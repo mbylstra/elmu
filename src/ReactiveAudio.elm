@@ -90,7 +90,6 @@ oscillator oscillatorType frequency currTime =
             Triangle -> triangleWave phase
 
 
-
 gain : Float -> Float -> Float
 gain amount value = amount * value
 
