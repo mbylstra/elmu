@@ -1,5 +1,5 @@
 var elm = Elm.worker(Elm.ReactiveAudio, {
-    requestBuffer: 4096,
+    requestBuffer: true,
 });
 
 
@@ -22,7 +22,7 @@ scriptNode.onaudioprocess = function(audioProcessingEvent) {
 //             outputData[i] = 1.0;
         }
     }
-    elm.ports.requestBuffer.send(4096);
+    elm.ports.requestBuffer.send(true);
 }
 
 

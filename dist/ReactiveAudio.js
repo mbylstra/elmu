@@ -7093,31 +7093,109 @@ Elm.ReactiveAudio.make = function (_elm) {
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm);
    var _op = {};
-   var sawWave = function (i) {
-      return $Basics.toFloat(A2($Basics._op["%"],i,100));
+   var gain = F2(function (amount,value) {
+      return amount * value;
+   });
+   var squareWave = function (phase) {
+      return _U.cmp(phase,0.5) < 0 ? 1.0 : -1.0;
    };
-   var getLatestBuffer = function (bufferSize) {
-      return A2($Array.initialize,bufferSize,sawWave);
+   var bias = function (value) {    return value * 2.0 - 1.0;};
+   var sawWave = function (phase) {    return bias(phase);};
+   var triangleWave = function (phase) {
+      return bias(_U.cmp(phase,
+      0.5) < 0 ? phase * 2.0 : (1.0 - phase) * 2.0);
    };
-   var squareWave = function (i) {
-      return _U.cmp(A2($Basics._op["%"],i,100),
-      50) > 0 ? 1.0 : -1.0;
+   var Triangle = {ctor: "Triangle"};
+   var Square = {ctor: "Square"};
+   var Saw = {ctor: "Saw"};
+   var getPeriodSeconds = function (frequency) {
+      return 1.0 / frequency;
+   };
+   var sampleLength = function (sampleRate) {
+      return 1.0 / $Basics.toFloat(sampleRate);
+   };
+   var timeSeconds = F3(function (buffersElapsed,
+   bufferSize,
+   sampleRate) {
+      return $Basics.toFloat(buffersElapsed) * $Basics.toFloat(bufferSize) * sampleLength(sampleRate);
+   });
+   var fmod = F2(function (a,b) {
+      var divided = a / b;
+      return divided - $Basics.toFloat($Basics.floor(divided));
+   });
+   var getPhaseFraction = F2(function (frequency,currTime) {
+      var period = getPeriodSeconds(frequency);
+      return A2(fmod,currTime,period);
+   });
+   var oscillator = F3(function (oscillatorType,
+   frequency,
+   currTime) {
+      var phase = A2(getPhaseFraction,frequency,currTime);
+      var _p0 = oscillatorType;
+      switch (_p0.ctor)
+      {case "Saw": return sawWave(phase);
+         case "Square": return squareWave(phase);
+         default: return triangleWave(phase);}
+   });
+   var getBufferVal = function (currTime) {
+      return A2(gain,0.1,A3(oscillator,Triangle,440.0,currTime));
+   };
+   var bufferSize = 4096;
+   var sampleRate = 44100;
+   var sampleDuration = 1.0 / $Basics.toFloat(sampleRate);
+   var updateCurrentTime = F2(function (_p1,prevTime) {
+      return prevTime + bufferSize * sampleDuration;
+   });
+   var getSampleTime = F2(function (bufferIndex,bufferStartTime) {
+      return bufferStartTime + $Basics.toFloat(bufferIndex) * sampleDuration;
+   });
+   var getLatestBuffer = function (currentTimeSeconds) {
+      var initFunc = function (bufferIndex) {
+         var currentTime = A2(getSampleTime,
+         bufferIndex,
+         currentTimeSeconds);
+         return getBufferVal(currentTime);
+      };
+      return A2($Array.initialize,bufferSize,initFunc);
    };
    var requestBuffer = Elm.Native.Port.make(_elm).inboundSignal("requestBuffer",
-   "Int",
+   "Bool",
    function (v) {
-      return typeof v === "number" && isFinite(v) && Math.floor(v) === v ? v : _U.badPort("an integer",
+      return typeof v === "boolean" ? v : _U.badPort("a boolean (true or false)",
       v);
    });
+   var clockSignal = A3($Signal.foldp,
+   updateCurrentTime,
+   0,
+   requestBuffer);
    var latestBuffer = Elm.Native.Port.make(_elm).outboundSignal("latestBuffer",
    function (v) {
       return Elm.Native.Array.make(_elm).toJSArray(v).map(function (v) {
          return v;
       });
    },
-   A2($Signal.map,getLatestBuffer,requestBuffer));
+   A2($Signal.map,getLatestBuffer,clockSignal));
    return _elm.ReactiveAudio.values = {_op: _op
-                                      ,squareWave: squareWave
+                                      ,sampleRate: sampleRate
+                                      ,sampleDuration: sampleDuration
+                                      ,bufferSize: bufferSize
+                                      ,updateCurrentTime: updateCurrentTime
+                                      ,clockSignal: clockSignal
+                                      ,fmod: fmod
+                                      ,sampleLength: sampleLength
+                                      ,timeSeconds: timeSeconds
+                                      ,getPeriodSeconds: getPeriodSeconds
+                                      ,getPhaseFraction: getPhaseFraction
+                                      ,Saw: Saw
+                                      ,Square: Square
+                                      ,Triangle: Triangle
+                                      ,bias: bias
                                       ,sawWave: sawWave
+                                      ,squareWave: squareWave
+                                      ,triangleWave: triangleWave
+                                      ,oscillator: oscillator
+                                      ,gain: gain
+                                      ,getSampleTime: getSampleTime
+                                      ,getBufferVal: getBufferVal
                                       ,getLatestBuffer: getLatestBuffer};
 };
