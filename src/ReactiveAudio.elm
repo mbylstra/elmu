@@ -108,6 +108,17 @@ getBufferVal currTime =
     |> gain 0.1
 
 
+average : List Float -> Float
+average values =
+    List.sum values / toFloat (List.length values)
+
+simpleLowPassFilter : Float -> List Float -> Float
+simpleLowPassFilter currValue prevValues =
+    average <| prevValues ++ [currValue]
+
+-- hmm, the filter itself must remember its previous inputs. This must
+-- be handled by the orchestrator
+
 
 getLatestBuffer : Float -> Array Float
 getLatestBuffer currentTimeSeconds =
