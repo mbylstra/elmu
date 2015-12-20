@@ -226,26 +226,26 @@ dummyAudioNode2 =
 --             { outputValue = Nothing  }
 --         }
 
-square1 =
+squareA =
     Generator
-        { id = "square1"
+        { id = "squareA"
         , function = squareWave
         , state =
             { outputValue = Nothing  }
         }
 
-destination1 =
+destinationA =
     Destination
-        { id = "destination1"
-        , input = ID "square1"
+        { id = "destinationA"
+        , input = ID "squareA"
         , state =
             { outputValue = Nothing }
         }
 
-lowpass1 =
+lowpassA =
     FeedforwardProcessor
-        { id = "lowpass1"
-        , input = ID "square1"
+        { id = "lowpassA"
+        , input = ID "squareA"
         , function = simpleLowPassFilter
         , state =
             { outputValue = Nothing
@@ -253,10 +253,26 @@ lowpass1 =
             }
         }
 
+squareAT1 =
+    Generator
+        { id = "squareA"
+        , function = squareWave
+        , state =
+            { outputValue = Just 1.0  }
+        }
+
+destinationAT1 =
+    Destination
+        { id = "destinationA"
+        , input = ID "squareA"
+        , state =
+            { outputValue = Just 1.0 }
+        }
+
 testGraph : ListGraph
 testGraph =
-    [ square1
-    , destination1
+    [ squareA
+    , destinationA
     ]
 
 testDictGraph : DictGraph
@@ -267,25 +283,18 @@ tests =
     suite "A Test Suite"
         [ test "getInputNodes"
             (assertEqual
-                (Just
-                    [ Generator
-                        { id = "square1"
-                        , function = squareWave
-                         ,state = { outputValue = Nothing }
-                         }
-                    ]
-                )
-                (getInputNodes  destination1 testDictGraph)
+                (Just [squareA])
+                (getInputNodes  destinationA testDictGraph)
             )
         , test "getInputNodes"
             (assertEqual
                 Nothing
-                (getInputNodes square1 testDictGraph)
+                (getInputNodes squareA testDictGraph)
             )
         , test "getNextSample"
             (assertEqual
-                (testDictGraph, 1.0)
-                (Debug.log "hello" (updateGraph testDictGraph 0.0))
+                (toDict [squareAT1, destinationAT1], 1.0)
+                (updateGraph testDictGraph 0.0)
             )
         ]
 

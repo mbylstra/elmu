@@ -10323,18 +10323,24 @@ Elm.AudioNodeTree.make = function (_elm) {
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm);
    var _op = {};
-   var lowpass1 = $Orchestrator.FeedforwardProcessor({id: "lowpass1"
-                                                     ,input: $Orchestrator.ID("square1")
+   var destinationAT1 = $Orchestrator.Destination({id: "destinationA"
+                                                  ,input: $Orchestrator.ID("squareA")
+                                                  ,state: {outputValue: $Maybe.Just(1.0)}});
+   var squareAT1 = $Orchestrator.Generator({id: "squareA"
+                                           ,$function: $AudioNodes.squareWave
+                                           ,state: {outputValue: $Maybe.Just(1.0)}});
+   var lowpassA = $Orchestrator.FeedforwardProcessor({id: "lowpassA"
+                                                     ,input: $Orchestrator.ID("squareA")
                                                      ,$function: $AudioNodes.simpleLowPassFilter
                                                      ,state: {outputValue: $Maybe.Nothing
                                                              ,prevValues: _U.list([0.0])}});
-   var destination1 = $Orchestrator.Destination({id: "destination1"
-                                                ,input: $Orchestrator.ID("square1")
+   var destinationA = $Orchestrator.Destination({id: "destinationA"
+                                                ,input: $Orchestrator.ID("squareA")
                                                 ,state: {outputValue: $Maybe.Nothing}});
-   var square1 = $Orchestrator.Generator({id: "square1"
+   var squareA = $Orchestrator.Generator({id: "squareA"
                                          ,$function: $AudioNodes.squareWave
                                          ,state: {outputValue: $Maybe.Nothing}});
-   var testGraph = _U.list([square1,destination1]);
+   var testGraph = _U.list([squareA,destinationA]);
    var getNodeId = function (node) {
       var _p0 = node;
       switch (_p0.ctor)
@@ -10502,20 +10508,20 @@ Elm.AudioNodeTree.make = function (_elm) {
    _U.list([A2($ElmTest.test,
            "getInputNodes",
            A2($ElmTest.assertEqual,
-           $Maybe.Just(_U.list([$Orchestrator.Generator({id: "square1"
-                                                        ,$function: $AudioNodes.squareWave
-                                                        ,state: {outputValue: $Maybe.Nothing}})])),
-           A2(getInputNodes,destination1,testDictGraph)))
+           $Maybe.Just(_U.list([squareA])),
+           A2(getInputNodes,destinationA,testDictGraph)))
            ,A2($ElmTest.test,
            "getInputNodes",
            A2($ElmTest.assertEqual,
            $Maybe.Nothing,
-           A2(getInputNodes,square1,testDictGraph)))
+           A2(getInputNodes,squareA,testDictGraph)))
            ,A2($ElmTest.test,
            "getNextSample",
            A2($ElmTest.assertEqual,
-           {ctor: "_Tuple2",_0: testDictGraph,_1: 1.0},
-           A2($Debug.log,"hello",A2(updateGraph,testDictGraph,0.0))))]));
+           {ctor: "_Tuple2"
+           ,_0: toDict(_U.list([squareAT1,destinationAT1]))
+           ,_1: 1.0},
+           A2(updateGraph,testDictGraph,0.0)))]));
    var main = $ElmTest.elementRunner(tests);
    return _elm.AudioNodeTree.values = {_op: _op
                                       ,updateGraph: updateGraph
@@ -10526,9 +10532,11 @@ Elm.AudioNodeTree.make = function (_elm) {
                                       ,getDestinationNode: getDestinationNode
                                       ,replaceGraphNode: replaceGraphNode
                                       ,getNodeId: getNodeId
-                                      ,square1: square1
-                                      ,destination1: destination1
-                                      ,lowpass1: lowpass1
+                                      ,squareA: squareA
+                                      ,destinationA: destinationA
+                                      ,lowpassA: lowpassA
+                                      ,squareAT1: squareAT1
+                                      ,destinationAT1: destinationAT1
                                       ,testGraph: testGraph
                                       ,testDictGraph: testDictGraph
                                       ,tests: tests
