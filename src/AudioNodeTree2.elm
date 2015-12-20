@@ -1,9 +1,16 @@
 module AudioNodeTree where
 
+
+--------------------------------------------------------------------------------
+-- EXTERNAL DEPENDENCIES
+--------------------------------------------------------------------------------
+
 import Dict exposing (Dict)
-import String
-import Graphics.Element exposing (Element, show)
 import ElmTest exposing (..)
+
+--------------------------------------------------------------------------------
+-- INTERNAL DEPENDENCIES
+--------------------------------------------------------------------------------
 
 import Orchestrator exposing
     ( AudioNode (Generator, FeedforwardProcessor, Destination, Mixer)
@@ -20,111 +27,69 @@ import AudioNodes exposing
     , oscillator
     )
 
--- I don't actually think we need the tree structure, as we
--- already have the graph!
-
-{- type alias TreeNodeValue =
-    { children: List AudioNodeTree
-    , audioNode: AudioNode
-    }
 
 
-type AudioNodeTree
-    = TreeNode TreeNodeValue
-    | Leaf AudioNode -}
+--------------------------------------------------------------------------------
+-- MAIN
+--------------------------------------------------------------------------------
 
-
-dummyAudioNode1 =
-    Generator
-        { id = "square1"
-        , function = oscillator Saw 440.0
-        , state =
-            { outputValue = Nothing  }
-        }
-
-dummyAudioNode2 =
-    FeedforwardProcessor
-        { id = "lowpass"
-        , input = ID "square1"
-        , function = simpleLowPassFilter
-        , state =
-            { outputValue = Nothing
-            , prevValues = [0.0]
-            }
-        }
-
--- dummyAudioNode3 =
---     Generator
---         { function = squareWave
---         , state =
---             { outputValue = Nothing  }
---         }
-
-
-
-testGraph : ListGraph
-testGraph =
-    [ Generator
-        { id = "square1"
-        , function = squareWave
-        , state =
-            { outputValue = Nothing  }
-        }
-    , FeedforwardProcessor
-        { id = "lowpass"
-        , input = ID "square1"
-        , function = simpleLowPassFilter
-        , state =
-            { outputValue = Nothing
-            , prevValues = [0.0]
-            }
-        }
-    , Destination
-        { id = "destination"
-        , input = ID "lowpass"
-        , state =
-            { outputValue = Nothing }
-        }
-    ]
-
-
-
-
-
-
-{- updateGraph : DictGraph -> TimeFloat -> (DictGraph, Float)
+updateGraph : DictGraph -> TimeFloat -> (DictGraph, Float)
 updateGraph graph time =
     let
-        destinationNode = getDestinationNode graph
+        _ = Debug.log("updateGraph start")
     in
-        updateGraphNode graph time destinationNode -}
+        updateGraphNode graph time (getDestinationNode graph)
 
 
 updateGraphNode : DictGraph -> TimeFloat -> AudioNode -> (DictGraph, Float)
 updateGraphNode graph time node =
-    case node of
-        Generator props ->
-            let
-                newValue = props.function time
-                newNode = updateNodeValue node newValue
-            in
-                (replaceGraphNode newNode graph, newValue)
-        FeedforwardProcessor props ->
-            case getInputNodes node graph of
-                [intputNode] ->
-                    let
-                        (newGraph, inputValue) = updateGraphNode graph time node
-                        newValue = props.function inputValue props.state.prevValues
-                        newNode = updateNodeValue node newValue
-                    in
-                        (replaceGraphNode newNode graph, newValue)
-                _ ->
-                    Debug.crash("multiple inputs not supported yet")
-        _ -> Debug.crash("not supported yet")
+    let
+        _ = Debug.log("updateGraphNode start")
+
+    in
+        case node of
+            Generator props ->
+                let
+                    _ = Debug.log("updating generator")
+                    newValue = props.function time
+                    newNode = updateNodeValue node newValue
+                in
+                    (replaceGraphNode newNode graph, newValue)
+
+            FeedforwardProcessor props ->
+                case getInputNodes node graph of
+                    Just [intputNode] ->
+                        let
+                            (newGraph, inputValue) = updateGraphNode graph time node
+                            newValue = props.function inputValue props.state.prevValues
+                            newNode = updateNodeValue node newValue
+                        in
+                            (replaceGraphNode newNode newGraph, newValue)
+                    Just inputNodes ->
+                        Debug.crash("multiple inputs not supported yet")
+                    Nothing ->
+                        Debug.crash("no input nodes!")
+
+
+            Destination props ->
+                case getInputNodes node graph of
+                    Just [inputNode] ->
+                        let
+                            _ = Debug.log("updating Destination")
+                            (newGraph, inputValue) = updateGraphNode graph time inputNode
+                            newNode = updateNodeValue node inputValue
+                        in
+                            (replaceGraphNode newNode newGraph, inputValue)
+                    Just inputNodes ->
+                        Debug.crash("multiple inputs not supported yet")
+                    Nothing ->
+                        Debug.crash("no input nodes!")
+
+            _ -> Debug.crash("updateGraphNode not supported yet")
 
 
 
-getInputNodes : AudioNode -> DictGraph -> List AudioNode
+getInputNodes : AudioNode -> DictGraph -> Maybe (List AudioNode)
 getInputNodes node graph =
     let
         getInputNode' : Input -> AudioNode
@@ -141,13 +106,13 @@ getInputNodes node graph =
     in
         case node of
             FeedforwardProcessor props ->
-                [getInputNode' props.input]
+                Just [getInputNode' props.input]
             Destination props ->
-                [getInputNode' props.input]
+                Just [getInputNode' props.input]
             Mixer props ->
-                getInputNodes' props.inputs
+                Just <| getInputNodes' props.inputs
             _ ->
-                Debug.crash("does not have an input node")
+                Nothing
 
 
 
@@ -172,12 +137,8 @@ updateNodeValue node newValue =
                 newState = { oldState | outputValue = Just newValue }
             in
                 Destination { props | state = newState }
-{-         Generator props ->
-            func node
-        FeedforwardProcessor props ->
-            func node -}
         _ ->
-            Debug.crash("not supported yet")
+            Debug.crash("updateNodeValue not supported yet")
 
 
 toDict : ListGraph -> DictGraph
@@ -230,12 +191,121 @@ getNodeId node =
         FeedforwardProcessor props -> props.id
         Mixer props -> props.id
 
-{- tests : Test
+
+
+
+--------------------------------------------------------------------------------
+-- TESTS
+--------------------------------------------------------------------------------
+
+{- dummyAudioNode1 =
+    Generator
+        { id = "square1"
+        , function = oscillator Saw 440.0
+        , state =
+            { outputValue = Nothing  }
+        }
+
+dummyAudioNode2 =
+    FeedforwardProcessor
+        { id = "lowpass"
+        , input = ID "square1"
+        , function = simpleLowPassFilter
+        , state =
+            { outputValue = Nothing
+            , prevValues = [0.0]
+            }
+        } -}
+
+
+
+-- dummyAudioNode3 =
+--     Generator
+--         { function = squareWave
+--         , state =
+--             { outputValue = Nothing  }
+--         }
+
+square1 =
+    Generator
+        { id = "square1"
+        , function = squareWave
+        , state =
+            { outputValue = Nothing  }
+        }
+
+destination1 =
+    Destination
+        { id = "destination1"
+        , input = ID "square1"
+        , state =
+            { outputValue = Nothing }
+        }
+
+lowpass1 =
+    FeedforwardProcessor
+        { id = "lowpass1"
+        , input = ID "square1"
+        , function = simpleLowPassFilter
+        , state =
+            { outputValue = Nothing
+            , prevValues = [0.0]
+            }
+        }
+
+testGraph : ListGraph
+testGraph =
+    [ square1
+    , destination1
+    ]
+
+testDictGraph : DictGraph
+testDictGraph = toDict testGraph
+
+tests : Test
 tests =
     suite "A Test Suite"
-        , test "getNextSample" (assertEqual 1.3 (getNextSample 2340.432 testTree2))
+        [ test "getInputNodes"
+            (assertEqual
+                (Just
+                    [ Generator
+                        { id = "square1"
+                        , function = squareWave
+                         ,state = { outputValue = Nothing }
+                         }
+                    ]
+                )
+                (getInputNodes  destination1 testDictGraph)
+            )
+        , test "getInputNodes"
+            (assertEqual
+                Nothing
+                (getInputNodes square1 testDictGraph)
+            )
+        , test "getNextSample"
+            (assertEqual
+                (testDictGraph, 1.0)
+                (Debug.log "hello" (updateGraph testDictGraph 0.0))
+            )
         ]
 
-main : Element
+
+{- (Dict.fromList
+    [ ("destination", Destination
+        { id = "destination"
+        , input = ID "square1"
+        , state = { outputValue = Nothing }
+        }
+       )
+    , ( "square1", Generator
+        { id = "square1",
+        , $function = <function>,
+        , state = { outputValue = Just -1 }
+        }
+        )
+    ]
+    , -1
+) -}
+
 main =
-    elementRunner tests -}
+    elementRunner tests
