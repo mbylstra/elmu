@@ -58,9 +58,9 @@ updateGraphNode graph time node =
 
             FeedforwardProcessor props ->
                 case getInputNodes node graph of
-                    Just [intputNode] ->
+                    Just [inputNode] ->
                         let
-                            (newGraph, inputValue) = updateGraphNode graph time node
+                            (newGraph, inputValue) = updateGraphNode graph time inputNode
                             newValue = props.function inputValue props.state.prevValues
                             newNode = updateNodeValue node newValue
                         in
@@ -122,23 +122,32 @@ updateNodeValue node newValue =
         Generator props ->
             let
                 oldState = props.state
-                newState = { oldState | outputValue = Just newValue }
+                newState = { oldState | outputValue = newValue }
             in
                 Generator  { props | state = newState }
         Mixer props ->
             let
                 oldState = props.state
-                newState = { oldState | outputValue = Just newValue }
+                newState = { oldState | outputValue = newValue }
             in
                 Mixer { props | state = newState }
+        FeedforwardProcessor props ->
+            let
+                oldState = props.state
+                newPrevValues = rotateList props.state.outputValue props.state.prevValues
+                newState =
+                    { oldState |
+                      outputValue = newValue
+                    , prevValues = newPrevValues
+                    }
+            in
+                FeedforwardProcessor { props | state = newState }
         Destination props ->
             let
                 oldState = props.state
-                newState = { oldState | outputValue = Just newValue }
+                newState = { oldState | outputValue = newValue }
             in
                 Destination { props | state = newState }
-        _ ->
-            Debug.crash("updateNodeValue not supported yet")
 
 
 toDict : ListGraph -> DictGraph
@@ -193,45 +202,20 @@ getNodeId node =
 
 
 
+-- rotateArray : Array -> Array
 
 --------------------------------------------------------------------------------
 -- TESTS
 --------------------------------------------------------------------------------
 
-{- dummyAudioNode1 =
-    Generator
-        { id = "square1"
-        , function = oscillator Saw 440.0
-        , state =
-            { outputValue = Nothing  }
-        }
-
-dummyAudioNode2 =
-    FeedforwardProcessor
-        { id = "lowpass"
-        , input = ID "square1"
-        , function = simpleLowPassFilter
-        , state =
-            { outputValue = Nothing
-            , prevValues = [0.0]
-            }
-        } -}
-
-
-
--- dummyAudioNode3 =
---     Generator
---         { function = squareWave
---         , state =
---             { outputValue = Nothing  }
---         }
+-- A
 
 squareA =
     Generator
         { id = "squareA"
         , function = squareWave
         , state =
-            { outputValue = Nothing  }
+            { processed = False, outputValue = 0.0  }
         }
 
 destinationA =
@@ -239,21 +223,66 @@ destinationA =
         { id = "destinationA"
         , input = ID "squareA"
         , state =
-            { outputValue = Nothing }
-        }
-
-lowpassA =
-    FeedforwardProcessor
-        { id = "lowpassA"
-        , input = ID "squareA"
-        , function = simpleLowPassFilter
-        , state =
-            { outputValue = Nothing
-            , prevValues = [0.0]
-            }
+            { processed = False, outputValue = 0.0 }
         }
 
 squareAT1 =
+    Generator
+        { id = "squareA"
+        , function = squareWave
+        , state =
+            { processed = False, outputValue = 1.0  }
+        }
+
+destinationAT1 =
+    Destination
+        { id = "destinationA"
+        , input = ID "squareA"
+        , state =
+            { processed = False, outputValue = 1.0 }
+        }
+
+testGraph : ListGraph
+testGraph =
+    [ squareA
+    , destinationA
+    ]
+
+testDictGraph : DictGraph
+testDictGraph = toDict testGraph
+
+-- B
+
+squareB =
+    Generator
+        { id = "squareB"
+        , function = squareWave
+        , state =
+            { processed = False, outputValue = 0.0  }
+        }
+
+
+lowpassB =
+    FeedforwardProcessor
+        { id = "lowpassB"
+        , input = ID "squareB"
+        , function = simpleLowPassFilter
+        , state =
+            { processed = False
+            , outputValue = 0.0
+            , prevValues = [0.0, 0.0, 0.0]
+            }
+        }
+
+destinationB =
+    Destination
+        { id = "destinationB"
+        , input = ID "lowpassB"
+        , state =
+            { processed = False, outputValue = 0.0 }
+        }
+
+{- squareAT1 =
     Generator
         { id = "squareA"
         , function = squareWave
@@ -267,21 +296,34 @@ destinationAT1 =
         , input = ID "squareA"
         , state =
             { outputValue = Just 1.0 }
-        }
+        } -}
 
-testGraph : ListGraph
-testGraph =
-    [ squareA
-    , destinationA
+testGraphB : ListGraph
+testGraphB =
+    [ squareB
+    , lowpassB
+    , destinationB
     ]
 
-testDictGraph : DictGraph
-testDictGraph = toDict testGraph
+testDictGraphB = toDict testGraphB
+
+
+
+
+feetless : List a -> List a
+feetless list =
+    List.take ((List.length list) - 1) list
+
+
+rotateList : a -> List a -> List a
+rotateList value list  =
+  [value] ++ feetless list
 
 tests : Test
 tests =
     suite "A Test Suite"
-        [ test "getInputNodes"
+        [
+{-           test "getInputNodes"
             (assertEqual
                 (Just [squareA])
                 (getInputNodes  destinationA testDictGraph)
@@ -295,6 +337,16 @@ tests =
             (assertEqual
                 (toDict [squareAT1, destinationAT1], 1.0)
                 (updateGraph testDictGraph 0.0)
+            ) -}
+          test "rotateList"
+            (assertEqual
+                [4, 3, 2]
+                (rotateList 4 [3, 2, 1])
+            )
+        , test "getNextSample"
+            (assertEqual
+                (toDict [squareAT1, destinationAT1], 1.0)
+                (updateGraph testDictGraphB 0.0)
             )
         ]
 

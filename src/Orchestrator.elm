@@ -14,7 +14,7 @@ type alias FeedforwardProcessorF = Float -> List ValueFloat -> ValueFloat
 
 type Input = ID String   -- or it could be an AudioNode!
 
-type alias OutputValue = Maybe Float
+type alias OutputValue = Float
 
 
 
@@ -26,21 +26,27 @@ type AudioNode =
         { id : String
         , function : GeneratorF
         , state :
-            { outputValue : OutputValue  }
+            { processed : Bool
+            , outputValue : OutputValue
+            }
         }
     | FeedforwardProcessor
         { id : String
         , input : Input
         , function : FeedforwardProcessorF -- this is the "update"
         , state :  -- this is the "model"
-            { outputValue : OutputValue
+            { processed : Bool
+            , outputValue : OutputValue
             , prevValues : List Float
             }
         }
     | Mixer
         { id : String
         , inputs : List Input
-        , state : { outputValue : OutputValue }
+        , state :
+            { processed : Bool
+            , outputValue : OutputValue
+            }
         }
     | Destination
         { id : String
@@ -49,8 +55,10 @@ type AudioNode =
         -- though. But this could have the destination id? (or dynamically
         -- get from available ids, in the case of multiple outs?)
         , input: Input
-        , state:
-            { outputValue: OutputValue }
+        , state :
+            { processed : Bool
+            , outputValue : OutputValue
+            }
         }
 
 
