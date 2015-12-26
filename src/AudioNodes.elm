@@ -35,7 +35,7 @@ getPhaseFraction frequency currTime =
 
 
 
-type OscillatorType = Saw | Square | Triangle
+type OscillatorType = Saw | Square | Triangle | Sin
 
 
 bias : Float -> Float
@@ -63,6 +63,11 @@ triangleWave phase =
             (1.0 - phase) * 2.0
         )
 
+sinWave : Float -> Float
+sinWave phase =
+    sin (phase * 2.0 * pi)
+
+
 
 oscillator : OscillatorType -> Float -> Float -> Float
 oscillator oscillatorType frequency currTime =
@@ -73,14 +78,11 @@ oscillator oscillatorType frequency currTime =
             Saw -> sawWave phase
             Square -> squareWave phase
             Triangle -> triangleWave phase
+            Sin -> sinWave phase
 
 
 gain : Float -> Float -> Float
 gain amount value = amount * value
-
-
-
-
 
 
 
@@ -90,4 +92,11 @@ average values =
 
 simpleLowPassFilter : ValueFloat -> List ValueFloat -> Float
 simpleLowPassFilter currValue prevValues =
-    average <| prevValues ++ [currValue]
+    let
+{-         _ = Debug.log "currValue" currValue
+        _ = Debug.log "prevValues" prevValues -}
+        value = average <| [currValue] ++ prevValues
+--         _ = Debug.log "output" value
+    in
+        value
+--         currValue

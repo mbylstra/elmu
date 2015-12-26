@@ -196,12 +196,14 @@ updateNodeValue node newValue =
                 newState = { oldState | outputValue = newValue }
             in
                 Generator  { props | state = newState }
+
         Mixer props ->
             let
                 oldState = props.state
                 newState = { oldState | outputValue = newValue }
             in
                 Mixer { props | state = newState }
+
         FeedforwardProcessor props ->
             let
                 oldState = props.state
@@ -211,8 +213,10 @@ updateNodeValue node newValue =
                       outputValue = newValue
                     , prevValues = newPrevValues
                     }
+--                 _ = Debug.log "newState" newState
             in
                 FeedforwardProcessor { props | state = newState }
+
         Destination props ->
             let
                 oldState = props.state

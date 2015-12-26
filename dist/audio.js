@@ -13,12 +13,15 @@ buffersElapsed = 0;
 
 var startTime = window.performance.now();
 var endTime = null;
+
 var ITERATIONS = 10;
 var MAX_ALLOWED_DURATION = ITERATIONS * BUFFER_DURATION;
-
-
 var PROFILING = 0;
-var DEBUG = 0;
+var DEBUG = 1;
+
+if (DEBUG) {
+     ITERATIONS = 0;
+}
 
 if (PROFILING) {
     console.log('start profiling');
@@ -30,7 +33,7 @@ if (PROFILING) {
     var i = ITERATIONS;
     elm.ports.requestBuffer.send(true);
     elm.ports.latestBuffer.subscribe(function(buffer) {
-        if (DEBUG) {
+        if (PROFILING && DEBUG) {
             console.log('buffer', buffer);
         }
         if (i > 0) {
@@ -59,6 +62,8 @@ if (PROFILING) {
     var audioCtx = new AudioContext();
     source = audioCtx.createBufferSource();
     var scriptNode = audioCtx.createScriptProcessor(BUFFER_SIZE, 1, 1);
+//     var iirFilter = audioCtx.createIIRFilter();
+//     var lowpass = audioCtx.createBiquadFilter();
     scriptNode.onaudioprocess = function(audioProcessingEvent) {
         var outputBuffer = audioProcessingEvent.outputBuffer;
         for (var channel = 0; channel < outputBuffer.numberOfChannels; channel++) {

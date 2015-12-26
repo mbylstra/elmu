@@ -2,7 +2,12 @@ module ReactiveAudio where
 
 import Debug exposing (log)
 
-import AudioNodes exposing (squareWave, OscillatorType(Square), oscillator)
+import AudioNodes exposing
+    ( squareWave
+    , OscillatorType(Square, Saw, Sin)
+    , oscillator
+    , simpleLowPassFilter
+    )
 
 import Array exposing(Array)
 
@@ -10,7 +15,7 @@ import Orchestrator exposing
     ( DictGraph
     , ListGraph
     , toDict
-    , AudioNode(Generator, Destination, Mixer)
+    , AudioNode(Generator, Destination, Mixer, FeedforwardProcessor)
     , Input(ID)
     , updateGraph
     )
@@ -99,6 +104,8 @@ squareA =
             { processed = False, outputValue = 0.0  }
         }
 
+
+
 destinationA =
     Destination
         { id = "destinationA"
@@ -107,36 +114,58 @@ destinationA =
             { processed = False, outputValue = 0.0 }
         }
 
+makeSquare id frequency =
+    Generator
+        { id = id
+        , function = oscillator Saw frequency
+        , state =
+            { processed = False, outputValue = 0.0  }
+        }
+
+makeSin id frequency =
+    Generator
+        { id = id
+        , function = oscillator Sin frequency
+        , state =
+            { processed = False, outputValue = 0.0  }
+        }
+
+
+makeLowPass id inputName =
+    FeedforwardProcessor
+        { id = id
+        , input = ID inputName
+        , function = simpleLowPassFilter
+        , state =
+            { processed = False
+            , outputValue = 0.0
+--             , prevValues = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            , prevValues =  List.repeat 3 0.0
+--             , prevValues = [0.0, 0.0, 0,0]
+            }
+        }
+
+
+
 
 testGraph : ListGraph
 testGraph =
-    [ Generator
-        { id = "squareA"
-        , function = oscillator Square 300.0
-        , state =
-            { processed = False, outputValue = 0.0  }
-        }
-    , Generator
-        { id = "squareB"
-        , function = oscillator Square 250.0
-        , state =
-            { processed = False, outputValue = 0.0  }
-        }
-    , Generator
-        { id = "squareC"
-        , function = oscillator Square 200.0
-        , state =
-            { processed = False, outputValue = 0.0  }
-        }
-    , Mixer
+--     [ makeSquare "osc"  11025.0
+    [ makeSquare "osc"  80.0
+--     , makeSquare "osc"  11025.0
+      {-     , makeSquare "squareB" 250.0
+    , makeSquare "squareC" 200.0 -}
+{-     , Mixer
         { id = "mixer"
         , inputs = [ID "squareA", ID "squareB", ID "squareC"]
         , state =
             { processed = False , outputValue = 0.0 }
-        }
+        } -}
+    , makeLowPass "lowpass" "osc"
     , Destination
         { id = "destinationA"
-        , input = ID "mixer"
+--         , input = ID "mixer"
+        , input = ID "lowpass"
         , state =
             { processed = False, outputValue = 0.0 }
         }

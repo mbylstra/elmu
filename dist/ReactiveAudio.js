@@ -10192,13 +10192,17 @@ Elm.AudioNodes.make = function (_elm) {
       return $List.sum(values) / $Basics.toFloat($List.length(values));
    };
    var simpleLowPassFilter = F2(function (currValue,prevValues) {
-      return average(A2($Basics._op["++"],
-      prevValues,
-      _U.list([currValue])));
+      var value = average(A2($Basics._op["++"],
+      _U.list([currValue]),
+      prevValues));
+      return value;
    });
    var gain = F2(function (amount,value) {
       return amount * value;
    });
+   var sinWave = function (phase) {
+      return $Basics.sin(phase * 2.0 * $Basics.pi);
+   };
    var squareWave = function (phase) {
       return _U.cmp(phase,0.5) < 0 ? 1.0 : -1.0;
    };
@@ -10208,6 +10212,7 @@ Elm.AudioNodes.make = function (_elm) {
       return bias(_U.cmp(phase,
       0.5) < 0 ? phase * 2.0 : (1.0 - phase) * 2.0);
    };
+   var Sin = {ctor: "Sin"};
    var Triangle = {ctor: "Triangle"};
    var Square = {ctor: "Square"};
    var Saw = {ctor: "Saw"};
@@ -10238,7 +10243,8 @@ Elm.AudioNodes.make = function (_elm) {
       switch (_p0.ctor)
       {case "Saw": return sawWave(phase);
          case "Square": return squareWave(phase);
-         default: return triangleWave(phase);}
+         case "Triangle": return triangleWave(phase);
+         default: return sinWave(phase);}
    });
    var sampleRate = 44100;
    var sampleDuration = 1.0 / $Basics.toFloat(sampleRate);
@@ -10253,10 +10259,12 @@ Elm.AudioNodes.make = function (_elm) {
                                    ,Saw: Saw
                                    ,Square: Square
                                    ,Triangle: Triangle
+                                   ,Sin: Sin
                                    ,bias: bias
                                    ,sawWave: sawWave
                                    ,squareWave: squareWave
                                    ,triangleWave: triangleWave
+                                   ,sinWave: sinWave
                                    ,oscillator: oscillator
                                    ,gain: gain
                                    ,average: average
@@ -10311,7 +10319,7 @@ Elm.Orchestrator.make = function (_elm) {
             return _p2._0;
          } else {
             return _U.crashCase("Orchestrator",
-            {start: {line: 254,column: 9},end: {line: 258,column: 78}},
+            {start: {line: 258,column: 9},end: {line: 262,column: 78}},
             _p2)("There aren\'t any nodes of type Destination!");
          }
    };
@@ -10569,22 +10577,28 @@ Elm.ReactiveAudio.make = function (_elm) {
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm);
    var _op = {};
-   var testGraph = _U.list([$Orchestrator.Generator({id: "squareA"
-                                                    ,$function: A2($AudioNodes.oscillator,$AudioNodes.Square,300.0)
-                                                    ,state: {processed: false,outputValue: 0.0}})
-                           ,$Orchestrator.Generator({id: "squareB"
-                                                    ,$function: A2($AudioNodes.oscillator,$AudioNodes.Square,250.0)
-                                                    ,state: {processed: false,outputValue: 0.0}})
-                           ,$Orchestrator.Generator({id: "squareC"
-                                                    ,$function: A2($AudioNodes.oscillator,$AudioNodes.Square,200.0)
-                                                    ,state: {processed: false,outputValue: 0.0}})
-                           ,$Orchestrator.Mixer({id: "mixer"
-                                                ,inputs: _U.list([$Orchestrator.ID("squareA")
-                                                                 ,$Orchestrator.ID("squareB")
-                                                                 ,$Orchestrator.ID("squareC")])
-                                                ,state: {processed: false,outputValue: 0.0}})
+   var makeLowPass = F2(function (id,inputName) {
+      return $Orchestrator.FeedforwardProcessor({id: id
+                                                ,input: $Orchestrator.ID(inputName)
+                                                ,$function: $AudioNodes.simpleLowPassFilter
+                                                ,state: {processed: false
+                                                        ,outputValue: 0.0
+                                                        ,prevValues: A2($List.repeat,3,0.0)}});
+   });
+   var makeSin = F2(function (id,frequency) {
+      return $Orchestrator.Generator({id: id
+                                     ,$function: A2($AudioNodes.oscillator,$AudioNodes.Sin,frequency)
+                                     ,state: {processed: false,outputValue: 0.0}});
+   });
+   var makeSquare = F2(function (id,frequency) {
+      return $Orchestrator.Generator({id: id
+                                     ,$function: A2($AudioNodes.oscillator,$AudioNodes.Saw,frequency)
+                                     ,state: {processed: false,outputValue: 0.0}});
+   });
+   var testGraph = _U.list([A2(makeSquare,"osc",80.0)
+                           ,A2(makeLowPass,"lowpass","osc")
                            ,$Orchestrator.Destination({id: "destinationA"
-                                                      ,input: $Orchestrator.ID("mixer")
+                                                      ,input: $Orchestrator.ID("lowpass")
                                                       ,state: {processed: false,outputValue: 0.0}})]);
    var testGraphDict = $Orchestrator.toDict(testGraph);
    var destinationA = $Orchestrator.Destination({id: "destinationA"
@@ -10666,6 +10680,9 @@ Elm.ReactiveAudio.make = function (_elm) {
                                       ,updateBufferState: updateBufferState
                                       ,squareA: squareA
                                       ,destinationA: destinationA
+                                      ,makeSquare: makeSquare
+                                      ,makeSin: makeSin
+                                      ,makeLowPass: makeLowPass
                                       ,testGraph: testGraph
                                       ,testGraphDict: testGraphDict
                                       ,initialBufferState: initialBufferState
