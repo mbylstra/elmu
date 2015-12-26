@@ -1,25 +1,31 @@
 module Orchestrator where
 
+--------------------------------------------------------------------------------
+-- EXTERNAL DEPENDENCIES
+--------------------------------------------------------------------------------
+
 import Dict exposing (Dict)
+import ElmTest exposing (..)
 
-import AudioNodes exposing (sawWave, squareWave, simpleLowPassFilter)
 
-type alias ValueFloat = Float
-type alias TimeFloat = Float
+--------------------------------------------------------------------------------
+-- INTERNAL DEPENDENCIES
+--------------------------------------------------------------------------------
 
-type alias GeneratorF = TimeFloat -> ValueFloat
-type alias ProcessorF = TimeFloat -> ValueFloat -> ValueFloat
-type alias FeedforwardProcessorF = Float -> List ValueFloat -> ValueFloat
+import AudioNodes exposing
+    ( squareWave
+    , simpleLowPassFilter
+    , sawWave
+    , OscillatorType(Square, Saw, Triangle)
+    , oscillator
+    )
 
+
+--------------------------------------------------------------------------------
+-- TYPE DEFINITIONS
+--------------------------------------------------------------------------------
 
 type Input = ID String   -- or it could be an AudioNode!
-
-type alias OutputValue = Float
-
-
-
-type alias Positioned a =
-  { a | x : Float, y : Float }
 
 type AudioNode =
     Generator
@@ -27,7 +33,7 @@ type AudioNode =
         , function : GeneratorF
         , state :
             { processed : Bool
-            , outputValue : OutputValue
+            , outputValue : Float
             }
         }
     | FeedforwardProcessor
@@ -36,7 +42,7 @@ type AudioNode =
         , function : FeedforwardProcessorF -- this is the "update"
         , state :  -- this is the "model"
             { processed : Bool
-            , outputValue : OutputValue
+            , outputValue : Float
             , prevValues : List Float
             }
         }
@@ -45,129 +51,372 @@ type AudioNode =
         , inputs : List Input
         , state :
             { processed : Bool
-            , outputValue : OutputValue
+            , outputValue : Float
             }
         }
     | Destination
         { id : String
-        -- no function is required, we just take the value of the input
-        -- it's kind of silly that you could have multiple destinations
-        -- though. But this could have the destination id? (or dynamically
-        -- get from available ids, in the case of multiple outs?)
         , input: Input
         , state :
             { processed : Bool
-            , outputValue : OutputValue
+            , outputValue : Float
             }
         }
 
+-- Update functions
+type alias GeneratorF = TimeFloat -> ValueFloat
+type alias ProcessorF = TimeFloat -> ValueFloat -> ValueFloat
+type alias FeedforwardProcessorF = Float -> List ValueFloat -> ValueFloat
 
-
+-- aliases for readability
+type alias ValueFloat = Float
+type alias TimeFloat = Float
 type alias ListGraph = List AudioNode
-
 type alias DictGraph = Dict String AudioNode
 
 
--- why not use initialiser functions, and initialize the state there?
--- so the graph you build is always actual state
+
+--------------------------------------------------------------------------------
+-- MAIN
+--------------------------------------------------------------------------------
 
 
--- IDEA: use user supplied union type for node ids.
------ problems: can't use dict. Can not dynamically add new nodes!
+{- updateGraph graph time =
+    let
+        _ = Debug.log("updateGraph start")
+    in
+        updateGraphNode graph time (getDestinationNode graph) -}
+
+updateGraph graph time =
+    (graph, time)
 
 
+updateGraphNode : DictGraph -> TimeFloat -> AudioNode -> (DictGraph, Float)
+updateGraphNode graph time node =
+    let
+        _ = Debug.log("updateGraphNode start")
+
+    in
+        case node of
+            Generator props ->
+                let
+                    _ = Debug.log("updating generator")
+                    newValue = props.function time
+                    newNode = updateNodeValue node newValue
+                in
+                    (replaceGraphNode newNode graph, newValue)
+
+            FeedforwardProcessor props ->
+                case getInputNodes node graph of
+                    Just [inputNode] ->
+                        let
+                            (newGraph, inputValue) = updateGraphNode graph time inputNode
+                            newValue = props.function inputValue props.state.prevValues
+                            newNode = updateNodeValue node newValue
+                        in
+                            (replaceGraphNode newNode newGraph, newValue)
+                    Just inputNodes ->
+                        Debug.crash("multiple inputs not supported yet")
+                    Nothing ->
+                        Debug.crash("no input nodes!")
 
 
-type alias NodeState =
-    { outputValue : ValueFloat
-    , prevInputValues : List ValueFloat
-    }
+            Destination props ->
+                case getInputNodes node graph of
+                    Just [inputNode] ->
+                        let
+                            _ = Debug.log("updating Destination")
+                            (newGraph, inputValue) = updateGraphNode graph time inputNode
+                            newNode = updateNodeValue node inputValue
+                        in
+                            (replaceGraphNode newNode newGraph, inputValue)
+                    Just inputNodes ->
+                        Debug.crash("multiple inputs not supported yet")
+                    Nothing ->
+                        Debug.crash("no input nodes!")
 
--- updateNodeState : AudioNode -> NodeState -> TimeFloat -> ValueFloat -> NodeState
--- updateNodeState node nodeState currentTime inputValue =
---     case node of
---         Generator props ->
---             let
---                 newValue = props.function currentTime
---             in
---                 { nodeState | outputValue = newValue }
-
---         FeedforwardProcessor props ->
---             let
---                 newValue = props.function inputValue nodeState.prevInputValues
---             in
---                 { outputValue = newValue
---                 , prevInputValues = [inputValue]
---                 }
-
-
--- updateGraphState
--- after updating the state of the entire graph, you just
--- get the output value of the node that's connected to Destination
-
-
-
-
--- updateGraphState graphState =
---     let
---         nodeGraphDict : Dict String AudioNode
---         nodeGraphDict = Dict.fromList graphState
---         destinationNode = getDestinationNode nodeGraphDict
---         nextNode = getInputNode destinationNode nodeGraphDict
---     in
---         -- maybe we need to be building a stack here?
---         case nextNode of
---             Generator data ->
-
---             _ ->
---                 graphstate
-
-
-
-
-
--- lets build a DAG, and if we hit any nodes that connect to any nodes already in the tree, then we create a new
--- node with a special type (FeedbackNode (?)), and initialise it with the previous value of the node that
--- it wants to point to. At the same time we should build a list of ids, so we know which
--- nodes are already in the tree, and so we can easily look up the previous value of a node
--- I guess we need to think about mixers??
---    mixers are fine (just a regular tree),
---    but splitters?
---        we can totally ignore paths that don't reach an output node (nice and efficient!)
---        and then splitters work on the same principle as feedback: if already computed, then
---        get previous value
---            Will this introduce a slight delay?
---                I guess so, but in reality in an anologue circuit there's going to be little delays
---                between signal paths
---                    But are those delays audible?
--- once we have the tree it should be reasonably easy to generate the output audio. We
--- need a (depth first traversal?) algorithm and update each node as we go along.
--- We can emulate this by applying a function to each node of a tree (surely
--- there's an example of this in elm?)
---    but it's trickier than that as the value must be based on the parent node,
---    so a tree reduce function would be more relevant. Eg: child node = parent node val + 1
---    It's an alg for getting tree depth!!
+            _ -> Debug.crash("updateGraphNode not supported yet")
 
 
 
+getInputNodes : AudioNode -> DictGraph -> Maybe (List AudioNode)
+getInputNodes node graph =
+    let
+        getInputNode' : Input -> AudioNode
+        getInputNode' input =
+            case input of
+                ID id ->
+                    case (Dict.get id graph) of
+                        Just node -> node
+                        Nothing -> Debug.crash("Can't find node")
+
+        getInputNodes' : List Input -> List AudioNode
+        getInputNodes' inputs =
+            List.map getInputNode' inputs
+    in
+        case node of
+            FeedforwardProcessor props ->
+                Just [getInputNode' props.input]
+            Destination props ->
+                Just [getInputNode' props.input]
+            Mixer props ->
+                Just <| getInputNodes' props.inputs
+            _ ->
+                Nothing
+
+
+
+updateNodeValue : AudioNode -> Float -> AudioNode
+updateNodeValue node newValue =
+    case node of
+        Generator props ->
+            let
+                oldState = props.state
+                newState = { oldState | outputValue = newValue }
+            in
+                Generator  { props | state = newState }
+        Mixer props ->
+            let
+                oldState = props.state
+                newState = { oldState | outputValue = newValue }
+            in
+                Mixer { props | state = newState }
+        FeedforwardProcessor props ->
+            let
+                oldState = props.state
+                newPrevValues = rotateList props.state.outputValue props.state.prevValues
+                newState =
+                    { oldState |
+                      outputValue = newValue
+                    , prevValues = newPrevValues
+                    }
+            in
+                FeedforwardProcessor { props | state = newState }
+        Destination props ->
+            let
+                oldState = props.state
+                newState = { oldState | outputValue = newValue }
+            in
+                Destination { props | state = newState }
+
+
+toDict : ListGraph -> DictGraph
+toDict listGraph =
+    let
+        createTuple node =
+            case node of
+                Destination props ->
+                    (props.id, node)
+                Generator props ->
+                    (props.id, node)
+                FeedforwardProcessor props ->
+                    (props.id, node)
+                Mixer props ->
+                    (props.id, node)
+        tuples = List.map createTuple listGraph
+    in
+        Dict.fromList tuples
+
+
+getDestinationNode : DictGraph -> AudioNode
+getDestinationNode graph =
+    let
+        nodes = Dict.values graph
+        isDestinationNode node =
+            case node of
+                Destination _ ->
+                    True
+                _ ->
+                    False
+        destinationNodes = List.filter isDestinationNode nodes
+    in
+        case List.head destinationNodes of
+            Just node
+                -> node
+            _
+                -> Debug.crash("There aren't any nodes of type Destination!")
+
+
+replaceGraphNode : AudioNode -> DictGraph -> DictGraph
+replaceGraphNode node graph =
+    Dict.insert (getNodeId node) node graph
+
+
+getNodeId : AudioNode -> String
+getNodeId node =
+    case node of
+        Destination props -> props.id
+        Generator props -> props.id
+        FeedforwardProcessor props -> props.id
+        Mixer props -> props.id
+
+
+
+-- rotateArray : Array -> Array
+
+--------------------------------------------------------------------------------
+-- TESTS
+--------------------------------------------------------------------------------
+
+-- A
+
+squareA =
+    Generator
+        { id = "squareA"
+        , function = squareWave
+        , state =
+            { processed = False, outputValue = 0.0  }
+        }
+
+destinationA =
+    Destination
+        { id = "destinationA"
+        , input = ID "squareA"
+        , state =
+            { processed = False, outputValue = 0.0 }
+        }
+
+squareAT1 =
+    Generator
+        { id = "squareA"
+        , function = squareWave
+        , state =
+            { processed = False, outputValue = 1.0  }
+        }
+
+destinationAT1 =
+    Destination
+        { id = "destinationA"
+        , input = ID "squareA"
+        , state =
+            { processed = False, outputValue = 1.0 }
+        }
+
+testGraph : ListGraph
+testGraph =
+    [ squareA
+    , destinationA
+    ]
+
+testDictGraph : DictGraph
+testDictGraph = toDict testGraph
+
+-- B
+
+squareB =
+    Generator
+        { id = "squareB"
+        , function = squareWave
+        , state =
+            { processed = False, outputValue = 0.0  }
+        }
+
+
+lowpassB =
+    FeedforwardProcessor
+        { id = "lowpassB"
+        , input = ID "squareB"
+        , function = simpleLowPassFilter
+        , state =
+            { processed = False
+            , outputValue = 0.0
+            , prevValues = [0.0, 0.0, 0.0]
+            }
+        }
+
+destinationB =
+    Destination
+        { id = "destinationB"
+        , input = ID "lowpassB"
+        , state =
+            { processed = False, outputValue = 0.0 }
+        }
+
+{- squareAT1 =
+    Generator
+        { id = "squareA"
+        , function = squareWave
+        , state =
+            { outputValue = Just 1.0  }
+        }
+
+destinationAT1 =
+    Destination
+        { id = "destinationA"
+        , input = ID "squareA"
+        , state =
+            { outputValue = Just 1.0 }
+        } -}
+
+testGraphB : ListGraph
+testGraphB =
+    [ squareB
+    , lowpassB
+    , destinationB
+    ]
+
+testDictGraphB = toDict testGraphB
 
 
 
 
--- I guess we need a graph structure?
-    -- is that even POSSIBLE with immutable data structures?
-        -- well, it is actually quite possible with dicts and string ids
-            -- i guess you start from destination, and work backwards and build a stack structure?
-                -- mixers might be tough! so start with basic path
+feetless : List a -> List a
+feetless list =
+    List.take ((List.length list) - 1) list
 
 
-                -- maybe other way round works best? Because then we can make destination a special value
+rotateList : a -> List a -> List a
+rotateList value list  =
+  [value] ++ feetless list
 
--- generateInitialGraphState (nodes, lastNode) =
---     let
---         tuples = List.map (\node -> (node.id, node)) nodes
---         nodesDict = Dict.fromList tuples
+tests : Test
+tests =
+    suite "A Test Suite"
+        [
+{-           test "getInputNodes"
+            (assertEqual
+                (Just [squareA])
+                (getInputNodes  destinationA testDictGraph)
+            )
+        , test "getInputNodes"
+            (assertEqual
+                Nothing
+                (getInputNodes squareA testDictGraph)
+            )
+        , test "getNextSample"
+            (assertEqual
+                (toDict [squareAT1, destinationAT1], 1.0)
+                (updateGraph testDictGraph 0.0)
+            ) -}
+          test "rotateList"
+            (assertEqual
+                [4, 3, 2]
+                (rotateList 4 [3, 2, 1])
+            )
+        , test "getNextSample"
+            (assertEqual
+                (toDict [squareAT1, destinationAT1], 1.0)
+                (updateGraph testDictGraphB 0.0)
+            )
+        ]
 
 
--- using strings for input names seems a bit rough!
--- you could use records though
+{- (Dict.fromList
+    [ ("destination", Destination
+        { id = "destination"
+        , input = ID "square1"
+        , state = { outputValue = Nothing }
+        }
+       )
+    , ( "square1", Generator
+        { id = "square1",
+        , $function = <function>,
+        , state = { outputValue = Just -1 }
+        }
+        )
+    ]
+    , -1
+) -}
+
+main =
+    elementRunner tests

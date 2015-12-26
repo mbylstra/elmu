@@ -79,18 +79,9 @@ gain : Float -> Float -> Float
 gain amount value = amount * value
 
 
-getSampleTime : Int -> Float -> Float
-getSampleTime bufferIndex bufferStartTime =
-    bufferStartTime + (toFloat bufferIndex * sampleDuration)
 
 
 
-getBufferVal : Float -> Float
-getBufferVal currTime =
-    currTime
---     |> oscillator Square 440.0
-    |> oscillator Triangle 440.0
-    |> gain 0.1
 
 
 average : List Float -> Float

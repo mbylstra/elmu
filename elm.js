@@ -10276,42 +10276,6 @@ Elm.Orchestrator.make = function (_elm) {
    _elm.Orchestrator = _elm.Orchestrator || {};
    if (_elm.Orchestrator.values) return _elm.Orchestrator.values;
    var _U = Elm.Native.Utils.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $Debug = Elm.Debug.make(_elm),
-   $Dict = Elm.Dict.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
-   var _op = {};
-   var NodeState = F2(function (a,b) {
-      return {outputValue: a,prevInputValues: b};
-   });
-   var Destination = function (a) {
-      return {ctor: "Destination",_0: a};
-   };
-   var Mixer = function (a) {    return {ctor: "Mixer",_0: a};};
-   var FeedforwardProcessor = function (a) {
-      return {ctor: "FeedforwardProcessor",_0: a};
-   };
-   var Generator = function (a) {
-      return {ctor: "Generator",_0: a};
-   };
-   var ID = function (a) {    return {ctor: "ID",_0: a};};
-   return _elm.Orchestrator.values = {_op: _op
-                                     ,ID: ID
-                                     ,Generator: Generator
-                                     ,FeedforwardProcessor: FeedforwardProcessor
-                                     ,Mixer: Mixer
-                                     ,Destination: Destination
-                                     ,NodeState: NodeState};
-};
-Elm.AudioNodeTree = Elm.AudioNodeTree || {};
-Elm.AudioNodeTree.make = function (_elm) {
-   "use strict";
-   _elm.AudioNodeTree = _elm.AudioNodeTree || {};
-   if (_elm.AudioNodeTree.values) return _elm.AudioNodeTree.values;
-   var _U = Elm.Native.Utils.make(_elm),
    $AudioNodes = Elm.AudioNodes.make(_elm),
    $Basics = Elm.Basics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
@@ -10319,7 +10283,6 @@ Elm.AudioNodeTree.make = function (_elm) {
    $ElmTest = Elm.ElmTest.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
-   $Orchestrator = Elm.Orchestrator.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm);
    var _op = {};
@@ -10329,32 +10292,6 @@ Elm.AudioNodeTree.make = function (_elm) {
    var rotateList = F2(function (value,list) {
       return A2($Basics._op["++"],_U.list([value]),feetless(list));
    });
-   var destinationB = $Orchestrator.Destination({id: "destinationB"
-                                                ,input: $Orchestrator.ID("lowpassB")
-                                                ,state: {processed: false,outputValue: 0.0}});
-   var lowpassB = $Orchestrator.FeedforwardProcessor({id: "lowpassB"
-                                                     ,input: $Orchestrator.ID("squareB")
-                                                     ,$function: $AudioNodes.simpleLowPassFilter
-                                                     ,state: {processed: false
-                                                             ,outputValue: 0.0
-                                                             ,prevValues: _U.list([0.0,0.0,0.0])}});
-   var squareB = $Orchestrator.Generator({id: "squareB"
-                                         ,$function: $AudioNodes.squareWave
-                                         ,state: {processed: false,outputValue: 0.0}});
-   var testGraphB = _U.list([squareB,lowpassB,destinationB]);
-   var destinationAT1 = $Orchestrator.Destination({id: "destinationA"
-                                                  ,input: $Orchestrator.ID("squareA")
-                                                  ,state: {processed: false,outputValue: 1.0}});
-   var squareAT1 = $Orchestrator.Generator({id: "squareA"
-                                           ,$function: $AudioNodes.squareWave
-                                           ,state: {processed: false,outputValue: 1.0}});
-   var destinationA = $Orchestrator.Destination({id: "destinationA"
-                                                ,input: $Orchestrator.ID("squareA")
-                                                ,state: {processed: false,outputValue: 0.0}});
-   var squareA = $Orchestrator.Generator({id: "squareA"
-                                         ,$function: $AudioNodes.squareWave
-                                         ,state: {processed: false,outputValue: 0.0}});
-   var testGraph = _U.list([squareA,destinationA]);
    var getNodeId = function (node) {
       var _p0 = node;
       switch (_p0.ctor)
@@ -10381,8 +10318,8 @@ Elm.AudioNodeTree.make = function (_elm) {
       if (_p2.ctor === "Just") {
             return _p2._0;
          } else {
-            return _U.crashCase("AudioNodeTree",
-            {start: {line: 183,column: 9},end: {line: 187,column: 78}},
+            return _U.crashCase("Orchestrator",
+            {start: {line: 230,column: 9},end: {line: 234,column: 78}},
             _p2)("There aren\'t any nodes of type Destination!");
          }
    };
@@ -10404,59 +10341,63 @@ Elm.AudioNodeTree.make = function (_elm) {
       var tuples = A2($List.map,createTuple,listGraph);
       return $Dict.fromList(tuples);
    };
-   var testDictGraph = toDict(testGraph);
-   var testDictGraphB = toDict(testGraphB);
-   var updateNodeValue = F2(function (node,newValue) {
-      var _p5 = node;
-      switch (_p5.ctor)
-      {case "Generator": var _p6 = _p5._0;
-           var oldState = _p6.state;
-           var newState = _U.update(oldState,{outputValue: newValue});
-           return $Orchestrator.Generator(_U.update(_p6,
-           {state: newState}));
-         case "Mixer": var _p7 = _p5._0;
-           var oldState = _p7.state;
-           var newState = _U.update(oldState,{outputValue: newValue});
-           return $Orchestrator.Mixer(_U.update(_p7,{state: newState}));
-         case "FeedforwardProcessor": var _p8 = _p5._0;
-           var newPrevValues = A2(rotateList,
-           _p8.state.outputValue,
-           _p8.state.prevValues);
-           var oldState = _p8.state;
-           var newState = _U.update(oldState,
-           {outputValue: newValue,prevValues: newPrevValues});
-           return $Orchestrator.FeedforwardProcessor(_U.update(_p8,
-           {state: newState}));
-         default: var _p9 = _p5._0;
-           var oldState = _p9.state;
-           var newState = _U.update(oldState,{outputValue: newValue});
-           return $Orchestrator.Destination(_U.update(_p9,
-           {state: newState}));}
-   });
    var getInputNodes = F2(function (node,graph) {
       var getInputNode$ = function (input) {
-         var _p10 = input;
-         var _p11 = A2($Dict.get,_p10._0,graph);
-         if (_p11.ctor === "Just") {
-               return _p11._0;
+         var _p5 = input;
+         var _p6 = A2($Dict.get,_p5._0,graph);
+         if (_p6.ctor === "Just") {
+               return _p6._0;
             } else {
-               return _U.crashCase("AudioNodeTree",
-               {start: {line: 99,column: 21},end: {line: 101,column: 66}},
-               _p11)("Can\'t find node");
+               return _U.crashCase("Orchestrator",
+               {start: {line: 146,column: 21},end: {line: 148,column: 66}},
+               _p6)("Can\'t find node");
             }
       };
       var getInputNodes$ = function (inputs) {
          return A2($List.map,getInputNode$,inputs);
       };
-      var _p13 = node;
-      switch (_p13.ctor)
+      var _p8 = node;
+      switch (_p8.ctor)
       {case "FeedforwardProcessor":
-         return $Maybe.Just(_U.list([getInputNode$(_p13._0.input)]));
+         return $Maybe.Just(_U.list([getInputNode$(_p8._0.input)]));
          case "Destination":
-         return $Maybe.Just(_U.list([getInputNode$(_p13._0.input)]));
-         case "Mixer":
-         return $Maybe.Just(getInputNodes$(_p13._0.inputs));
+         return $Maybe.Just(_U.list([getInputNode$(_p8._0.input)]));
+         case "Mixer": return $Maybe.Just(getInputNodes$(_p8._0.inputs));
          default: return $Maybe.Nothing;}
+   });
+   var Destination = function (a) {
+      return {ctor: "Destination",_0: a};
+   };
+   var Mixer = function (a) {    return {ctor: "Mixer",_0: a};};
+   var FeedforwardProcessor = function (a) {
+      return {ctor: "FeedforwardProcessor",_0: a};
+   };
+   var Generator = function (a) {
+      return {ctor: "Generator",_0: a};
+   };
+   var updateNodeValue = F2(function (node,newValue) {
+      var _p9 = node;
+      switch (_p9.ctor)
+      {case "Generator": var _p10 = _p9._0;
+           var oldState = _p10.state;
+           var newState = _U.update(oldState,{outputValue: newValue});
+           return Generator(_U.update(_p10,{state: newState}));
+         case "Mixer": var _p11 = _p9._0;
+           var oldState = _p11.state;
+           var newState = _U.update(oldState,{outputValue: newValue});
+           return Mixer(_U.update(_p11,{state: newState}));
+         case "FeedforwardProcessor": var _p12 = _p9._0;
+           var newPrevValues = A2(rotateList,
+           _p12.state.outputValue,
+           _p12.state.prevValues);
+           var oldState = _p12.state;
+           var newState = _U.update(oldState,
+           {outputValue: newValue,prevValues: newPrevValues});
+           return FeedforwardProcessor(_U.update(_p12,{state: newState}));
+         default: var _p13 = _p9._0;
+           var oldState = _p13.state;
+           var newState = _U.update(oldState,{outputValue: newValue});
+           return Destination(_U.update(_p13,{state: newState}));}
    });
    var updateGraphNode = F3(function (graph,time,node) {
       var _p14 = $Debug.log("updateGraphNode start");
@@ -10483,13 +10424,13 @@ Elm.AudioNodeTree.make = function (_elm) {
                               ,_0: A2(replaceGraphNode,newNode,newGraph)
                               ,_1: newValue};
                     } else {
-                       return _U.crashCase("AudioNodeTree",
-                       {start: {line: 60,column: 17},end: {line: 71,column: 55}},
+                       return _U.crashCase("Orchestrator",
+                       {start: {line: 107,column: 17},end: {line: 118,column: 55}},
                        _p17)("multiple inputs not supported yet");
                     }
               } else {
-                 return _U.crashCase("AudioNodeTree",
-                 {start: {line: 60,column: 17},end: {line: 71,column: 55}},
+                 return _U.crashCase("Orchestrator",
+                 {start: {line: 107,column: 17},end: {line: 118,column: 55}},
                  _p17)("no input nodes!");
               }
          case "Destination": var _p22 = A2(getInputNodes,node,graph);
@@ -10504,23 +10445,52 @@ Elm.AudioNodeTree.make = function (_elm) {
                               ,_0: A2(replaceGraphNode,newNode,newGraph)
                               ,_1: inputValue};
                     } else {
-                       return _U.crashCase("AudioNodeTree",
-                       {start: {line: 75,column: 17},end: {line: 86,column: 55}},
+                       return _U.crashCase("Orchestrator",
+                       {start: {line: 122,column: 17},end: {line: 133,column: 55}},
                        _p22)("multiple inputs not supported yet");
                     }
               } else {
-                 return _U.crashCase("AudioNodeTree",
-                 {start: {line: 75,column: 17},end: {line: 86,column: 55}},
+                 return _U.crashCase("Orchestrator",
+                 {start: {line: 122,column: 17},end: {line: 133,column: 55}},
                  _p22)("no input nodes!");
               }
-         default: return _U.crashCase("AudioNodeTree",
-           {start: {line: 50,column: 9},end: {line: 88,column: 66}},
+         default: return _U.crashCase("Orchestrator",
+           {start: {line: 97,column: 9},end: {line: 135,column: 66}},
            _p15)("updateGraphNode not supported yet");}
    });
    var updateGraph = F2(function (graph,time) {
       var _p28 = $Debug.log("updateGraph start");
       return A3(updateGraphNode,graph,time,getDestinationNode(graph));
    });
+   var squareA = Generator({id: "squareA"
+                           ,$function: $AudioNodes.squareWave
+                           ,state: {processed: false,outputValue: 0.0}});
+   var squareAT1 = Generator({id: "squareA"
+                             ,$function: $AudioNodes.squareWave
+                             ,state: {processed: false,outputValue: 1.0}});
+   var squareB = Generator({id: "squareB"
+                           ,$function: $AudioNodes.squareWave
+                           ,state: {processed: false,outputValue: 0.0}});
+   var ID = function (a) {    return {ctor: "ID",_0: a};};
+   var destinationA = Destination({id: "destinationA"
+                                  ,input: ID("squareA")
+                                  ,state: {processed: false,outputValue: 0.0}});
+   var testGraph = _U.list([squareA,destinationA]);
+   var testDictGraph = toDict(testGraph);
+   var destinationAT1 = Destination({id: "destinationA"
+                                    ,input: ID("squareA")
+                                    ,state: {processed: false,outputValue: 1.0}});
+   var lowpassB = FeedforwardProcessor({id: "lowpassB"
+                                       ,input: ID("squareB")
+                                       ,$function: $AudioNodes.simpleLowPassFilter
+                                       ,state: {processed: false
+                                               ,outputValue: 0.0
+                                               ,prevValues: _U.list([0.0,0.0,0.0])}});
+   var destinationB = Destination({id: "destinationB"
+                                  ,input: ID("lowpassB")
+                                  ,state: {processed: false,outputValue: 0.0}});
+   var testGraphB = _U.list([squareB,lowpassB,destinationB]);
+   var testDictGraphB = toDict(testGraphB);
    var tests = A2($ElmTest.suite,
    "A Test Suite",
    _U.list([A2($ElmTest.test,
@@ -10536,28 +10506,33 @@ Elm.AudioNodeTree.make = function (_elm) {
            ,_1: 1.0},
            A2(updateGraph,testDictGraphB,0.0)))]));
    var main = $ElmTest.elementRunner(tests);
-   return _elm.AudioNodeTree.values = {_op: _op
-                                      ,updateGraph: updateGraph
-                                      ,updateGraphNode: updateGraphNode
-                                      ,getInputNodes: getInputNodes
-                                      ,updateNodeValue: updateNodeValue
-                                      ,toDict: toDict
-                                      ,getDestinationNode: getDestinationNode
-                                      ,replaceGraphNode: replaceGraphNode
-                                      ,getNodeId: getNodeId
-                                      ,squareA: squareA
-                                      ,destinationA: destinationA
-                                      ,squareAT1: squareAT1
-                                      ,destinationAT1: destinationAT1
-                                      ,testGraph: testGraph
-                                      ,testDictGraph: testDictGraph
-                                      ,squareB: squareB
-                                      ,lowpassB: lowpassB
-                                      ,destinationB: destinationB
-                                      ,testGraphB: testGraphB
-                                      ,testDictGraphB: testDictGraphB
-                                      ,feetless: feetless
-                                      ,rotateList: rotateList
-                                      ,tests: tests
-                                      ,main: main};
+   return _elm.Orchestrator.values = {_op: _op
+                                     ,ID: ID
+                                     ,Generator: Generator
+                                     ,FeedforwardProcessor: FeedforwardProcessor
+                                     ,Mixer: Mixer
+                                     ,Destination: Destination
+                                     ,updateGraph: updateGraph
+                                     ,updateGraphNode: updateGraphNode
+                                     ,getInputNodes: getInputNodes
+                                     ,updateNodeValue: updateNodeValue
+                                     ,toDict: toDict
+                                     ,getDestinationNode: getDestinationNode
+                                     ,replaceGraphNode: replaceGraphNode
+                                     ,getNodeId: getNodeId
+                                     ,squareA: squareA
+                                     ,destinationA: destinationA
+                                     ,squareAT1: squareAT1
+                                     ,destinationAT1: destinationAT1
+                                     ,testGraph: testGraph
+                                     ,testDictGraph: testDictGraph
+                                     ,squareB: squareB
+                                     ,lowpassB: lowpassB
+                                     ,destinationB: destinationB
+                                     ,testGraphB: testGraphB
+                                     ,testDictGraphB: testDictGraphB
+                                     ,feetless: feetless
+                                     ,rotateList: rotateList
+                                     ,tests: tests
+                                     ,main: main};
 };

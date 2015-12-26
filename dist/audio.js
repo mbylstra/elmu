@@ -10,9 +10,17 @@ elm.ports.latestBuffer.subscribe(function(buffer) {
 });
 
 
+
+timeElapsed = 0.0;
+bufferSize = 4096;
+sampleRate = 44100;
+bufferDuration = (1 / sampleRate) * bufferSize;
+buffersElapsed = 0;
+
+
 var audioCtx = new AudioContext();
 source = audioCtx.createBufferSource();
-var scriptNode = audioCtx.createScriptProcessor(4096, 1, 1);
+var scriptNode = audioCtx.createScriptProcessor(bufferSize, 1, 1);
 scriptNode.onaudioprocess = function(audioProcessingEvent) {
     var outputBuffer = audioProcessingEvent.outputBuffer;
     for (var channel = 0; channel < outputBuffer.numberOfChannels; channel++) {
@@ -21,6 +29,11 @@ scriptNode.onaudioprocess = function(audioProcessingEvent) {
             outputData[i] = latestBuffer[i];
 //             outputData[i] = 1.0;
         }
+    }
+    buffersElapsed += 1;
+    timeElapsed += bufferDuration;
+    if (buffersElapsed % 10 == 0) {
+        console.log('time elapsed: ', timeElapsed);
     }
     elm.ports.requestBuffer.send(true);
 }
