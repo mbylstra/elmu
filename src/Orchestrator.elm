@@ -82,7 +82,10 @@ type alias DictGraph = Dict String AudioNode
 
 
 updateGraph graph time =
-     updateGraphNode graph time (getDestinationNode graph)
+{-     let
+        _ = Debug.log "time" time
+    in -}
+    updateGraphNode graph time (getDestinationNode graph)
 
 {- updateGraph graph time =
     (graph, time) -}
@@ -112,7 +115,6 @@ updateGraphNode graph time node =
                 Nothing ->
                     Debug.crash("no input nodes!")
 
-
         Destination props ->
             case getInputNodes node graph of
                 Just [inputNode] ->
@@ -126,7 +128,35 @@ updateGraphNode graph time node =
                 Nothing ->
                     Debug.crash("no input nodes!")
 
-        _ -> Debug.crash("updateGraphNode not supported yet")
+        Mixer props ->
+            case getInputNodes node graph of
+                Just inputNodes ->
+                    let
+                        updateFunc inputNode (graph, accValue) =
+                            let
+                                (newGraph, inputValue) = updateGraphNode graph time inputNode
+                                newNode = updateNodeValue node inputValue
+                            in
+                                (replaceGraphNode newNode newGraph, accValue + inputValue)
+                        (newGraph, totalValue) = List.foldl updateFunc (graph, 0) inputNodes
+                        averageValue = totalValue / toFloat (List.length inputNodes)
+                        newNode = updateNodeValue node averageValue
+                    in
+                        (replaceGraphNode newNode newGraph, averageValue)
+
+                Nothing ->
+                    Debug.crash("no input nodes!")
+
+
+{-                     let
+                        (newGraph, inputValue) = updateGraphNode graph time inputNode
+                        newNode = updateNodeValue node inputValue
+                    in
+                        (replaceGraphNode newNode newGraph, inputValue) -}
+{-                 Just inputNodes ->
+                    Debug.crash("multiple inputs not supported yet")
+                Nothing ->
+                    Debug.crash("no input nodes!") -}
 
 
 

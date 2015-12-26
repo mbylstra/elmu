@@ -2,26 +2,31 @@ module ReactiveAudio where
 
 import Debug exposing (log)
 
-import AudioNodes exposing (squareWave)
+import AudioNodes exposing (squareWave, OscillatorType(Square), oscillator)
+
+import Array exposing(Array)
 
 import Orchestrator exposing
     ( DictGraph
     , ListGraph
     , toDict
-    , AudioNode(Generator, Destination)
+    , AudioNode(Generator, Destination, Mixer)
     , Input(ID)
     , updateGraph
     )
 
-type alias Buffer = List Float
+type alias Buffer = Array Float
 
 type alias BufferState =
     { time: Float
     , graph: DictGraph
     , buffer: Buffer
+    , bufferIndex: Int
     }
 
 
+initialBuffer : Array Float
+initialBuffer = Array.repeat bufferSize 0.0
 
 
 {- a helper function -}
@@ -45,42 +50,51 @@ sampleRate = 44100
 
 sampleDuration = 1.0 / sampleRate
 
+
+
 updateBufferState : Bool -> BufferState -> BufferState
 updateBufferState _ prevBufferState =
 
     let
         time = prevBufferState.time + sampleDuration
         initialGraph = prevBufferState.graph
+{-         _ = Debug.log "sampleCuration" sampleDuration
+        _ = Debug.log "updateBufferState time" time -}
 
 
         -- surely we can do this without having to manually create a counter?
         -- we can just iterate over the last buffer, and ignore values
 
+        prevBuffer = prevBufferState.buffer
         initialBufferState =
-            { time=time
+            { time = time
             , graph = initialGraph
-            , buffer = [] --we'll build it up as we go
+            , buffer = prevBuffer
+            , bufferIndex = 0
             }
 
-        updateForSample {time, graph, buffer} =
+        updateForSample {time, graph, buffer, bufferIndex} =
             let
-                time  = time + sampleDuration
-                (newGraph, value) = updateGraph graph time
+                newTime  = time + sampleDuration
+--                 _ = Debug.log "udpateForSample newTime" newTime
+                (newGraph, value) = updateGraph graph newTime
+                newBufferIndex = bufferIndex + 1
+--                 _ = Debug.log "newBufferIndex" newBufferIndex
+--                 _ = Debug.log "value" value
             in
-                { time  = time
+                { time  = newTime
                 , graph = newGraph
-                , buffer = buffer ++ [value]
+                , buffer = Array.set newBufferIndex value buffer
+                , bufferIndex = newBufferIndex
                 }
     in
         foldn updateForSample initialBufferState bufferSize
 
 
-
-
 squareA =
     Generator
         { id = "squareA"
-        , function = squareWave
+        , function = oscillator Square 444.0
         , state =
             { processed = False, outputValue = 0.0  }
         }
@@ -96,15 +110,38 @@ destinationA =
 
 testGraph : ListGraph
 testGraph =
-    [ squareA
-    , destinationA
+    [ Generator
+        { id = "squareB"
+        , function = oscillator Square 200.0
+        , state =
+            { processed = False, outputValue = 0.0  }
+        }
+    , Generator
+        { id = "squareA"
+        , function = oscillator Square 300.0
+        , state =
+            { processed = False, outputValue = 0.0  }
+        }
+    , Mixer
+        { id = "mixer"
+        , inputs = [ID "squareA", ID "squareB"]
+        , state =
+            { processed = False , outputValue = 0.0 }
+        }
+    , Destination
+        { id = "destinationA"
+        , input = ID "mixer"
+        , state =
+            { processed = False, outputValue = 0.0 }
+        }
     ]
 
 testGraphDict = toDict testGraph
 initialBufferState =
     { time = 0.0
     , graph = testGraphDict
-    , buffer = []
+    , buffer = initialBuffer
+    , bufferIndex = 0
     }
 
 
@@ -112,9 +149,13 @@ bufferStateSignal : Signal BufferState
 bufferStateSignal = Signal.foldp updateBufferState initialBufferState requestBuffer
 
 
-getSampleTime : Int -> Float -> Float
+{- getSampleTime : Int -> Float -> Float
 getSampleTime bufferIndex bufferStartTime =
-    bufferStartTime + (toFloat bufferIndex * sampleDuration)
+    let
+        _ = Debug.log "bufferIndex" bufferStartTime
+
+    in
+        bufferStartTime + (toFloat bufferIndex * sampleDuration) -}
 
 
 
@@ -122,7 +163,7 @@ getSampleTime bufferIndex bufferStartTime =
 
 
 
-port latestBuffer : Signal (List Float)
+port latestBuffer : Signal (Array Float)
 port latestBuffer = Signal.map .buffer bufferStateSignal
 
 
