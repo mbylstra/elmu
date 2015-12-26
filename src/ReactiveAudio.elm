@@ -111,20 +111,26 @@ destinationA =
 testGraph : ListGraph
 testGraph =
     [ Generator
-        { id = "squareB"
-        , function = oscillator Square 200.0
-        , state =
-            { processed = False, outputValue = 0.0  }
-        }
-    , Generator
         { id = "squareA"
         , function = oscillator Square 300.0
         , state =
             { processed = False, outputValue = 0.0  }
         }
+    , Generator
+        { id = "squareB"
+        , function = oscillator Square 250.0
+        , state =
+            { processed = False, outputValue = 0.0  }
+        }
+    , Generator
+        { id = "squareC"
+        , function = oscillator Square 200.0
+        , state =
+            { processed = False, outputValue = 0.0  }
+        }
     , Mixer
         { id = "mixer"
-        , inputs = [ID "squareA", ID "squareB"]
+        , inputs = [ID "squareA", ID "squareB", ID "squareC"]
         , state =
             { processed = False , outputValue = 0.0 }
         }

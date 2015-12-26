@@ -13,11 +13,12 @@ buffersElapsed = 0;
 
 var startTime = window.performance.now();
 var endTime = null;
-var ITERATIONS = 0;
+var ITERATIONS = 10;
 var MAX_ALLOWED_DURATION = ITERATIONS * BUFFER_DURATION;
 
 
 var PROFILING = 0;
+var DEBUG = 0;
 
 if (PROFILING) {
     console.log('start profiling');
@@ -29,8 +30,9 @@ if (PROFILING) {
     var i = ITERATIONS;
     elm.ports.requestBuffer.send(true);
     elm.ports.latestBuffer.subscribe(function(buffer) {
-        console.log('buffer', buffer);
-//         console.log('get return');
+        if (DEBUG) {
+            console.log('buffer', buffer);
+        }
         if (i > 0) {
             elm.ports.requestBuffer.send(true);
             i--;

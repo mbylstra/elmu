@@ -10569,15 +10569,19 @@ Elm.ReactiveAudio.make = function (_elm) {
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm);
    var _op = {};
-   var testGraph = _U.list([$Orchestrator.Generator({id: "squareB"
-                                                    ,$function: A2($AudioNodes.oscillator,$AudioNodes.Square,200.0)
-                                                    ,state: {processed: false,outputValue: 0.0}})
-                           ,$Orchestrator.Generator({id: "squareA"
+   var testGraph = _U.list([$Orchestrator.Generator({id: "squareA"
                                                     ,$function: A2($AudioNodes.oscillator,$AudioNodes.Square,300.0)
+                                                    ,state: {processed: false,outputValue: 0.0}})
+                           ,$Orchestrator.Generator({id: "squareB"
+                                                    ,$function: A2($AudioNodes.oscillator,$AudioNodes.Square,250.0)
+                                                    ,state: {processed: false,outputValue: 0.0}})
+                           ,$Orchestrator.Generator({id: "squareC"
+                                                    ,$function: A2($AudioNodes.oscillator,$AudioNodes.Square,200.0)
                                                     ,state: {processed: false,outputValue: 0.0}})
                            ,$Orchestrator.Mixer({id: "mixer"
                                                 ,inputs: _U.list([$Orchestrator.ID("squareA")
-                                                                 ,$Orchestrator.ID("squareB")])
+                                                                 ,$Orchestrator.ID("squareB")
+                                                                 ,$Orchestrator.ID("squareC")])
                                                 ,state: {processed: false,outputValue: 0.0}})
                            ,$Orchestrator.Destination({id: "destinationA"
                                                       ,input: $Orchestrator.ID("mixer")
