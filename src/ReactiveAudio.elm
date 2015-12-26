@@ -22,6 +22,8 @@ type alias BufferState =
     }
 
 
+
+
 {- a helper function -}
 foldn : (a -> a) -> a -> Int -> a
 foldn func initial count =

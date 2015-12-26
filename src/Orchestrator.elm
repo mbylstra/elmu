@@ -81,61 +81,52 @@ type alias DictGraph = Dict String AudioNode
 --------------------------------------------------------------------------------
 
 
-{- updateGraph graph time =
-    let
-        _ = Debug.log("updateGraph start")
-    in
-        updateGraphNode graph time (getDestinationNode graph) -}
-
 updateGraph graph time =
-    (graph, time)
+     updateGraphNode graph time (getDestinationNode graph)
+
+{- updateGraph graph time =
+    (graph, time) -}
 
 
 updateGraphNode : DictGraph -> TimeFloat -> AudioNode -> (DictGraph, Float)
 updateGraphNode graph time node =
-    let
-        _ = Debug.log("updateGraphNode start")
+    case node of
+        Generator props ->
+            let
+                newValue = props.function time
+                newNode = updateNodeValue node newValue
+            in
+                (replaceGraphNode newNode graph, newValue)
 
-    in
-        case node of
-            Generator props ->
-                let
-                    _ = Debug.log("updating generator")
-                    newValue = props.function time
-                    newNode = updateNodeValue node newValue
-                in
-                    (replaceGraphNode newNode graph, newValue)
-
-            FeedforwardProcessor props ->
-                case getInputNodes node graph of
-                    Just [inputNode] ->
-                        let
-                            (newGraph, inputValue) = updateGraphNode graph time inputNode
-                            newValue = props.function inputValue props.state.prevValues
-                            newNode = updateNodeValue node newValue
-                        in
-                            (replaceGraphNode newNode newGraph, newValue)
-                    Just inputNodes ->
-                        Debug.crash("multiple inputs not supported yet")
-                    Nothing ->
-                        Debug.crash("no input nodes!")
+        FeedforwardProcessor props ->
+            case getInputNodes node graph of
+                Just [inputNode] ->
+                    let
+                        (newGraph, inputValue) = updateGraphNode graph time inputNode
+                        newValue = props.function inputValue props.state.prevValues
+                        newNode = updateNodeValue node newValue
+                    in
+                        (replaceGraphNode newNode newGraph, newValue)
+                Just inputNodes ->
+                    Debug.crash("multiple inputs not supported yet")
+                Nothing ->
+                    Debug.crash("no input nodes!")
 
 
-            Destination props ->
-                case getInputNodes node graph of
-                    Just [inputNode] ->
-                        let
-                            _ = Debug.log("updating Destination")
-                            (newGraph, inputValue) = updateGraphNode graph time inputNode
-                            newNode = updateNodeValue node inputValue
-                        in
-                            (replaceGraphNode newNode newGraph, inputValue)
-                    Just inputNodes ->
-                        Debug.crash("multiple inputs not supported yet")
-                    Nothing ->
-                        Debug.crash("no input nodes!")
+        Destination props ->
+            case getInputNodes node graph of
+                Just [inputNode] ->
+                    let
+                        (newGraph, inputValue) = updateGraphNode graph time inputNode
+                        newNode = updateNodeValue node inputValue
+                    in
+                        (replaceGraphNode newNode newGraph, inputValue)
+                Just inputNodes ->
+                    Debug.crash("multiple inputs not supported yet")
+                Nothing ->
+                    Debug.crash("no input nodes!")
 
-            _ -> Debug.crash("updateGraphNode not supported yet")
+        _ -> Debug.crash("updateGraphNode not supported yet")
 
 
 
