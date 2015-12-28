@@ -10334,7 +10334,7 @@ Elm.Orchestrator.make = function (_elm) {
             return _p2._0;
          } else {
             return _U.crashCase("Orchestrator",
-            {start: {line: 367,column: 9},end: {line: 371,column: 78}},
+            {start: {line: 368,column: 9},end: {line: 372,column: 78}},
             _p2)("There aren\'t any nodes of type Destination!");
          }
    };
@@ -10362,7 +10362,7 @@ Elm.Orchestrator.make = function (_elm) {
             return _p5._0;
          } else {
             return _U.crashCase("Orchestrator",
-            {start: {line: 263,column: 5},end: {line: 265,column: 50}},
+            {start: {line: 264,column: 5},end: {line: 266,column: 50}},
             _p5)("Can\'t find node");
          }
    });
@@ -10371,10 +10371,10 @@ Elm.Orchestrator.make = function (_elm) {
       switch (_p7.ctor)
       {case "ID": return A2(getInputNode,graph,_p7._0);
          case "Value": return _U.crashCase("Orchestrator",
-           {start: {line: 269,column: 5},end: {line: 275,column: 45}},
+           {start: {line: 270,column: 5},end: {line: 276,column: 45}},
            _p7)("see getInputNodes");
          default: return _U.crashCase("Orchestrator",
-           {start: {line: 269,column: 5},end: {line: 275,column: 45}},
+           {start: {line: 270,column: 5},end: {line: 276,column: 45}},
            _p7)("see getInputNodes");}
    });
    var getInputNodes = F2(function (node,graph) {
@@ -10435,100 +10435,109 @@ Elm.Orchestrator.make = function (_elm) {
    var updateGraphNode = F3(function (graph,time,node) {
       var _p16 = node;
       switch (_p16.ctor)
-      {case "Oscillator": var _p18 = _p16._0;
+      {case "Oscillator": var _p19 = _p16._0;
            var _p17 = A3(updateGraphNode$,
            graph,
            time,
-           _p18.inputs.frequency);
-           var newGraph = _p17._0;
+           _p19.inputs.frequency);
+           var graph2 = _p17._0;
            var frequencyInputValue = _p17._1;
-           var newValue = A3(_p18.$function,frequencyInputValue,0.0,time);
+           var _p18 = A3(updateGraphNode$,
+           graph2,
+           time,
+           _p19.inputs.phaseOffset);
+           var graph3 = _p18._0;
+           var phaseOffsetValue = _p18._1;
+           var newValue = A3(_p19.$function,
+           frequencyInputValue,
+           phaseOffsetValue,
+           time);
            var newNode = A2(updateNodeValue,node,newValue);
            return {ctor: "_Tuple2"
-                  ,_0: A2(replaceGraphNode,newNode,graph)
+                  ,_0: A2(replaceGraphNode,newNode,graph3)
                   ,_1: newValue};
-         case "FeedforwardProcessor": var _p23 = _p16._0;
-           var _p19 = A2(getInputNodes,node,graph);
-           if (_p19.ctor === "Just") {
-                 if (_p19._0.ctor === "::" && _p19._0._1.ctor === "[]") {
-                       var _p20 = A3(updateGraphNode,graph,time,_p19._0._0);
-                       var newGraph = _p20._0;
-                       var inputValue = _p20._1;
-                       var newValue = A2(_p23.$function,
+         case "FeedforwardProcessor": var _p24 = _p16._0;
+           var _p20 = A2(getInputNodes,node,graph);
+           if (_p20.ctor === "Just") {
+                 if (_p20._0.ctor === "::" && _p20._0._1.ctor === "[]") {
+                       var _p21 = A3(updateGraphNode,graph,time,_p20._0._0);
+                       var newGraph = _p21._0;
+                       var inputValue = _p21._1;
+                       var newValue = A2(_p24.$function,
                        inputValue,
-                       _p23.state.prevValues);
+                       _p24.state.prevValues);
                        var newNode = A2(updateNodeValue,node,newValue);
                        return {ctor: "_Tuple2"
                               ,_0: A2(replaceGraphNode,newNode,newGraph)
                               ,_1: newValue};
                     } else {
                        return _U.crashCase("Orchestrator",
-                       {start: {line: 205,column: 13},end: {line: 216,column: 51}},
-                       _p19)("multiple inputs not supported yet");
+                       {start: {line: 206,column: 13},end: {line: 217,column: 51}},
+                       _p20)("multiple inputs not supported yet");
                     }
               } else {
                  return _U.crashCase("Orchestrator",
-                 {start: {line: 205,column: 13},end: {line: 216,column: 51}},
-                 _p19)("no input nodes!");
+                 {start: {line: 206,column: 13},end: {line: 217,column: 51}},
+                 _p20)("no input nodes!");
               }
-         case "Destination": var _p24 = A2(getInputNodes,node,graph);
-           if (_p24.ctor === "Just") {
-                 if (_p24._0.ctor === "::" && _p24._0._1.ctor === "[]") {
-                       var _p25 = A3(updateGraphNode,graph,time,_p24._0._0);
-                       var newGraph = _p25._0;
-                       var inputValue = _p25._1;
+         case "Destination": var _p25 = A2(getInputNodes,node,graph);
+           if (_p25.ctor === "Just") {
+                 if (_p25._0.ctor === "::" && _p25._0._1.ctor === "[]") {
+                       var _p26 = A3(updateGraphNode,graph,time,_p25._0._0);
+                       var newGraph = _p26._0;
+                       var inputValue = _p26._1;
                        var newNode = A2(updateNodeValue,node,inputValue);
                        return {ctor: "_Tuple2"
                               ,_0: A2(replaceGraphNode,newNode,newGraph)
                               ,_1: inputValue};
                     } else {
                        return _U.crashCase("Orchestrator",
-                       {start: {line: 219,column: 13},end: {line: 229,column: 51}},
-                       _p24)("multiple inputs not supported yet");
+                       {start: {line: 220,column: 13},end: {line: 230,column: 51}},
+                       _p25)("multiple inputs not supported yet");
                     }
               } else {
                  return _U.crashCase("Orchestrator",
-                 {start: {line: 219,column: 13},end: {line: 229,column: 51}},
-                 _p24)("no input nodes!");
+                 {start: {line: 220,column: 13},end: {line: 230,column: 51}},
+                 _p25)("no input nodes!");
               }
-         default: var _p28 = A2(getInputNodes,node,graph);
-           if (_p28.ctor === "Just") {
-                 var _p33 = _p28._0;
-                 var updateFunc = F2(function (inputNode,_p29) {
-                    var _p30 = _p29;
-                    var _p31 = A3(updateGraphNode,_p30._0,time,inputNode);
-                    var newGraph = _p31._0;
-                    var inputValue = _p31._1;
+         default: var _p29 = A2(getInputNodes,node,graph);
+           if (_p29.ctor === "Just") {
+                 var _p34 = _p29._0;
+                 var updateFunc = F2(function (inputNode,_p30) {
+                    var _p31 = _p30;
+                    var _p32 = A3(updateGraphNode,_p31._0,time,inputNode);
+                    var newGraph = _p32._0;
+                    var inputValue = _p32._1;
                     var newNode = A2(updateNodeValue,node,inputValue);
                     return {ctor: "_Tuple2"
                            ,_0: A2(replaceGraphNode,newNode,newGraph)
-                           ,_1: _p30._1 + inputValue};
+                           ,_1: _p31._1 + inputValue};
                  });
-                 var _p32 = A3($List.foldl,
+                 var _p33 = A3($List.foldl,
                  updateFunc,
                  {ctor: "_Tuple2",_0: graph,_1: 0},
-                 _p33);
-                 var newGraph = _p32._0;
-                 var totalValue = _p32._1;
-                 var averageValue = totalValue / $Basics.toFloat($List.length(_p33));
+                 _p34);
+                 var newGraph = _p33._0;
+                 var totalValue = _p33._1;
+                 var averageValue = totalValue / $Basics.toFloat($List.length(_p34));
                  var newNode = A2(updateNodeValue,node,averageValue);
                  return {ctor: "_Tuple2"
                         ,_0: A2(replaceGraphNode,newNode,newGraph)
                         ,_1: averageValue};
               } else {
                  return _U.crashCase("Orchestrator",
-                 {start: {line: 232,column: 13},end: {line: 248,column: 51}},
-                 _p28)("no input nodes!");
+                 {start: {line: 233,column: 13},end: {line: 249,column: 51}},
+                 _p29)("no input nodes!");
               }}
    });
    var updateGraphNode$ = F3(function (graph,time,input) {
-      var _p35 = input;
-      switch (_p35.ctor)
+      var _p36 = input;
+      switch (_p36.ctor)
       {case "ID": return A3(updateGraphNode,
            graph,
            time,
-           A2(getInputNode,graph,_p35._0));
-         case "Value": return {ctor: "_Tuple2",_0: graph,_1: _p35._0};
+           A2(getInputNode,graph,_p36._0));
+         case "Value": return {ctor: "_Tuple2",_0: graph,_1: _p36._0};
          default: return {ctor: "_Tuple2",_0: graph,_1: 0.0};}
    });
    var updateGraph = F2(function (graph,time) {
@@ -10603,28 +10612,39 @@ Elm.ReactiveAudio.make = function (_elm) {
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm);
    var _op = {};
-   var testGraph = _U.list([$Orchestrator.Oscillator({id: "lfo"
-                                                     ,$function: $AudioNodes.sinWave
-                                                     ,inputs: {frequency: $Orchestrator.Value(20.0)
-                                                              ,phaseOffset: $Orchestrator.Default}
-                                                     ,state: {processed: false,outputValue: 0.0}})
-                           ,$Orchestrator.Oscillator({id: "oscA"
-                                                     ,$function: $AudioNodes.sinWave
-                                                     ,inputs: {frequency: $Orchestrator.ID("lfo")
-                                                              ,phaseOffset: $Orchestrator.Default}
-                                                     ,state: {processed: false,outputValue: 0.0}})
-                           ,$Orchestrator.Destination({id: "destinationA"
-                                                      ,input: $Orchestrator.ID("oscA")
-                                                      ,state: {processed: false,outputValue: 0.0}})]);
-   var testGraphDict = $Orchestrator.toDict(testGraph);
    var makeLowPass = F2(function (id,inputName) {
       return $Orchestrator.FeedforwardProcessor({id: id
                                                 ,input: $Orchestrator.ID(inputName)
                                                 ,$function: $AudioNodes.simpleLowPassFilter
                                                 ,state: {processed: false
                                                         ,outputValue: 0.0
-                                                        ,prevValues: A2($List.repeat,10,0.0)}});
+                                                        ,prevValues: A2($List.repeat,2,0.0)}});
    });
+   var testGraph = _U.list([$Orchestrator.Oscillator({id: "osc4"
+                                                     ,$function: $AudioNodes.sinWave
+                                                     ,inputs: {frequency: $Orchestrator.Value(300.01)
+                                                              ,phaseOffset: $Orchestrator.Default}
+                                                     ,state: {processed: false,outputValue: 0.0}})
+                           ,$Orchestrator.Oscillator({id: "osc3"
+                                                     ,$function: $AudioNodes.sinWave
+                                                     ,inputs: {frequency: $Orchestrator.Value(50.03)
+                                                              ,phaseOffset: $Orchestrator.ID("osc4")}
+                                                     ,state: {processed: false,outputValue: 0.0}})
+                           ,$Orchestrator.Oscillator({id: "osc2"
+                                                     ,$function: $AudioNodes.sinWave
+                                                     ,inputs: {frequency: $Orchestrator.Value(100.01)
+                                                              ,phaseOffset: $Orchestrator.ID("osc3")}
+                                                     ,state: {processed: false,outputValue: 0.0}})
+                           ,$Orchestrator.Oscillator({id: "osc1"
+                                                     ,$function: $AudioNodes.sinWave
+                                                     ,inputs: {frequency: $Orchestrator.Value(100.02)
+                                                              ,phaseOffset: $Orchestrator.ID("osc2")}
+                                                     ,state: {processed: false,outputValue: 0.0}})
+                           ,A2(makeLowPass,"lowpass","osc1")
+                           ,$Orchestrator.Destination({id: "destinationA"
+                                                      ,input: $Orchestrator.ID("lowpass")
+                                                      ,state: {processed: false,outputValue: 0.0}})]);
+   var testGraphDict = $Orchestrator.toDict(testGraph);
    var destinationA = $Orchestrator.Destination({id: "destinationA"
                                                 ,input: $Orchestrator.ID("squareA")
                                                 ,state: {processed: false,outputValue: 0.0}});

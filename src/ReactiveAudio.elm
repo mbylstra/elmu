@@ -171,7 +171,7 @@ makeLowPass id inputName =
             { processed = False
             , outputValue = 0.0
 --             , prevValues = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-            , prevValues =  List.repeat 10 0.0
+            , prevValues =  List.repeat 2 0.0
 --             , prevValues = [0.0, 0.0, 0,0]
             }
         }
@@ -182,17 +182,31 @@ makeLowPass id inputName =
 testGraph : ListGraph
 testGraph =
 --     [ makeSquare "osc"  11025.0
-    [ Oscillator
-        { id = "lfo"
+    [  Oscillator
+        { id = "osc4"
         , function = sinWave
-        , inputs = { frequency = Value 20.0, phaseOffset = Default }
+        , inputs = { frequency = Value 300.01, phaseOffset = Default }
+        , state =
+            { processed = False, outputValue = 0.0  }
+        }
+    ,  Oscillator
+        { id = "osc3"
+        , function = sinWave
+        , inputs = { frequency = Value 50.03, phaseOffset = ID "osc4" }
         , state =
             { processed = False, outputValue = 0.0  }
         }
     , Oscillator
-        { id = "oscA"
+        { id = "osc2"
         , function = sinWave
-        , inputs = { frequency = ID "lfo", phaseOffset = Default }
+        , inputs = { frequency = Value 100.01, phaseOffset = ID "osc3"}
+        , state =
+            { processed = False, outputValue = 0.0  }
+        }
+    , Oscillator
+        { id = "osc1"
+        , function = sinWave
+        , inputs = { frequency = Value 100.02, phaseOffset = ID "osc2"}
         , state =
             { processed = False, outputValue = 0.0  }
         }
@@ -206,11 +220,11 @@ testGraph =
         , state =
             { processed = False , outputValue = 0.0 }
         } -}
---     , makeLowPass "lowpass" "osc"
+    , makeLowPass "lowpass" "osc1"
     , Destination
         { id = "destinationA"
 --         , input = ID "mixer"
-        , input = ID "oscA"
+        , input = ID "lowpass"
 --         , input = ID "osc"
         , state =
             { processed = False, outputValue = 0.0 }

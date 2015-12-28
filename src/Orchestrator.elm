@@ -191,15 +191,16 @@ updateGraphNode graph time node =
 
 --                 frequencyInputNode = getInputNode graph frequencyInput
                     -- this should be abstracted into a function that just gets the value and updates the graph at the same time (regardless of input type etc)
-                (newGraph, frequencyInputValue) = updateGraphNode' graph time props.inputs.frequency
-                newValue = props.function frequencyInputValue 0.0 time -- this function should start accepting frequency
+                (graph2, frequencyInputValue) = updateGraphNode' graph time props.inputs.frequency
+                (graph3, phaseOffsetValue) = updateGraphNode' graph2 time props.inputs.phaseOffset
+                newValue = props.function frequencyInputValue phaseOffsetValue time -- this function should start accepting frequency
                 newNode = updateNodeValue node newValue
 {-                 _ = Debug.log "time" time
                 _ = Debug.log "frequencyInputValue" frequencyInputValue
                 _ = Debug.log "newValue" newValue -}
 
             in
-                (replaceGraphNode newNode graph, newValue)
+                (replaceGraphNode newNode graph3, newValue)
 
         FeedforwardProcessor props ->
             case getInputNodes node graph of
