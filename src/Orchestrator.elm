@@ -18,6 +18,8 @@ import AudioNodes exposing
     , sawWave
     , OscillatorType(Square, Saw, Triangle)
     , oscillator
+    , sinWave
+    , OscillatorF
     )
 
 
@@ -25,15 +27,20 @@ import AudioNodes exposing
 -- TYPE DEFINITIONS
 --------------------------------------------------------------------------------
 
-type Input = ID String   -- or it could be an AudioNode!
+type Input = ID String | Value Float | Default   -- or it could be an AudioNode! Maybe?
+    -- We could also consider conveniences like whether the unit is in hz, dbs, amps, or a "note" like C3
+    -- eg: type NoteValue = A0 | B0 | C0 | D0 | E0 | F0 | G0 | A1 | A2 | etc
+    -- eg : type Input = Note NoteValue | MidiNote Int |
+    -- consider making ID NodeID instead, or just Node
 
 type AudioNode =
-    Generator
+    Oscillator
         { id : String
-        , function : GeneratorF
+        , function : OscillatorF
+        , inputs: OscillatorInputs
         , state :
-            { processed : Bool
-            , outputValue : Float
+            { processed : Bool -- we won't need this
+            , outputValue : Float -- do we really need this? Is it just for feedback? Doesn't really hurt to keep as we need inputs anyway.
             }
         }
     | FeedforwardProcessor
@@ -63,10 +70,78 @@ type AudioNode =
             }
         }
 
+
+-- an insteresting idea is explicitly putting in a delay, whenever you want feedback.
+-- would this make inline functions possible??
+--     Yeah, but it puts some responsiblity on the developer to avoid infinite loops.
+--        - Seeing as it's a rare thing, it's ok for dev to know about it
+--        - might  make Orchestrator a little more efficient, as it doesn't need to look for loops
+--        - but crashes are pretty gross, and I don't think there's a way to avoid it.
+--
+--     could be interesting modulating the size of this feedback.. Is this how no input mixer works??
+
+
+
+-- so are there any benefits to this "central state" architecture?
+--     time travel debugging!!! FTW FUCK YEAH!!!
+--            So cool... you play a sequence on a midi keyboard, then you can
+--            tweak params, and hear the difference!! FUCKING AWESOME!!!
+--                OK cool, but unless you made some music spefici TTDB interface, it would be kind of crappy?
+--                And don't you just want to keep midi and controller events anyway? in which case
+--                You could make specific software for this (just store events in local storate, and replay them), to achieve the same effect.
+--                     Yeah, but the point is with TTDB, is that this state is always available to the TTDB. Otherwsie, you have to get the
+--                     library author to expose the internal state. Eg: someone makes a nice knob widget. Unless the internal state is exposed,
+--                    it makes it impossible (?) to replay the actions.
+--                         still, is it that different from VST automation?
+--                              I guess the difference is that VST might have internal state, and only exposed controls can be automated.
+--                                  Is this not a good thing?? You only want to expose the user to meaningful controls. Some state might
+--                                  be just to do with animation. Would be silly to expose that to the user - and if the TTDB has too much shit,
+--                                  it's as good as worthless.
+
+-- looking at Euterpea, I wonder if a big limitation with this (That maybe you get with Arrows), is that
+--     you can't compose nodes with code, you can only do it with the clunky Dict Graph. Modularity is pretty screwed.
+--     It's like it's fine with really basic examples, but can we think of more complex examples?
+--        What do we need for a full dx27 emulation?
+--            - four osciallators that can feedback into each other. TICK
+--            - LFO, AM. Easy. Tick.
+--            - Envelopes.. needs design decision on this one, but probably like FIlters in that they need state.
+
+-- Triggers & Envelopes
+-- -----------------------
+-- We need to be able to do envelopes.
+-- They could be potentially be triggered by signal processing (not necessarily GUI events)
+-- An example would be a pulse signal. Whenever the signal is 1, re-trigger.
+-- Envelopes need state:
+--  At what stage is it at?
+-- Most basic example is a sound that plays for 100 samples, then turns off.
+--    So it's in two states. NOTE ON (counter) and NOTE OFF. When it's nNOTE OFF, just return 0,
+--   When it's NOTE ON, output 1 and decrement the counter. How do we generalize this stuff?
+--       you don't really need the union types. Can do, if counter = 0, output = 0, else output 1 and decrement counter.
+--        Somehow the thing needs to listen for NOTE ON events. This could just be a pulse signal (makes sense).
+--
+--
+-- Second most basic example is a ramp envelope.
+--   same as first example but output is a fraction of the counter
+-- Ideas:
+--
+--
+--
+--
+-- square frequencyInputFunc time =
+
+-- s1 = square (delay 1 square) 0.0   -- hmm, I guess it *is* possible then??
+    -- BIG BUT: you must pass the dealy state to delay! (so the orchestrator really needs to manage this)
+
+
 -- Update functions
-type alias GeneratorF = TimeFloat -> ValueFloat
 type alias ProcessorF = TimeFloat -> ValueFloat -> ValueFloat
 type alias FeedforwardProcessorF = Float -> List ValueFloat -> ValueFloat
+
+
+type alias OscillatorInputs =
+    { frequency : Input
+    , phaseOffset : Input
+    }
 
 -- aliases for readability
 type alias ValueFloat = Float
@@ -91,13 +166,38 @@ updateGraph graph time =
     (graph, time) -}
 
 
+{- this naming is pretty gross! Difference is it takes an Input rather than an AudioNode -}
+updateGraphNode' : DictGraph -> TimeFloat -> Input -> (DictGraph, Float)
+updateGraphNode' graph time input =
+    case input of
+        ID id ->
+            updateGraphNode graph time (getInputNode graph id)
+        Value v ->
+            (graph, v)
+        Default ->
+            (graph, 0.0) -- need to work out how to send defaults around
+
+
 updateGraphNode : DictGraph -> TimeFloat -> AudioNode -> (DictGraph, Float)
 updateGraphNode graph time node =
+
     case node of
-        Generator props ->
+
+        -- this requires a lot of rework to support inputs!
+        -- it will be much easier with an actuall record for inputs
+        Oscillator props ->
             let
-                newValue = props.function time
+                -- phaseOffsetInput = props.inputs.phaseOffsetInput (just ignore this one for now)
+
+--                 frequencyInputNode = getInputNode graph frequencyInput
+                    -- this should be abstracted into a function that just gets the value and updates the graph at the same time (regardless of input type etc)
+                (newGraph, frequencyInputValue) = updateGraphNode' graph time props.inputs.frequency
+                newValue = props.function frequencyInputValue 0.0 time -- this function should start accepting frequency
                 newNode = updateNodeValue node newValue
+{-                 _ = Debug.log "time" time
+                _ = Debug.log "frequencyInputValue" frequencyInputValue
+                _ = Debug.log "newValue" newValue -}
+
             in
                 (replaceGraphNode newNode graph, newValue)
 
@@ -158,28 +258,37 @@ updateGraphNode graph time node =
                 Nothing ->
                     Debug.crash("no input nodes!") -}
 
+getInputNode : DictGraph -> String -> AudioNode
+getInputNode graph id =
+    case (Dict.get id graph) of
+        Just node -> node
+        Nothing -> Debug.crash("Can't find node")
+
+getInputNode' : DictGraph -> Input -> AudioNode
+getInputNode' graph input =
+    case input of
+        ID id ->
+            getInputNode graph id
+        Value _ ->
+            Debug.crash("see getInputNodes")
+        Default ->
+            Debug.crash("see getInputNodes")
+
+
 
 
 getInputNodes : AudioNode -> DictGraph -> Maybe (List AudioNode)
 getInputNodes node graph =
     let
-        getInputNode' : Input -> AudioNode
-        getInputNode' input =
-            case input of
-                ID id ->
-                    case (Dict.get id graph) of
-                        Just node -> node
-                        Nothing -> Debug.crash("Can't find node")
-
         getInputNodes' : List Input -> List AudioNode
         getInputNodes' inputs =
-            List.map getInputNode' inputs
+            List.map (getInputNode' graph)  inputs
     in
         case node of
             FeedforwardProcessor props ->
-                Just [getInputNode' props.input]
+                Just [getInputNode' graph props.input]
             Destination props ->
-                Just [getInputNode' props.input]
+                Just [getInputNode' graph props.input]
             Mixer props ->
                 Just <| getInputNodes' props.inputs
             _ ->
@@ -190,12 +299,12 @@ getInputNodes node graph =
 updateNodeValue : AudioNode -> Float -> AudioNode
 updateNodeValue node newValue =
     case node of
-        Generator props ->
+        Oscillator props ->
             let
                 oldState = props.state
                 newState = { oldState | outputValue = newValue }
             in
-                Generator  { props | state = newState }
+                Oscillator  { props | state = newState }
 
         Mixer props ->
             let
@@ -232,7 +341,7 @@ toDict listGraph =
             case node of
                 Destination props ->
                     (props.id, node)
-                Generator props ->
+                Oscillator props ->
                     (props.id, node)
                 FeedforwardProcessor props ->
                     (props.id, node)
@@ -271,7 +380,7 @@ getNodeId : AudioNode -> String
 getNodeId node =
     case node of
         Destination props -> props.id
-        Generator props -> props.id
+        Oscillator props -> props.id
         FeedforwardProcessor props -> props.id
         Mixer props -> props.id
 
@@ -286,9 +395,10 @@ getNodeId node =
 -- A
 
 squareA =
-    Generator
+    Oscillator
         { id = "squareA"
-        , function = squareWave
+        , function = sinWave
+        , inputs = { frequency = Value 440.0, phaseOffset = Default }
         , state =
             { processed = False, outputValue = 0.0  }
         }
@@ -302,9 +412,10 @@ destinationA =
         }
 
 squareAT1 =
-    Generator
+    Oscillator
         { id = "squareA"
-        , function = squareWave
+        , inputs = { frequency = Value 440.0, phaseOffset = Default }
+        , function = sinWave
         , state =
             { processed = False, outputValue = 1.0  }
         }
@@ -328,10 +439,11 @@ testDictGraph = toDict testGraph
 
 -- B
 
-squareB =
-    Generator
+{- squareB =
+    Oscillator
         { id = "squareB"
-        , function = squareWave
+        , function = sinWave
+        , inputs = [Value 440.0, Default]
         , state =
             { processed = False, outputValue = 0.0  }
         }
@@ -358,7 +470,7 @@ destinationB =
         }
 
 {- squareAT1 =
-    Generator
+    Oscillator
         { id = "squareA"
         , function = squareWave
         , state =
@@ -380,7 +492,7 @@ testGraphB =
     , destinationB
     ]
 
-testDictGraphB = toDict testGraphB
+testDictGraphB = toDict testGraphB -}
 
 
 
@@ -418,11 +530,11 @@ tests =
                 [4, 3, 2]
                 (rotateList 4 [3, 2, 1])
             )
-        , test "getNextSample"
+{-         , test "getNextSample"
             (assertEqual
                 (toDict [squareAT1, destinationAT1], 1.0)
                 (updateGraph testDictGraphB 0.0)
-            )
+            ) -}
         ]
 
 

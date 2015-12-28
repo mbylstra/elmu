@@ -2,10 +2,22 @@ module AudioNodes where
 
 type alias ValueFloat = Float
 type alias TimeFloat = Float
+type alias FrequencyFloat = Float
+type alias PhaseOffsetFloat = Float
+type alias OutputFloat = Float
 
 sampleRate = 44100
 sampleDuration = 1.0 / toFloat sampleRate
 -- some basic math
+
+
+--------------------------------------------------------------------------------
+-- Types
+--------------------------------------------------------------------------------
+
+
+type alias OscillatorF = FrequencyFloat -> PhaseOffsetFloat -> TimeFloat -> OutputFloat
+
 
 fmod : Float -> Float -> Float
 fmod a b =
@@ -32,6 +44,10 @@ getPhaseFraction frequency currTime =
     in
         -- fmod (log "currTime" currTime) (log "period" period)
         fmod currTime period
+
+
+
+
 
 
 
@@ -63,11 +79,12 @@ triangleWave phase =
             (1.0 - phase) * 2.0
         )
 
-sinWave : Float -> Float
-sinWave phase =
+sinWave' : Float -> Float
+sinWave' phase =
     sin (phase * 2.0 * pi)
 
 
+-- let's ditch the oscillator abstraction and focus on sinWave'
 
 oscillator : OscillatorType -> Float -> Float -> Float
 oscillator oscillatorType frequency currTime =
@@ -78,7 +95,7 @@ oscillator oscillatorType frequency currTime =
             Saw -> sawWave phase
             Square -> squareWave phase
             Triangle -> triangleWave phase
-            Sin -> sinWave phase
+            Sin -> sinWave' phase
 
 
 gain : Float -> Float -> Float
@@ -98,5 +115,15 @@ simpleLowPassFilter currValue prevValues =
         value = average <| [currValue] ++ prevValues
 --         _ = Debug.log "output" value
     in
-        value
+        value * 1.1
 --         currValue
+
+
+sinWave : Float -> Float -> Float -> Float
+sinWave frequency phaseOffset currTime =  -- I'm not really sure what order the args should be
+    let
+        phase = (getPhaseFraction frequency currTime) + phaseOffset
+    in
+        sinWave' phase
+
+-- sin currTime

@@ -7,6 +7,7 @@ import AudioNodes exposing
     , OscillatorType(Square, Saw, Sin)
     , oscillator
     , simpleLowPassFilter
+    , sinWave
     )
 
 import Array exposing(Array)
@@ -15,8 +16,8 @@ import Orchestrator exposing
     ( DictGraph
     , ListGraph
     , toDict
-    , AudioNode(Generator, Destination, Mixer, FeedforwardProcessor)
-    , Input(ID)
+    , AudioNode(Oscillator, Destination, Mixer, FeedforwardProcessor)
+    , Input(ID, Default, Value)
     , updateGraph
     )
 
@@ -29,6 +30,36 @@ type alias BufferState =
     , bufferIndex: Int
     }
 
+
+
+
+
+
+{- type alias Positioned a =
+    { a | x : Float, y : Float } -}
+
+
+{- type alias EmptyRecord a =
+    { a |  x : Float} -}
+
+type alias EmptyRecord =
+    { }
+
+
+type alias Positioned a =
+  { a | x : Float, y : Float }
+
+type alias Named a =
+  { a | name : String }
+
+type alias Moving a =
+  { a | velocity : Float, angle : Float }
+
+
+type alias Something = Named  (Moving  ( Positioned EmptyRecord))
+
+
+-- type alias Asdf (Positioned {})
 
 initialBuffer : Array Float
 initialBuffer = Array.repeat bufferSize 0.0
@@ -96,13 +127,13 @@ updateBufferState _ prevBufferState =
         foldn updateForSample initialBufferState bufferSize
 
 
-squareA =
+{- squareA =
     Generator
         { id = "squareA"
         , function = oscillator Square 444.0
         , state =
             { processed = False, outputValue = 0.0  }
-        }
+        } -}
 
 
 
@@ -114,21 +145,21 @@ destinationA =
             { processed = False, outputValue = 0.0 }
         }
 
-makeSquare id frequency =
+{- makeSquare id frequency =
     Generator
         { id = id
         , function = oscillator Saw frequency
         , state =
             { processed = False, outputValue = 0.0  }
-        }
+        } -}
 
-makeSin id frequency =
+{- makeSin id frequency =
     Generator
         { id = id
         , function = oscillator Sin frequency
         , state =
             { processed = False, outputValue = 0.0  }
-        }
+        } -}
 
 
 makeLowPass id inputName =
@@ -140,7 +171,7 @@ makeLowPass id inputName =
             { processed = False
             , outputValue = 0.0
 --             , prevValues = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-            , prevValues =  List.repeat 3 0.0
+            , prevValues =  List.repeat 10 0.0
 --             , prevValues = [0.0, 0.0, 0,0]
             }
         }
@@ -151,7 +182,21 @@ makeLowPass id inputName =
 testGraph : ListGraph
 testGraph =
 --     [ makeSquare "osc"  11025.0
-    [ makeSquare "osc"  80.0
+    [ Oscillator
+        { id = "lfo"
+        , function = sinWave
+        , inputs = { frequency = Value 20.0, phaseOffset = Default }
+        , state =
+            { processed = False, outputValue = 0.0  }
+        }
+    , Oscillator
+        { id = "oscA"
+        , function = sinWave
+        , inputs = { frequency = ID "lfo", phaseOffset = Default }
+        , state =
+            { processed = False, outputValue = 0.0  }
+        }
+--     [ makeSquare "osc"  80.0
 --     , makeSquare "osc"  11025.0
       {-     , makeSquare "squareB" 250.0
     , makeSquare "squareC" 200.0 -}
@@ -161,11 +206,12 @@ testGraph =
         , state =
             { processed = False , outputValue = 0.0 }
         } -}
-    , makeLowPass "lowpass" "osc"
+--     , makeLowPass "lowpass" "osc"
     , Destination
         { id = "destinationA"
 --         , input = ID "mixer"
-        , input = ID "lowpass"
+        , input = ID "oscA"
+--         , input = ID "osc"
         , state =
             { processed = False, outputValue = 0.0 }
         }
