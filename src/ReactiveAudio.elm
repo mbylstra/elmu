@@ -257,12 +257,13 @@ testGraph =
     , adderNode "pitch" [Value 200.0, ID "lfoGain"]
 
 --     , sinNode "mod3" {frequency = ID "pitch", frequencyOffset = Default, phaseOffset = Default}
-    , sinNode "mod2" {frequency = ID "pitch", frequencyOffset = Default, phaseOffset = Default}
+--     , sinNode "mod2" {frequency = ID "pitch", frequencyOffset = Default, phaseOffset = Default}
 
-    , gainNode "mod1Frequency" {signal = ID "pitch", gain = Value 2.0}
-    , sinNode "mod1" {frequency = ID "mod1Frequency", frequencyOffset = Default, phaseOffset = ID "mod2"}
+    , gainNode "mod1Frequency" {signal = ID "pitch", gain = Value 3.0}
+    , sinNode "mod1" {frequency = ID "mod1Frequency", frequencyOffset = Default, phaseOffset = Default }
 
     , sinNode "root1" {frequency = ID "pitch", frequencyOffset = Default, phaseOffset = ID "mod1"}
+--     , sinNode "root1" {frequency = ID "mod1Frequency", frequencyOffset = Default, phaseOffset = Default}
 --     , sinNode "root1" {frequency = ID "pitch", frequencyOffset = Default, phaseOffset = Default}
 
 

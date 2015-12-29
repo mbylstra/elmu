@@ -10680,20 +10680,15 @@ Elm.ReactiveAudio.make = function (_elm) {
                            "pitch",
                            _U.list([$Orchestrator.Value(200.0)
                                    ,$Orchestrator.ID("lfoGain")]))
-                           ,A2(sinNode,
-                           "mod2",
-                           {frequency: $Orchestrator.ID("pitch")
-                           ,frequencyOffset: $Orchestrator.Default
-                           ,phaseOffset: $Orchestrator.Default})
                            ,A2(gainNode,
                            "mod1Frequency",
                            {signal: $Orchestrator.ID("pitch")
-                           ,gain: $Orchestrator.Value(2.0)})
+                           ,gain: $Orchestrator.Value(3.0)})
                            ,A2(sinNode,
                            "mod1",
                            {frequency: $Orchestrator.ID("mod1Frequency")
                            ,frequencyOffset: $Orchestrator.Default
-                           ,phaseOffset: $Orchestrator.ID("mod2")})
+                           ,phaseOffset: $Orchestrator.Default})
                            ,A2(sinNode,
                            "root1",
                            {frequency: $Orchestrator.ID("pitch")
