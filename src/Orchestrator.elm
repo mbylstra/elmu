@@ -20,6 +20,8 @@ import AudioNodes exposing
     , oscillator
     , sinWave
     , OscillatorF
+    , gain
+    , GainF
     )
 
 
@@ -39,8 +41,16 @@ type AudioNode =
         , function : OscillatorF
         , inputs: OscillatorInputs
         , state :
-            { processed : Bool -- we won't need this
+            { phase: Float
             , outputValue : Float -- do we really need this? Is it just for feedback? Doesn't really hurt to keep as we need inputs anyway.
+            }
+        }
+    | Gain
+        { id : String
+        , function : GainF
+        , inputs: {signal: Input, gain: Input}
+        , state :
+            { outputValue : Float -- do we really need this? Is it just for feedback? Doesn't really hurt to keep as we need inputs anyway.
             }
         }
     | FeedforwardProcessor
@@ -48,8 +58,7 @@ type AudioNode =
         , input : Input
         , function : FeedforwardProcessorF -- this is the "update"
         , state :  -- this is the "model"
-            { processed : Bool
-            , outputValue : Float
+            { outputValue : Float
             , prevValues : List Float
             }
         }
@@ -57,16 +66,14 @@ type AudioNode =
         { id : String
         , inputs : List Input
         , state :
-            { processed : Bool
-            , outputValue : Float
+            { outputValue : Float
             }
         }
     | Destination
         { id : String
         , input: Input
         , state :
-            { processed : Bool
-            , outputValue : Float
+            { outputValue : Float
             }
         }
 
@@ -191,10 +198,16 @@ updateGraphNode graph time node =
 
 --                 frequencyInputNode = getInputNode graph frequencyInput
                     -- this should be abstracted into a function that just gets the value and updates the graph at the same time (regardless of input type etc)
+--                 _ = Debug.log "------------------------" True
                 (graph2, frequencyInputValue) = updateGraphNode' graph time props.inputs.frequency
                 (graph3, phaseOffsetValue) = updateGraphNode' graph2 time props.inputs.phaseOffset
-                newValue = props.function frequencyInputValue phaseOffsetValue time -- this function should start accepting frequency
-                newNode = updateNodeValue node newValue
+--                 _ = Debug.log "phaseOffsetValue" phaseOffsetValue
+                (newValue, newPhase) = props.function frequencyInputValue phaseOffsetValue props.state.phase -- this function should start accepting frequency
+{-                 _ = Debug.log "newValue" newValue
+                _ = Debug.log "newPhase" newPhase -}
+                newState = {outputValue = newValue, phase = newPhase}
+                newNode = Oscillator { props | state = newState }
+
 {-                 _ = Debug.log "time" time
                 _ = Debug.log "frequencyInputValue" frequencyInputValue
                 _ = Debug.log "newValue" newValue -}
@@ -208,7 +221,9 @@ updateGraphNode graph time node =
                     let
                         (newGraph, inputValue) = updateGraphNode graph time inputNode
                         newValue = props.function inputValue props.state.prevValues
-                        newNode = updateNodeValue node newValue
+                        newPrevValues = rotateList props.state.outputValue props.state.prevValues
+                        newState = {outputValue = newValue, prevValues = newPrevValues }
+                        newNode = FeedforwardProcessor { props | state = newState }
                     in
                         (replaceGraphNode newNode newGraph, newValue)
                 Just inputNodes ->
@@ -221,7 +236,8 @@ updateGraphNode graph time node =
                 Just [inputNode] ->
                     let
                         (newGraph, inputValue) = updateGraphNode graph time inputNode
-                        newNode = updateNodeValue node inputValue
+                        newState = { outputValue = inputValue }
+                        newNode =  Destination { props | state = newState }
                     in
                         (replaceGraphNode newNode newGraph, inputValue)
                 Just inputNodes ->
@@ -236,12 +252,14 @@ updateGraphNode graph time node =
                         updateFunc inputNode (graph, accValue) =
                             let
                                 (newGraph, inputValue) = updateGraphNode graph time inputNode
-                                newNode = updateNodeValue node inputValue
+                                newState = { outputValue = inputValue }
+                                newNode =  Mixer { props | state = newState }
                             in
                                 (replaceGraphNode newNode newGraph, accValue + inputValue)
                         (newGraph, totalValue) = List.foldl updateFunc (graph, 0) inputNodes
                         averageValue = totalValue / toFloat (List.length inputNodes)
-                        newNode = updateNodeValue node averageValue
+                        newState = { outputValue = averageValue }
+                        newNode = Mixer { props | state = newState }
                     in
                         (replaceGraphNode newNode newGraph, averageValue)
 
@@ -251,13 +269,35 @@ updateGraphNode graph time node =
 
 {-                     let
                         (newGraph, inputValue) = updateGraphNode graph time inputNode
-                        newNode = updateNodeValue node inputValue
+                        newNode = updateNodeState node inputValue
                     in
                         (replaceGraphNode newNode newGraph, inputValue) -}
 {-                 Just inputNodes ->
                     Debug.crash("multiple inputs not supported yet")
                 Nothing ->
                     Debug.crash("no input nodes!") -}
+        Gain props ->
+            let
+                -- phaseOffsetInput = props.inputs.phaseOffsetInput (just ignore this one for now)
+
+--                 frequencyInputNode = getInputNode graph frequencyInput
+                    -- this should be abstracted into a function that just gets the value and updates the graph at the same time (regardless of input type etc)
+--                 _ = Debug.log "------------------------" True
+                (graph2, signalValue) = updateGraphNode' graph time props.inputs.signal
+                (graph3, gainValue) = updateGraphNode' graph2 time props.inputs.gain
+--                 _ = Debug.log "phaseOffsetValue" phaseOffsetValue
+                newValue = props.function signalValue gainValue -- this function should start accepting frequency
+{-                 _ = Debug.log "newValue" newValue
+                _ = Debug.log "newPhase" newPhase -}
+                newState = {outputValue = newValue}
+                newNode = Gain { props | state = newState }
+
+{-                 _ = Debug.log "time" time
+                _ = Debug.log "frequencyInputValue" frequencyInputValue
+                _ = Debug.log "newValue" newValue -}
+
+            in
+                (replaceGraphNode newNode graph3, newValue)
 
 getInputNode : DictGraph -> String -> AudioNode
 getInputNode graph id =
@@ -296,9 +336,11 @@ getInputNodes node graph =
                 Nothing
 
 
+-- let's just do this inline
 
-updateNodeValue : AudioNode -> Float -> AudioNode
-updateNodeValue node newValue =
+
+{- updateNodeState : AudioNode -> Float -> AudioNode
+updateNodeState node newValue =
     case node of
         Oscillator props ->
             let
@@ -332,7 +374,7 @@ updateNodeValue node newValue =
                 oldState = props.state
                 newState = { oldState | outputValue = newValue }
             in
-                Destination { props | state = newState }
+                Destination { props | state = newState } -}
 
 
 toDict : ListGraph -> DictGraph
@@ -347,6 +389,8 @@ toDict listGraph =
                 FeedforwardProcessor props ->
                     (props.id, node)
                 Mixer props ->
+                    (props.id, node)
+                Gain props ->
                     (props.id, node)
         tuples = List.map createTuple listGraph
     in
@@ -384,6 +428,7 @@ getNodeId node =
         Oscillator props -> props.id
         FeedforwardProcessor props -> props.id
         Mixer props -> props.id
+        Gain props -> props.id
 
 
 
@@ -401,7 +446,7 @@ squareA =
         , function = sinWave
         , inputs = { frequency = Value 440.0, phaseOffset = Default }
         , state =
-            { processed = False, outputValue = 0.0  }
+            { outputValue = 0.0, phase = 0.0  }
         }
 
 destinationA =
@@ -409,7 +454,7 @@ destinationA =
         { id = "destinationA"
         , input = ID "squareA"
         , state =
-            { processed = False, outputValue = 0.0 }
+            { outputValue = 0.0 }
         }
 
 squareAT1 =
@@ -418,7 +463,7 @@ squareAT1 =
         , inputs = { frequency = Value 440.0, phaseOffset = Default }
         , function = sinWave
         , state =
-            { processed = False, outputValue = 1.0  }
+            { outputValue = 1.0, phase = 0.0  }
         }
 
 destinationAT1 =
@@ -426,7 +471,7 @@ destinationAT1 =
         { id = "destinationA"
         , input = ID "squareA"
         , state =
-            { processed = False, outputValue = 1.0 }
+            { outputValue = 1.0 }
         }
 
 testGraph : ListGraph
@@ -446,7 +491,7 @@ testDictGraph = toDict testGraph
         , function = sinWave
         , inputs = [Value 440.0, Default]
         , state =
-            { processed = False, outputValue = 0.0  }
+            { outputValue = 0.0  }
         }
 
 
@@ -456,8 +501,7 @@ lowpassB =
         , input = ID "squareB"
         , function = simpleLowPassFilter
         , state =
-            { processed = False
-            , outputValue = 0.0
+            { outputValue = 0.0
             , prevValues = [0.0, 0.0, 0.0]
             }
         }
@@ -467,7 +511,7 @@ destinationB =
         { id = "destinationB"
         , input = ID "lowpassB"
         , state =
-            { processed = False, outputValue = 0.0 }
+            { outputValue = 0.0 }
         }
 
 {- squareAT1 =

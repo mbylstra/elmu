@@ -8,6 +8,7 @@ import AudioNodes exposing
     , oscillator
     , simpleLowPassFilter
     , sinWave
+    , gain
     )
 
 import Array exposing(Array)
@@ -16,7 +17,7 @@ import Orchestrator exposing
     ( DictGraph
     , ListGraph
     , toDict
-    , AudioNode(Oscillator, Destination, Mixer, FeedforwardProcessor)
+    , AudioNode(Oscillator, Destination, Mixer, FeedforwardProcessor, Gain)
     , Input(ID, Default, Value)
     , updateGraph
     )
@@ -132,7 +133,7 @@ updateBufferState _ prevBufferState =
         { id = "squareA"
         , function = oscillator Square 444.0
         , state =
-            { processed = False, outputValue = 0.0  }
+            { outputValue = 0.0  }
         } -}
 
 
@@ -142,7 +143,7 @@ destinationA =
         { id = "destinationA"
         , input = ID "squareA"
         , state =
-            { processed = False, outputValue = 0.0 }
+            { outputValue = 0.0 }
         }
 
 {- makeSquare id frequency =
@@ -150,7 +151,7 @@ destinationA =
         { id = id
         , function = oscillator Saw frequency
         , state =
-            { processed = False, outputValue = 0.0  }
+            { outputValue = 0.0  }
         } -}
 
 {- makeSin id frequency =
@@ -158,7 +159,7 @@ destinationA =
         { id = id
         , function = oscillator Sin frequency
         , state =
-            { processed = False, outputValue = 0.0  }
+            { outputValue = 0.0  }
         } -}
 
 
@@ -168,8 +169,7 @@ makeLowPass id inputName =
         , input = ID inputName
         , function = simpleLowPassFilter
         , state =
-            { processed = False
-            , outputValue = 0.0
+            { outputValue = 0.0
 --             , prevValues = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
             , prevValues =  List.repeat 2 0.0
 --             , prevValues = [0.0, 0.0, 0,0]
@@ -182,33 +182,48 @@ makeLowPass id inputName =
 testGraph : ListGraph
 testGraph =
 --     [ makeSquare "osc"  11025.0
-    [  Oscillator
+    [
+{-        Oscillator
         { id = "osc4"
         , function = sinWave
         , inputs = { frequency = Value 300.01, phaseOffset = Default }
         , state =
-            { processed = False, outputValue = 0.0  }
-        }
-    ,  Oscillator
+            { outputValue = 0.0, phase = 0.0  }
+        } -}
+{-        Oscillator
         { id = "osc3"
         , function = sinWave
-        , inputs = { frequency = Value 50.03, phaseOffset = ID "osc4" }
+--         , inputs = { frequency = Value 50.00, phaseOffset = ID "osc4" }
+        , inputs = { frequency = Value 50.00, phaseOffset = Default }
         , state =
-            { processed = False, outputValue = 0.0  }
-        }
-    , Oscillator
+            { outputValue = 0.0, phase = 0.0  }
+        }  -}
+{-       Oscillator
         { id = "osc2"
         , function = sinWave
-        , inputs = { frequency = Value 100.01, phaseOffset = ID "osc3"}
+--         , inputs = { frequency = Value 5, phaseOffset = ID "osc3"}
+        , inputs = { frequency = Value 0.1, phaseOffset = Default }
         , state =
-            { processed = False, outputValue = 0.0  }
-        }
-    , Oscillator
+            { outputValue = 0.0, phase = 0.0  }
+        } -}
+
+
+      Oscillator
         { id = "osc1"
         , function = sinWave
-        , inputs = { frequency = Value 100.02, phaseOffset = ID "osc2"}
+--         , inputs = { frequency = Value 200.0, phaseOffset = ID "osc2" }
+        , inputs = { frequency = Value 80.0, phaseOffset = Default }
         , state =
-            { processed = False, outputValue = 0.0  }
+            { outputValue = 0.0, phase = 0.0  }
+        }
+
+    , Gain
+        { id = "osc1Gain"
+        , function = gain
+--         , inputs = { frequency = Value 200.0, phaseOffset = ID "osc2" }
+        , inputs = { signal = ID "osc1", gain = Value 1.0 }
+        , state =
+            { outputValue = 0.0 }
         }
 --     [ makeSquare "osc"  80.0
 --     , makeSquare "osc"  11025.0
@@ -218,16 +233,16 @@ testGraph =
         { id = "mixer"
         , inputs = [ID "squareA", ID "squareB", ID "squareC"]
         , state =
-            { processed = False , outputValue = 0.0 }
+            { outputValue = 0.0 }
         } -}
-    , makeLowPass "lowpass" "osc1"
+--     , makeLowPass "lowpass" "osc1"
     , Destination
         { id = "destinationA"
 --         , input = ID "mixer"
-        , input = ID "lowpass"
+        , input = ID "osc1Gain"
 --         , input = ID "osc"
         , state =
-            { processed = False, outputValue = 0.0 }
+            { outputValue = 0.0 }
         }
     ]
 

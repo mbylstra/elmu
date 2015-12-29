@@ -1,23 +1,34 @@
 module AudioNodes where
 
-type alias ValueFloat = Float
-type alias TimeFloat = Float
-type alias FrequencyFloat = Float
-type alias PhaseOffsetFloat = Float
-type alias OutputFloat = Float
+--------------------------------------------------------------------------------
+-- EXTERNAL DEPENDENCIES
+--------------------------------------------------------------------------------
 
-sampleRate = 44100
-sampleDuration = 1.0 / toFloat sampleRate
--- some basic math
+
+
+import Dict exposing (Dict)
+import ElmTest exposing (..)
+
+
+
+
 
 
 --------------------------------------------------------------------------------
 -- Types
 --------------------------------------------------------------------------------
+type alias ValueFloat = Float
+type alias TimeFloat = Float
+type alias FrequencyFloat = Float
+type alias PhaseOffsetFloat = Float
+type alias OutputFloat = Float
+type alias PhaseFloat = Float
+type alias OscillatorF = FrequencyFloat -> PhaseOffsetFloat -> TimeFloat -> (OutputFloat, PhaseFloat)
+type alias GainF = Float -> Float -> Float
 
-
-type alias OscillatorF = FrequencyFloat -> PhaseOffsetFloat -> TimeFloat -> OutputFloat
-
+sampleRate = 44100
+sampleDuration = 1.0 / toFloat sampleRate
+-- some basic math
 
 fmod : Float -> Float -> Float
 fmod a b =
@@ -98,11 +109,6 @@ oscillator oscillatorType frequency currTime =
             Sin -> sinWave' phase
 
 
-gain : Float -> Float -> Float
-gain amount value = amount * value
-
-
-
 average : List Float -> Float
 average values =
     List.sum values / toFloat (List.length values)
@@ -119,11 +125,53 @@ simpleLowPassFilter currValue prevValues =
 --         currValue
 
 
-sinWave : Float -> Float -> Float -> Float
+{- sinWave : Float -> Float -> Float -> Float
 sinWave frequency phaseOffset currTime =  -- I'm not really sure what order the args should be
     let
         phase = (getPhaseFraction frequency currTime) + phaseOffset
     in
-        sinWave' phase
+        sinWave' phase -}
 
--- sin currTime
+
+sinWave : Float -> Float -> Float -> (Float, Float)
+sinWave frequency phaseOffset prevPhase =
+    let
+        periodSeconds = getPeriodSeconds frequency
+        phaseIncrement = sampleDuration / periodSeconds
+        phase = prevPhase + phaseIncrement + phaseOffset
+        phase' = if phase > 1.0 then phase - 1.0 else phase
+        amplitude = cos (phase' * 2.0 * pi)
+{-         _ = Debug.log "amp" amplitude
+        _ = Debug.log "phase'" phase'
+        _ = Debug.log "phase" phase
+        _ = Debug.log "phaseIncrement" phaseIncrement
+        _ = Debug.log "period Seconds" periodSeconds
+        _ = Debug.log "prevPhase" prevPhase -}
+    in
+        (amplitude, phase')
+
+gain : GainF
+gain signalValue gainValue =
+    signalValue * gainValue
+
+--------------------------------------------------------------------------------
+-- TESTS
+--------------------------------------------------------------------------------
+
+
+tests : Test
+tests =
+    suite "sineWave"
+        [
+          test "sineWave"
+            (assertEqual
+                (0.0, 0.0)
+--                 (sinWave 10025.0 0.0 0.0)
+                (sinWave 11025.0 0.0 0.0)
+            )
+        ]
+
+
+
+main =
+    elementRunner tests
