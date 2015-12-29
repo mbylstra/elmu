@@ -10650,22 +10650,34 @@ Elm.ReactiveAudio.make = function (_elm) {
    ,phaseOffset: $Orchestrator.Default});
    var testGraph = _U.list([commaHelper
                            ,A2(sinNode,
-                           "lfo",
-                           {frequency: $Orchestrator.Value(0.5)
+                           "mod2",
+                           {frequency: $Orchestrator.Value(200.0)
                            ,phaseOffset: $Orchestrator.Default})
                            ,A2(gainNode,
-                           "lfoGain",
-                           {signal: $Orchestrator.ID("lfo")
-                           ,gain: $Orchestrator.Value(50.0)})
+                           "mod2WithGain",
+                           {signal: $Orchestrator.ID("mod2")
+                           ,gain: $Orchestrator.Value(123.0)})
                            ,A2(adderNode,
-                           "osc1Frequency",
-                           _U.list([$Orchestrator.ID("lfoGain")
+                           "mod2Frequency",
+                           _U.list([$Orchestrator.ID("mod1WithGain")
                                    ,$Orchestrator.Value(200.0)]))
                            ,A2(sinNode,
-                           "osc1",
-                           {frequency: $Orchestrator.ID("osc1Frequency")
+                           "mod1",
+                           {frequency: $Orchestrator.Value(200.0)
                            ,phaseOffset: $Orchestrator.Default})
-                           ,destinationNode({signal: $Orchestrator.ID("osc1")})]);
+                           ,A2(gainNode,
+                           "mod1WithGain",
+                           {signal: $Orchestrator.ID("mod1")
+                           ,gain: $Orchestrator.Value(123.0)})
+                           ,A2(adderNode,
+                           "mod1Frequency",
+                           _U.list([$Orchestrator.ID("mod1WithGain")
+                                   ,$Orchestrator.Value(200.0)]))
+                           ,A2(sinNode,
+                           "root1",
+                           {frequency: $Orchestrator.ID("mod1Frequency")
+                           ,phaseOffset: $Orchestrator.Default})
+                           ,destinationNode({signal: $Orchestrator.ID("root1")})]);
    var testGraphDict = $Orchestrator.toDict(testGraph);
    var destinationA = $Orchestrator.Destination({id: "destinationA"
                                                 ,input: $Orchestrator.ID("squareA")

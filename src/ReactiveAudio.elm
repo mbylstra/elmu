@@ -223,11 +223,18 @@ commaHelper =
 testGraph : ListGraph
 testGraph =
     [ commaHelper
-    , sinNode "lfo" {frequency = Value 0.5, phaseOffset = Default}
-    , gainNode "lfoGain" {signal = ID "lfo", gain = Value 50.0}
-    , adderNode "osc1Frequency" [ID "lfoGain", Value 200.0]
-    , sinNode "osc1" {frequency = ID "osc1Frequency", phaseOffset = Default}
-    , destinationNode {signal = ID "osc1"}
+
+    , sinNode "mod2" {frequency = Value 200.0, phaseOffset = Default}
+    , gainNode "mod2WithGain" {signal = ID "mod2", gain = Value 123.0}
+    , adderNode "mod2Frequency" [ID "mod1WithGain", Value 200.0]
+
+    , sinNode "mod1" {frequency = Value 200.0, phaseOffset = Default}
+    , gainNode "mod1WithGain" {signal = ID "mod1", gain = Value 123.0}
+    , adderNode "mod1Frequency" [ID "mod1WithGain", Value 200.0]
+
+    , sinNode "root1" {frequency = ID "mod1Frequency", phaseOffset = Default}
+    , destinationNode {signal = ID "root1"}
+
     ]
 
 
