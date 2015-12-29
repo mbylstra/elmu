@@ -147,7 +147,7 @@ sinWave frequency frequencyOffset phaseOffset prevPhase =
     -- currently ignore frequencyOffset
     let
         phaseOffset = phaseOffset / 2.0
-        periodSeconds = getPeriodSeconds frequency
+        periodSeconds = getPeriodSeconds (frequency + frequencyOffset)
         phaseIncrement = sampleDuration / periodSeconds
         currPhase = prevPhase + phaseIncrement
 --         currPhaseNormed = if currPhase > 1.0 then currPhase - 1.0 else currPhase
@@ -155,7 +155,7 @@ sinWave frequency frequencyOffset phaseOffset prevPhase =
         amplitude = sin (outputPhase * 2.0 * pi)
 
     in
-        if (frequencyOffset /= 666.0)
+{-         if (frequencyOffset /= 666.0)
         then
 {-             let
                 _ = Debug.log "amp" amplitude
@@ -169,7 +169,7 @@ sinWave frequency frequencyOffset phaseOffset prevPhase =
             in  -}
             (amplitude, currPhase)
 
-        else
+        else -}
 {-             let
                 _ = Debug.log "MODULATOR amp" amplitude
                 _ = Debug.log "outputPhase" outputPhase
@@ -181,7 +181,7 @@ sinWave frequency frequencyOffset phaseOffset prevPhase =
                 _ = Debug.log "-------------------------------" True
                 _ = Debug.log "-------------------------------" True
             in -}
-            (amplitude, currPhase)
+        (amplitude, currPhase)
 
 gain : GainF
 gain signalValue gainValue =

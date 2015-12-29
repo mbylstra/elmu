@@ -248,16 +248,26 @@ testGraph =
     , sinNode "root1" {frequency = Value 11025.0, frequencyOffset = Default, phaseOffset = ID "mod1"} -}
 --     , sinNode "root1" {frequency = Value 440.0, frequencyOffset = Default, phaseOffset = Default}
 
-    , sinNode "mod6" {frequency = Value 200.0, frequencyOffset = Value 666.0, phaseOffset = Default}
+{-     , sinNode "mod6" {frequency = Value 200.0, frequencyOffset = Value 666.0, phaseOffset = Default}
     , sinNode "mod5" {frequency = Value 200.0, frequencyOffset = Value 666.0, phaseOffset = ID "mod6"}
-    , sinNode "mod4" {frequency = Value 200.0, frequencyOffset = Value 666.0, phaseOffset = ID "mod5"}
-    , sinNode "mod3" {frequency = Value 400.0, frequencyOffset = Value 666.0, phaseOffset = ID "mod4"}
-    , sinNode "mod2" {frequency = Value 200.0, frequencyOffset = Value 666.0, phaseOffset = ID "mod3"}
-    , sinNode "mod1" {frequency = Value 100.0, frequencyOffset = Value 666.0, phaseOffset = ID "mod2"}
-    , sinNode "root1" {frequency = Value 200.0, frequencyOffset = Default, phaseOffset = ID "mod1"}
+    , sinNode "mod4" {frequency = Value 200.0, frequencyOffset = Value 666.0, phaseOffset = ID "mod5"} -}
+
+    , sinNode "lfoRaw" {frequency = Value 0.25, frequencyOffset = Default, phaseOffset = Default}
+    , gainNode "lfoGain" {signal = ID "lfoRaw", gain = Value 20.0}
+    , adderNode "pitch" [Value 200.0, ID "lfoGain"]
+
+--     , sinNode "mod3" {frequency = ID "pitch", frequencyOffset = Default, phaseOffset = Default}
+    , sinNode "mod2" {frequency = ID "pitch", frequencyOffset = Default, phaseOffset = Default}
+
+    , gainNode "mod1Frequency" {signal = ID "pitch", gain = Value 2.0}
+    , sinNode "mod1" {frequency = ID "mod1Frequency", frequencyOffset = Default, phaseOffset = ID "mod2"}
+
+    , sinNode "root1" {frequency = ID "pitch", frequencyOffset = Default, phaseOffset = ID "mod1"}
+--     , sinNode "root1" {frequency = ID "pitch", frequencyOffset = Default, phaseOffset = Default}
 
 
     , destinationNode {signal = ID "root1"}
+--     , destinationNode {signal = ID "lfoRaw"}
 
     ]
 
