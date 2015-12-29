@@ -8,7 +8,6 @@ import AudioNodes exposing
     , oscillator
     , simpleLowPassFilter
     , sinWave
-    , gain
     )
 
 import Array exposing(Array)
@@ -17,7 +16,7 @@ import Orchestrator exposing
     ( DictGraph
     , ListGraph
     , toDict
-    , AudioNode(Oscillator, Destination, Mixer, FeedforwardProcessor, Gain)
+    , AudioNode(Oscillator, Destination, Add, FeedforwardProcessor, Gain)
     , Input(ID, Default, Value)
     , updateGraph
     )
@@ -163,7 +162,9 @@ destinationA =
         } -}
 
 
-makeLowPass id inputName =
+
+
+{- lowPassNode id inputName =
     FeedforwardProcessor
         { id = id
         , input = ID inputName
@@ -174,77 +175,64 @@ makeLowPass id inputName =
             , prevValues =  List.repeat 2 0.0
 --             , prevValues = [0.0, 0.0, 0,0]
             }
+        } -}
+
+sinNode id {frequency, phaseOffset} =
+  Oscillator
+    { id = id
+    , function = sinWave
+    , inputs = { frequency = frequency, phaseOffset = phaseOffset }
+    , state =
+        { outputValue = 0.0, phase = 0.0  }
+    }
+
+gainNode id {signal, gain} =
+    Gain
+        { id = id
+        , function = AudioNodes.gain
+        , inputs = { signal = signal, gain = gain }
+        , state =
+            { outputValue = 0.0 }
         }
+
+adderNode id inputs =
+    Add
+        { id = id
+        , inputs = inputs
+        , state =
+            { outputValue = 0.0 }
+        }
+
+destinationNode {signal} =
+    Destination
+        { id = "destination"
+        , input = signal
+        , state =
+            { outputValue = 0.0 }
+        }
+
+
+commaHelper =
+  sinNode "dummy123456789" {frequency = Default, phaseOffset = Default }
+
+
 
 
 
 
 testGraph : ListGraph
 testGraph =
---     [ makeSquare "osc"  11025.0
-    [
-{-        Oscillator
-        { id = "osc4"
-        , function = sinWave
-        , inputs = { frequency = Value 300.01, phaseOffset = Default }
-        , state =
-            { outputValue = 0.0, phase = 0.0  }
-        } -}
-{-        Oscillator
-        { id = "osc3"
-        , function = sinWave
---         , inputs = { frequency = Value 50.00, phaseOffset = ID "osc4" }
-        , inputs = { frequency = Value 50.00, phaseOffset = Default }
-        , state =
-            { outputValue = 0.0, phase = 0.0  }
-        }  -}
-{-       Oscillator
-        { id = "osc2"
-        , function = sinWave
---         , inputs = { frequency = Value 5, phaseOffset = ID "osc3"}
-        , inputs = { frequency = Value 0.1, phaseOffset = Default }
-        , state =
-            { outputValue = 0.0, phase = 0.0  }
-        } -}
-
-
-      Oscillator
-        { id = "osc1"
-        , function = sinWave
---         , inputs = { frequency = Value 200.0, phaseOffset = ID "osc2" }
-        , inputs = { frequency = Value 80.0, phaseOffset = Default }
-        , state =
-            { outputValue = 0.0, phase = 0.0  }
-        }
-
-    , Gain
-        { id = "osc1Gain"
-        , function = gain
---         , inputs = { frequency = Value 200.0, phaseOffset = ID "osc2" }
-        , inputs = { signal = ID "osc1", gain = Value 1.0 }
-        , state =
-            { outputValue = 0.0 }
-        }
---     [ makeSquare "osc"  80.0
---     , makeSquare "osc"  11025.0
-      {-     , makeSquare "squareB" 250.0
-    , makeSquare "squareC" 200.0 -}
-{-     , Mixer
-        { id = "mixer"
-        , inputs = [ID "squareA", ID "squareB", ID "squareC"]
-        , state =
-            { outputValue = 0.0 }
-        } -}
---     , makeLowPass "lowpass" "osc1"
-    , Destination
-        { id = "destinationA"
---         , input = ID "mixer"
-        , input = ID "osc1Gain"
---         , input = ID "osc"
-        , state =
-            { outputValue = 0.0 }
-        }
+    [ commaHelper
+    , sinNode "lfo" {frequency = Value 0.5, phaseOffset = Default}
+    , gainNode "lfoGain" {signal = ID "lfo", gain = Value 50.0}
+    , adderNode "osc1Frequency" [ID "lfoGain", Value 200.0]
+    , sinNode "osc1" {frequency = ID "osc1Frequency", phaseOffset = Default}
+    , destinationNode {signal = ID "osc1"}
     ]
+
+
+
+
 
 testGraphDict = toDict testGraph
 initialBufferState =

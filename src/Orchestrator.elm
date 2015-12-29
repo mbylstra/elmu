@@ -62,7 +62,7 @@ type AudioNode =
             , prevValues : List Float
             }
         }
-    | Mixer
+    | Add
         { id : String
         , inputs : List Input
         , state :
@@ -245,37 +245,20 @@ updateGraphNode graph time node =
                 Nothing ->
                     Debug.crash("no input nodes!")
 
-        Mixer props ->
-            case getInputNodes node graph of
-                Just inputNodes ->
+        Add props ->
+            let
+                updateFunc input (graph, accValue) =
                     let
-                        updateFunc inputNode (graph, accValue) =
-                            let
-                                (newGraph, inputValue) = updateGraphNode graph time inputNode
-                                newState = { outputValue = inputValue }
-                                newNode =  Mixer { props | state = newState }
-                            in
-                                (replaceGraphNode newNode newGraph, accValue + inputValue)
-                        (newGraph, totalValue) = List.foldl updateFunc (graph, 0) inputNodes
-                        averageValue = totalValue / toFloat (List.length inputNodes)
-                        newState = { outputValue = averageValue }
-                        newNode = Mixer { props | state = newState }
+                        (newGraph, inputValue) = updateGraphNode' graph time input
                     in
-                        (replaceGraphNode newNode newGraph, averageValue)
+                        (replaceGraphNode newNode newGraph, accValue + inputValue)
 
-                Nothing ->
-                    Debug.crash("no input nodes!")
+                (newGraph, newValue) = List.foldl updateFunc (graph, 0) props.inputs
+                newState = { outputValue = newValue }
+                newNode = Add { props | state = newState }
+            in
+                (replaceGraphNode newNode newGraph, newValue)
 
-
-{-                     let
-                        (newGraph, inputValue) = updateGraphNode graph time inputNode
-                        newNode = updateNodeState node inputValue
-                    in
-                        (replaceGraphNode newNode newGraph, inputValue) -}
-{-                 Just inputNodes ->
-                    Debug.crash("multiple inputs not supported yet")
-                Nothing ->
-                    Debug.crash("no input nodes!") -}
         Gain props ->
             let
                 -- phaseOffsetInput = props.inputs.phaseOffsetInput (just ignore this one for now)
@@ -303,7 +286,7 @@ getInputNode : DictGraph -> String -> AudioNode
 getInputNode graph id =
     case (Dict.get id graph) of
         Just node -> node
-        Nothing -> Debug.crash("Can't find node")
+        Nothing -> Debug.crash("Can't find node: " ++ (toString id))
 
 getInputNode' : DictGraph -> Input -> AudioNode
 getInputNode' graph input =
@@ -330,8 +313,6 @@ getInputNodes node graph =
                 Just [getInputNode' graph props.input]
             Destination props ->
                 Just [getInputNode' graph props.input]
-            Mixer props ->
-                Just <| getInputNodes' props.inputs
             _ ->
                 Nothing
 
@@ -349,12 +330,12 @@ updateNodeState node newValue =
             in
                 Oscillator  { props | state = newState }
 
-        Mixer props ->
+        Add props ->
             let
                 oldState = props.state
                 newState = { oldState | outputValue = newValue }
             in
-                Mixer { props | state = newState }
+                Add { props | state = newState }
 
         FeedforwardProcessor props ->
             let
@@ -388,7 +369,7 @@ toDict listGraph =
                     (props.id, node)
                 FeedforwardProcessor props ->
                     (props.id, node)
-                Mixer props ->
+                Add props ->
                     (props.id, node)
                 Gain props ->
                     (props.id, node)
@@ -427,7 +408,7 @@ getNodeId node =
         Destination props -> props.id
         Oscillator props -> props.id
         FeedforwardProcessor props -> props.id
-        Mixer props -> props.id
+        Add props -> props.id
         Gain props -> props.id
 
 
