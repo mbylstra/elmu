@@ -224,17 +224,39 @@ testGraph : ListGraph
 testGraph =
     [ commaHelper
 
-    , sinNode "mod3'" {frequency = Value 200.0, frequencyOffset = Default, phaseOffset = Default}
-    , gainNode "mod3" {signal = ID "mod3'", gain = Value 50.0}
+{-     , sinNode "mod3'" {frequency = Value 200.0, frequencyOffset = Default, phaseOffset = Default}
+    , gainNode "mod3" {signal = ID "mod3'", gain = Value 70.0}
 
-    , sinNode "mod2'" {frequency = Value 200.0, frequencyOffset = ID "mod3", phaseOffset = Default}
-    , gainNode "mod2" {signal = ID "mod2'", gain = Value 50.0}
+    , sinNode "mod2'" {frequency = Value 800.0, frequencyOffset = ID "mod3" , phaseOffset = Default}
+    , gainNode "mod2" {signal = ID "mod2'", gain = Value 5000.0}
 
-    , sinNode "mod1'" {frequency = Value 200.0, frequencyOffset = ID "mod2", phaseOffset = Default}
-    , gainNode "mod1" {signal = ID "mod1'", gain = Value 50.0}
+    , sinNode "mod1'" {frequency = Value 400.0, frequencyOffset = ID "mod2", phaseOffset = Default}
+    , gainNode "mod1" {signal = ID "mod1'", gain = Value 200.0} -}
+
+{-     , sinNode "mod3'" {frequency = Value 200.0, frequencyOffset = Default, phaseOffset = Default}
+    , gainNode "mod3" {signal = ID "mod3'", gain = Value 70.0}
+
+    , sinNode "mod2'" {frequency = Value 800.0, frequencyOffset = ID "mod3" , phaseOffset = Default}
+    , gainNode "mod2" {signal = ID "mod2'", gain = Value 5000.0} -}
+
+{-     , sinNode "mod1" {frequency = Value 11025.0, frequencyOffset = Default, phaseOffset = Default}
+--     , gainNode "mod1" {signal = ID "mod1'", gain = Value 200.0}
+    , sinNode "root1" {frequency = Value 11025.0, frequencyOffset = Default, phaseOffset = ID "mod1"} -}
+
+--     , sinNode "mod2" {frequency = Value 345.0, frequencyOffset = Default, phaseOffset = Default}
+{-     , sinNode "mod1" {frequency = Value 11025.0, frequencyOffset = Value 666.0, phaseOffset = Default}
+    , sinNode "root1" {frequency = Value 11025.0, frequencyOffset = Default, phaseOffset = ID "mod1"} -}
+--     , sinNode "root1" {frequency = Value 440.0, frequencyOffset = Default, phaseOffset = Default}
+
+    , sinNode "mod6" {frequency = Value 200.0, frequencyOffset = Value 666.0, phaseOffset = Default}
+    , sinNode "mod5" {frequency = Value 200.0, frequencyOffset = Value 666.0, phaseOffset = ID "mod6"}
+    , sinNode "mod4" {frequency = Value 200.0, frequencyOffset = Value 666.0, phaseOffset = ID "mod5"}
+    , sinNode "mod3" {frequency = Value 400.0, frequencyOffset = Value 666.0, phaseOffset = ID "mod4"}
+    , sinNode "mod2" {frequency = Value 200.0, frequencyOffset = Value 666.0, phaseOffset = ID "mod3"}
+    , sinNode "mod1" {frequency = Value 100.0, frequencyOffset = Value 666.0, phaseOffset = ID "mod2"}
+    , sinNode "root1" {frequency = Value 200.0, frequencyOffset = Default, phaseOffset = ID "mod1"}
 
 
-    , sinNode "root1" {frequency = Value 200.0, frequencyOffset = ID "mod1", phaseOffset = Default}
     , destinationNode {signal = ID "root1"}
 
     ]

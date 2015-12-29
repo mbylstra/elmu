@@ -215,7 +215,7 @@ updateGraphNode graph time node =
                 _ = Debug.log "newValue" newValue -}
 
             in
-                (replaceGraphNode newNode graph3, newValue)
+                (replaceGraphNode newNode graph4, newValue)
 
         FeedforwardProcessor props ->
             case getInputNodes node graph of

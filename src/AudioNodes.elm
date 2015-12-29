@@ -142,21 +142,46 @@ sinWave frequency phaseOffset currTime =  -- I'm not really sure what order the 
 
 sinWave : Float -> Float -> Float -> Float -> (Float, Float)
 sinWave frequency frequencyOffset phaseOffset prevPhase =
+
+
+    -- currently ignore frequencyOffset
     let
-        frequency = frequency + frequencyOffset
+        phaseOffset = phaseOffset / 2.0
         periodSeconds = getPeriodSeconds frequency
         phaseIncrement = sampleDuration / periodSeconds
-        phase = prevPhase + phaseIncrement + phaseOffset
-        phase' = if phase > 1.0 then phase - 1.0 else phase
-        amplitude = cos (phase' * 2.0 * pi)
-{-         _ = Debug.log "amp" amplitude
-        _ = Debug.log "phase'" phase'
-        _ = Debug.log "phase" phase
-        _ = Debug.log "phaseIncrement" phaseIncrement
-        _ = Debug.log "period Seconds" periodSeconds
-        _ = Debug.log "prevPhase" prevPhase -}
+        currPhase = prevPhase + phaseIncrement
+--         currPhaseNormed = if currPhase > 1.0 then currPhase - 1.0 else currPhase
+        outputPhase = currPhase + phaseOffset
+        amplitude = sin (outputPhase * 2.0 * pi)
+
     in
-        (amplitude, phase')
+        if (frequencyOffset /= 666.0)
+        then
+{-             let
+                _ = Debug.log "amp" amplitude
+                _ = Debug.log "outputPhase" outputPhase
+                _ = Debug.log "phaseOffset" phaseOffset
+                _ = Debug.log "currPhase" currPhase
+                _ = Debug.log "phaseIncrement" phaseIncrement
+                _ = Debug.log "period Seconds" periodSeconds
+                _ = Debug.log "prevPhase" prevPhase
+                _ = Debug.log "-------------------------------" True
+            in  -}
+            (amplitude, currPhase)
+
+        else
+{-             let
+                _ = Debug.log "MODULATOR amp" amplitude
+                _ = Debug.log "outputPhase" outputPhase
+                _ = Debug.log "phaseOffset" phaseOffset
+                _ = Debug.log "currPhase" currPhase
+                _ = Debug.log "phaseIncrement" phaseIncrement
+                _ = Debug.log "period Seconds" periodSeconds
+                _ = Debug.log "prevPhase" prevPhase
+                _ = Debug.log "-------------------------------" True
+                _ = Debug.log "-------------------------------" True
+            in -}
+            (amplitude, currPhase)
 
 gain : GainF
 gain signalValue gainValue =

@@ -10253,13 +10253,15 @@ Elm.AudioNodes.make = function (_elm) {
    frequencyOffset,
    phaseOffset,
    prevPhase) {
-      var frequency = frequency + frequencyOffset;
       var periodSeconds = getPeriodSeconds(frequency);
       var phaseIncrement = sampleDuration / periodSeconds;
-      var phase = prevPhase + phaseIncrement + phaseOffset;
-      var phase$ = _U.cmp(phase,1.0) > 0 ? phase - 1.0 : phase;
-      var amplitude = $Basics.cos(phase$ * 2.0 * $Basics.pi);
-      return {ctor: "_Tuple2",_0: amplitude,_1: phase$};
+      var currPhase = prevPhase + phaseIncrement;
+      var phaseOffset = phaseOffset / 2.0;
+      var outputPhase = currPhase + phaseOffset;
+      var amplitude = $Basics.sin(outputPhase * 2.0 * $Basics.pi);
+      return !_U.eq(frequencyOffset,666.0) ? {ctor: "_Tuple2"
+                                             ,_0: amplitude
+                                             ,_1: currPhase} : {ctor: "_Tuple2",_0: amplitude,_1: currPhase};
    });
    var tests = A2($ElmTest.suite,
    "sineWave",
@@ -10460,7 +10462,7 @@ Elm.Orchestrator.make = function (_elm) {
            var newState = {outputValue: newValue,phase: newPhase};
            var newNode = Oscillator(_U.update(_p16,{state: newState}));
            return {ctor: "_Tuple2"
-                  ,_0: A2(replaceGraphNode,newNode,graph3)
+                  ,_0: A2(replaceGraphNode,newNode,graph4)
                   ,_1: newValue};
          case "FeedforwardProcessor": var _p21 = _p11._0;
            var _p17 = A2(getInputNodes,node,graph);
@@ -10668,37 +10670,40 @@ Elm.ReactiveAudio.make = function (_elm) {
    ,phaseOffset: $Orchestrator.Default});
    var testGraph = _U.list([commaHelper
                            ,A2(sinNode,
-                           "mod3\'",
+                           "mod6",
                            {frequency: $Orchestrator.Value(200.0)
-                           ,frequencyOffset: $Orchestrator.Default
+                           ,frequencyOffset: $Orchestrator.Value(666.0)
                            ,phaseOffset: $Orchestrator.Default})
-                           ,A2(gainNode,
+                           ,A2(sinNode,
+                           "mod5",
+                           {frequency: $Orchestrator.Value(200.0)
+                           ,frequencyOffset: $Orchestrator.Value(666.0)
+                           ,phaseOffset: $Orchestrator.ID("mod6")})
+                           ,A2(sinNode,
+                           "mod4",
+                           {frequency: $Orchestrator.Value(200.0)
+                           ,frequencyOffset: $Orchestrator.Value(666.0)
+                           ,phaseOffset: $Orchestrator.ID("mod5")})
+                           ,A2(sinNode,
                            "mod3",
-                           {signal: $Orchestrator.ID("mod3\'")
-                           ,gain: $Orchestrator.Value(50.0)})
+                           {frequency: $Orchestrator.Value(400.0)
+                           ,frequencyOffset: $Orchestrator.Value(666.0)
+                           ,phaseOffset: $Orchestrator.ID("mod4")})
                            ,A2(sinNode,
-                           "mod2\'",
-                           {frequency: $Orchestrator.Value(200.0)
-                           ,frequencyOffset: $Orchestrator.ID("mod3")
-                           ,phaseOffset: $Orchestrator.Default})
-                           ,A2(gainNode,
                            "mod2",
-                           {signal: $Orchestrator.ID("mod2\'")
-                           ,gain: $Orchestrator.Value(50.0)})
-                           ,A2(sinNode,
-                           "mod1\'",
                            {frequency: $Orchestrator.Value(200.0)
-                           ,frequencyOffset: $Orchestrator.ID("mod2")
-                           ,phaseOffset: $Orchestrator.Default})
-                           ,A2(gainNode,
+                           ,frequencyOffset: $Orchestrator.Value(666.0)
+                           ,phaseOffset: $Orchestrator.ID("mod3")})
+                           ,A2(sinNode,
                            "mod1",
-                           {signal: $Orchestrator.ID("mod1\'")
-                           ,gain: $Orchestrator.Value(50.0)})
+                           {frequency: $Orchestrator.Value(100.0)
+                           ,frequencyOffset: $Orchestrator.Value(666.0)
+                           ,phaseOffset: $Orchestrator.ID("mod2")})
                            ,A2(sinNode,
                            "root1",
                            {frequency: $Orchestrator.Value(200.0)
-                           ,frequencyOffset: $Orchestrator.ID("mod1")
-                           ,phaseOffset: $Orchestrator.Default})
+                           ,frequencyOffset: $Orchestrator.Default
+                           ,phaseOffset: $Orchestrator.ID("mod1")})
                            ,destinationNode({signal: $Orchestrator.ID("root1")})]);
    var testGraphDict = $Orchestrator.toDict(testGraph);
    var destinationA = $Orchestrator.Destination({id: "destinationA"
