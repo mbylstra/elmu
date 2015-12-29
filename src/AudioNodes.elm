@@ -23,7 +23,14 @@ type alias FrequencyFloat = Float
 type alias PhaseOffsetFloat = Float
 type alias OutputFloat = Float
 type alias PhaseFloat = Float
-type alias OscillatorF = FrequencyFloat -> PhaseOffsetFloat -> TimeFloat -> (OutputFloat, PhaseFloat)
+type alias FrequencyOffsetFloat = Float
+
+type alias OscillatorF =
+    FrequencyFloat
+    -> FrequencyOffsetFloat
+    -> PhaseOffsetFloat
+    -> TimeFloat
+    -> (OutputFloat, PhaseFloat)
 type alias GainF = Float -> Float -> Float
 
 sampleRate = 44100
@@ -133,9 +140,10 @@ sinWave frequency phaseOffset currTime =  -- I'm not really sure what order the 
         sinWave' phase -}
 
 
-sinWave : Float -> Float -> Float -> (Float, Float)
-sinWave frequency phaseOffset prevPhase =
+sinWave : Float -> Float -> Float -> Float -> (Float, Float)
+sinWave frequency frequencyOffset phaseOffset prevPhase =
     let
+        frequency = frequency + frequencyOffset
         periodSeconds = getPeriodSeconds frequency
         phaseIncrement = sampleDuration / periodSeconds
         phase = prevPhase + phaseIncrement + phaseOffset
@@ -167,7 +175,7 @@ tests =
             (assertEqual
                 (0.0, 0.0)
 --                 (sinWave 10025.0 0.0 0.0)
-                (sinWave 11025.0 0.0 0.0)
+                (sinWave 11025.0 0.0 0.0 0.0)
             )
         ]
 

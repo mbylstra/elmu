@@ -177,11 +177,11 @@ destinationA =
             }
         } -}
 
-sinNode id {frequency, phaseOffset} =
+sinNode id {frequency, frequencyOffset, phaseOffset} =
   Oscillator
     { id = id
     , function = sinWave
-    , inputs = { frequency = frequency, phaseOffset = phaseOffset }
+    , inputs = { frequency = frequency, frequencyOffset = frequencyOffset, phaseOffset = phaseOffset }
     , state =
         { outputValue = 0.0, phase = 0.0  }
     }
@@ -213,7 +213,7 @@ destinationNode {signal} =
 
 
 commaHelper =
-  sinNode "dummy123456789" {frequency = Default, phaseOffset = Default }
+  sinNode "dummy123456789" {frequency = Default, frequencyOffset = Default, phaseOffset = Default }
 
 
 
@@ -224,15 +224,17 @@ testGraph : ListGraph
 testGraph =
     [ commaHelper
 
-    , sinNode "mod2" {frequency = Value 200.0, phaseOffset = Default}
-    , gainNode "mod2WithGain" {signal = ID "mod2", gain = Value 123.0}
-    , adderNode "mod2Frequency" [ID "mod1WithGain", Value 200.0]
+    , sinNode "mod3'" {frequency = Value 200.0, frequencyOffset = Default, phaseOffset = Default}
+    , gainNode "mod3" {signal = ID "mod3'", gain = Value 50.0}
 
-    , sinNode "mod1" {frequency = Value 200.0, phaseOffset = Default}
-    , gainNode "mod1WithGain" {signal = ID "mod1", gain = Value 123.0}
-    , adderNode "mod1Frequency" [ID "mod1WithGain", Value 200.0]
+    , sinNode "mod2'" {frequency = Value 200.0, frequencyOffset = ID "mod3", phaseOffset = Default}
+    , gainNode "mod2" {signal = ID "mod2'", gain = Value 50.0}
 
-    , sinNode "root1" {frequency = ID "mod1Frequency", phaseOffset = Default}
+    , sinNode "mod1'" {frequency = Value 200.0, frequencyOffset = ID "mod2", phaseOffset = Default}
+    , gainNode "mod1" {signal = ID "mod1'", gain = Value 50.0}
+
+
+    , sinNode "root1" {frequency = Value 200.0, frequencyOffset = ID "mod1", phaseOffset = Default}
     , destinationNode {signal = ID "root1"}
 
     ]

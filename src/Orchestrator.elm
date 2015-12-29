@@ -147,6 +147,7 @@ type alias FeedforwardProcessorF = Float -> List ValueFloat -> ValueFloat
 
 type alias OscillatorInputs =
     { frequency : Input
+    , frequencyOffset : Input
     , phaseOffset : Input
     }
 
@@ -199,10 +200,11 @@ updateGraphNode graph time node =
 --                 frequencyInputNode = getInputNode graph frequencyInput
                     -- this should be abstracted into a function that just gets the value and updates the graph at the same time (regardless of input type etc)
 --                 _ = Debug.log "------------------------" True
-                (graph2, frequencyInputValue) = updateGraphNode' graph time props.inputs.frequency
-                (graph3, phaseOffsetValue) = updateGraphNode' graph2 time props.inputs.phaseOffset
+                (graph2, frequencyValue) = updateGraphNode' graph time props.inputs.frequency
+                (graph3, frequencyOffsetValue) = updateGraphNode' graph2 time props.inputs.frequencyOffset
+                (graph4, phaseOffsetValue) = updateGraphNode' graph3 time props.inputs.phaseOffset
 --                 _ = Debug.log "phaseOffsetValue" phaseOffsetValue
-                (newValue, newPhase) = props.function frequencyInputValue phaseOffsetValue props.state.phase -- this function should start accepting frequency
+                (newValue, newPhase) = props.function frequencyValue frequencyOffsetValue phaseOffsetValue props.state.phase -- this function should start accepting frequency
 {-                 _ = Debug.log "newValue" newValue
                 _ = Debug.log "newPhase" newPhase -}
                 newState = {outputValue = newValue, phase = newPhase}
@@ -425,7 +427,7 @@ squareA =
     Oscillator
         { id = "squareA"
         , function = sinWave
-        , inputs = { frequency = Value 440.0, phaseOffset = Default }
+        , inputs = { frequency = Value 440.0, phaseOffset = Default, frequencyOffset = Default }
         , state =
             { outputValue = 0.0, phase = 0.0  }
         }
@@ -441,7 +443,7 @@ destinationA =
 squareAT1 =
     Oscillator
         { id = "squareA"
-        , inputs = { frequency = Value 440.0, phaseOffset = Default }
+        , inputs = { frequency = Value 440.0, phaseOffset = Default, frequencyOffset = Default }
         , function = sinWave
         , state =
             { outputValue = 1.0, phase = 0.0  }
