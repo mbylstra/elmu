@@ -2,6 +2,13 @@ module ReactiveAudio where
 
 import Debug exposing (log)
 
+
+import Html exposing (text)
+
+import Time exposing (Time, fps)
+import Keyboard
+import Mouse
+
 import AudioNodes exposing
     ( squareWave
     , OscillatorType(Square, Saw, Sin)
@@ -80,6 +87,11 @@ foldn func initial count =
 
 port requestBuffer : Signal Bool
 
+
+everySecond : Signal Time
+everySecond = fps 1
+
+
 bufferSize = 4096
 
 sampleRate = 44100
@@ -88,10 +100,11 @@ sampleDuration = 1.0 / sampleRate
 
 
 
-updateBufferState : Bool -> BufferState -> BufferState
-updateBufferState _ prevBufferState =
+-- updateBufferState : ? -> BufferState -> BufferState
+updateBufferState userInput prevBufferState =
 
     let
+        _ = Debug.log "userInput: " userInput
         time = prevBufferState.time + sampleDuration
         initialGraph = prevBufferState.graph
 {-         _ = Debug.log "sampleCuration" sampleDuration
@@ -262,8 +275,8 @@ testGraph =
     , gainNode "mod1Frequency" {signal = ID "pitch", gain = Value 3.0}
     , sinNode "mod1" {frequency = ID "mod1Frequency", frequencyOffset = Default, phaseOffset = Default }
 
-    , sinNode "root1" {frequency = ID "pitch", frequencyOffset = Default, phaseOffset = ID "mod1"}
---     , sinNode "root1" {frequency = ID "mod1Frequency", frequencyOffset = Default, phaseOffset = Default}
+--     , sinNode "root1" {frequency = ID "pitch", frequencyOffset = Default, phaseOffset = ID "mod1"}
+    , sinNode "root1" {frequency = ID "mod1Frequency", frequencyOffset = Default, phaseOffset = Default}
 --     , sinNode "root1" {frequency = ID "pitch", frequencyOffset = Default, phaseOffset = Default}
 
 
@@ -285,8 +298,48 @@ initialBufferState =
     }
 
 
+
+
+
+-- I think we need to merge requestBuffer and everySecond
+
+-- map2 means we can mix bufferSignal and mouse signals and combine them into
+-- a new type (a record with both), but this function is updated whenever *either* change
+
+-- let's combine wasd and mousePosition into a signal as a demo
+
+
+-- wasd : Signal { x : Int, y : Int }
+
+userInputSignal =
+    Signal.map2
+    (\wasd mousePosition -> {wasd = wasd, mousePosition = mousePosition})
+    Keyboard.wasd
+    Mouse.position
+
+
+bufferRequestWithUserInput = Signal.sampleOn requestBuffer userInputSignal
+
+
+
+-- sampleOn : Signal a -> Signal b -> Signal b
+
+
+-- let's juoin
+
+
+-- I'm not actually sure how to handle triggers
+
+
+-- we can use map to merge different signals into one (using a record)
+-- we also have a signal True from requestBuffer, which is really just a pulse (we don't care about the value)
+
+
+
+
+
 bufferStateSignal : Signal BufferState
-bufferStateSignal = Signal.foldp updateBufferState initialBufferState requestBuffer
+bufferStateSignal = Signal.foldp updateBufferState initialBufferState bufferRequestWithUserInput
 
 
 {- getSampleTime : Int -> Float -> Float
@@ -298,6 +351,9 @@ getSampleTime bufferIndex bufferStartTime =
         bufferStartTime + (toFloat bufferIndex * sampleDuration) -}
 
 
+
+main =
+  text "Hello, World!"
 
 
 

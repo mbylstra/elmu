@@ -25,7 +25,7 @@ if (DEBUG) {
 
 if (PROFILING) {
     console.log('start profiling');
-    var elm = Elm.worker(Elm.ReactiveAudio, {
+    var elm = Elm.fullscreen(Elm.ReactiveAudio, {
         requestBuffer: true,
     });
 
@@ -51,7 +51,7 @@ if (PROFILING) {
     });
 
 } else {
-    var elm = Elm.worker(Elm.ReactiveAudio, {
+    var elm = Elm.fullscreen(Elm.ReactiveAudio, {
         requestBuffer: true,
     });
 
