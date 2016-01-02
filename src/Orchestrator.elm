@@ -22,6 +22,7 @@ import AudioNodes exposing
     , OscillatorF
     , gain
     , GainF
+    , OutputFloat
     )
 
 
@@ -34,6 +35,11 @@ type Input = ID String | Value Float | Default   -- or it could be an AudioNode!
     -- eg: type NoteValue = A0 | B0 | C0 | D0 | E0 | F0 | G0 | A1 | A2 | etc
     -- eg : type Input = Note NoteValue | MidiNote Int |
     -- consider making ID NodeID instead, or just Node
+    -- How do we get inputs from
+     -- for now just make a dict, and put a dict key in.
+     -- Or make a special node that connects to an exaternal value (?)
+         -- the good thing about "External" is that you can tap into the signal for debugging easily.
+             -- and maybe apply a smoothing function to the inputs?
 
 type AudioNode =
     Oscillator
@@ -69,6 +75,13 @@ type AudioNode =
             { outputValue : Float
             }
         }
+    -- | ExternalInput
+    --     { id : String
+    --     , input : String -- A dict key. Yeah, this needs a big rethink!
+    --     , state :
+    --         { outputValue : Float
+    --         }
+    --     }
     | Destination
         { id : String
         , input: Input
@@ -134,7 +147,7 @@ type AudioNode =
 --
 --
 --
--- square frequencyInputFunc time =
+-- square frequencyInputFunc externalState =
 
 -- s1 = square (delay 1 square) 0.0   -- hmm, I guess it *is* possible then??
     -- BIG BUT: you must pass the dealy state to delay! (so the orchestrator really needs to manage this)
@@ -157,37 +170,48 @@ type alias TimeFloat = Float
 type alias ListGraph = List AudioNode
 type alias DictGraph = Dict String AudioNode
 
-
+type alias ExternalInputState =
+    { xWindowFraction : Float
+    , yWindowFraction : Float
+    , audioOn : Bool
+    }
+type alias ExternalState =
+    { time : Float
+    , externalInputState : ExternalInputState
+    }
 
 --------------------------------------------------------------------------------
 -- MAIN
 --------------------------------------------------------------------------------
 
 
-updateGraph graph time =
+updateGraph : DictGraph -> ExternalState -> (DictGraph, OutputFloat)
+updateGraph graph externalState =
 {-     let
-        _ = Debug.log "time" time
+        _ = Debug.log "externalState" externalState
     in -}
-    updateGraphNode graph time (getDestinationNode graph)
+    updateGraphNode graph externalState (getDestinationNode graph)
 
-{- updateGraph graph time =
-    (graph, time) -}
+{- updateGraph graph externalState =
+    (graph, externalState) -}
 
 
 {- this naming is pretty gross! Difference is it takes an Input rather than an AudioNode -}
-updateGraphNode' : DictGraph -> TimeFloat -> Input -> (DictGraph, Float)
-updateGraphNode' graph time input =
+-- updateGraphNode' : DictGraph -> TimeFloat -> Input -> (DictGraph, Float)
+
+updateGraphNode' : DictGraph -> ExternalState -> Input -> (DictGraph, OutputFloat)
+updateGraphNode' graph externalState input =
     case input of
         ID id ->
-            updateGraphNode graph time (getInputNode graph id)
+            updateGraphNode graph externalState (getInputNode graph id)
         Value v ->
             (graph, v)
         Default ->
             (graph, 0.0) -- need to work out how to send defaults around
 
 
-updateGraphNode : DictGraph -> TimeFloat -> AudioNode -> (DictGraph, Float)
-updateGraphNode graph time node =
+updateGraphNode : DictGraph -> ExternalState -> AudioNode -> (DictGraph, OutputFloat)
+updateGraphNode graph externalState node =
 
     case node of
 
@@ -200,9 +224,9 @@ updateGraphNode graph time node =
 --                 frequencyInputNode = getInputNode graph frequencyInput
                     -- this should be abstracted into a function that just gets the value and updates the graph at the same time (regardless of input type etc)
 --                 _ = Debug.log "------------------------" True
-                (graph2, frequencyValue) = updateGraphNode' graph time props.inputs.frequency
-                (graph3, frequencyOffsetValue) = updateGraphNode' graph2 time props.inputs.frequencyOffset
-                (graph4, phaseOffsetValue) = updateGraphNode' graph3 time props.inputs.phaseOffset
+                (graph2, frequencyValue) = updateGraphNode' graph externalState props.inputs.frequency
+                (graph3, frequencyOffsetValue) = updateGraphNode' graph2 externalState props.inputs.frequencyOffset
+                (graph4, phaseOffsetValue) = updateGraphNode' graph3 externalState props.inputs.phaseOffset
 --                 _ = Debug.log "phaseOffsetValue" phaseOffsetValue
                 (newValue, newPhase) = props.function frequencyValue frequencyOffsetValue phaseOffsetValue props.state.phase -- this function should start accepting frequency
 {-                 _ = Debug.log "newValue" newValue
@@ -210,7 +234,7 @@ updateGraphNode graph time node =
                 newState = {outputValue = newValue, phase = newPhase}
                 newNode = Oscillator { props | state = newState }
 
-{-                 _ = Debug.log "time" time
+{-                 _ = Debug.log "externalState" externalState
                 _ = Debug.log "frequencyInputValue" frequencyInputValue
                 _ = Debug.log "newValue" newValue -}
 
@@ -221,7 +245,7 @@ updateGraphNode graph time node =
             case getInputNodes node graph of
                 Just [inputNode] ->
                     let
-                        (newGraph, inputValue) = updateGraphNode graph time inputNode
+                        (newGraph, inputValue) = updateGraphNode graph externalState inputNode
                         newValue = props.function inputValue props.state.prevValues
                         newPrevValues = rotateList props.state.outputValue props.state.prevValues
                         newState = {outputValue = newValue, prevValues = newPrevValues }
@@ -237,7 +261,7 @@ updateGraphNode graph time node =
             case getInputNodes node graph of
                 Just [inputNode] ->
                     let
-                        (newGraph, inputValue) = updateGraphNode graph time inputNode
+                        (newGraph, inputValue) = updateGraphNode graph externalState inputNode
                         newState = { outputValue = inputValue }
                         newNode =  Destination { props | state = newState }
                     in
@@ -251,7 +275,7 @@ updateGraphNode graph time node =
             let
                 updateFunc input (graph, accValue) =
                     let
-                        (newGraph, inputValue) = updateGraphNode' graph time input
+                        (newGraph, inputValue) = updateGraphNode' graph externalState input
                     in
                         (replaceGraphNode newNode newGraph, accValue + inputValue)
 
@@ -266,10 +290,10 @@ updateGraphNode graph time node =
                 -- phaseOffsetInput = props.inputs.phaseOffsetInput (just ignore this one for now)
 
 --                 frequencyInputNode = getInputNode graph frequencyInput
-                    -- this should be abstracted into a function that just gets the value and updates the graph at the same time (regardless of input type etc)
+                    -- this should be abstracted into a function that just gets the value and updates the graph at the same externalState (regardless of input type etc)
 --                 _ = Debug.log "------------------------" True
-                (graph2, signalValue) = updateGraphNode' graph time props.inputs.signal
-                (graph3, gainValue) = updateGraphNode' graph2 time props.inputs.gain
+                (graph2, signalValue) = updateGraphNode' graph externalState props.inputs.signal
+                (graph3, gainValue) = updateGraphNode' graph2 externalState props.inputs.gain
 --                 _ = Debug.log "phaseOffsetValue" phaseOffsetValue
                 newValue = props.function signalValue gainValue -- this function should start accepting frequency
 {-                 _ = Debug.log "newValue" newValue
@@ -277,12 +301,31 @@ updateGraphNode graph time node =
                 newState = {outputValue = newValue}
                 newNode = Gain { props | state = newState }
 
-{-                 _ = Debug.log "time" time
+{-                 _ = Debug.log "externalState" externalState
                 _ = Debug.log "frequencyInputValue" frequencyInputValue
                 _ = Debug.log "newValue" newValue -}
 
             in
                 (replaceGraphNode newNode graph3, newValue)
+
+--         externalinput props ->
+--             let
+--                 -- here we get the value from the inputstatedict, using props.input
+--                 (graph2, signalvalue) = updategraphnode' graph externalState props.input
+--                 (graph3, gainvalue) = updategraphnode' graph2 externalState props.inputs.gain
+-- --                 _ = debug.log "phaseoffsetvalue" phaseoffsetvalue
+--                 newvalue = props.function signalvalue gainvalue -- this function should start accepting frequency
+-- {-                 _ = debug.log "newvalue" newvalue
+--                 _ = debug.log "newphase" newphase -}
+--                 newstate = {outputvalue = newvalue}
+--                 newnode = gain { props | state = newstate }
+--
+-- {-                 _ = debug.log "externalState" externalState
+--                 _ = debug.log "frequencyinputvalue" frequencyinputvalue
+--                 _ = debug.log "newvalue" newvalue -}
+--
+--             in
+--                 (replacegraphnode newnode graph3, newvalue)
 
 getInputNode : DictGraph -> String -> AudioNode
 getInputNode graph id =
@@ -423,6 +466,7 @@ getNodeId node =
 
 -- A
 
+squareA : AudioNode
 squareA =
     Oscillator
         { id = "squareA"
@@ -432,6 +476,7 @@ squareA =
             { outputValue = 0.0, phase = 0.0  }
         }
 
+destinationA : AudioNode
 destinationA =
     Destination
         { id = "destinationA"
@@ -440,6 +485,7 @@ destinationA =
             { outputValue = 0.0 }
         }
 
+squareAT1 : AudioNode
 squareAT1 =
     Oscillator
         { id = "squareA"
@@ -449,6 +495,7 @@ squareAT1 =
             { outputValue = 1.0, phase = 0.0  }
         }
 
+destinationAT1 : AudioNode
 destinationAT1 =
     Destination
         { id = "destinationA"
@@ -582,6 +629,6 @@ tests =
     ]
     , -1
 ) -}
-
-main =
-    elementRunner tests
+-- main : Graphics.Element.Element
+-- main =
+--     elementRunner tests

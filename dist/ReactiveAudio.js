@@ -10340,264 +10340,6 @@ Elm.Time.make = function (_elm) {
                              ,delay: delay
                              ,since: since};
 };
-Elm.Set = Elm.Set || {};
-Elm.Set.make = function (_elm) {
-   "use strict";
-   _elm.Set = _elm.Set || {};
-   if (_elm.Set.values) return _elm.Set.values;
-   var _U = Elm.Native.Utils.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $Dict = Elm.Dict.make(_elm),
-   $List = Elm.List.make(_elm);
-   var _op = {};
-   var foldr = F3(function (f,b,_p0) {
-      var _p1 = _p0;
-      return A3($Dict.foldr,
-      F3(function (k,_p2,b) {    return A2(f,k,b);}),
-      b,
-      _p1._0);
-   });
-   var foldl = F3(function (f,b,_p3) {
-      var _p4 = _p3;
-      return A3($Dict.foldl,
-      F3(function (k,_p5,b) {    return A2(f,k,b);}),
-      b,
-      _p4._0);
-   });
-   var toList = function (_p6) {
-      var _p7 = _p6;
-      return $Dict.keys(_p7._0);
-   };
-   var size = function (_p8) {
-      var _p9 = _p8;
-      return $Dict.size(_p9._0);
-   };
-   var member = F2(function (k,_p10) {
-      var _p11 = _p10;
-      return A2($Dict.member,k,_p11._0);
-   });
-   var isEmpty = function (_p12) {
-      var _p13 = _p12;
-      return $Dict.isEmpty(_p13._0);
-   };
-   var Set_elm_builtin = function (a) {
-      return {ctor: "Set_elm_builtin",_0: a};
-   };
-   var empty = Set_elm_builtin($Dict.empty);
-   var singleton = function (k) {
-      return Set_elm_builtin(A2($Dict.singleton,
-      k,
-      {ctor: "_Tuple0"}));
-   };
-   var insert = F2(function (k,_p14) {
-      var _p15 = _p14;
-      return Set_elm_builtin(A3($Dict.insert,
-      k,
-      {ctor: "_Tuple0"},
-      _p15._0));
-   });
-   var fromList = function (xs) {
-      return A3($List.foldl,insert,empty,xs);
-   };
-   var map = F2(function (f,s) {
-      return fromList(A2($List.map,f,toList(s)));
-   });
-   var remove = F2(function (k,_p16) {
-      var _p17 = _p16;
-      return Set_elm_builtin(A2($Dict.remove,k,_p17._0));
-   });
-   var union = F2(function (_p19,_p18) {
-      var _p20 = _p19;
-      var _p21 = _p18;
-      return Set_elm_builtin(A2($Dict.union,_p20._0,_p21._0));
-   });
-   var intersect = F2(function (_p23,_p22) {
-      var _p24 = _p23;
-      var _p25 = _p22;
-      return Set_elm_builtin(A2($Dict.intersect,_p24._0,_p25._0));
-   });
-   var diff = F2(function (_p27,_p26) {
-      var _p28 = _p27;
-      var _p29 = _p26;
-      return Set_elm_builtin(A2($Dict.diff,_p28._0,_p29._0));
-   });
-   var filter = F2(function (p,_p30) {
-      var _p31 = _p30;
-      return Set_elm_builtin(A2($Dict.filter,
-      F2(function (k,_p32) {    return p(k);}),
-      _p31._0));
-   });
-   var partition = F2(function (p,_p33) {
-      var _p34 = _p33;
-      var _p35 = A2($Dict.partition,
-      F2(function (k,_p36) {    return p(k);}),
-      _p34._0);
-      var p1 = _p35._0;
-      var p2 = _p35._1;
-      return {ctor: "_Tuple2"
-             ,_0: Set_elm_builtin(p1)
-             ,_1: Set_elm_builtin(p2)};
-   });
-   return _elm.Set.values = {_op: _op
-                            ,empty: empty
-                            ,singleton: singleton
-                            ,insert: insert
-                            ,remove: remove
-                            ,isEmpty: isEmpty
-                            ,member: member
-                            ,size: size
-                            ,foldl: foldl
-                            ,foldr: foldr
-                            ,map: map
-                            ,filter: filter
-                            ,partition: partition
-                            ,union: union
-                            ,intersect: intersect
-                            ,diff: diff
-                            ,toList: toList
-                            ,fromList: fromList};
-};
-Elm.Native.Keyboard = {};
-
-Elm.Native.Keyboard.make = function(localRuntime) {
-	localRuntime.Native = localRuntime.Native || {};
-	localRuntime.Native.Keyboard = localRuntime.Native.Keyboard || {};
-	if (localRuntime.Native.Keyboard.values)
-	{
-		return localRuntime.Native.Keyboard.values;
-	}
-
-	var NS = Elm.Native.Signal.make(localRuntime);
-
-
-	function keyEvent(event)
-	{
-		return {
-			alt: event.altKey,
-			meta: event.metaKey,
-			keyCode: event.keyCode
-		};
-	}
-
-
-	function keyStream(node, eventName, handler)
-	{
-		var stream = NS.input(eventName, { alt: false, meta: false, keyCode: 0 });
-
-		localRuntime.addListener([stream.id], node, eventName, function(e) {
-			localRuntime.notify(stream.id, handler(e));
-		});
-
-		return stream;
-	}
-
-	var downs = keyStream(document, 'keydown', keyEvent);
-	var ups = keyStream(document, 'keyup', keyEvent);
-	var presses = keyStream(document, 'keypress', keyEvent);
-	var blurs = keyStream(window, 'blur', function() { return null; });
-
-
-	return localRuntime.Native.Keyboard.values = {
-		downs: downs,
-		ups: ups,
-		blurs: blurs,
-		presses: presses
-	};
-};
-
-Elm.Keyboard = Elm.Keyboard || {};
-Elm.Keyboard.make = function (_elm) {
-   "use strict";
-   _elm.Keyboard = _elm.Keyboard || {};
-   if (_elm.Keyboard.values) return _elm.Keyboard.values;
-   var _U = Elm.Native.Utils.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $Char = Elm.Char.make(_elm),
-   $Native$Keyboard = Elm.Native.Keyboard.make(_elm),
-   $Set = Elm.Set.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
-   var _op = {};
-   var presses = A2($Signal.map,
-   function (_) {
-      return _.keyCode;
-   },
-   $Native$Keyboard.presses);
-   var toXY = F2(function (_p0,keyCodes) {
-      var _p1 = _p0;
-      var is = function (keyCode) {
-         return A2($Set.member,keyCode,keyCodes) ? 1 : 0;
-      };
-      return {x: is(_p1.right) - is(_p1.left)
-             ,y: is(_p1.up) - is(_p1.down)};
-   });
-   var Directions = F4(function (a,b,c,d) {
-      return {up: a,down: b,left: c,right: d};
-   });
-   var dropMap = F2(function (f,signal) {
-      return $Signal.dropRepeats(A2($Signal.map,f,signal));
-   });
-   var EventInfo = F3(function (a,b,c) {
-      return {alt: a,meta: b,keyCode: c};
-   });
-   var Blur = {ctor: "Blur"};
-   var Down = function (a) {    return {ctor: "Down",_0: a};};
-   var Up = function (a) {    return {ctor: "Up",_0: a};};
-   var rawEvents = $Signal.mergeMany(_U.list([A2($Signal.map,
-                                             Up,
-                                             $Native$Keyboard.ups)
-                                             ,A2($Signal.map,Down,$Native$Keyboard.downs)
-                                             ,A2($Signal.map,$Basics.always(Blur),$Native$Keyboard.blurs)]));
-   var empty = {alt: false,meta: false,keyCodes: $Set.empty};
-   var update = F2(function (event,model) {
-      var _p2 = event;
-      switch (_p2.ctor)
-      {case "Down": var _p3 = _p2._0;
-           return {alt: _p3.alt
-                  ,meta: _p3.meta
-                  ,keyCodes: A2($Set.insert,_p3.keyCode,model.keyCodes)};
-         case "Up": var _p4 = _p2._0;
-           return {alt: _p4.alt
-                  ,meta: _p4.meta
-                  ,keyCodes: A2($Set.remove,_p4.keyCode,model.keyCodes)};
-         default: return empty;}
-   });
-   var model = A3($Signal.foldp,update,empty,rawEvents);
-   var alt = A2(dropMap,function (_) {    return _.alt;},model);
-   var meta = A2(dropMap,function (_) {    return _.meta;},model);
-   var keysDown = A2(dropMap,
-   function (_) {
-      return _.keyCodes;
-   },
-   model);
-   var arrows = A2(dropMap,
-   toXY({up: 38,down: 40,left: 37,right: 39}),
-   keysDown);
-   var wasd = A2(dropMap,
-   toXY({up: 87,down: 83,left: 65,right: 68}),
-   keysDown);
-   var isDown = function (keyCode) {
-      return A2(dropMap,$Set.member(keyCode),keysDown);
-   };
-   var ctrl = isDown(17);
-   var shift = isDown(16);
-   var space = isDown(32);
-   var enter = isDown(13);
-   var Model = F3(function (a,b,c) {
-      return {alt: a,meta: b,keyCodes: c};
-   });
-   return _elm.Keyboard.values = {_op: _op
-                                 ,arrows: arrows
-                                 ,wasd: wasd
-                                 ,enter: enter
-                                 ,space: space
-                                 ,ctrl: ctrl
-                                 ,shift: shift
-                                 ,alt: alt
-                                 ,meta: meta
-                                 ,isDown: isDown
-                                 ,keysDown: keysDown
-                                 ,presses: presses};
-};
 Elm.Native = Elm.Native || {};
 Elm.Native.Mouse = {};
 Elm.Native.Mouse.make = function(localRuntime) {
@@ -10662,6 +10404,92 @@ Elm.Mouse.make = function (_elm) {
                               ,y: y
                               ,isDown: isDown
                               ,clicks: clicks};
+};
+Elm.Native = Elm.Native || {};
+Elm.Native.Window = {};
+Elm.Native.Window.make = function make(localRuntime) {
+	localRuntime.Native = localRuntime.Native || {};
+	localRuntime.Native.Window = localRuntime.Native.Window || {};
+	if (localRuntime.Native.Window.values)
+	{
+		return localRuntime.Native.Window.values;
+	}
+
+	var NS = Elm.Native.Signal.make(localRuntime);
+	var Tuple2 = Elm.Native.Utils.make(localRuntime).Tuple2;
+
+
+	function getWidth()
+	{
+		return localRuntime.node.clientWidth;
+	}
+
+
+	function getHeight()
+	{
+		if (localRuntime.isFullscreen())
+		{
+			return window.innerHeight;
+		}
+		return localRuntime.node.clientHeight;
+	}
+
+
+	var dimensions = NS.input('Window.dimensions', Tuple2(getWidth(), getHeight()));
+
+
+	function resizeIfNeeded()
+	{
+		// Do not trigger event if the dimensions have not changed.
+		// This should be most of the time.
+		var w = getWidth();
+		var h = getHeight();
+		if (dimensions.value._0 === w && dimensions.value._1 === h)
+		{
+			return;
+		}
+
+		setTimeout(function() {
+			// Check again to see if the dimensions have changed.
+			// It is conceivable that the dimensions have changed
+			// again while some other event was being processed.
+			w = getWidth();
+			h = getHeight();
+			if (dimensions.value._0 === w && dimensions.value._1 === h)
+			{
+				return;
+			}
+			localRuntime.notify(dimensions.id, Tuple2(w, h));
+		}, 0);
+	}
+
+
+	localRuntime.addListener([dimensions.id], window, 'resize', resizeIfNeeded);
+
+
+	return localRuntime.Native.Window.values = {
+		dimensions: dimensions,
+		resizeIfNeeded: resizeIfNeeded
+	};
+};
+
+Elm.Window = Elm.Window || {};
+Elm.Window.make = function (_elm) {
+   "use strict";
+   _elm.Window = _elm.Window || {};
+   if (_elm.Window.values) return _elm.Window.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Native$Window = Elm.Native.Window.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var _op = {};
+   var dimensions = $Native$Window.dimensions;
+   var width = A2($Signal.map,$Basics.fst,dimensions);
+   var height = A2($Signal.map,$Basics.snd,dimensions);
+   return _elm.Window.values = {_op: _op
+                               ,dimensions: dimensions
+                               ,width: width
+                               ,height: height};
 };
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 
@@ -12538,6 +12366,525 @@ Elm.Html.make = function (_elm) {
                              ,menuitem: menuitem
                              ,menu: menu};
 };
+Elm.Html = Elm.Html || {};
+Elm.Html.Attributes = Elm.Html.Attributes || {};
+Elm.Html.Attributes.make = function (_elm) {
+   "use strict";
+   _elm.Html = _elm.Html || {};
+   _elm.Html.Attributes = _elm.Html.Attributes || {};
+   if (_elm.Html.Attributes.values)
+   return _elm.Html.Attributes.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Html = Elm.Html.make(_elm),
+   $Json$Encode = Elm.Json.Encode.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $String = Elm.String.make(_elm),
+   $VirtualDom = Elm.VirtualDom.make(_elm);
+   var _op = {};
+   var attribute = $VirtualDom.attribute;
+   var contextmenu = function (value) {
+      return A2(attribute,"contextmenu",value);
+   };
+   var property = $VirtualDom.property;
+   var stringProperty = F2(function (name,string) {
+      return A2(property,name,$Json$Encode.string(string));
+   });
+   var $class = function (name) {
+      return A2(stringProperty,"className",name);
+   };
+   var id = function (name) {
+      return A2(stringProperty,"id",name);
+   };
+   var title = function (name) {
+      return A2(stringProperty,"title",name);
+   };
+   var accesskey = function ($char) {
+      return A2(stringProperty,
+      "accessKey",
+      $String.fromChar($char));
+   };
+   var dir = function (value) {
+      return A2(stringProperty,"dir",value);
+   };
+   var draggable = function (value) {
+      return A2(stringProperty,"draggable",value);
+   };
+   var dropzone = function (value) {
+      return A2(stringProperty,"dropzone",value);
+   };
+   var itemprop = function (value) {
+      return A2(stringProperty,"itemprop",value);
+   };
+   var lang = function (value) {
+      return A2(stringProperty,"lang",value);
+   };
+   var tabindex = function (n) {
+      return A2(stringProperty,"tabIndex",$Basics.toString(n));
+   };
+   var charset = function (value) {
+      return A2(stringProperty,"charset",value);
+   };
+   var content = function (value) {
+      return A2(stringProperty,"content",value);
+   };
+   var httpEquiv = function (value) {
+      return A2(stringProperty,"httpEquiv",value);
+   };
+   var language = function (value) {
+      return A2(stringProperty,"language",value);
+   };
+   var src = function (value) {
+      return A2(stringProperty,"src",value);
+   };
+   var height = function (value) {
+      return A2(stringProperty,"height",$Basics.toString(value));
+   };
+   var width = function (value) {
+      return A2(stringProperty,"width",$Basics.toString(value));
+   };
+   var alt = function (value) {
+      return A2(stringProperty,"alt",value);
+   };
+   var preload = function (value) {
+      return A2(stringProperty,"preload",value);
+   };
+   var poster = function (value) {
+      return A2(stringProperty,"poster",value);
+   };
+   var kind = function (value) {
+      return A2(stringProperty,"kind",value);
+   };
+   var srclang = function (value) {
+      return A2(stringProperty,"srclang",value);
+   };
+   var sandbox = function (value) {
+      return A2(stringProperty,"sandbox",value);
+   };
+   var srcdoc = function (value) {
+      return A2(stringProperty,"srcdoc",value);
+   };
+   var type$ = function (value) {
+      return A2(stringProperty,"type",value);
+   };
+   var value = function (value) {
+      return A2(stringProperty,"value",value);
+   };
+   var placeholder = function (value) {
+      return A2(stringProperty,"placeholder",value);
+   };
+   var accept = function (value) {
+      return A2(stringProperty,"accept",value);
+   };
+   var acceptCharset = function (value) {
+      return A2(stringProperty,"acceptCharset",value);
+   };
+   var action = function (value) {
+      return A2(stringProperty,"action",value);
+   };
+   var autocomplete = function (bool) {
+      return A2(stringProperty,"autocomplete",bool ? "on" : "off");
+   };
+   var autosave = function (value) {
+      return A2(stringProperty,"autosave",value);
+   };
+   var enctype = function (value) {
+      return A2(stringProperty,"enctype",value);
+   };
+   var formaction = function (value) {
+      return A2(stringProperty,"formAction",value);
+   };
+   var list = function (value) {
+      return A2(stringProperty,"list",value);
+   };
+   var minlength = function (n) {
+      return A2(stringProperty,"minLength",$Basics.toString(n));
+   };
+   var maxlength = function (n) {
+      return A2(stringProperty,"maxLength",$Basics.toString(n));
+   };
+   var method = function (value) {
+      return A2(stringProperty,"method",value);
+   };
+   var name = function (value) {
+      return A2(stringProperty,"name",value);
+   };
+   var pattern = function (value) {
+      return A2(stringProperty,"pattern",value);
+   };
+   var size = function (n) {
+      return A2(stringProperty,"size",$Basics.toString(n));
+   };
+   var $for = function (value) {
+      return A2(stringProperty,"htmlFor",value);
+   };
+   var form = function (value) {
+      return A2(stringProperty,"form",value);
+   };
+   var max = function (value) {
+      return A2(stringProperty,"max",value);
+   };
+   var min = function (value) {
+      return A2(stringProperty,"min",value);
+   };
+   var step = function (n) {
+      return A2(stringProperty,"step",n);
+   };
+   var cols = function (n) {
+      return A2(stringProperty,"cols",$Basics.toString(n));
+   };
+   var rows = function (n) {
+      return A2(stringProperty,"rows",$Basics.toString(n));
+   };
+   var wrap = function (value) {
+      return A2(stringProperty,"wrap",value);
+   };
+   var usemap = function (value) {
+      return A2(stringProperty,"useMap",value);
+   };
+   var shape = function (value) {
+      return A2(stringProperty,"shape",value);
+   };
+   var coords = function (value) {
+      return A2(stringProperty,"coords",value);
+   };
+   var challenge = function (value) {
+      return A2(stringProperty,"challenge",value);
+   };
+   var keytype = function (value) {
+      return A2(stringProperty,"keytype",value);
+   };
+   var align = function (value) {
+      return A2(stringProperty,"align",value);
+   };
+   var cite = function (value) {
+      return A2(stringProperty,"cite",value);
+   };
+   var href = function (value) {
+      return A2(stringProperty,"href",value);
+   };
+   var target = function (value) {
+      return A2(stringProperty,"target",value);
+   };
+   var downloadAs = function (value) {
+      return A2(stringProperty,"download",value);
+   };
+   var hreflang = function (value) {
+      return A2(stringProperty,"hreflang",value);
+   };
+   var media = function (value) {
+      return A2(stringProperty,"media",value);
+   };
+   var ping = function (value) {
+      return A2(stringProperty,"ping",value);
+   };
+   var rel = function (value) {
+      return A2(stringProperty,"rel",value);
+   };
+   var datetime = function (value) {
+      return A2(stringProperty,"datetime",value);
+   };
+   var pubdate = function (value) {
+      return A2(stringProperty,"pubdate",value);
+   };
+   var start = function (n) {
+      return A2(stringProperty,"start",$Basics.toString(n));
+   };
+   var colspan = function (n) {
+      return A2(stringProperty,"colSpan",$Basics.toString(n));
+   };
+   var headers = function (value) {
+      return A2(stringProperty,"headers",value);
+   };
+   var rowspan = function (n) {
+      return A2(stringProperty,"rowSpan",$Basics.toString(n));
+   };
+   var scope = function (value) {
+      return A2(stringProperty,"scope",value);
+   };
+   var manifest = function (value) {
+      return A2(stringProperty,"manifest",value);
+   };
+   var boolProperty = F2(function (name,bool) {
+      return A2(property,name,$Json$Encode.bool(bool));
+   });
+   var hidden = function (bool) {
+      return A2(boolProperty,"hidden",bool);
+   };
+   var contenteditable = function (bool) {
+      return A2(boolProperty,"contentEditable",bool);
+   };
+   var spellcheck = function (bool) {
+      return A2(boolProperty,"spellcheck",bool);
+   };
+   var async = function (bool) {
+      return A2(boolProperty,"async",bool);
+   };
+   var defer = function (bool) {
+      return A2(boolProperty,"defer",bool);
+   };
+   var scoped = function (bool) {
+      return A2(boolProperty,"scoped",bool);
+   };
+   var autoplay = function (bool) {
+      return A2(boolProperty,"autoplay",bool);
+   };
+   var controls = function (bool) {
+      return A2(boolProperty,"controls",bool);
+   };
+   var loop = function (bool) {
+      return A2(boolProperty,"loop",bool);
+   };
+   var $default = function (bool) {
+      return A2(boolProperty,"default",bool);
+   };
+   var seamless = function (bool) {
+      return A2(boolProperty,"seamless",bool);
+   };
+   var checked = function (bool) {
+      return A2(boolProperty,"checked",bool);
+   };
+   var selected = function (bool) {
+      return A2(boolProperty,"selected",bool);
+   };
+   var autofocus = function (bool) {
+      return A2(boolProperty,"autofocus",bool);
+   };
+   var disabled = function (bool) {
+      return A2(boolProperty,"disabled",bool);
+   };
+   var multiple = function (bool) {
+      return A2(boolProperty,"multiple",bool);
+   };
+   var novalidate = function (bool) {
+      return A2(boolProperty,"noValidate",bool);
+   };
+   var readonly = function (bool) {
+      return A2(boolProperty,"readOnly",bool);
+   };
+   var required = function (bool) {
+      return A2(boolProperty,"required",bool);
+   };
+   var ismap = function (value) {
+      return A2(boolProperty,"isMap",value);
+   };
+   var download = function (bool) {
+      return A2(boolProperty,"download",bool);
+   };
+   var reversed = function (bool) {
+      return A2(boolProperty,"reversed",bool);
+   };
+   var classList = function (list) {
+      return $class(A2($String.join,
+      " ",
+      A2($List.map,$Basics.fst,A2($List.filter,$Basics.snd,list))));
+   };
+   var style = function (props) {
+      return A2(property,
+      "style",
+      $Json$Encode.object(A2($List.map,
+      function (_p0) {
+         var _p1 = _p0;
+         return {ctor: "_Tuple2"
+                ,_0: _p1._0
+                ,_1: $Json$Encode.string(_p1._1)};
+      },
+      props)));
+   };
+   var key = function (k) {    return A2(stringProperty,"key",k);};
+   return _elm.Html.Attributes.values = {_op: _op
+                                        ,key: key
+                                        ,style: style
+                                        ,$class: $class
+                                        ,classList: classList
+                                        ,id: id
+                                        ,title: title
+                                        ,hidden: hidden
+                                        ,type$: type$
+                                        ,value: value
+                                        ,checked: checked
+                                        ,placeholder: placeholder
+                                        ,selected: selected
+                                        ,accept: accept
+                                        ,acceptCharset: acceptCharset
+                                        ,action: action
+                                        ,autocomplete: autocomplete
+                                        ,autofocus: autofocus
+                                        ,autosave: autosave
+                                        ,disabled: disabled
+                                        ,enctype: enctype
+                                        ,formaction: formaction
+                                        ,list: list
+                                        ,maxlength: maxlength
+                                        ,minlength: minlength
+                                        ,method: method
+                                        ,multiple: multiple
+                                        ,name: name
+                                        ,novalidate: novalidate
+                                        ,pattern: pattern
+                                        ,readonly: readonly
+                                        ,required: required
+                                        ,size: size
+                                        ,$for: $for
+                                        ,form: form
+                                        ,max: max
+                                        ,min: min
+                                        ,step: step
+                                        ,cols: cols
+                                        ,rows: rows
+                                        ,wrap: wrap
+                                        ,href: href
+                                        ,target: target
+                                        ,download: download
+                                        ,downloadAs: downloadAs
+                                        ,hreflang: hreflang
+                                        ,media: media
+                                        ,ping: ping
+                                        ,rel: rel
+                                        ,ismap: ismap
+                                        ,usemap: usemap
+                                        ,shape: shape
+                                        ,coords: coords
+                                        ,src: src
+                                        ,height: height
+                                        ,width: width
+                                        ,alt: alt
+                                        ,autoplay: autoplay
+                                        ,controls: controls
+                                        ,loop: loop
+                                        ,preload: preload
+                                        ,poster: poster
+                                        ,$default: $default
+                                        ,kind: kind
+                                        ,srclang: srclang
+                                        ,sandbox: sandbox
+                                        ,seamless: seamless
+                                        ,srcdoc: srcdoc
+                                        ,reversed: reversed
+                                        ,start: start
+                                        ,align: align
+                                        ,colspan: colspan
+                                        ,rowspan: rowspan
+                                        ,headers: headers
+                                        ,scope: scope
+                                        ,async: async
+                                        ,charset: charset
+                                        ,content: content
+                                        ,defer: defer
+                                        ,httpEquiv: httpEquiv
+                                        ,language: language
+                                        ,scoped: scoped
+                                        ,accesskey: accesskey
+                                        ,contenteditable: contenteditable
+                                        ,contextmenu: contextmenu
+                                        ,dir: dir
+                                        ,draggable: draggable
+                                        ,dropzone: dropzone
+                                        ,itemprop: itemprop
+                                        ,lang: lang
+                                        ,spellcheck: spellcheck
+                                        ,tabindex: tabindex
+                                        ,challenge: challenge
+                                        ,keytype: keytype
+                                        ,cite: cite
+                                        ,datetime: datetime
+                                        ,pubdate: pubdate
+                                        ,manifest: manifest
+                                        ,property: property
+                                        ,attribute: attribute};
+};
+Elm.Html = Elm.Html || {};
+Elm.Html.Events = Elm.Html.Events || {};
+Elm.Html.Events.make = function (_elm) {
+   "use strict";
+   _elm.Html = _elm.Html || {};
+   _elm.Html.Events = _elm.Html.Events || {};
+   if (_elm.Html.Events.values) return _elm.Html.Events.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Html = Elm.Html.make(_elm),
+   $Json$Decode = Elm.Json.Decode.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $VirtualDom = Elm.VirtualDom.make(_elm);
+   var _op = {};
+   var keyCode = A2($Json$Decode._op[":="],
+   "keyCode",
+   $Json$Decode.$int);
+   var targetChecked = A2($Json$Decode.at,
+   _U.list(["target","checked"]),
+   $Json$Decode.bool);
+   var targetValue = A2($Json$Decode.at,
+   _U.list(["target","value"]),
+   $Json$Decode.string);
+   var defaultOptions = $VirtualDom.defaultOptions;
+   var Options = F2(function (a,b) {
+      return {stopPropagation: a,preventDefault: b};
+   });
+   var onWithOptions = $VirtualDom.onWithOptions;
+   var on = $VirtualDom.on;
+   var messageOn = F3(function (name,addr,msg) {
+      return A3(on,
+      name,
+      $Json$Decode.value,
+      function (_p0) {
+         return A2($Signal.message,addr,msg);
+      });
+   });
+   var onClick = messageOn("click");
+   var onDoubleClick = messageOn("dblclick");
+   var onMouseMove = messageOn("mousemove");
+   var onMouseDown = messageOn("mousedown");
+   var onMouseUp = messageOn("mouseup");
+   var onMouseEnter = messageOn("mouseenter");
+   var onMouseLeave = messageOn("mouseleave");
+   var onMouseOver = messageOn("mouseover");
+   var onMouseOut = messageOn("mouseout");
+   var onBlur = messageOn("blur");
+   var onFocus = messageOn("focus");
+   var onSubmit = messageOn("submit");
+   var onKey = F3(function (name,addr,handler) {
+      return A3(on,
+      name,
+      keyCode,
+      function (code) {
+         return A2($Signal.message,addr,handler(code));
+      });
+   });
+   var onKeyUp = onKey("keyup");
+   var onKeyDown = onKey("keydown");
+   var onKeyPress = onKey("keypress");
+   return _elm.Html.Events.values = {_op: _op
+                                    ,onBlur: onBlur
+                                    ,onFocus: onFocus
+                                    ,onSubmit: onSubmit
+                                    ,onKeyUp: onKeyUp
+                                    ,onKeyDown: onKeyDown
+                                    ,onKeyPress: onKeyPress
+                                    ,onClick: onClick
+                                    ,onDoubleClick: onDoubleClick
+                                    ,onMouseMove: onMouseMove
+                                    ,onMouseDown: onMouseDown
+                                    ,onMouseUp: onMouseUp
+                                    ,onMouseEnter: onMouseEnter
+                                    ,onMouseLeave: onMouseLeave
+                                    ,onMouseOver: onMouseOver
+                                    ,onMouseOut: onMouseOut
+                                    ,on: on
+                                    ,onWithOptions: onWithOptions
+                                    ,defaultOptions: defaultOptions
+                                    ,targetValue: targetValue
+                                    ,targetChecked: targetChecked
+                                    ,keyCode: keyCode
+                                    ,Options: Options};
+};
 Elm.AudioNodes = Elm.AudioNodes || {};
 Elm.AudioNodes.make = function (_elm) {
    "use strict";
@@ -12686,7 +13033,6 @@ Elm.Orchestrator.make = function (_elm) {
    A2($ElmTest.assertEqual,
    _U.list([4,3,2]),
    A2(rotateList,4,_U.list([3,2,1]))))]));
-   var main = $ElmTest.elementRunner(tests);
    var getNodeId = function (node) {
       var _p0 = node;
       switch (_p0.ctor)
@@ -12715,7 +13061,7 @@ Elm.Orchestrator.make = function (_elm) {
             return _p2._0;
          } else {
             return _U.crashCase("Orchestrator",
-            {start: {line: 395,column: 9},end: {line: 399,column: 78}},
+            {start: {line: 438,column: 9},end: {line: 442,column: 78}},
             _p2)("There aren\'t any nodes of type Destination!");
          }
    };
@@ -12744,7 +13090,7 @@ Elm.Orchestrator.make = function (_elm) {
             return _p5._0;
          } else {
             return _U.crashCase("Orchestrator",
-            {start: {line: 289,column: 5},end: {line: 291,column: 69}},
+            {start: {line: 332,column: 5},end: {line: 334,column: 69}},
             _p5)(A2($Basics._op["++"],
             "Can\'t find node: ",
             $Basics.toString(id)));
@@ -12755,10 +13101,10 @@ Elm.Orchestrator.make = function (_elm) {
       switch (_p7.ctor)
       {case "ID": return A2(getInputNode,graph,_p7._0);
          case "Value": return _U.crashCase("Orchestrator",
-           {start: {line: 295,column: 5},end: {line: 301,column: 45}},
+           {start: {line: 338,column: 5},end: {line: 344,column: 45}},
            _p7)("see getInputNodes");
          default: return _U.crashCase("Orchestrator",
-           {start: {line: 295,column: 5},end: {line: 301,column: 45}},
+           {start: {line: 338,column: 5},end: {line: 344,column: 45}},
            _p7)("see getInputNodes");}
    });
    var getInputNodes = F2(function (node,graph) {
@@ -12777,6 +13123,12 @@ Elm.Orchestrator.make = function (_elm) {
            _p10._0.input)]));
          default: return $Maybe.Nothing;}
    });
+   var ExternalState = F2(function (a,b) {
+      return {time: a,externalInputState: b};
+   });
+   var ExternalInputState = F3(function (a,b,c) {
+      return {xWindowFraction: a,yWindowFraction: b,audioOn: c};
+   });
    var OscillatorInputs = F3(function (a,b,c) {
       return {frequency: a,frequencyOffset: b,phaseOffset: c};
    });
@@ -12791,25 +13143,25 @@ Elm.Orchestrator.make = function (_elm) {
    var Oscillator = function (a) {
       return {ctor: "Oscillator",_0: a};
    };
-   var updateGraphNode = F3(function (graph,time,node) {
+   var updateGraphNode = F3(function (graph,externalState,node) {
       var _p11 = node;
       switch (_p11.ctor)
       {case "Oscillator": var _p16 = _p11._0;
            var _p12 = A3(updateGraphNode$,
            graph,
-           time,
+           externalState,
            _p16.inputs.frequency);
            var graph2 = _p12._0;
            var frequencyValue = _p12._1;
            var _p13 = A3(updateGraphNode$,
            graph2,
-           time,
+           externalState,
            _p16.inputs.frequencyOffset);
            var graph3 = _p13._0;
            var frequencyOffsetValue = _p13._1;
            var _p14 = A3(updateGraphNode$,
            graph3,
-           time,
+           externalState,
            _p16.inputs.phaseOffset);
            var graph4 = _p14._0;
            var phaseOffsetValue = _p14._1;
@@ -12832,7 +13184,7 @@ Elm.Orchestrator.make = function (_elm) {
                        var newPrevValues = A2(rotateList,
                        _p21.state.outputValue,
                        _p21.state.prevValues);
-                       var _p18 = A3(updateGraphNode,graph,time,_p17._0._0);
+                       var _p18 = A3(updateGraphNode,graph,externalState,_p17._0._0);
                        var newGraph = _p18._0;
                        var inputValue = _p18._1;
                        var newValue = A2(_p21.$function,
@@ -12847,18 +13199,21 @@ Elm.Orchestrator.make = function (_elm) {
                               ,_1: newValue};
                     } else {
                        return _U.crashCase("Orchestrator",
-                       {start: {line: 221,column: 13},end: {line: 234,column: 51}},
+                       {start: {line: 245,column: 13},end: {line: 258,column: 51}},
                        _p17)("multiple inputs not supported yet");
                     }
               } else {
                  return _U.crashCase("Orchestrator",
-                 {start: {line: 221,column: 13},end: {line: 234,column: 51}},
+                 {start: {line: 245,column: 13},end: {line: 258,column: 51}},
                  _p17)("no input nodes!");
               }
          case "Destination": var _p22 = A2(getInputNodes,node,graph);
            if (_p22.ctor === "Just") {
                  if (_p22._0.ctor === "::" && _p22._0._1.ctor === "[]") {
-                       var _p23 = A3(updateGraphNode,graph,time,_p22._0._0);
+                       var _p23 = A3(updateGraphNode,
+                       graph,
+                       externalState,
+                       _p22._0._0);
                        var newGraph = _p23._0;
                        var inputValue = _p23._1;
                        var newState = {outputValue: inputValue};
@@ -12868,18 +13223,18 @@ Elm.Orchestrator.make = function (_elm) {
                               ,_1: inputValue};
                     } else {
                        return _U.crashCase("Orchestrator",
-                       {start: {line: 237,column: 13},end: {line: 248,column: 51}},
+                       {start: {line: 261,column: 13},end: {line: 272,column: 51}},
                        _p22)("multiple inputs not supported yet");
                     }
               } else {
                  return _U.crashCase("Orchestrator",
-                 {start: {line: 237,column: 13},end: {line: 248,column: 51}},
+                 {start: {line: 261,column: 13},end: {line: 272,column: 51}},
                  _p22)("no input nodes!");
               }
          case "Add": var _p30 = _p11._0;
            var updateFunc = F2(function (input,_p26) {
               var _p27 = _p26;
-              var _p28 = A3(updateGraphNode$,_p27._0,time,input);
+              var _p28 = A3(updateGraphNode$,_p27._0,externalState,input);
               var newGraph = _p28._0;
               var inputValue = _p28._1;
               return {ctor: "_Tuple2"
@@ -12898,10 +13253,16 @@ Elm.Orchestrator.make = function (_elm) {
                   ,_0: A2(replaceGraphNode,newNode,newGraph)
                   ,_1: newValue};
          default: var _p33 = _p11._0;
-           var _p31 = A3(updateGraphNode$,graph,time,_p33.inputs.signal);
+           var _p31 = A3(updateGraphNode$,
+           graph,
+           externalState,
+           _p33.inputs.signal);
            var graph2 = _p31._0;
            var signalValue = _p31._1;
-           var _p32 = A3(updateGraphNode$,graph2,time,_p33.inputs.gain);
+           var _p32 = A3(updateGraphNode$,
+           graph2,
+           externalState,
+           _p33.inputs.gain);
            var graph3 = _p32._0;
            var gainValue = _p32._1;
            var newValue = A2(_p33.$function,signalValue,gainValue);
@@ -12911,20 +13272,20 @@ Elm.Orchestrator.make = function (_elm) {
                   ,_0: A2(replaceGraphNode,newNode,graph3)
                   ,_1: newValue};}
    });
-   var updateGraphNode$ = F3(function (graph,time,input) {
+   var updateGraphNode$ = F3(function (graph,externalState,input) {
       var _p34 = input;
       switch (_p34.ctor)
       {case "ID": return A3(updateGraphNode,
            graph,
-           time,
+           externalState,
            A2(getInputNode,graph,_p34._0));
          case "Value": return {ctor: "_Tuple2",_0: graph,_1: _p34._0};
          default: return {ctor: "_Tuple2",_0: graph,_1: 0.0};}
    });
-   var updateGraph = F2(function (graph,time) {
+   var updateGraph = F2(function (graph,externalState) {
       return A3(updateGraphNode,
       graph,
-      time,
+      externalState,
       getDestinationNode(graph));
    });
    var Default = {ctor: "Default"};
@@ -12960,6 +13321,8 @@ Elm.Orchestrator.make = function (_elm) {
                                      ,Add: Add
                                      ,Destination: Destination
                                      ,OscillatorInputs: OscillatorInputs
+                                     ,ExternalInputState: ExternalInputState
+                                     ,ExternalState: ExternalState
                                      ,updateGraph: updateGraph
                                      ,updateGraphNode$: updateGraphNode$
                                      ,updateGraphNode: updateGraphNode
@@ -12978,8 +13341,7 @@ Elm.Orchestrator.make = function (_elm) {
                                      ,testDictGraph: testDictGraph
                                      ,feetless: feetless
                                      ,rotateList: rotateList
-                                     ,tests: tests
-                                     ,main: main};
+                                     ,tests: tests};
 };
 Elm.ReactiveAudio = Elm.ReactiveAudio || {};
 Elm.ReactiveAudio.make = function (_elm) {
@@ -12992,26 +13354,25 @@ Elm.ReactiveAudio.make = function (_elm) {
    $Basics = Elm.Basics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
    $Html = Elm.Html.make(_elm),
-   $Keyboard = Elm.Keyboard.make(_elm),
+   $Html$Attributes = Elm.Html.Attributes.make(_elm),
+   $Html$Events = Elm.Html.Events.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Mouse = Elm.Mouse.make(_elm),
    $Orchestrator = Elm.Orchestrator.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm),
-   $Time = Elm.Time.make(_elm);
+   $Time = Elm.Time.make(_elm),
+   $Window = Elm.Window.make(_elm);
    var _op = {};
-   var main = $Html.text("Hello, World!");
-   var userInputSignal = A3($Signal.map2,
-   F2(function (wasd,mousePosition) {
-      return {wasd: wasd,mousePosition: mousePosition};
-   }),
-   $Keyboard.wasd,
-   $Mouse.position);
-   var destinationNode = function (_p0) {
-      var _p1 = _p0;
+   var updateGuiModel = F2(function (action,b) {
+      var _p0 = action;
+      return _p0._0;
+   });
+   var destinationNode = function (_p1) {
+      var _p2 = _p1;
       return $Orchestrator.Destination({id: "destination"
-                                       ,input: _p1.signal
+                                       ,input: _p2.signal
                                        ,state: {outputValue: 0.0}});
    };
    var adderNode = F2(function (id,inputs) {
@@ -13019,20 +13380,20 @@ Elm.ReactiveAudio.make = function (_elm) {
                                ,inputs: inputs
                                ,state: {outputValue: 0.0}});
    });
-   var gainNode = F2(function (id,_p2) {
-      var _p3 = _p2;
+   var gainNode = F2(function (id,_p3) {
+      var _p4 = _p3;
       return $Orchestrator.Gain({id: id
                                 ,$function: $AudioNodes.gain
-                                ,inputs: {signal: _p3.signal,gain: _p3.gain}
+                                ,inputs: {signal: _p4.signal,gain: _p4.gain}
                                 ,state: {outputValue: 0.0}});
    });
-   var sinNode = F2(function (id,_p4) {
-      var _p5 = _p4;
+   var sinNode = F2(function (id,_p5) {
+      var _p6 = _p5;
       return $Orchestrator.Oscillator({id: id
                                       ,$function: $AudioNodes.sinWave
-                                      ,inputs: {frequency: _p5.frequency
-                                               ,frequencyOffset: _p5.frequencyOffset
-                                               ,phaseOffset: _p5.phaseOffset}
+                                      ,inputs: {frequency: _p6.frequency
+                                               ,frequencyOffset: _p6.frequencyOffset
+                                               ,phaseOffset: _p6.phaseOffset}
                                       ,state: {outputValue: 0.0,phase: 0.0}});
    });
    var commaHelper = A2(sinNode,
@@ -13042,30 +13403,8 @@ Elm.ReactiveAudio.make = function (_elm) {
    ,phaseOffset: $Orchestrator.Default});
    var testGraph = _U.list([commaHelper
                            ,A2(sinNode,
-                           "lfoRaw",
-                           {frequency: $Orchestrator.Value(0.25)
-                           ,frequencyOffset: $Orchestrator.Default
-                           ,phaseOffset: $Orchestrator.Default})
-                           ,A2(gainNode,
-                           "lfoGain",
-                           {signal: $Orchestrator.ID("lfoRaw")
-                           ,gain: $Orchestrator.Value(20.0)})
-                           ,A2(adderNode,
-                           "pitch",
-                           _U.list([$Orchestrator.Value(200.0)
-                                   ,$Orchestrator.ID("lfoGain")]))
-                           ,A2(gainNode,
-                           "mod1Frequency",
-                           {signal: $Orchestrator.ID("pitch")
-                           ,gain: $Orchestrator.Value(3.0)})
-                           ,A2(sinNode,
-                           "mod1",
-                           {frequency: $Orchestrator.ID("mod1Frequency")
-                           ,frequencyOffset: $Orchestrator.Default
-                           ,phaseOffset: $Orchestrator.Default})
-                           ,A2(sinNode,
                            "root1",
-                           {frequency: $Orchestrator.ID("mod1Frequency")
+                           {frequency: $Orchestrator.Value(200.0)
                            ,frequencyOffset: $Orchestrator.Default
                            ,phaseOffset: $Orchestrator.Default})
                            ,destinationNode({signal: $Orchestrator.ID("root1")})]);
@@ -13074,7 +13413,7 @@ Elm.ReactiveAudio.make = function (_elm) {
                                                 ,input: $Orchestrator.ID("squareA")
                                                 ,state: {outputValue: 0.0}});
    var sampleRate = 44100;
-   var sampleDuration = 1.0 / sampleRate;
+   var sampleDuration = 1.0 / $Basics.toFloat(sampleRate);
    var bufferSize = 4096;
    var everySecond = $Time.fps(1);
    var requestBuffer = Elm.Native.Port.make(_elm).inboundSignal("requestBuffer",
@@ -13083,47 +13422,112 @@ Elm.ReactiveAudio.make = function (_elm) {
       return typeof v === "boolean" ? v : _U.badPort("a boolean (true or false)",
       v);
    });
-   var bufferRequestWithUserInput = A2($Signal.sampleOn,
-   requestBuffer,
-   userInputSignal);
    var foldn = F3(function (func,initial,count) {
       foldn: while (true) if (_U.cmp(count,0) > 0) {
-            var _v3 = func,_v4 = func(initial),_v5 = count - 1;
-            func = _v3;
-            initial = _v4;
-            count = _v5;
+            var _v4 = func,_v5 = func(initial),_v6 = count - 1;
+            func = _v4;
+            initial = _v5;
+            count = _v6;
             continue foldn;
          } else return initial;
    });
    var updateBufferState = F2(function (userInput,
    prevBufferState) {
-      var updateForSample = function (_p6) {
-         var _p7 = _p6;
-         var newBufferIndex = _p7.bufferIndex + 1;
-         var newTime = _p7.time + sampleDuration;
-         var _p8 = A2($Orchestrator.updateGraph,_p7.graph,newTime);
-         var newGraph = _p8._0;
-         var value = _p8._1;
-         return {time: newTime
-                ,graph: newGraph
-                ,buffer: A3($Array.set,newBufferIndex,value,_p7.buffer)
-                ,bufferIndex: newBufferIndex};
-      };
       var prevBuffer = prevBufferState.buffer;
       var initialGraph = prevBufferState.graph;
       var time = prevBufferState.time + sampleDuration;
+      var externalInputState = {xWindowFraction: $Basics.toFloat(userInput.mousePosition.x) / $Basics.toFloat(userInput.windowDimensions.width)
+                               ,yWindowFraction: $Basics.toFloat(userInput.mousePosition.y) / $Basics.toFloat(userInput.windowDimensions.height)
+                               ,audioOn: userInput.audioOn};
       var initialBufferState = {time: time
                                ,graph: initialGraph
                                ,buffer: prevBuffer
-                               ,bufferIndex: 0};
-      var _p9 = A2($Debug.log,"userInput: ",userInput);
+                               ,bufferIndex: 0
+                               ,externalInputState: externalInputState};
+      var updateForSample = function (_p7) {
+         var _p8 = _p7;
+         var _p11 = _p8.graph;
+         var _p10 = _p8.buffer;
+         var newBufferIndex = _p8.bufferIndex + 1;
+         var newTime = _p8.time + sampleDuration;
+         var externalState = {time: newTime
+                             ,externalInputState: externalInputState};
+         if (_U.eq(externalInputState.audioOn,true)) {
+               var _p9 = A2($Orchestrator.updateGraph,_p11,externalState);
+               var newGraph = _p9._0;
+               var value = _p9._1;
+               return {time: newTime
+                      ,graph: newGraph
+                      ,buffer: A3($Array.set,newBufferIndex,value,_p10)
+                      ,bufferIndex: newBufferIndex
+                      ,externalInputState: externalInputState};
+            } else return {time: newTime
+                          ,graph: _p11
+                          ,buffer: A3($Array.set,newBufferIndex,0.0,_p10)
+                          ,bufferIndex: newBufferIndex
+                          ,externalInputState: externalInputState};
+      };
       return A3(foldn,updateForSample,initialBufferState,bufferSize);
    });
    var initialBuffer = A2($Array.repeat,bufferSize,0.0);
    var initialBufferState = {time: 0.0
                             ,graph: testGraphDict
                             ,buffer: initialBuffer
-                            ,bufferIndex: 0};
+                            ,bufferIndex: 0
+                            ,externalInputState: {xWindowFraction: 0.0
+                                                 ,yWindowFraction: 0.0
+                                                 ,audioOn: false}};
+   var UserInput = F3(function (a,b,c) {
+      return {mousePosition: a,windowDimensions: b,audioOn: c};
+   });
+   var BufferState = F5(function (a,b,c,d,e) {
+      return {time: a
+             ,graph: b
+             ,buffer: c
+             ,bufferIndex: d
+             ,externalInputState: e};
+   });
+   var ExternalInputState = F3(function (a,b,c) {
+      return {xWindowFraction: a,yWindowFraction: b,audioOn: c};
+   });
+   var AudioOn = function (a) {
+      return {ctor: "AudioOn",_0: a};
+   };
+   var audioOnCheckbox = F2(function (address,isChecked) {
+      return A2($Html.div,
+      _U.list([]),
+      _U.list([A2($Html.input,
+              _U.list([$Html$Attributes.type$("checkbox")
+                      ,$Html$Attributes.checked(isChecked)
+                      ,A3($Html$Events.on,
+                      "change",
+                      $Html$Events.targetChecked,
+                      function (isChecked) {
+                         return A2($Signal.message,address,AudioOn(isChecked));
+                      })]),
+              _U.list([]))
+              ,$Html.text("AUDIO ON")
+              ,$Html.text(isChecked ? " (ON)" : " (OFF)")]));
+   });
+   var guiMailbox = $Signal.mailbox(AudioOn(true));
+   var guiModelSignal = A3($Signal.foldp,
+   updateGuiModel,
+   false,
+   guiMailbox.signal);
+   var userInputSignal = A4($Signal.map3,
+   F3(function (_p13,_p12,audioOn) {
+      var _p14 = _p13;
+      var _p15 = _p12;
+      return {mousePosition: {x: _p14._0,y: _p14._1}
+             ,windowDimensions: {width: _p15._0,height: _p15._1}
+             ,audioOn: audioOn};
+   }),
+   $Mouse.position,
+   $Window.dimensions,
+   guiModelSignal);
+   var bufferRequestWithUserInput = A2($Signal.sampleOn,
+   requestBuffer,
+   userInputSignal);
    var bufferStateSignal = A3($Signal.foldp,
    updateBufferState,
    initialBufferState,
@@ -13139,13 +13543,16 @@ Elm.ReactiveAudio.make = function (_elm) {
       return _.buffer;
    },
    bufferStateSignal));
-   var EmptyRecord = {};
-   var BufferState = F4(function (a,b,c,d) {
-      return {time: a,graph: b,buffer: c,bufferIndex: d};
-   });
+   var guiView = function (model) {
+      return A2(audioOnCheckbox,guiMailbox.address,model);
+   };
+   var guiSignal = A2($Signal.map,guiView,guiModelSignal);
+   var main = guiSignal;
    return _elm.ReactiveAudio.values = {_op: _op
+                                      ,AudioOn: AudioOn
+                                      ,ExternalInputState: ExternalInputState
                                       ,BufferState: BufferState
-                                      ,EmptyRecord: EmptyRecord
+                                      ,UserInput: UserInput
                                       ,initialBuffer: initialBuffer
                                       ,foldn: foldn
                                       ,everySecond: everySecond
@@ -13165,5 +13572,11 @@ Elm.ReactiveAudio.make = function (_elm) {
                                       ,userInputSignal: userInputSignal
                                       ,bufferRequestWithUserInput: bufferRequestWithUserInput
                                       ,bufferStateSignal: bufferStateSignal
+                                      ,audioOnCheckbox: audioOnCheckbox
+                                      ,updateGuiModel: updateGuiModel
+                                      ,guiMailbox: guiMailbox
+                                      ,guiModelSignal: guiModelSignal
+                                      ,guiView: guiView
+                                      ,guiSignal: guiSignal
                                       ,main: main};
 };

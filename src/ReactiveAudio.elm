@@ -1,15 +1,23 @@
 module ReactiveAudio where
 
-import Debug exposing (log)
+-- import Debug exposing (log)
 
+import Html exposing (..)
+import Html.Attributes exposing (..)
+import Html.Events exposing (on, targetChecked)
+-- import Signal
+-- import StartApp.Simple as StartApp
 
-import Html exposing (text)
+-- import Html exposing (text)
+-- import Graphics.Element
+-- import Graphics.Input
 
 import Time exposing (Time, fps)
-import Keyboard
+-- import Keyboard
 import Mouse
-
+import Window
 import AudioNodes exposing
+
     ( squareWave
     , OscillatorType(Square, Saw, Sin)
     , oscillator
@@ -26,15 +34,32 @@ import Orchestrator exposing
     , AudioNode(Oscillator, Destination, Add, FeedforwardProcessor, Gain)
     , Input(ID, Default, Value)
     , updateGraph
+    , ExternalState
+    , ExternalInputState
     )
 
+--------------------------------------------------------------------------------
+-- Types
+--------------------------------------------------------------------------------
+
+-- type GuiAction : AudioOn Bool
+-- type Input = ID String | Value Float | Default   -- or it could be an AudioNode! Maybe?
+type GuiAction = AudioOn Bool
+
 type alias Buffer = Array Float
+
+type alias ExternalInputState =
+    { xWindowFraction: Float
+    , yWindowFraction: Float
+    , audioOn : Bool
+    }
 
 type alias BufferState =
     { time: Float
     , graph: DictGraph
     , buffer: Buffer
     , bufferIndex: Int
+    , externalInputState: ExternalInputState
     }
 
 
@@ -42,28 +67,24 @@ type alias BufferState =
 
 
 
+type alias UserInput =
+    { mousePosition : { x : Int, y : Int}
+    , windowDimensions : { width: Int, height: Int}
+    , audioOn : Bool
+    }
+
 {- type alias Positioned a =
     { a | x : Float, y : Float } -}
 
 
 {- type alias EmptyRecord a =
     { a |  x : Float} -}
-
-type alias EmptyRecord =
-    { }
-
-
-type alias Positioned a =
-  { a | x : Float, y : Float }
-
-type alias Named a =
-  { a | name : String }
-
-type alias Moving a =
-  { a | velocity : Float, angle : Float }
+{- type alias Positioned a =
+    { a | x : Float, y : Float } -}
 
 
-type alias Something = Named  (Moving  ( Positioned EmptyRecord))
+{- type alias EmptyRecord a =
+    { a |  x : Float} -}
 
 
 -- type alias Asdf (Positioned {})
@@ -91,21 +112,34 @@ port requestBuffer : Signal Bool
 everySecond : Signal Time
 everySecond = fps 1
 
-
+bufferSize : Int
 bufferSize = 4096
 
+sampleRate : Int
 sampleRate = 44100
 
-sampleDuration = 1.0 / sampleRate
+sampleDuration : Float
+sampleDuration = 1.0 / toFloat sampleRate
 
 
 
--- updateBufferState : ? -> BufferState -> BufferState
+updateBufferState : UserInput -> BufferState -> BufferState
 updateBufferState userInput prevBufferState =
 
     let
-        _ = Debug.log "userInput: " userInput
+
+        externalInputState : ExternalInputState
+        externalInputState =
+            { xWindowFraction = toFloat userInput.mousePosition.x / toFloat userInput.windowDimensions.width
+            , yWindowFraction = toFloat userInput.mousePosition.y / toFloat userInput.windowDimensions.height
+            , audioOn = userInput.audioOn
+            }
+        -- _ = Debug.log "externalInputState: " externalInputState
+
         time = prevBufferState.time + sampleDuration
+
+        -- frequency = 40.0 + (xWindowFraction * 10000.0) -- how do we pass this in?
+
         initialGraph = prevBufferState.graph
 {-         _ = Debug.log "sampleCuration" sampleDuration
         _ = Debug.log "updateBufferState time" time -}
@@ -115,27 +149,47 @@ updateBufferState userInput prevBufferState =
         -- we can just iterate over the last buffer, and ignore values
 
         prevBuffer = prevBufferState.buffer
+
+        initialBufferState : BufferState
         initialBufferState =
             { time = time
             , graph = initialGraph
             , buffer = prevBuffer
             , bufferIndex = 0
+            , externalInputState = externalInputState
             }
 
         updateForSample {time, graph, buffer, bufferIndex} =
             let
                 newTime  = time + sampleDuration
+                externalState =
+                    { time = newTime
+                    , externalInputState = externalInputState
+                    }
 --                 _ = Debug.log "udpateForSample newTime" newTime
-                (newGraph, value) = updateGraph graph newTime
                 newBufferIndex = bufferIndex + 1
 --                 _ = Debug.log "newBufferIndex" newBufferIndex
 --                 _ = Debug.log "value" value
             in
-                { time  = newTime
-                , graph = newGraph
-                , buffer = Array.set newBufferIndex value buffer
-                , bufferIndex = newBufferIndex
-                }
+                if
+                    externalInputState.audioOn == True
+                then
+                    let
+                        (newGraph, value) = updateGraph graph externalState
+                    in
+                        { time  = newTime
+                        , graph = newGraph
+                        , buffer = Array.set newBufferIndex value buffer
+                        , bufferIndex = newBufferIndex
+                        , externalInputState =  externalInputState
+                        }
+                else
+                    { time  = newTime
+                    , graph = graph
+                    , buffer = Array.set newBufferIndex 0.0 buffer
+                    , bufferIndex = newBufferIndex
+                    , externalInputState =  externalInputState
+                    }
     in
         foldn updateForSample initialBufferState bufferSize
 
@@ -150,6 +204,7 @@ updateBufferState userInput prevBufferState =
 
 
 
+destinationA : AudioNode
 destinationA =
     Destination
         { id = "destinationA"
@@ -190,6 +245,7 @@ destinationA =
             }
         } -}
 
+sinNode : String -> {frequency: Input, frequencyOffset: Input, phaseOffset: Input} -> AudioNode
 sinNode id {frequency, frequencyOffset, phaseOffset} =
   Oscillator
     { id = id
@@ -199,6 +255,7 @@ sinNode id {frequency, frequencyOffset, phaseOffset} =
         { outputValue = 0.0, phase = 0.0  }
     }
 
+gainNode : String -> {signal: Input, gain: Input} -> AudioNode
 gainNode id {signal, gain} =
     Gain
         { id = id
@@ -207,7 +264,7 @@ gainNode id {signal, gain} =
         , state =
             { outputValue = 0.0 }
         }
-
+adderNode : String -> List Input -> AudioNode
 adderNode id inputs =
     Add
         { id = id
@@ -216,6 +273,7 @@ adderNode id inputs =
             { outputValue = 0.0 }
         }
 
+destinationNode : {signal: Input} -> AudioNode
 destinationNode {signal} =
     Destination
         { id = "destination"
@@ -224,7 +282,7 @@ destinationNode {signal} =
             { outputValue = 0.0 }
         }
 
-
+commaHelper : AudioNode
 commaHelper =
   sinNode "dummy123456789" {frequency = Default, frequencyOffset = Default, phaseOffset = Default }
 
@@ -265,19 +323,20 @@ testGraph =
     , sinNode "mod5" {frequency = Value 200.0, frequencyOffset = Value 666.0, phaseOffset = ID "mod6"}
     , sinNode "mod4" {frequency = Value 200.0, frequencyOffset = Value 666.0, phaseOffset = ID "mod5"} -}
 
-    , sinNode "lfoRaw" {frequency = Value 0.25, frequencyOffset = Default, phaseOffset = Default}
-    , gainNode "lfoGain" {signal = ID "lfoRaw", gain = Value 20.0}
-    , adderNode "pitch" [Value 200.0, ID "lfoGain"]
+    -- , sinNode "lfoRaw" {frequency = Value 0.25, frequencyOffset = Default, phaseOffset = Default}
+    -- , gainNode "lfoGain" {signal = ID "lfoRaw", gain = Value 20.0}
+    -- , adderNode "pitch" [Value 200.0, ID "lfoGain"]
 
 --     , sinNode "mod3" {frequency = ID "pitch", frequencyOffset = Default, phaseOffset = Default}
 --     , sinNode "mod2" {frequency = ID "pitch", frequencyOffset = Default, phaseOffset = Default}
 
-    , gainNode "mod1Frequency" {signal = ID "pitch", gain = Value 3.0}
-    , sinNode "mod1" {frequency = ID "mod1Frequency", frequencyOffset = Default, phaseOffset = Default }
+    -- , gainNode "mod1Frequency" {signal = ID "pitch", gain = Value 3.0}
+    -- , sinNode "mod1" {frequency = ID "mod1Frequency", frequencyOffset = Default, phaseOffset = Default }
 
 --     , sinNode "root1" {frequency = ID "pitch", frequencyOffset = Default, phaseOffset = ID "mod1"}
-    , sinNode "root1" {frequency = ID "mod1Frequency", frequencyOffset = Default, phaseOffset = Default}
---     , sinNode "root1" {frequency = ID "pitch", frequencyOffset = Default, phaseOffset = Default}
+    -- , sinNode "root1" {frequency = ID "mod1Frequency", frequencyOffset = Default, phaseOffset = Default}
+    -- , sinNode "root1" {frequency = ID "pitch", frequencyOffset = Default, phaseOffset = Default}
+    , sinNode "root1" {frequency = Value 200.0, frequencyOffset = Default, phaseOffset = Default}
 
 
     , destinationNode {signal = ID "root1"}
@@ -289,12 +348,23 @@ testGraph =
 
 
 
+-- perhaps put external input here? Why not
+testGraphDict : DictGraph
 testGraphDict = toDict testGraph
+
+
+
+initialBufferState : BufferState
 initialBufferState =
     { time = 0.0
     , graph = testGraphDict
     , buffer = initialBuffer
     , bufferIndex = 0
+    , externalInputState =
+        { xWindowFraction = 0.0
+        , yWindowFraction = 0.0
+        , audioOn = False
+        }
     }
 
 
@@ -311,13 +381,24 @@ initialBufferState =
 
 -- wasd : Signal { x : Int, y : Int }
 
+userInputSignal : Signal UserInput
 userInputSignal =
-    Signal.map2
-    (\wasd mousePosition -> {wasd = wasd, mousePosition = mousePosition})
-    Keyboard.wasd
-    Mouse.position
+    Signal.map3
+        ( \(mouseX, mouseY) (windowWidth, windowHeight) audioOn ->
+            -- { wasd = wasd
+            { mousePosition = {x = mouseX, y = mouseY}
+            , windowDimensions = {width = windowWidth, height = windowHeight}
+            , audioOn = audioOn
+            }
+        )
+        -- Keyboard.wasd
+        Mouse.position
+        Window.dimensions
+        guiModelSignal
 
 
+
+bufferRequestWithUserInput : Signal UserInput
 bufferRequestWithUserInput = Signal.sampleOn requestBuffer userInputSignal
 
 
@@ -352,15 +433,59 @@ getSampleTime bufferIndex bufferStartTime =
 
 
 
-main =
-  text "Hello, World!"
 
 
+audioOnCheckbox : Signal.Address GuiAction -> Bool -> Html
+audioOnCheckbox address isChecked =
+  div []
+      [ input
+          [ type' "checkbox"
+          , checked isChecked
+          , on "change" targetChecked (\isChecked -> Signal.message address (AudioOn isChecked))
+          ]
+          []
+      , text "AUDIO ON"
+      , text (if isChecked then " (ON)" else " (OFF)")
+      ]
 
+
+updateGuiModel : GuiAction -> Bool -> Bool
+updateGuiModel action b =
+    case action of
+        AudioOn bool ->
+            bool
+
+guiMailbox : Signal.Mailbox GuiAction
+guiMailbox = Signal.mailbox (AudioOn True)
+
+guiModelSignal : Signal Bool
+guiModelSignal =
+    Signal.foldp
+        updateGuiModel
+        False
+        guiMailbox.signal
+
+guiView : Bool -> Html
+guiView model =
+    audioOnCheckbox guiMailbox.address model
+guiSignal : Signal Html
+guiSignal = Signal.map guiView guiModelSignal
+
+-- map : (a -> result) -> Signal a -> Signal result
+
+-- foldp
+--     :  (a -> state -> state)
+--     -> state
+--     -> Signal a
+--     -> Signal state
+
+-- main : Html
+-- main =
+--     audioOnCheckbox
+
+main : Signal Html
+main = guiSignal
 
 
 port latestBuffer : Signal (Array Float)
 port latestBuffer = Signal.map .buffer bufferStateSignal
-
-
-

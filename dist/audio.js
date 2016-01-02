@@ -73,11 +73,6 @@ if (PROFILING) {
     //             outputData[i] = 1.0;
             }
         }
-        buffersElapsed += 1;
-        timeElapsed += BUFFER_DURATION;
-        if (buffersElapsed % 10 == 0) {
-            console.log('time elapsed: ', timeElapsed);
-        }
         elm.ports.requestBuffer.send(true);
     }
 
