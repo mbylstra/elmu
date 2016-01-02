@@ -107,17 +107,6 @@ foldn func initial count =
 
 
 
-everySecond : Signal Time
-everySecond = fps 1
-
-bufferSize : Int
-bufferSize = 4096
-
-sampleRate : Int
-sampleRate = 44100
-
-sampleDuration : Float
-sampleDuration = 1.0 / toFloat sampleRate
 
 
 
@@ -325,20 +314,20 @@ audioGraph =
     , sinNode "mod5" {frequency = Value 200.0, frequencyOffset = Value 666.0, phaseOffset = ID "mod6"}
     , sinNode "mod4" {frequency = Value 200.0, frequencyOffset = Value 666.0, phaseOffset = ID "mod5"} -}
 
-    -- , sinNode "lfoRaw" {frequency = Value 0.25, frequencyOffset = Default, phaseOffset = Default}
-    -- , gainNode "lfoGain" {signal = ID "lfoRaw", gain = Value 20.0}
-    -- , adderNode "pitch" [Value 200.0, ID "lfoGain"]
+    , sinNode "lfoRaw" {frequency = Value 0.25, frequencyOffset = Default, phaseOffset = Default}
+    , gainNode "lfoGain" {signal = ID "lfoRaw", gain = Value 20.0}
+    , adderNode "pitch" [Value 200.0, ID "lfoGain"]
 
 --     , sinNode "mod3" {frequency = ID "pitch", frequencyOffset = Default, phaseOffset = Default}
---     , sinNode "mod2" {frequency = ID "pitch", frequencyOffset = Default, phaseOffset = Default}
+    -- , sinNode "mod2" {frequency = ID "pitch", frequencyOffset = Default, phaseOffset = Default}
 
-    -- , gainNode "mod1Frequency" {signal = ID "pitch", gain = Value 3.0}
-    -- , sinNode "mod1" {frequency = ID "mod1Frequency", frequencyOffset = Default, phaseOffset = Default }
+    , gainNode "mod1Frequency" {signal = ID "pitch", gain = Value 3.0}
+    , sinNode "mod1" {frequency = ID "mod1Frequency", frequencyOffset = Default, phaseOffset = Default }
 
---     , sinNode "root1" {frequency = ID "pitch", frequencyOffset = Default, phaseOffset = ID "mod1"}
+    , sinNode "root1" {frequency = ID "pitch", frequencyOffset = Default, phaseOffset = ID "mod1"}
     -- , sinNode "root1" {frequency = ID "mod1Frequency", frequencyOffset = Default, phaseOffset = Default}
     -- , sinNode "root1" {frequency = ID "pitch", frequencyOffset = Default, phaseOffset = Default}
-    , sinNode "root1" {frequency = Value 200.0, frequencyOffset = Default, phaseOffset = Default}
+    -- , sinNode "root1" {frequency = Value 200.0, frequencyOffset = Default, phaseOffset = Default}
 
 
     , destinationNode {signal = ID "root1"}

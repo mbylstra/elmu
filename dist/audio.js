@@ -5,10 +5,14 @@
 
 
 timeElapsed = 0.0;
+// var BUFFER_SIZE = 4096;  //92 milliseconds, pretty shit!
 var BUFFER_SIZE = 4096;  //92 milliseconds, pretty shit!
+// var BUFFER_SIZE = 2048;  //92 milliseconds, pretty shit!
+// var BUFFER_SIZE = 1024;  //92 milliseconds, pretty shit!
+// var BUFFER_SIZE = 512;  //92 milliseconds, pretty shit!
 var SAMPLE_RATE = 44100;
-var BUFFER_DURATION = (1 / SAMPLE_RATE) * BUFFER_SIZE;
-console.log('buffer duration', BUFFER_DURATION);
+var SAMPLE_DURATION = 1.0 / SAMPLE_RATE;
+var BUFFER_DURATION = SAMPLE_DURATION * BUFFER_SIZE;
 
 buffersElapsed = 0;
 
@@ -18,10 +22,13 @@ var latestUserInput = {
     audioOn: false
 }
 
-
-
 var startTime = window.performance.now();
 var endTime = null;
+
+var unpackTuple2 = function(tuple2) {
+  return [tuple2._0, tuple2._1]
+}
+
 
 var ITERATIONS = 10;
 var MAX_ALLOWED_DURATION = ITERATIONS * BUFFER_DURATION;
@@ -57,9 +64,6 @@ if (PROFILING) {
     // });
 
 } else {
-    console.log(Elm);
-    console.log('Elm.ReactiveAudio', Elm.ReactiveAudio);
-    console.log('Elm.Gui', Elm.ReactiveAudio);
 
     var elmGui = Elm.fullscreen(Elm.Gui);
     // var elmAudio = Elm.worker(Elm.ReactiveAudio);
@@ -68,11 +72,14 @@ if (PROFILING) {
 
     //expose Elm modules
     var Orchestrator = exposeElmModule(Elm.Orchestrator);
+
+    var updateGraph = function(initialAudioGraph, externalState) {
+      return unpackTuple2(Orchestrator.updateGraph(initialAudioGraph)(externalState));
+    }
     var ReactiveAudio = exposeElmModule(Elm.ReactiveAudio);
 
     var initialAudioGraph = Orchestrator.toDict(ReactiveAudio.audioGraph);
     var audioGraph = initialAudioGraph;
-    console.log('audioGraph', ReactiveAudio.audioGraph);
 
 
 
@@ -97,20 +104,17 @@ if (PROFILING) {
       }
     }
 
-    var result = Orchestrator.updateGraph(initialAudioGraph)(externalState);
-    console.log('result', result);
-    // console.log('result()', result());
+    // var result = updateGraph(initialAudioGraph, externalState);
     //expose Elm modules
     // var Orchestorator = Elm.Orchestrator.make(elmAudio);
 
-    // console.log(elmAudio);
 
     // var latestBuffer = [];
 
 
     elmGui.ports.outgoingUserInput.subscribe(function(userInput) {
-      // console.log('userInput', userInput);
-      latestUserInput = userInput;
+      // latestUserInput = userInput;
+      externalState.externalInputState = userInput;
     });
 
 
@@ -126,15 +130,101 @@ if (PROFILING) {
 //     var lowpass = audioCtx.createBiquadFilter();
     scriptNode.onaudioprocess = function(audioProcessingEvent) {
       // console.log('latest user input', latestUserInput);
-    //     var outputBuffer = audioProcessingEvent.outputBuffer;
-    //     for (var channel = 0; channel < outputBuffer.numberOfChannels; channel++) {
-    //     var outputData = outputBuffer.getChannelData(channel);
-    //         for (var i = 0; i < outputBuffer.length; i++) {
-    //             outputData[i] = latestBuffer[i];
-    // //             outputData[i] = 1.0;
-    //         }
-    //     }
-        // elm.ports.requestBuffer.send(true);
+        var outputBuffer = audioProcessingEvent.outputBuffer;
+
+        var monoBuffer = [];
+        for (var i = 0; i < BUFFER_SIZE; i++) {
+          var result = updateGraph(audioGraph, externalState);
+          audioGraph = result[0];
+          monoBuffer[i]= result[1];
+        }
+        // here we fill the buffer (and use same values for both channels)
+
+        for (var channelNumber = 0; channelNumber < outputBuffer.numberOfChannels; channelNumber++) {
+          var outputData = outputBuffer.getChannelData(channelNumber);
+              for (var i = 0; i < outputBuffer.length; i++) {
+                  var value;
+                  if (externalState.externalInputState.audioOn) {
+                    value = monoBuffer[i];
+                  } else {
+                    value = 0.0;
+                  }
+                  outputData[i] = value;
+              }
+          }
+
+// -- updateBufferState : UserInput -> BufferState -> BufferState
+// -- updateBufferState userInput prevBufferState =
+// --
+// --     let
+// --
+// --         externalInputState : ExternalInputState
+// --         externalInputState =
+// --             { xWindowFraction = toFloat userInput.mousePosition.x / toFloat userInput.windowDimensions.width
+// --             , yWindowFraction = toFloat userInput.mousePosition.y / toFloat userInput.windowDimensions.height
+// --             , audioOn = userInput.audioOn
+// --             }
+// --         -- _ = Debug.log "externalInputState: " externalInputState
+// --
+// --         time = prevBufferState.time + sampleDuration
+// --
+// --         -- frequency = 40.0 + (xWindowFraction * 10000.0) -- how do we pass this in?
+// --
+// --         initialGraph = prevBufferState.graph
+// -- {-         _ = Debug.log "sampleCuration" sampleDuration
+// --         _ = Debug.log "updateBufferState time" time -}
+// --
+// --
+// --         -- surely we can do this without having to manually create a counter?
+// --         -- we can just iterate over the last buffer, and ignore values
+// --
+// --         prevBuffer = prevBufferState.buffer
+// --
+// --         initialBufferState : BufferState
+// --         initialBufferState =
+// --             { time = time
+// --             , graph = initialGraph
+// --             , buffer = prevBuffer
+// --             , bufferIndex = 0
+// --             , externalInputState = externalInputState
+// --             }
+// --
+// --         -- we must expose this as a public function
+// --         updateForSample {time, graph, buffer, bufferIndex} =
+// --             let
+// --                 newTime  = time + sampleDuration
+// --                 externalState =
+// --                     { time = newTime
+// --                     , externalInputState = externalInputState
+// --                     }
+// -- --                 _ = Debug.log "udpateForSample newTime" newTime
+// --                 newBufferIndex = bufferIndex + 1
+// -- --                 _ = Debug.log "newBufferIndex" newBufferIndex
+// -- --                 _ = Debug.log "value" value
+// --             in
+// --                 if
+// --                     externalInputState.audioOn == True
+// --                 then
+// --                     let
+// --                         -- this is pretty much all elm will do
+// --                         (newGraph, value) = updateGraph graph externalState
+// --                     in
+// --                         -- this will be done in JS land
+// --                         { time  = newTime
+// --                         , graph = newGraph
+// --                         , buffer = Array.set newBufferIndex value buffer
+// --                         , bufferIndex = newBufferIndex
+// --                         , externalInputState =  externalInputState
+// --                         }
+// --                 else
+// --                     { time  = newTime
+// --                     , graph = graph
+// --                     , buffer = Array.set newBufferIndex 0.0 buffer
+// --                     , bufferIndex = newBufferIndex
+// --                     , externalInputState =  externalInputState
+// --                     }
+// --     in
+// --         foldn updateForSample initialBufferState bufferSize
     }
 
 

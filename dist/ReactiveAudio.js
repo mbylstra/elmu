@@ -13447,8 +13447,7 @@ Elm.ReactiveAudio.make = function (_elm) {
    $Maybe = Elm.Maybe.make(_elm),
    $Orchestrator = Elm.Orchestrator.make(_elm),
    $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm),
-   $Time = Elm.Time.make(_elm);
+   $Signal = Elm.Signal.make(_elm);
    var _op = {};
    var main = $Html.text("Hello, World!");
    var destinationNode = function (_p0) {
@@ -13485,18 +13484,36 @@ Elm.ReactiveAudio.make = function (_elm) {
    ,phaseOffset: $Orchestrator.Default});
    var audioGraph = _U.list([commaHelper
                             ,A2(sinNode,
-                            "root1",
-                            {frequency: $Orchestrator.Value(200.0)
+                            "lfoRaw",
+                            {frequency: $Orchestrator.Value(0.25)
                             ,frequencyOffset: $Orchestrator.Default
                             ,phaseOffset: $Orchestrator.Default})
+                            ,A2(gainNode,
+                            "lfoGain",
+                            {signal: $Orchestrator.ID("lfoRaw")
+                            ,gain: $Orchestrator.Value(20.0)})
+                            ,A2(adderNode,
+                            "pitch",
+                            _U.list([$Orchestrator.Value(200.0)
+                                    ,$Orchestrator.ID("lfoGain")]))
+                            ,A2(gainNode,
+                            "mod1Frequency",
+                            {signal: $Orchestrator.ID("pitch")
+                            ,gain: $Orchestrator.Value(3.0)})
+                            ,A2(sinNode,
+                            "mod1",
+                            {frequency: $Orchestrator.ID("mod1Frequency")
+                            ,frequencyOffset: $Orchestrator.Default
+                            ,phaseOffset: $Orchestrator.Default})
+                            ,A2(sinNode,
+                            "root1",
+                            {frequency: $Orchestrator.ID("pitch")
+                            ,frequencyOffset: $Orchestrator.Default
+                            ,phaseOffset: $Orchestrator.ID("mod1")})
                             ,destinationNode({signal: $Orchestrator.ID("root1")})]);
    var destinationA = $Orchestrator.Destination({id: "destinationA"
                                                 ,input: $Orchestrator.ID("squareA")
                                                 ,state: {outputValue: 0.0}});
-   var sampleRate = 44100;
-   var sampleDuration = 1.0 / $Basics.toFloat(sampleRate);
-   var bufferSize = 4096;
-   var everySecond = $Time.fps(1);
    var foldn = F3(function (func,initial,count) {
       foldn: while (true) if (_U.cmp(count,0) > 0) {
             var _v3 = func,_v4 = func(initial),_v5 = count - 1;
@@ -13522,10 +13539,6 @@ Elm.ReactiveAudio.make = function (_elm) {
                                       ,BufferState: BufferState
                                       ,reallyDumb: reallyDumb
                                       ,foldn: foldn
-                                      ,everySecond: everySecond
-                                      ,bufferSize: bufferSize
-                                      ,sampleRate: sampleRate
-                                      ,sampleDuration: sampleDuration
                                       ,destinationA: destinationA
                                       ,sinNode: sinNode
                                       ,gainNode: gainNode
