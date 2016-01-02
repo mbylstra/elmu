@@ -13004,6 +13004,94 @@ Elm.AudioNodes.make = function (_elm) {
                                    ,tests: tests
                                    ,main: main};
 };
+Elm.Gui = Elm.Gui || {};
+Elm.Gui.make = function (_elm) {
+   "use strict";
+   _elm.Gui = _elm.Gui || {};
+   if (_elm.Gui.values) return _elm.Gui.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Html = Elm.Html.make(_elm),
+   $Html$Attributes = Elm.Html.Attributes.make(_elm),
+   $Html$Events = Elm.Html.Events.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Mouse = Elm.Mouse.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $Window = Elm.Window.make(_elm);
+   var _op = {};
+   var updateGuiModel = F2(function (action,b) {
+      var _p0 = action;
+      return _p0._0;
+   });
+   var dummy = "dummy!";
+   var AudioOn = function (a) {
+      return {ctor: "AudioOn",_0: a};
+   };
+   var guiMailbox = $Signal.mailbox(AudioOn(true));
+   var guiModelSignal = A3($Signal.foldp,
+   updateGuiModel,
+   false,
+   guiMailbox.signal);
+   var userInputSignal = A4($Signal.map3,
+   F3(function (_p2,_p1,audioOn) {
+      var _p3 = _p2;
+      var _p4 = _p1;
+      return {mousePosition: {x: _p3._0,y: _p3._1}
+             ,windowDimensions: {width: _p4._0,height: _p4._1}
+             ,audioOn: audioOn};
+   }),
+   $Mouse.position,
+   $Window.dimensions,
+   guiModelSignal);
+   var outgoingUserInput = Elm.Native.Port.make(_elm).outboundSignal("outgoingUserInput",
+   function (v) {
+      return {mousePosition: {x: v.mousePosition.x
+                             ,y: v.mousePosition.y}
+             ,windowDimensions: {width: v.windowDimensions.width
+                                ,height: v.windowDimensions.height}
+             ,audioOn: v.audioOn};
+   },
+   userInputSignal);
+   var audioOnCheckbox = F2(function (address,isChecked) {
+      return A2($Html.div,
+      _U.list([]),
+      _U.list([A2($Html.input,
+              _U.list([$Html$Attributes.type$("checkbox")
+                      ,$Html$Attributes.checked(isChecked)
+                      ,A3($Html$Events.on,
+                      "change",
+                      $Html$Events.targetChecked,
+                      function (isChecked) {
+                         return A2($Signal.message,address,AudioOn(isChecked));
+                      })]),
+              _U.list([]))
+              ,$Html.text("AUDIO ON")
+              ,$Html.text(isChecked ? " (ON)" : " (OFF)")]));
+   });
+   var guiView = function (model) {
+      return A2(audioOnCheckbox,guiMailbox.address,model);
+   };
+   var guiSignal = A2($Signal.map,guiView,guiModelSignal);
+   var main = guiSignal;
+   var UserInput = F3(function (a,b,c) {
+      return {mousePosition: a,windowDimensions: b,audioOn: c};
+   });
+   return _elm.Gui.values = {_op: _op
+                            ,UserInput: UserInput
+                            ,AudioOn: AudioOn
+                            ,dummy: dummy
+                            ,updateGuiModel: updateGuiModel
+                            ,guiMailbox: guiMailbox
+                            ,guiModelSignal: guiModelSignal
+                            ,audioOnCheckbox: audioOnCheckbox
+                            ,main: main
+                            ,guiView: guiView
+                            ,guiSignal: guiSignal
+                            ,userInputSignal: userInputSignal};
+};
 Elm.Orchestrator = Elm.Orchestrator || {};
 Elm.Orchestrator.make = function (_elm) {
    "use strict";
@@ -13353,26 +13441,20 @@ Elm.ReactiveAudio.make = function (_elm) {
    $AudioNodes = Elm.AudioNodes.make(_elm),
    $Basics = Elm.Basics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
+   $Gui = Elm.Gui.make(_elm),
    $Html = Elm.Html.make(_elm),
-   $Html$Attributes = Elm.Html.Attributes.make(_elm),
-   $Html$Events = Elm.Html.Events.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
-   $Mouse = Elm.Mouse.make(_elm),
    $Orchestrator = Elm.Orchestrator.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm),
-   $Time = Elm.Time.make(_elm),
-   $Window = Elm.Window.make(_elm);
+   $Time = Elm.Time.make(_elm);
    var _op = {};
-   var updateGuiModel = F2(function (action,b) {
-      var _p0 = action;
-      return _p0._0;
-   });
-   var destinationNode = function (_p1) {
-      var _p2 = _p1;
+   var main = $Html.text("Hello, World!");
+   var destinationNode = function (_p0) {
+      var _p1 = _p0;
       return $Orchestrator.Destination({id: "destination"
-                                       ,input: _p2.signal
+                                       ,input: _p1.signal
                                        ,state: {outputValue: 0.0}});
    };
    var adderNode = F2(function (id,inputs) {
@@ -13380,20 +13462,20 @@ Elm.ReactiveAudio.make = function (_elm) {
                                ,inputs: inputs
                                ,state: {outputValue: 0.0}});
    });
-   var gainNode = F2(function (id,_p3) {
-      var _p4 = _p3;
+   var gainNode = F2(function (id,_p2) {
+      var _p3 = _p2;
       return $Orchestrator.Gain({id: id
                                 ,$function: $AudioNodes.gain
-                                ,inputs: {signal: _p4.signal,gain: _p4.gain}
+                                ,inputs: {signal: _p3.signal,gain: _p3.gain}
                                 ,state: {outputValue: 0.0}});
    });
-   var sinNode = F2(function (id,_p5) {
-      var _p6 = _p5;
+   var sinNode = F2(function (id,_p4) {
+      var _p5 = _p4;
       return $Orchestrator.Oscillator({id: id
                                       ,$function: $AudioNodes.sinWave
-                                      ,inputs: {frequency: _p6.frequency
-                                               ,frequencyOffset: _p6.frequencyOffset
-                                               ,phaseOffset: _p6.phaseOffset}
+                                      ,inputs: {frequency: _p5.frequency
+                                               ,frequencyOffset: _p5.frequencyOffset
+                                               ,phaseOffset: _p5.phaseOffset}
                                       ,state: {outputValue: 0.0,phase: 0.0}});
    });
    var commaHelper = A2(sinNode,
@@ -13401,14 +13483,13 @@ Elm.ReactiveAudio.make = function (_elm) {
    {frequency: $Orchestrator.Default
    ,frequencyOffset: $Orchestrator.Default
    ,phaseOffset: $Orchestrator.Default});
-   var testGraph = _U.list([commaHelper
-                           ,A2(sinNode,
-                           "root1",
-                           {frequency: $Orchestrator.Value(200.0)
-                           ,frequencyOffset: $Orchestrator.Default
-                           ,phaseOffset: $Orchestrator.Default})
-                           ,destinationNode({signal: $Orchestrator.ID("root1")})]);
-   var testGraphDict = $Orchestrator.toDict(testGraph);
+   var audioGraph = _U.list([commaHelper
+                            ,A2(sinNode,
+                            "root1",
+                            {frequency: $Orchestrator.Value(200.0)
+                            ,frequencyOffset: $Orchestrator.Default
+                            ,phaseOffset: $Orchestrator.Default})
+                            ,destinationNode({signal: $Orchestrator.ID("root1")})]);
    var destinationA = $Orchestrator.Destination({id: "destinationA"
                                                 ,input: $Orchestrator.ID("squareA")
                                                 ,state: {outputValue: 0.0}});
@@ -13416,70 +13497,16 @@ Elm.ReactiveAudio.make = function (_elm) {
    var sampleDuration = 1.0 / $Basics.toFloat(sampleRate);
    var bufferSize = 4096;
    var everySecond = $Time.fps(1);
-   var requestBuffer = Elm.Native.Port.make(_elm).inboundSignal("requestBuffer",
-   "Bool",
-   function (v) {
-      return typeof v === "boolean" ? v : _U.badPort("a boolean (true or false)",
-      v);
-   });
    var foldn = F3(function (func,initial,count) {
       foldn: while (true) if (_U.cmp(count,0) > 0) {
-            var _v4 = func,_v5 = func(initial),_v6 = count - 1;
-            func = _v4;
-            initial = _v5;
-            count = _v6;
+            var _v3 = func,_v4 = func(initial),_v5 = count - 1;
+            func = _v3;
+            initial = _v4;
+            count = _v5;
             continue foldn;
          } else return initial;
    });
-   var updateBufferState = F2(function (userInput,
-   prevBufferState) {
-      var prevBuffer = prevBufferState.buffer;
-      var initialGraph = prevBufferState.graph;
-      var time = prevBufferState.time + sampleDuration;
-      var externalInputState = {xWindowFraction: $Basics.toFloat(userInput.mousePosition.x) / $Basics.toFloat(userInput.windowDimensions.width)
-                               ,yWindowFraction: $Basics.toFloat(userInput.mousePosition.y) / $Basics.toFloat(userInput.windowDimensions.height)
-                               ,audioOn: userInput.audioOn};
-      var initialBufferState = {time: time
-                               ,graph: initialGraph
-                               ,buffer: prevBuffer
-                               ,bufferIndex: 0
-                               ,externalInputState: externalInputState};
-      var updateForSample = function (_p7) {
-         var _p8 = _p7;
-         var _p11 = _p8.graph;
-         var _p10 = _p8.buffer;
-         var newBufferIndex = _p8.bufferIndex + 1;
-         var newTime = _p8.time + sampleDuration;
-         var externalState = {time: newTime
-                             ,externalInputState: externalInputState};
-         if (_U.eq(externalInputState.audioOn,true)) {
-               var _p9 = A2($Orchestrator.updateGraph,_p11,externalState);
-               var newGraph = _p9._0;
-               var value = _p9._1;
-               return {time: newTime
-                      ,graph: newGraph
-                      ,buffer: A3($Array.set,newBufferIndex,value,_p10)
-                      ,bufferIndex: newBufferIndex
-                      ,externalInputState: externalInputState};
-            } else return {time: newTime
-                          ,graph: _p11
-                          ,buffer: A3($Array.set,newBufferIndex,0.0,_p10)
-                          ,bufferIndex: newBufferIndex
-                          ,externalInputState: externalInputState};
-      };
-      return A3(foldn,updateForSample,initialBufferState,bufferSize);
-   });
-   var initialBuffer = A2($Array.repeat,bufferSize,0.0);
-   var initialBufferState = {time: 0.0
-                            ,graph: testGraphDict
-                            ,buffer: initialBuffer
-                            ,bufferIndex: 0
-                            ,externalInputState: {xWindowFraction: 0.0
-                                                 ,yWindowFraction: 0.0
-                                                 ,audioOn: false}};
-   var UserInput = F3(function (a,b,c) {
-      return {mousePosition: a,windowDimensions: b,audioOn: c};
-   });
+   var reallyDumb = $Gui.dummy;
    var BufferState = F5(function (a,b,c,d,e) {
       return {time: a
              ,graph: b
@@ -13490,93 +13517,21 @@ Elm.ReactiveAudio.make = function (_elm) {
    var ExternalInputState = F3(function (a,b,c) {
       return {xWindowFraction: a,yWindowFraction: b,audioOn: c};
    });
-   var AudioOn = function (a) {
-      return {ctor: "AudioOn",_0: a};
-   };
-   var audioOnCheckbox = F2(function (address,isChecked) {
-      return A2($Html.div,
-      _U.list([]),
-      _U.list([A2($Html.input,
-              _U.list([$Html$Attributes.type$("checkbox")
-                      ,$Html$Attributes.checked(isChecked)
-                      ,A3($Html$Events.on,
-                      "change",
-                      $Html$Events.targetChecked,
-                      function (isChecked) {
-                         return A2($Signal.message,address,AudioOn(isChecked));
-                      })]),
-              _U.list([]))
-              ,$Html.text("AUDIO ON")
-              ,$Html.text(isChecked ? " (ON)" : " (OFF)")]));
-   });
-   var guiMailbox = $Signal.mailbox(AudioOn(true));
-   var guiModelSignal = A3($Signal.foldp,
-   updateGuiModel,
-   false,
-   guiMailbox.signal);
-   var userInputSignal = A4($Signal.map3,
-   F3(function (_p13,_p12,audioOn) {
-      var _p14 = _p13;
-      var _p15 = _p12;
-      return {mousePosition: {x: _p14._0,y: _p14._1}
-             ,windowDimensions: {width: _p15._0,height: _p15._1}
-             ,audioOn: audioOn};
-   }),
-   $Mouse.position,
-   $Window.dimensions,
-   guiModelSignal);
-   var bufferRequestWithUserInput = A2($Signal.sampleOn,
-   requestBuffer,
-   userInputSignal);
-   var bufferStateSignal = A3($Signal.foldp,
-   updateBufferState,
-   initialBufferState,
-   bufferRequestWithUserInput);
-   var latestBuffer = Elm.Native.Port.make(_elm).outboundSignal("latestBuffer",
-   function (v) {
-      return Elm.Native.Array.make(_elm).toJSArray(v).map(function (v) {
-         return v;
-      });
-   },
-   A2($Signal.map,
-   function (_) {
-      return _.buffer;
-   },
-   bufferStateSignal));
-   var guiView = function (model) {
-      return A2(audioOnCheckbox,guiMailbox.address,model);
-   };
-   var guiSignal = A2($Signal.map,guiView,guiModelSignal);
-   var main = guiSignal;
    return _elm.ReactiveAudio.values = {_op: _op
-                                      ,AudioOn: AudioOn
                                       ,ExternalInputState: ExternalInputState
                                       ,BufferState: BufferState
-                                      ,UserInput: UserInput
-                                      ,initialBuffer: initialBuffer
+                                      ,reallyDumb: reallyDumb
                                       ,foldn: foldn
                                       ,everySecond: everySecond
                                       ,bufferSize: bufferSize
                                       ,sampleRate: sampleRate
                                       ,sampleDuration: sampleDuration
-                                      ,updateBufferState: updateBufferState
                                       ,destinationA: destinationA
                                       ,sinNode: sinNode
                                       ,gainNode: gainNode
                                       ,adderNode: adderNode
                                       ,destinationNode: destinationNode
                                       ,commaHelper: commaHelper
-                                      ,testGraph: testGraph
-                                      ,testGraphDict: testGraphDict
-                                      ,initialBufferState: initialBufferState
-                                      ,userInputSignal: userInputSignal
-                                      ,bufferRequestWithUserInput: bufferRequestWithUserInput
-                                      ,bufferStateSignal: bufferStateSignal
-                                      ,audioOnCheckbox: audioOnCheckbox
-                                      ,updateGuiModel: updateGuiModel
-                                      ,guiMailbox: guiMailbox
-                                      ,guiModelSignal: guiModelSignal
-                                      ,guiView: guiView
-                                      ,guiSignal: guiSignal
+                                      ,audioGraph: audioGraph
                                       ,main: main};
 };

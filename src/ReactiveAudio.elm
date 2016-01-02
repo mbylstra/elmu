@@ -1,10 +1,13 @@
 module ReactiveAudio where
 
+import Html exposing (text)
+
+import Gui exposing(dummy)
+
+
+
 -- import Debug exposing (log)
 
-import Html exposing (..)
-import Html.Attributes exposing (..)
-import Html.Events exposing (on, targetChecked)
 -- import Signal
 -- import StartApp.Simple as StartApp
 
@@ -14,8 +17,6 @@ import Html.Events exposing (on, targetChecked)
 
 import Time exposing (Time, fps)
 -- import Keyboard
-import Mouse
-import Window
 import AudioNodes exposing
 
     ( squareWave
@@ -24,6 +25,8 @@ import AudioNodes exposing
     , simpleLowPassFilter
     , sinWave
     )
+
+-- import Gui exposing (UserInput)
 
 import Array exposing(Array)
 
@@ -44,7 +47,6 @@ import Orchestrator exposing
 
 -- type GuiAction : AudioOn Bool
 -- type Input = ID String | Value Float | Default   -- or it could be an AudioNode! Maybe?
-type GuiAction = AudioOn Bool
 
 type alias Buffer = Array Float
 
@@ -67,11 +69,6 @@ type alias BufferState =
 
 
 
-type alias UserInput =
-    { mousePosition : { x : Int, y : Int}
-    , windowDimensions : { width: Int, height: Int}
-    , audioOn : Bool
-    }
 
 {- type alias Positioned a =
     { a | x : Float, y : Float } -}
@@ -88,9 +85,11 @@ type alias UserInput =
 
 
 -- type alias Asdf (Positioned {})
+reallyDumb : String
+reallyDumb = dummy
 
-initialBuffer : Array Float
-initialBuffer = Array.repeat bufferSize 0.0
+-- initialBuffer : Array Float
+-- initialBuffer = Array.repeat bufferSize 0.0
 
 
 {- a helper function -}
@@ -106,7 +105,6 @@ foldn func initial count =
 
 -- let's just hardcode sample rate for now (it's easier!)
 
-port requestBuffer : Signal Bool
 
 
 everySecond : Signal Time
@@ -123,75 +121,78 @@ sampleDuration = 1.0 / toFloat sampleRate
 
 
 
-updateBufferState : UserInput -> BufferState -> BufferState
-updateBufferState userInput prevBufferState =
-
-    let
-
-        externalInputState : ExternalInputState
-        externalInputState =
-            { xWindowFraction = toFloat userInput.mousePosition.x / toFloat userInput.windowDimensions.width
-            , yWindowFraction = toFloat userInput.mousePosition.y / toFloat userInput.windowDimensions.height
-            , audioOn = userInput.audioOn
-            }
-        -- _ = Debug.log "externalInputState: " externalInputState
-
-        time = prevBufferState.time + sampleDuration
-
-        -- frequency = 40.0 + (xWindowFraction * 10000.0) -- how do we pass this in?
-
-        initialGraph = prevBufferState.graph
-{-         _ = Debug.log "sampleCuration" sampleDuration
-        _ = Debug.log "updateBufferState time" time -}
-
-
-        -- surely we can do this without having to manually create a counter?
-        -- we can just iterate over the last buffer, and ignore values
-
-        prevBuffer = prevBufferState.buffer
-
-        initialBufferState : BufferState
-        initialBufferState =
-            { time = time
-            , graph = initialGraph
-            , buffer = prevBuffer
-            , bufferIndex = 0
-            , externalInputState = externalInputState
-            }
-
-        updateForSample {time, graph, buffer, bufferIndex} =
-            let
-                newTime  = time + sampleDuration
-                externalState =
-                    { time = newTime
-                    , externalInputState = externalInputState
-                    }
---                 _ = Debug.log "udpateForSample newTime" newTime
-                newBufferIndex = bufferIndex + 1
---                 _ = Debug.log "newBufferIndex" newBufferIndex
---                 _ = Debug.log "value" value
-            in
-                if
-                    externalInputState.audioOn == True
-                then
-                    let
-                        (newGraph, value) = updateGraph graph externalState
-                    in
-                        { time  = newTime
-                        , graph = newGraph
-                        , buffer = Array.set newBufferIndex value buffer
-                        , bufferIndex = newBufferIndex
-                        , externalInputState =  externalInputState
-                        }
-                else
-                    { time  = newTime
-                    , graph = graph
-                    , buffer = Array.set newBufferIndex 0.0 buffer
-                    , bufferIndex = newBufferIndex
-                    , externalInputState =  externalInputState
-                    }
-    in
-        foldn updateForSample initialBufferState bufferSize
+-- updateBufferState : UserInput -> BufferState -> BufferState
+-- updateBufferState userInput prevBufferState =
+--
+--     let
+--
+--         externalInputState : ExternalInputState
+--         externalInputState =
+--             { xWindowFraction = toFloat userInput.mousePosition.x / toFloat userInput.windowDimensions.width
+--             , yWindowFraction = toFloat userInput.mousePosition.y / toFloat userInput.windowDimensions.height
+--             , audioOn = userInput.audioOn
+--             }
+--         -- _ = Debug.log "externalInputState: " externalInputState
+--
+--         time = prevBufferState.time + sampleDuration
+--
+--         -- frequency = 40.0 + (xWindowFraction * 10000.0) -- how do we pass this in?
+--
+--         initialGraph = prevBufferState.graph
+-- {-         _ = Debug.log "sampleCuration" sampleDuration
+--         _ = Debug.log "updateBufferState time" time -}
+--
+--
+--         -- surely we can do this without having to manually create a counter?
+--         -- we can just iterate over the last buffer, and ignore values
+--
+--         prevBuffer = prevBufferState.buffer
+--
+--         initialBufferState : BufferState
+--         initialBufferState =
+--             { time = time
+--             , graph = initialGraph
+--             , buffer = prevBuffer
+--             , bufferIndex = 0
+--             , externalInputState = externalInputState
+--             }
+--
+--         -- we must expose this as a public function
+--         updateForSample {time, graph, buffer, bufferIndex} =
+--             let
+--                 newTime  = time + sampleDuration
+--                 externalState =
+--                     { time = newTime
+--                     , externalInputState = externalInputState
+--                     }
+-- --                 _ = Debug.log "udpateForSample newTime" newTime
+--                 newBufferIndex = bufferIndex + 1
+-- --                 _ = Debug.log "newBufferIndex" newBufferIndex
+-- --                 _ = Debug.log "value" value
+--             in
+--                 if
+--                     externalInputState.audioOn == True
+--                 then
+--                     let
+--                         -- this is pretty much all elm will do
+--                         (newGraph, value) = updateGraph graph externalState
+--                     in
+--                         -- this will be done in JS land
+--                         { time  = newTime
+--                         , graph = newGraph
+--                         , buffer = Array.set newBufferIndex value buffer
+--                         , bufferIndex = newBufferIndex
+--                         , externalInputState =  externalInputState
+--                         }
+--                 else
+--                     { time  = newTime
+--                     , graph = graph
+--                     , buffer = Array.set newBufferIndex 0.0 buffer
+--                     , bufferIndex = newBufferIndex
+--                     , externalInputState =  externalInputState
+--                     }
+--     in
+--         foldn updateForSample initialBufferState bufferSize
 
 
 {- squareA =
@@ -290,9 +291,10 @@ commaHelper =
 
 
 
+-- this could be like the "main" (JS expects this to be here)
 
-testGraph : ListGraph
-testGraph =
+audioGraph : ListGraph
+audioGraph =
     [ commaHelper
 
 {-     , sinNode "mod3'" {frequency = Value 200.0, frequencyOffset = Default, phaseOffset = Default}
@@ -348,58 +350,36 @@ testGraph =
 
 
 
--- perhaps put external input here? Why not
-testGraphDict : DictGraph
-testGraphDict = toDict testGraph
+-- I guess this can be done in JS, to avoid the user having to do it
+-- testGraphDict : DictGraph
+-- testGraphDict = toDict testGraph
 
 
 
-initialBufferState : BufferState
-initialBufferState =
-    { time = 0.0
-    , graph = testGraphDict
-    , buffer = initialBuffer
-    , bufferIndex = 0
-    , externalInputState =
-        { xWindowFraction = 0.0
-        , yWindowFraction = 0.0
-        , audioOn = False
-        }
-    }
+-- initialBufferState : BufferState
+-- initialBufferState =
+--     { time = 0.0
+--     , graph = testGraphDict
+--     , buffer = initialBuffer
+--     , bufferIndex = 0
+--     , externalInputState =
+--         { xWindowFraction = 0.0
+--         , yWindowFraction = 0.0
+--         , audioOn = False
+--         }
+    -- }
 
 
 
 
 
--- I think we need to merge requestBuffer and everySecond
-
--- map2 means we can mix bufferSignal and mouse signals and combine them into
--- a new type (a record with both), but this function is updated whenever *either* change
-
--- let's combine wasd and mousePosition into a signal as a demo
-
-
--- wasd : Signal { x : Int, y : Int }
-
-userInputSignal : Signal UserInput
-userInputSignal =
-    Signal.map3
-        ( \(mouseX, mouseY) (windowWidth, windowHeight) audioOn ->
-            -- { wasd = wasd
-            { mousePosition = {x = mouseX, y = mouseY}
-            , windowDimensions = {width = windowWidth, height = windowHeight}
-            , audioOn = audioOn
-            }
-        )
-        -- Keyboard.wasd
-        Mouse.position
-        Window.dimensions
-        guiModelSignal
 
 
 
-bufferRequestWithUserInput : Signal UserInput
-bufferRequestWithUserInput = Signal.sampleOn requestBuffer userInputSignal
+
+-- we won't use this any port, rather we'll use userInputSignal as a port
+-- bufferRequestWithUserInput : Signal UserInput
+-- bufferRequestWithUserInput = Signal.sampleOn requestBuffer userInputSignal
 
 
 
@@ -419,8 +399,8 @@ bufferRequestWithUserInput = Signal.sampleOn requestBuffer userInputSignal
 
 
 
-bufferStateSignal : Signal BufferState
-bufferStateSignal = Signal.foldp updateBufferState initialBufferState bufferRequestWithUserInput
+-- bufferStateSignal : Signal BufferState
+-- bufferStateSignal = Signal.foldp updateBufferState initialBufferState bufferRequestWithUserInput
 
 
 {- getSampleTime : Int -> Float -> Float
@@ -435,57 +415,14 @@ getSampleTime bufferIndex bufferStartTime =
 
 
 
-audioOnCheckbox : Signal.Address GuiAction -> Bool -> Html
-audioOnCheckbox address isChecked =
-  div []
-      [ input
-          [ type' "checkbox"
-          , checked isChecked
-          , on "change" targetChecked (\isChecked -> Signal.message address (AudioOn isChecked))
-          ]
-          []
-      , text "AUDIO ON"
-      , text (if isChecked then " (ON)" else " (OFF)")
-      ]
 
 
-updateGuiModel : GuiAction -> Bool -> Bool
-updateGuiModel action b =
-    case action of
-        AudioOn bool ->
-            bool
-
-guiMailbox : Signal.Mailbox GuiAction
-guiMailbox = Signal.mailbox (AudioOn True)
-
-guiModelSignal : Signal Bool
-guiModelSignal =
-    Signal.foldp
-        updateGuiModel
-        False
-        guiMailbox.signal
-
-guiView : Bool -> Html
-guiView model =
-    audioOnCheckbox guiMailbox.address model
-guiSignal : Signal Html
-guiSignal = Signal.map guiView guiModelSignal
-
--- map : (a -> result) -> Signal a -> Signal result
-
--- foldp
---     :  (a -> state -> state)
---     -> state
---     -> Signal a
---     -> Signal state
-
--- main : Html
--- main =
---     audioOnCheckbox
-
-main : Signal Html
-main = guiSignal
 
 
-port latestBuffer : Signal (Array Float)
-port latestBuffer = Signal.map .buffer bufferStateSignal
+-- incoming port (no longer used)
+-- port requestBuffer : Signal Bool
+
+
+
+main =
+  text "Hello, World!"
