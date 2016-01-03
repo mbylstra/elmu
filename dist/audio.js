@@ -132,27 +132,79 @@ if (PROFILING) {
     var scriptNode = audioCtx.createScriptProcessor(BUFFER_SIZE, 1, 1);
 //     var iirFilter = audioCtx.createIIRFilter();
 //     var lowpass = audioCtx.createBiquadFilter();
+
+    function fmod(a, b) {
+      var divided = a / b;
+      return  divided - Math.floor(divided);
+    }
+
+    function getPeriodSeconds(frequency) {
+      return 1.0 / frequency;
+    }
+
+    function squareWave(frequency, frequencyOffset, phaseOffset, prevPhase) {
+      var phaseOffset = phaseOffset / 2.0;
+      var periodSeconds = getPeriodSeconds(frequency + frequencyOffset);
+      var phaseIncrement = SAMPLE_DURATION / periodSeconds;
+      var currPhase = prevPhase + phaseIncrement;
+      var outputPhase = currPhase + phaseOffset;
+      var outputPhaseNormed = fmod(outputPhase, 1.0);
+
+      var amplitude = Math.sin(2.0 * Math.PI * outputPhaseNormed)
+      // var amplitude = outputPhaseNormed > 0.5 ?  1.0 : -1.0;
+      // console.log('amplitude', amplitude);
+      return [amplitude, currPhase];
+    }
+
+    var numOscillators = 200;
+    var phases = [];
+    for (var i = 0; i < numOscillators; i++) {
+      phases.push(0.0);
+    }
+
+    var frequencies = [];
+    for (var i = 0; i < numOscillators; i++) {
+      frequencies.push((i + 1) * 100.0);
+    }
+
+    // var oscValues = [];
+
+    function getOutputValue() {
+      // console.log('phases', phases);
+      var accValue = 0;
+      for (var i = 0; i < numOscillators; i++) {
+        var result = squareWave(frequencies[i], 0, 0, phases[i])
+        // oscValues[i] = result[0];
+        accValue += result[0];
+        phases[i] = result[1];
+      }
+      return accValue;
+    }
+
     scriptNode.onaudioprocess = function(audioProcessingEvent) {
+
       // console.log('latest user input', latestUserInput);
         var outputBuffer = audioProcessingEvent.outputBuffer;
 
         var monoBuffer = [];
         for (var i = 0; i < BUFFER_SIZE; i++) {
-          var result = updateGraph(audioGraph, externalState);
-          audioGraph = result[0];
-          monoBuffer[i]= result[1];
+          // var result = updateGraph(audioGraph, externalState);
+          // var result = getOutputValue();
+          // audioGraph = result[0];
+          monoBuffer[i] = getOutputValue();
         }
+        // console.log(monoBuffer);
         // here we fill the buffer (and use same values for both channels)
 
         for (var channelNumber = 0; channelNumber < outputBuffer.numberOfChannels; channelNumber++) {
           var outputData = outputBuffer.getChannelData(channelNumber);
               for (var i = 0; i < outputBuffer.length; i++) {
                   var value;
-                  if (externalState.externalInputState.audioOn) {
-                    value = monoBuffer[i];
-                  } else {
-                    value = 0.0;
-                  }
+                  // if (externalState.externalInputState.audioOn) {
+                  value = monoBuffer[i];
+                  // } else {
+                  //   value = 0.0;
+                  // }
                   outputData[i] = value;
               }
           }
