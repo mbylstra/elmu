@@ -10193,6 +10193,8 @@ Elm.AudioNodes.make = function (_elm) {
    var gain = F2(function (signalValue,gainValue) {
       return signalValue * gainValue;
    });
+   var sinLookupFrequency = 20.0;
+   var sinLookupDuration = 1.0 / sinLookupFrequency;
    var average = function (values) {
       return $List.sum(values) / $Basics.toFloat($List.length(values));
    };
@@ -10250,15 +10252,13 @@ Elm.AudioNodes.make = function (_elm) {
    });
    var sampleRate = 44100;
    var sampleDuration = 1.0 / $Basics.toFloat(sampleRate);
-   var generateSinLookup = function () {
-      var frequency = 20.0;
-      var duration = 1.0 / frequency;
-      var arrayLength = $Basics.floor(duration / sampleDuration);
+   var sinLookupArrayLength = $Basics.floor(sinLookupDuration / sampleDuration);
+   var sinLookup = function () {
       var getSample = function (n) {
-         var phase = $Basics.toFloat(n) / $Basics.toFloat(arrayLength);
+         var phase = $Basics.toFloat(n) / $Basics.toFloat(sinLookupArrayLength);
          return $Basics.sin(phase * 2.0 * $Basics.pi);
       };
-      return A2($Array.initialize,arrayLength,getSample);
+      return A2($Array.initialize,sinLookupArrayLength,getSample);
    }();
    var sinWave = F4(function (frequency,
    frequencyOffset,
@@ -10269,7 +10269,15 @@ Elm.AudioNodes.make = function (_elm) {
       var currPhase = prevPhase + phaseIncrement;
       var phaseOffset = phaseOffset / 2.0;
       var outputPhase = currPhase + phaseOffset;
-      var amplitude = $Basics.sin(outputPhase * 2.0 * $Basics.pi);
+      var lookupArrayIndex = $Basics.floor(outputPhase * $Basics.toFloat(sinLookupArrayLength));
+      var amplitude = function () {
+         var _p1 = A2($Array.get,lookupArrayIndex,sinLookup);
+         if (_p1.ctor === "Just") {
+               return _p1._0;
+            } else {
+               return 0.0;
+            }
+      }();
       return {ctor: "_Tuple2",_0: amplitude,_1: currPhase};
    });
    var tests = A2($ElmTest.suite,
@@ -10280,10 +10288,10 @@ Elm.AudioNodes.make = function (_elm) {
            {ctor: "_Tuple2",_0: 0.0,_1: 0.0},
            A4(sinWave,11025.0,0.0,0.0,0.0)))
            ,A2($ElmTest.test,
-           "generateSinLookup",
+           "sinLookup",
            A2($ElmTest.assertEqual,
            $Array.fromList(_U.list([0.0])),
-           generateSinLookup))]));
+           sinLookup))]));
    var main = $ElmTest.elementRunner(tests);
    return _elm.AudioNodes.values = {_op: _op
                                    ,sampleRate: sampleRate
@@ -10305,7 +10313,10 @@ Elm.AudioNodes.make = function (_elm) {
                                    ,oscillator: oscillator
                                    ,average: average
                                    ,simpleLowPassFilter: simpleLowPassFilter
-                                   ,generateSinLookup: generateSinLookup
+                                   ,sinLookupFrequency: sinLookupFrequency
+                                   ,sinLookupDuration: sinLookupDuration
+                                   ,sinLookupArrayLength: sinLookupArrayLength
+                                   ,sinLookup: sinLookup
                                    ,sinWave: sinWave
                                    ,gain: gain
                                    ,tests: tests

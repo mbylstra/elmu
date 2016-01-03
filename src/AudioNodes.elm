@@ -83,8 +83,8 @@ sawWave : Float -> Float
 sawWave phase =
     bias phase
 
-squareWave : Float -> Float
-squareWave phase =
+squareWave' : Float -> Float
+squareWave' phase =
     if phase < 0.5 then 1.0 else -1.0
 
 
@@ -113,7 +113,7 @@ oscillator oscillatorType frequency currTime =
     in
         case oscillatorType of
             Saw -> sawWave phase
-            Square -> squareWave phase
+            Square -> squareWave' phase
             Triangle -> triangleWave phase
             Sin -> sinWave' phase
 
@@ -143,7 +143,7 @@ sinWave frequency phaseOffset currTime =  -- I'm not really sure what order the 
 
 sinLookupFrequency = 20.0
 sinLookupDuration = 1.0 / sinLookupFrequency
-sinLookupArrayLength = floor (sinLookupDuration / sinLookupFrequency)
+sinLookupArrayLength = floor (sinLookupDuration / sampleDuration)
 
 sinLookup : Array Float
 sinLookup =
@@ -165,14 +165,24 @@ sinWave frequency frequencyOffset phaseOffset prevPhase =
         periodSeconds = getPeriodSeconds (frequency + frequencyOffset)
         phaseIncrement = sampleDuration / periodSeconds
         currPhase = prevPhase + phaseIncrement
---         currPhaseNormed = if currPhase > 1.0 then currPhase - 1.0 else currPhase
         outputPhase = currPhase + phaseOffset
+        -- outputPhaseNormed = if outputPhase > 1.0 then outputPhase - 1.0 else outputPhase
+
+        outputPhaseNormed = fmod outputPhase 1.0
         -- amplitude = sin (outputPhase * 2.0 * pi)
-        lookupArrayIndex = floor (outputPhase * toFloat sinLookupArrayLength)
+        lookupArrayIndex = floor (outputPhaseNormed * toFloat sinLookupArrayLength)
+        -- debug = ((toString lookupArrayIndex) ++ " " ++ (toString sinLookupArrayLength) ++  " " ++ (toString outputPhaseNormed))
+        -- _ = Debug.log "---------------" "-"
+        -- _ = Debug.log "stuff"  debug
+        -- _ = Debug.log "sinLookupArrayLength"
+        -- _ = Debug.log "outputPhaseNormed" outputPhaseNormed
         amplitude =
             case Array.get lookupArrayIndex sinLookup of
                 Just amplitude' -> amplitude'
-                Nothing -> 0.0
+                -- Nothing -> Debug.crash("arraylookup out of index. length is " ++ toString sinLookupArrayLength ++ " but index is " ++ toString lookupArrayIndex ++ " Debug: " ++ debug)
+                Nothing -> Debug.crash("arraylookup out of index")
+                    -- _ = Debug.log "stuff" ((toString lookupArrayIndex) ++ " " ++ (toString sinLookupArrayLength) ++  " " ++ (toString outputPhaseNormed))
+                -- Nothing -> Debug.crash("arraylookup out of index")
 
 
     in
@@ -203,6 +213,20 @@ sinWave frequency frequencyOffset phaseOffset prevPhase =
                 _ = Debug.log "-------------------------------" True
             in -}
         (amplitude, currPhase)
+
+squareWave : Float -> Float -> Float -> Float -> (Float, Float)
+squareWave frequency frequencyOffset phaseOffset prevPhase =
+    let
+        phaseOffset = phaseOffset / 2.0
+        periodSeconds = getPeriodSeconds (frequency + frequencyOffset)
+        phaseIncrement = sampleDuration / periodSeconds
+        currPhase = prevPhase + phaseIncrement
+        outputPhase = currPhase + phaseOffset
+        outputPhaseNormed = fmod outputPhase 1.0
+        amplitude = if outputPhaseNormed > 0.5 then 1.0 else -1.0
+    in
+        (amplitude, currPhase)
+
 
 gain : GainF
 gain signalValue gainValue =

@@ -12891,6 +12891,7 @@ Elm.AudioNodes.make = function (_elm) {
    _elm.AudioNodes = _elm.AudioNodes || {};
    if (_elm.AudioNodes.values) return _elm.AudioNodes.values;
    var _U = Elm.Native.Utils.make(_elm),
+   $Array = Elm.Array.make(_elm),
    $Basics = Elm.Basics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
    $ElmTest = Elm.ElmTest.make(_elm),
@@ -12902,6 +12903,8 @@ Elm.AudioNodes.make = function (_elm) {
    var gain = F2(function (signalValue,gainValue) {
       return signalValue * gainValue;
    });
+   var sinLookupFrequency = 20.0;
+   var sinLookupDuration = 1.0 / sinLookupFrequency;
    var average = function (values) {
       return $List.sum(values) / $Basics.toFloat($List.length(values));
    };
@@ -12914,7 +12917,7 @@ Elm.AudioNodes.make = function (_elm) {
    var sinWave$ = function (phase) {
       return $Basics.sin(phase * 2.0 * $Basics.pi);
    };
-   var squareWave = function (phase) {
+   var squareWave$ = function (phase) {
       return _U.cmp(phase,0.5) < 0 ? 1.0 : -1.0;
    };
    var bias = function (value) {    return value * 2.0 - 1.0;};
@@ -12953,12 +12956,20 @@ Elm.AudioNodes.make = function (_elm) {
       var _p0 = oscillatorType;
       switch (_p0.ctor)
       {case "Saw": return sawWave(phase);
-         case "Square": return squareWave(phase);
+         case "Square": return squareWave$(phase);
          case "Triangle": return triangleWave(phase);
          default: return sinWave$(phase);}
    });
    var sampleRate = 44100;
    var sampleDuration = 1.0 / $Basics.toFloat(sampleRate);
+   var sinLookupArrayLength = $Basics.floor(sinLookupDuration / sampleDuration);
+   var sinLookup = function () {
+      var getSample = function (n) {
+         var phase = $Basics.toFloat(n) / $Basics.toFloat(sinLookupArrayLength);
+         return $Basics.sin(phase * 2.0 * $Basics.pi);
+      };
+      return A2($Array.initialize,sinLookupArrayLength,getSample);
+   }();
    var sinWave = F4(function (frequency,
    frequencyOffset,
    phaseOffset,
@@ -12968,17 +12979,46 @@ Elm.AudioNodes.make = function (_elm) {
       var currPhase = prevPhase + phaseIncrement;
       var phaseOffset = phaseOffset / 2.0;
       var outputPhase = currPhase + phaseOffset;
-      var amplitude = $Basics.sin(outputPhase * 2.0 * $Basics.pi);
+      var outputPhaseNormed = A2(fmod,outputPhase,1.0);
+      var lookupArrayIndex = $Basics.floor(outputPhaseNormed * $Basics.toFloat(sinLookupArrayLength));
+      var amplitude = function () {
+         var _p1 = A2($Array.get,lookupArrayIndex,sinLookup);
+         if (_p1.ctor === "Just") {
+               return _p1._0;
+            } else {
+               return _U.crashCase("AudioNodes",
+               {start: {line: 180,column: 13},end: {line: 183,column: 67}},
+               _p1)("arraylookup out of index");
+            }
+      }();
       return {ctor: "_Tuple2",_0: amplitude,_1: currPhase};
    });
    var tests = A2($ElmTest.suite,
    "sineWave",
    _U.list([A2($ElmTest.test,
-   "sineWave",
-   A2($ElmTest.assertEqual,
-   {ctor: "_Tuple2",_0: 0.0,_1: 0.0},
-   A4(sinWave,11025.0,0.0,0.0,0.0)))]));
+           "sineWave",
+           A2($ElmTest.assertEqual,
+           {ctor: "_Tuple2",_0: 0.0,_1: 0.0},
+           A4(sinWave,11025.0,0.0,0.0,0.0)))
+           ,A2($ElmTest.test,
+           "sinLookup",
+           A2($ElmTest.assertEqual,
+           $Array.fromList(_U.list([0.0])),
+           sinLookup))]));
    var main = $ElmTest.elementRunner(tests);
+   var squareWave = F4(function (frequency,
+   frequencyOffset,
+   phaseOffset,
+   prevPhase) {
+      var periodSeconds = getPeriodSeconds(frequency + frequencyOffset);
+      var phaseIncrement = sampleDuration / periodSeconds;
+      var currPhase = prevPhase + phaseIncrement;
+      var phaseOffset = phaseOffset / 2.0;
+      var outputPhase = currPhase + phaseOffset;
+      var outputPhaseNormed = A2(fmod,outputPhase,1.0);
+      var amplitude = _U.cmp(outputPhaseNormed,0.5) > 0 ? 1.0 : -1.0;
+      return {ctor: "_Tuple2",_0: amplitude,_1: currPhase};
+   });
    return _elm.AudioNodes.values = {_op: _op
                                    ,sampleRate: sampleRate
                                    ,sampleDuration: sampleDuration
@@ -12993,13 +13033,18 @@ Elm.AudioNodes.make = function (_elm) {
                                    ,Sin: Sin
                                    ,bias: bias
                                    ,sawWave: sawWave
-                                   ,squareWave: squareWave
+                                   ,squareWave$: squareWave$
                                    ,triangleWave: triangleWave
                                    ,sinWave$: sinWave$
                                    ,oscillator: oscillator
                                    ,average: average
                                    ,simpleLowPassFilter: simpleLowPassFilter
+                                   ,sinLookupFrequency: sinLookupFrequency
+                                   ,sinLookupDuration: sinLookupDuration
+                                   ,sinLookupArrayLength: sinLookupArrayLength
+                                   ,sinLookup: sinLookup
                                    ,sinWave: sinWave
+                                   ,squareWave: squareWave
                                    ,gain: gain
                                    ,tests: tests
                                    ,main: main};
@@ -13468,13 +13513,49 @@ Elm.ReactiveAudio.make = function (_elm) {
                                 ,inputs: {signal: _p3.signal,gain: _p3.gain}
                                 ,state: {outputValue: 0.0}});
    });
-   var sinNode = F2(function (id,_p4) {
+   var squareNode = F2(function (id,_p4) {
       var _p5 = _p4;
       return $Orchestrator.Oscillator({id: id
-                                      ,$function: $AudioNodes.sinWave
+                                      ,$function: $AudioNodes.squareWave
                                       ,inputs: {frequency: _p5.frequency
                                                ,frequencyOffset: _p5.frequencyOffset
                                                ,phaseOffset: _p5.phaseOffset}
+                                      ,state: {outputValue: 0.0,phase: 0.0}});
+   });
+   var additiveSynthAudioGraph = F2(function (baseFrequency,
+   numOscillators) {
+      var getId = function (n) {
+         return A2($Basics._op["++"],"harmonic",$Basics.toString(n));
+      };
+      var getSinNode = function (n) {
+         var id = getId(n);
+         var frequency = n * baseFrequency;
+         return A2(squareNode,
+         id,
+         {frequency: $Orchestrator.Value(frequency)
+         ,frequencyOffset: $Orchestrator.Default
+         ,phaseOffset: $Orchestrator.Default});
+      };
+      var oscs = A2($List.map,getSinNode,_U.range(1,numOscillators));
+      var mixerInputs = A2($List.map,
+      function (n) {
+         return $Orchestrator.ID(getId(n));
+      },
+      _U.range(1,numOscillators));
+      return A2($Basics._op["++"],
+      oscs,
+      _U.list([A2(adderNode,"additiveSynth",mixerInputs)]));
+   });
+   var audioGraph = A2($Basics._op["++"],
+   A2(additiveSynthAudioGraph,100.0,7),
+   _U.list([destinationNode({signal: $Orchestrator.ID("additiveSynth")})]));
+   var sinNode = F2(function (id,_p6) {
+      var _p7 = _p6;
+      return $Orchestrator.Oscillator({id: id
+                                      ,$function: $AudioNodes.sinWave
+                                      ,inputs: {frequency: _p7.frequency
+                                               ,frequencyOffset: _p7.frequencyOffset
+                                               ,phaseOffset: _p7.phaseOffset}
                                       ,state: {outputValue: 0.0,phase: 0.0}});
    });
    var commaHelper = A2(sinNode,
@@ -13482,41 +13563,41 @@ Elm.ReactiveAudio.make = function (_elm) {
    {frequency: $Orchestrator.Default
    ,frequencyOffset: $Orchestrator.Default
    ,phaseOffset: $Orchestrator.Default});
-   var audioGraph = _U.list([commaHelper
-                            ,A2(sinNode,
-                            "mod3",
-                            {frequency: $Orchestrator.Value(800.0)
-                            ,frequencyOffset: $Orchestrator.Default
-                            ,phaseOffset: $Orchestrator.Default})
-                            ,A2(sinNode,
-                            "mod2",
-                            {frequency: $Orchestrator.Value(600.0)
-                            ,frequencyOffset: $Orchestrator.Default
-                            ,phaseOffset: $Orchestrator.ID("mod3")})
-                            ,A2(gainNode,
-                            "mod1Frequency",
-                            {signal: $Orchestrator.ID("pitch")
-                            ,gain: $Orchestrator.Value(3.0)})
-                            ,A2(sinNode,
-                            "mod1",
-                            {frequency: $Orchestrator.Value(400.0)
-                            ,frequencyOffset: $Orchestrator.Default
-                            ,phaseOffset: $Orchestrator.ID("mod2")})
-                            ,A2(sinNode,
-                            "root1",
-                            {frequency: $Orchestrator.Value(200.0)
-                            ,frequencyOffset: $Orchestrator.Default
-                            ,phaseOffset: $Orchestrator.ID("mod1")})
-                            ,destinationNode({signal: $Orchestrator.ID("root1")})]);
+   var audioGraph2 = _U.list([commaHelper
+                             ,A2(sinNode,
+                             "mod3",
+                             {frequency: $Orchestrator.Value(800.0)
+                             ,frequencyOffset: $Orchestrator.Default
+                             ,phaseOffset: $Orchestrator.Default})
+                             ,A2(sinNode,
+                             "mod2",
+                             {frequency: $Orchestrator.Value(600.0)
+                             ,frequencyOffset: $Orchestrator.Default
+                             ,phaseOffset: $Orchestrator.ID("mod3")})
+                             ,A2(gainNode,
+                             "mod1Frequency",
+                             {signal: $Orchestrator.ID("pitch")
+                             ,gain: $Orchestrator.Value(3.0)})
+                             ,A2(sinNode,
+                             "mod1",
+                             {frequency: $Orchestrator.Value(400.0)
+                             ,frequencyOffset: $Orchestrator.Default
+                             ,phaseOffset: $Orchestrator.ID("mod2")})
+                             ,A2(sinNode,
+                             "root1",
+                             {frequency: $Orchestrator.Value(200.0)
+                             ,frequencyOffset: $Orchestrator.Default
+                             ,phaseOffset: $Orchestrator.ID("mod1")})
+                             ,destinationNode({signal: $Orchestrator.ID("root1")})]);
    var destinationA = $Orchestrator.Destination({id: "destinationA"
                                                 ,input: $Orchestrator.ID("squareA")
                                                 ,state: {outputValue: 0.0}});
    var foldn = F3(function (func,initial,count) {
       foldn: while (true) if (_U.cmp(count,0) > 0) {
-            var _v3 = func,_v4 = func(initial),_v5 = count - 1;
-            func = _v3;
-            initial = _v4;
-            count = _v5;
+            var _v4 = func,_v5 = func(initial),_v6 = count - 1;
+            func = _v4;
+            initial = _v5;
+            count = _v6;
             continue foldn;
          } else return initial;
    });
@@ -13538,10 +13619,13 @@ Elm.ReactiveAudio.make = function (_elm) {
                                       ,foldn: foldn
                                       ,destinationA: destinationA
                                       ,sinNode: sinNode
+                                      ,squareNode: squareNode
                                       ,gainNode: gainNode
                                       ,adderNode: adderNode
                                       ,destinationNode: destinationNode
                                       ,commaHelper: commaHelper
+                                      ,additiveSynthAudioGraph: additiveSynthAudioGraph
+                                      ,audioGraph2: audioGraph2
                                       ,audioGraph: audioGraph
                                       ,main: main};
 };

@@ -245,6 +245,16 @@ sinNode id {frequency, frequencyOffset, phaseOffset} =
         { outputValue = 0.0, phase = 0.0  }
     }
 
+squareNode : String -> {frequency: Input, frequencyOffset: Input, phaseOffset: Input} -> AudioNode
+squareNode id {frequency, frequencyOffset, phaseOffset} =
+  Oscillator
+    { id = id
+    , function = squareWave
+    , inputs = { frequency = frequency, frequencyOffset = frequencyOffset, phaseOffset = phaseOffset }
+    , state =
+        { outputValue = 0.0, phase = 0.0  }
+    }
+
 gainNode : String -> {signal: Input, gain: Input} -> AudioNode
 gainNode id {signal, gain} =
     Gain
@@ -282,8 +292,28 @@ commaHelper =
 
 -- this could be like the "main" (JS expects this to be here)
 
-audioGraph : ListGraph
-audioGraph =
+
+additiveSynthAudioGraph baseFrequency numOscillators =
+    let
+        getId n =
+            "harmonic" ++ toString n
+        getSinNode n =
+            let
+                frequency = n * baseFrequency
+                id = getId n
+            in
+                squareNode id {frequency = Value frequency, frequencyOffset = Default, phaseOffset = Default}
+
+
+        oscs = List.map getSinNode [1..numOscillators]
+        mixerInputs = List.map (\n -> ID (getId n)) [1..numOscillators]
+
+    in
+        oscs ++ [adderNode "additiveSynth" mixerInputs]
+
+
+audioGraph2: ListGraph
+audioGraph2 =
     [ commaHelper
 
 {-     , sinNode "mod3'" {frequency = Value 200.0, frequencyOffset = Default, phaseOffset = Default}
@@ -340,6 +370,10 @@ audioGraph =
 
     ]
 
+
+audioGraph =
+    (additiveSynthAudioGraph 100.0 7)
+    ++ [ destinationNode {signal = ID "additiveSynth"} ]
 
 
 

@@ -1,14 +1,15 @@
-
-
-
+var PROFILING = 0;
+var DEBUG = 1;
+var ITERATIONS = 10;
+var MAX_ALLOWED_DURATION = ITERATIONS * BUFFER_DURATION;
 
 
 
 timeElapsed = 0.0;
-// var BUFFER_SIZE = 4096;  //92 milliseconds, pretty shit!
+var BUFFER_SIZE = 4096;  //92 milliseconds, pretty shit!
 // var BUFFER_SIZE = 4096;  //92 milliseconds, pretty shit!
 // var BUFFER_SIZE = 2048;  //92 milliseconds, pretty shit!
-var BUFFER_SIZE = 1024;  //92 milliseconds, pretty shit!
+// var BUFFER_SIZE = 1024;  //92 milliseconds, pretty shit!
 // var BUFFER_SIZE = 512;  //92 milliseconds, pretty shit!
 var SAMPLE_RATE = 44100;
 var SAMPLE_DURATION = 1.0 / SAMPLE_RATE;
@@ -30,21 +31,39 @@ var unpackTuple2 = function(tuple2) {
 }
 
 
-var ITERATIONS = 10;
-var MAX_ALLOWED_DURATION = ITERATIONS * BUFFER_DURATION;
-var PROFILING = 0;
-var DEBUG = 1;
 
 if (DEBUG) {
      ITERATIONS = 0;
 }
 
+var elmGui = Elm.fullscreen(Elm.Gui);
+// var elmAudio = Elm.worker(Elm.ReactiveAudio);
+
+
+
+//expose Elm modules
+var Orchestrator = exposeElmModule(Elm.Orchestrator);
+
+var updateGraph = function(initialAudioGraph, externalState) {
+  return unpackTuple2(Orchestrator.updateGraph(initialAudioGraph)(externalState));
+}
+var ReactiveAudio = exposeElmModule(Elm.ReactiveAudio);
+
+var initialAudioGraph = Orchestrator.toDict(ReactiveAudio.audioGraph);
+var audioGraph = initialAudioGraph;
+
 if (PROFILING) {
     console.log('start profiling');
-    var elmGui = Elm.fullscreen(Elm.Gui);
-
 
     var i = ITERATIONS;
+    BUFFER_SIZE = 2000;
+    var monoBuffer = [];
+    for (var i = 0; i < BUFFER_SIZE; i++) {
+      var result = updateGraph(audioGraph, externalState);
+      audioGraph = result[0];
+      monoBuffer[i]= result[1];
+    }
+    console.log(monoBuffer);
     // elm.ports.latestBuffer.subscribe(function(buffer) {
     //     if (PROFILING && DEBUG) {
     //         console.log('buffer', buffer);
@@ -65,21 +84,6 @@ if (PROFILING) {
 
 } else {
 
-    var elmGui = Elm.fullscreen(Elm.Gui);
-    // var elmAudio = Elm.worker(Elm.ReactiveAudio);
-
-
-
-    //expose Elm modules
-    var Orchestrator = exposeElmModule(Elm.Orchestrator);
-
-    var updateGraph = function(initialAudioGraph, externalState) {
-      return unpackTuple2(Orchestrator.updateGraph(initialAudioGraph)(externalState));
-    }
-    var ReactiveAudio = exposeElmModule(Elm.ReactiveAudio);
-
-    var initialAudioGraph = Orchestrator.toDict(ReactiveAudio.audioGraph);
-    var audioGraph = initialAudioGraph;
 
 
 
