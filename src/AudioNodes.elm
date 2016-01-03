@@ -7,6 +7,7 @@ module AudioNodes where
 
 
 import Dict exposing (Dict)
+import Array exposing (Array)
 import ElmTest exposing (..)
 
 
@@ -32,6 +33,7 @@ type alias OscillatorF =
     -> TimeFloat
     -> (OutputFloat, PhaseFloat)
 type alias GainF = Float -> Float -> Float
+
 
 sampleRate = 44100
 sampleDuration = 1.0 / toFloat sampleRate
@@ -139,11 +141,24 @@ sinWave frequency phaseOffset currTime =  -- I'm not really sure what order the 
     in
         sinWave' phase -}
 
+sinLookupFrequency = 20.0
+sinLookupDuration = 1.0 / sinLookupFrequency
+sinLookupArrayLength = floor (sinLookupDuration / sinLookupFrequency)
+
+sinLookup : Array Float
+sinLookup =
+    let
+        getSample n =
+            let
+                phase = toFloat n / toFloat sinLookupArrayLength
+            in
+                sin (phase * 2.0 * pi)
+    in
+        Array.initialize sinLookupArrayLength getSample
+
 
 sinWave : Float -> Float -> Float -> Float -> (Float, Float)
 sinWave frequency frequencyOffset phaseOffset prevPhase =
-
-
     -- currently ignore frequencyOffset
     let
         phaseOffset = phaseOffset / 2.0
@@ -152,7 +167,13 @@ sinWave frequency frequencyOffset phaseOffset prevPhase =
         currPhase = prevPhase + phaseIncrement
 --         currPhaseNormed = if currPhase > 1.0 then currPhase - 1.0 else currPhase
         outputPhase = currPhase + phaseOffset
-        amplitude = sin (outputPhase * 2.0 * pi)
+        -- amplitude = sin (outputPhase * 2.0 * pi)
+        lookupArrayIndex = floor (outputPhase * toFloat sinLookupArrayLength)
+        amplitude =
+            case Array.get lookupArrayIndex sinLookup of
+                Just amplitude' -> amplitude'
+                Nothing -> 0.0
+
 
     in
 {-         if (frequencyOffset /= 666.0)
@@ -201,6 +222,11 @@ tests =
                 (0.0, 0.0)
 --                 (sinWave 10025.0 0.0 0.0)
                 (sinWave 11025.0 0.0 0.0 0.0)
+            )
+        , test "sinLookup"
+            (assertEqual
+                (Array.fromList([0.0]))
+                (sinLookup)
             )
         ]
 

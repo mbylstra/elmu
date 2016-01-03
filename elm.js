@@ -10181,6 +10181,7 @@ Elm.AudioNodes.make = function (_elm) {
    _elm.AudioNodes = _elm.AudioNodes || {};
    if (_elm.AudioNodes.values) return _elm.AudioNodes.values;
    var _U = Elm.Native.Utils.make(_elm),
+   $Array = Elm.Array.make(_elm),
    $Basics = Elm.Basics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
    $ElmTest = Elm.ElmTest.make(_elm),
@@ -10189,6 +10190,9 @@ Elm.AudioNodes.make = function (_elm) {
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm);
    var _op = {};
+   var gain = F2(function (signalValue,gainValue) {
+      return signalValue * gainValue;
+   });
    var average = function (values) {
       return $List.sum(values) / $Basics.toFloat($List.length(values));
    };
@@ -10197,9 +10201,6 @@ Elm.AudioNodes.make = function (_elm) {
       _U.list([currValue]),
       prevValues));
       return value * 1.1;
-   });
-   var gain = F2(function (amount,value) {
-      return amount * value;
    });
    var sinWave$ = function (phase) {
       return $Basics.sin(phase * 2.0 * $Basics.pi);
@@ -10249,26 +10250,40 @@ Elm.AudioNodes.make = function (_elm) {
    });
    var sampleRate = 44100;
    var sampleDuration = 1.0 / $Basics.toFloat(sampleRate);
-   var sinWave = F3(function (frequency,phaseOffset,prevPhase) {
-      var periodSeconds = getPeriodSeconds(frequency);
-      var _p1 = A2($Debug.log,"period Seconds",periodSeconds);
+   var generateSinLookup = function () {
+      var frequency = 20.0;
+      var duration = 1.0 / frequency;
+      var arrayLength = $Basics.floor(duration / sampleDuration);
+      var getSample = function (n) {
+         var phase = $Basics.toFloat(n) / $Basics.toFloat(arrayLength);
+         return $Basics.sin(phase * 2.0 * $Basics.pi);
+      };
+      return A2($Array.initialize,arrayLength,getSample);
+   }();
+   var sinWave = F4(function (frequency,
+   frequencyOffset,
+   phaseOffset,
+   prevPhase) {
+      var periodSeconds = getPeriodSeconds(frequency + frequencyOffset);
       var phaseIncrement = sampleDuration / periodSeconds;
-      var _p2 = A2($Debug.log,"phaseIncrement",phaseIncrement);
-      var phase = prevPhase + phaseIncrement + phaseOffset;
-      var _p3 = A2($Debug.log,"phase",phase);
-      var phase$ = _U.cmp(phase,1.0) > 0 ? phase - 1.0 : phase;
-      var _p4 = A2($Debug.log,"phase\'",phase$);
-      var amplitude = $Basics.cos(phase$ * 2.0 * $Basics.pi);
-      var _p5 = A2($Debug.log,"amp",amplitude);
-      return {ctor: "_Tuple2",_0: amplitude,_1: phase$};
+      var currPhase = prevPhase + phaseIncrement;
+      var phaseOffset = phaseOffset / 2.0;
+      var outputPhase = currPhase + phaseOffset;
+      var amplitude = $Basics.sin(outputPhase * 2.0 * $Basics.pi);
+      return {ctor: "_Tuple2",_0: amplitude,_1: currPhase};
    });
    var tests = A2($ElmTest.suite,
    "sineWave",
    _U.list([A2($ElmTest.test,
-   "sineWave",
-   A2($ElmTest.assertEqual,
-   {ctor: "_Tuple2",_0: 0.0,_1: 0.0},
-   A3(sinWave,11025.0,0.0,0.0)))]));
+           "sineWave",
+           A2($ElmTest.assertEqual,
+           {ctor: "_Tuple2",_0: 0.0,_1: 0.0},
+           A4(sinWave,11025.0,0.0,0.0,0.0)))
+           ,A2($ElmTest.test,
+           "generateSinLookup",
+           A2($ElmTest.assertEqual,
+           $Array.fromList(_U.list([0.0])),
+           generateSinLookup))]));
    var main = $ElmTest.elementRunner(tests);
    return _elm.AudioNodes.values = {_op: _op
                                    ,sampleRate: sampleRate
@@ -10288,10 +10303,11 @@ Elm.AudioNodes.make = function (_elm) {
                                    ,triangleWave: triangleWave
                                    ,sinWave$: sinWave$
                                    ,oscillator: oscillator
-                                   ,gain: gain
                                    ,average: average
                                    ,simpleLowPassFilter: simpleLowPassFilter
+                                   ,generateSinLookup: generateSinLookup
                                    ,sinWave: sinWave
+                                   ,gain: gain
                                    ,tests: tests
                                    ,main: main};
 };

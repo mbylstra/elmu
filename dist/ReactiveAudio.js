@@ -13484,30 +13484,27 @@ Elm.ReactiveAudio.make = function (_elm) {
    ,phaseOffset: $Orchestrator.Default});
    var audioGraph = _U.list([commaHelper
                             ,A2(sinNode,
-                            "lfoRaw",
-                            {frequency: $Orchestrator.Value(0.25)
+                            "mod3",
+                            {frequency: $Orchestrator.Value(800.0)
                             ,frequencyOffset: $Orchestrator.Default
                             ,phaseOffset: $Orchestrator.Default})
-                            ,A2(gainNode,
-                            "lfoGain",
-                            {signal: $Orchestrator.ID("lfoRaw")
-                            ,gain: $Orchestrator.Value(20.0)})
-                            ,A2(adderNode,
-                            "pitch",
-                            _U.list([$Orchestrator.Value(200.0)
-                                    ,$Orchestrator.ID("lfoGain")]))
+                            ,A2(sinNode,
+                            "mod2",
+                            {frequency: $Orchestrator.Value(600.0)
+                            ,frequencyOffset: $Orchestrator.Default
+                            ,phaseOffset: $Orchestrator.ID("mod3")})
                             ,A2(gainNode,
                             "mod1Frequency",
                             {signal: $Orchestrator.ID("pitch")
                             ,gain: $Orchestrator.Value(3.0)})
                             ,A2(sinNode,
                             "mod1",
-                            {frequency: $Orchestrator.ID("mod1Frequency")
+                            {frequency: $Orchestrator.Value(400.0)
                             ,frequencyOffset: $Orchestrator.Default
-                            ,phaseOffset: $Orchestrator.Default})
+                            ,phaseOffset: $Orchestrator.ID("mod2")})
                             ,A2(sinNode,
                             "root1",
-                            {frequency: $Orchestrator.ID("pitch")
+                            {frequency: $Orchestrator.Value(200.0)
                             ,frequencyOffset: $Orchestrator.Default
                             ,phaseOffset: $Orchestrator.ID("mod1")})
                             ,destinationNode({signal: $Orchestrator.ID("root1")})]);

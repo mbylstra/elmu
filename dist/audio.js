@@ -6,9 +6,9 @@
 
 timeElapsed = 0.0;
 // var BUFFER_SIZE = 4096;  //92 milliseconds, pretty shit!
-var BUFFER_SIZE = 4096;  //92 milliseconds, pretty shit!
+// var BUFFER_SIZE = 4096;  //92 milliseconds, pretty shit!
 // var BUFFER_SIZE = 2048;  //92 milliseconds, pretty shit!
-// var BUFFER_SIZE = 1024;  //92 milliseconds, pretty shit!
+var BUFFER_SIZE = 1024;  //92 milliseconds, pretty shit!
 // var BUFFER_SIZE = 512;  //92 milliseconds, pretty shit!
 var SAMPLE_RATE = 44100;
 var SAMPLE_DURATION = 1.0 / SAMPLE_RATE;
