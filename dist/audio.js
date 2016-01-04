@@ -47,24 +47,9 @@ if (DEBUG) {
 var elmGui = Elm.fullscreen(Elm.Gui);
 
 //expose Elm modules
-var Orchestrator = exposeElmModule(Elm.Orchestrator);
 var ReactiveAudio = exposeElmModule(Elm.ReactiveAudio);
 var _Utils = exposeElmModule(Elm.Native.Utils);
 var _List = exposeElmModule(Elm.Native.List);
-
-
-  //   _List.toArray(
-  //     PureElmExamples.listReverse(
-  //       _Utils.list([1,2,3])
-  //     )
-  //   )
-  // );
-
-
-// var updateGraph = function(initialAudioGraph, externalState) {
-//   return unpackTuple2(Orchestrator.updateGraph(initialAudioGraph)(externalState));
-// }
-
 
 var initialAudioGraph = _List.toArray(ReactiveAudio.audioGraph);
 // console.log(initialAudioGraph);

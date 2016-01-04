@@ -1,4 +1,3 @@
-
 module Gui where
 
 import Mouse

@@ -1,160 +1,27 @@
 module ReactiveAudio where
-
 import Html exposing (text)
-
 import Gui exposing(dummy)
 
 
+import AudioNodes exposing(..)
+import MainTypes exposing(..)
 
--- import Debug exposing (log)
-
--- import Signal
--- import StartApp.Simple as StartApp
-
--- import Html exposing (text)
--- import Graphics.Element
--- import Graphics.Input
-
--- import Time exposing (Time, fps)
--- import Keyboard
-import AudioNodes exposing
-
-    ( squareWave
-    , OscillatorType(Square, Saw, Sin)
-    , oscillator
-    , simpleLowPassFilter
-    , sinWave
-    , zeroWave
-    )
-
--- import Gui exposing (UserInput)
-
-import Array exposing(Array)
-
-import Orchestrator exposing
-    ( DictGraph
-    , ListGraph
-    , toDict
-    , AudioNode(Oscillator, Destination, Add, FeedforwardProcessor, Gain)
-    , Input(ID, Default, Value)
-    , updateGraph
-    , ExternalState
-    , ExternalInputState
-    )
-
---------------------------------------------------------------------------------
--- Types
---------------------------------------------------------------------------------
-
--- type GuiAction : AudioOn Bool
--- type Input = ID String | Value Float | Default   -- or it could be an AudioNode! Maybe?
-
-type alias Buffer = Array Float
-
-type alias ExternalInputState =
-    { xWindowFraction: Float
-    , yWindowFraction: Float
-    , audioOn : Bool
-    }
-
-type alias BufferState =
-    { time: Float
-    , graph: DictGraph
-    , buffer: Buffer
-    , bufferIndex: Int
-    , externalInputState: ExternalInputState
-    }
-
+-- import Orchestrator exposing
+--     ( DictGraph
+--     , ListGraph
+--     , toDict
+--     , AudioNode(Oscillator, Destination, Add, FeedforwardProcessor, Gain)
+--     , Input(ID, Default, Value)
+--     , updateGraph
+--     , ExternalState
+--     , ExternalInputState
+--     )
 
 reallyDumb : String
 reallyDumb = dummy
 
 
-{- a helper func -}
-foldn : (a -> a) -> a -> Int -> a
-foldn func initial count =
-    if
-        count > 0
-    then
-        foldn func (func initial) (count - 1)
-    else
-        initial
-
-
-destinationA : AudioNode
-destinationA =
-    Destination
-        { id = "destinationA"
-        , input = ID "squareA"
-        , state =
-            { outputValue = 0.0 }
-        }
-
-
-sinNode : String -> {frequency: Input, frequencyOffset: Input, phaseOffset: Input} -> AudioNode
-sinNode id {frequency, frequencyOffset, phaseOffset} =
-  Oscillator
-    { id = id
-    , func = sinWave
-    , inputs = { frequency = frequency, frequencyOffset = frequencyOffset, phaseOffset = phaseOffset }
-    , state =
-        { outputValue = 0.0, phase = 0.0  }
-    }
-
-squareNode : String -> {frequency: Input, frequencyOffset: Input, phaseOffset: Input} -> AudioNode
-squareNode id {frequency, frequencyOffset, phaseOffset} =
-  Oscillator
-    { id = id
-    , func = squareWave
-    , inputs = { frequency = frequency, frequencyOffset = frequencyOffset, phaseOffset = phaseOffset }
-    , state =
-        { outputValue = 0.0, phase = 0.0  }
-    }
-
-
-dummyNode : String -> {frequency: Input, frequencyOffset: Input, phaseOffset: Input} -> AudioNode
-dummyNode id {frequency, frequencyOffset, phaseOffset} =
-  Oscillator
-    { id = id
-    , func = zeroWave
-    , inputs = { frequency = frequency, frequencyOffset = frequencyOffset, phaseOffset = phaseOffset }
-    , state =
-        { outputValue = 0.0, phase = 0.0  }
-    }
-
-gainNode : String -> {signal: Input, gain: Input} -> AudioNode
-gainNode id {signal, gain} =
-    Gain
-        { id = id
-        , func = AudioNodes.gain
-        , inputs = { signal = signal, gain = gain }
-        , state =
-            { outputValue = 0.0 }
-        }
-adderNode : String -> List Input -> AudioNode
-adderNode id inputs =
-    Add
-        { id = id
-        , inputs = inputs
-        , state =
-            { outputValue = 0.0 }
-        }
-
-destinationNode : {signal: Input} -> AudioNode
-destinationNode {signal} =
-    Destination
-        { id = "destination"
-        , input = signal
-        , state =
-            { outputValue = 0.0 }
-        }
-
-commaHelper : AudioNode
-commaHelper =
-  sinNode "dummy123456789" {frequency = Default, frequencyOffset = Default, phaseOffset = Default }
-
-
-
+additiveSynthAudioGraph : Float -> Float -> ListGraph
 additiveSynthAudioGraph baseFrequency numOscillators =
     let
         getId n =
@@ -187,6 +54,7 @@ audioGraph2 =
     ]
 
 
+audioGraph : ListGraph
 audioGraph =
     (additiveSynthAudioGraph 100.0 30)
     ++ [ destinationNode {signal = ID "additiveSynth"} ]

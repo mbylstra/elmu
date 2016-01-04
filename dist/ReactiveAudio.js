@@ -12720,17 +12720,69 @@ Elm.Html.Events.make = function (_elm) {
                                     ,keyCode: keyCode
                                     ,Options: Options};
 };
-Elm.AudioNodes = Elm.AudioNodes || {};
-Elm.AudioNodes.make = function (_elm) {
+Elm.MainTypes = Elm.MainTypes || {};
+Elm.MainTypes.make = function (_elm) {
    "use strict";
-   _elm.AudioNodes = _elm.AudioNodes || {};
-   if (_elm.AudioNodes.values) return _elm.AudioNodes.values;
+   _elm.MainTypes = _elm.MainTypes || {};
+   if (_elm.MainTypes.values) return _elm.MainTypes.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Dict = Elm.Dict.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var _op = {};
+   var ExternalState = F2(function (a,b) {
+      return {time: a,externalInputState: b};
+   });
+   var ExternalInputState = F3(function (a,b,c) {
+      return {xWindowFraction: a,yWindowFraction: b,audioOn: c};
+   });
+   var OscillatorInputs = F3(function (a,b,c) {
+      return {frequency: a,frequencyOffset: b,phaseOffset: c};
+   });
+   var Destination = function (a) {
+      return {ctor: "Destination",_0: a};
+   };
+   var Add = function (a) {    return {ctor: "Add",_0: a};};
+   var FeedforwardProcessor = function (a) {
+      return {ctor: "FeedforwardProcessor",_0: a};
+   };
+   var Gain = function (a) {    return {ctor: "Gain",_0: a};};
+   var Oscillator = function (a) {
+      return {ctor: "Oscillator",_0: a};
+   };
+   var Default = {ctor: "Default"};
+   var Value = function (a) {    return {ctor: "Value",_0: a};};
+   var ID = function (a) {    return {ctor: "ID",_0: a};};
+   return _elm.MainTypes.values = {_op: _op
+                                  ,ID: ID
+                                  ,Value: Value
+                                  ,Default: Default
+                                  ,Oscillator: Oscillator
+                                  ,Gain: Gain
+                                  ,FeedforwardProcessor: FeedforwardProcessor
+                                  ,Add: Add
+                                  ,Destination: Destination
+                                  ,OscillatorInputs: OscillatorInputs
+                                  ,ExternalInputState: ExternalInputState
+                                  ,ExternalState: ExternalState};
+};
+Elm.AudioNodeFunctions = Elm.AudioNodeFunctions || {};
+Elm.AudioNodeFunctions.make = function (_elm) {
+   "use strict";
+   _elm.AudioNodeFunctions = _elm.AudioNodeFunctions || {};
+   if (_elm.AudioNodeFunctions.values)
+   return _elm.AudioNodeFunctions.values;
    var _U = Elm.Native.Utils.make(_elm),
    $Array = Elm.Array.make(_elm),
    $Basics = Elm.Basics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
    $ElmTest = Elm.ElmTest.make(_elm),
    $List = Elm.List.make(_elm),
+   $MainTypes = Elm.MainTypes.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm);
@@ -12767,10 +12819,6 @@ Elm.AudioNodes.make = function (_elm) {
       return bias(_U.cmp(phase,
       0.5) < 0 ? phase * 2.0 : (1.0 - phase) * 2.0);
    };
-   var Sin = {ctor: "Sin"};
-   var Triangle = {ctor: "Triangle"};
-   var Square = {ctor: "Square"};
-   var Saw = {ctor: "Saw"};
    var getPeriodSeconds = function (frequency) {
       return 1.0 / frequency;
    };
@@ -12827,8 +12875,8 @@ Elm.AudioNodes.make = function (_elm) {
          if (_p1.ctor === "Just") {
                return _p1._0;
             } else {
-               return _U.crashCase("AudioNodes",
-               {start: {line: 180,column: 13},end: {line: 183,column: 67}},
+               return _U.crashCase("AudioNodeFunctions",
+               {start: {line: 155,column: 13},end: {line: 157,column: 67}},
                _p1)("arraylookup out of index");
             }
       }();
@@ -12860,36 +12908,114 @@ Elm.AudioNodes.make = function (_elm) {
       var amplitude = _U.cmp(outputPhaseNormed,0.5) > 0 ? 1.0 : -1.0;
       return {ctor: "_Tuple2",_0: amplitude,_1: currPhase};
    });
+   var Sin = {ctor: "Sin"};
+   var Triangle = {ctor: "Triangle"};
+   var Square = {ctor: "Square"};
+   var Saw = {ctor: "Saw"};
+   return _elm.AudioNodeFunctions.values = {_op: _op
+                                           ,Saw: Saw
+                                           ,Square: Square
+                                           ,Triangle: Triangle
+                                           ,Sin: Sin
+                                           ,sampleRate: sampleRate
+                                           ,sampleDuration: sampleDuration
+                                           ,fmod: fmod
+                                           ,sampleLength: sampleLength
+                                           ,timeSeconds: timeSeconds
+                                           ,getPeriodSeconds: getPeriodSeconds
+                                           ,getPhaseFraction: getPhaseFraction
+                                           ,bias: bias
+                                           ,sawWave: sawWave
+                                           ,squareWave$: squareWave$
+                                           ,triangleWave: triangleWave
+                                           ,sinWave$: sinWave$
+                                           ,oscillator: oscillator
+                                           ,average: average
+                                           ,simpleLowPassFilter: simpleLowPassFilter
+                                           ,sinLookupFrequency: sinLookupFrequency
+                                           ,sinLookupDuration: sinLookupDuration
+                                           ,sinLookupArrayLength: sinLookupArrayLength
+                                           ,sinLookup: sinLookup
+                                           ,sinWave: sinWave
+                                           ,squareWave: squareWave
+                                           ,zeroWave: zeroWave
+                                           ,gain: gain
+                                           ,tests: tests
+                                           ,main: main};
+};
+Elm.AudioNodes = Elm.AudioNodes || {};
+Elm.AudioNodes.make = function (_elm) {
+   "use strict";
+   _elm.AudioNodes = _elm.AudioNodes || {};
+   if (_elm.AudioNodes.values) return _elm.AudioNodes.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $AudioNodeFunctions = Elm.AudioNodeFunctions.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $List = Elm.List.make(_elm),
+   $MainTypes = Elm.MainTypes.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var _op = {};
+   var destinationNode = function (_p0) {
+      var _p1 = _p0;
+      return $MainTypes.Destination({id: "destination"
+                                    ,input: _p1.signal
+                                    ,state: {outputValue: 0.0}});
+   };
+   var adderNode = F2(function (id,inputs) {
+      return $MainTypes.Add({id: id
+                            ,inputs: inputs
+                            ,state: {outputValue: 0.0}});
+   });
+   var gainNode = F2(function (id,_p2) {
+      var _p3 = _p2;
+      return $MainTypes.Gain({id: id
+                             ,func: $AudioNodeFunctions.gain
+                             ,inputs: {signal: _p3.signal,gain: _p3.gain}
+                             ,state: {outputValue: 0.0}});
+   });
+   var dummyNode = F2(function (id,_p4) {
+      var _p5 = _p4;
+      return $MainTypes.Oscillator({id: id
+                                   ,func: $AudioNodeFunctions.zeroWave
+                                   ,inputs: {frequency: _p5.frequency
+                                            ,frequencyOffset: _p5.frequencyOffset
+                                            ,phaseOffset: _p5.phaseOffset}
+                                   ,state: {outputValue: 0.0,phase: 0.0}});
+   });
+   var squareNode = F2(function (id,_p6) {
+      var _p7 = _p6;
+      return $MainTypes.Oscillator({id: id
+                                   ,func: $AudioNodeFunctions.squareWave
+                                   ,inputs: {frequency: _p7.frequency
+                                            ,frequencyOffset: _p7.frequencyOffset
+                                            ,phaseOffset: _p7.phaseOffset}
+                                   ,state: {outputValue: 0.0,phase: 0.0}});
+   });
+   var sinNode = F2(function (id,_p8) {
+      var _p9 = _p8;
+      return $MainTypes.Oscillator({id: id
+                                   ,func: $AudioNodeFunctions.sinWave
+                                   ,inputs: {frequency: _p9.frequency
+                                            ,frequencyOffset: _p9.frequencyOffset
+                                            ,phaseOffset: _p9.phaseOffset}
+                                   ,state: {outputValue: 0.0,phase: 0.0}});
+   });
+   var commaHelper = A2(sinNode,
+   "dummy123456789",
+   {frequency: $MainTypes.Default
+   ,frequencyOffset: $MainTypes.Default
+   ,phaseOffset: $MainTypes.Default});
    return _elm.AudioNodes.values = {_op: _op
-                                   ,sampleRate: sampleRate
-                                   ,sampleDuration: sampleDuration
-                                   ,fmod: fmod
-                                   ,sampleLength: sampleLength
-                                   ,timeSeconds: timeSeconds
-                                   ,getPeriodSeconds: getPeriodSeconds
-                                   ,getPhaseFraction: getPhaseFraction
-                                   ,Saw: Saw
-                                   ,Square: Square
-                                   ,Triangle: Triangle
-                                   ,Sin: Sin
-                                   ,bias: bias
-                                   ,sawWave: sawWave
-                                   ,squareWave$: squareWave$
-                                   ,triangleWave: triangleWave
-                                   ,sinWave$: sinWave$
-                                   ,oscillator: oscillator
-                                   ,average: average
-                                   ,simpleLowPassFilter: simpleLowPassFilter
-                                   ,sinLookupFrequency: sinLookupFrequency
-                                   ,sinLookupDuration: sinLookupDuration
-                                   ,sinLookupArrayLength: sinLookupArrayLength
-                                   ,sinLookup: sinLookup
-                                   ,sinWave: sinWave
-                                   ,squareWave: squareWave
-                                   ,zeroWave: zeroWave
-                                   ,gain: gain
-                                   ,tests: tests
-                                   ,main: main};
+                                   ,sinNode: sinNode
+                                   ,squareNode: squareNode
+                                   ,dummyNode: dummyNode
+                                   ,gainNode: gainNode
+                                   ,adderNode: adderNode
+                                   ,destinationNode: destinationNode
+                                   ,commaHelper: commaHelper};
 };
 Elm.Gui = Elm.Gui || {};
 Elm.Gui.make = function (_elm) {
@@ -12979,412 +13105,49 @@ Elm.Gui.make = function (_elm) {
                             ,userInputSignal: userInputSignal
                             ,main: main};
 };
-Elm.Orchestrator = Elm.Orchestrator || {};
-Elm.Orchestrator.make = function (_elm) {
-   "use strict";
-   _elm.Orchestrator = _elm.Orchestrator || {};
-   if (_elm.Orchestrator.values) return _elm.Orchestrator.values;
-   var _U = Elm.Native.Utils.make(_elm),
-   $AudioNodes = Elm.AudioNodes.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $Debug = Elm.Debug.make(_elm),
-   $Dict = Elm.Dict.make(_elm),
-   $ElmTest = Elm.ElmTest.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
-   var _op = {};
-   var feetless = function (list) {
-      return A2($List.take,$List.length(list) - 1,list);
-   };
-   var rotateList = F2(function (value,list) {
-      return A2($Basics._op["++"],_U.list([value]),feetless(list));
-   });
-   var tests = A2($ElmTest.suite,
-   "A Test Suite",
-   _U.list([A2($ElmTest.test,
-   "rotateList",
-   A2($ElmTest.assertEqual,
-   _U.list([4,3,2]),
-   A2(rotateList,4,_U.list([3,2,1]))))]));
-   var getNodeId = function (node) {
-      var _p0 = node;
-      switch (_p0.ctor)
-      {case "Destination": return _p0._0.id;
-         case "Oscillator": return _p0._0.id;
-         case "FeedforwardProcessor": return _p0._0.id;
-         case "Add": return _p0._0.id;
-         default: return _p0._0.id;}
-   };
-   var replaceGraphNode = F2(function (node,graph) {
-      return A3($Dict.insert,getNodeId(node),node,graph);
-   });
-   var getDestinationNode = function (graph) {
-      var isDestinationNode = function (node) {
-         var _p1 = node;
-         if (_p1.ctor === "Destination") {
-               return true;
-            } else {
-               return false;
-            }
-      };
-      var nodes = $Dict.values(graph);
-      var destinationNodes = A2($List.filter,isDestinationNode,nodes);
-      var _p2 = $List.head(destinationNodes);
-      if (_p2.ctor === "Just") {
-            return _p2._0;
-         } else {
-            return _U.crashCase("Orchestrator",
-            {start: {line: 438,column: 9},end: {line: 442,column: 78}},
-            _p2)("There aren\'t any nodes of type Destination!");
-         }
-   };
-   var toDict = function (listGraph) {
-      var createTuple = function (node) {
-         var _p4 = node;
-         switch (_p4.ctor)
-         {case "Destination": return {ctor: "_Tuple2"
-                                     ,_0: _p4._0.id
-                                     ,_1: node};
-            case "Oscillator": return {ctor: "_Tuple2"
-                                      ,_0: _p4._0.id
-                                      ,_1: node};
-            case "FeedforwardProcessor": return {ctor: "_Tuple2"
-                                                ,_0: _p4._0.id
-                                                ,_1: node};
-            case "Add": return {ctor: "_Tuple2",_0: _p4._0.id,_1: node};
-            default: return {ctor: "_Tuple2",_0: _p4._0.id,_1: node};}
-      };
-      var tuples = A2($List.map,createTuple,listGraph);
-      return $Dict.fromList(tuples);
-   };
-   var getInputNode = F2(function (graph,id) {
-      var _p5 = A2($Dict.get,id,graph);
-      if (_p5.ctor === "Just") {
-            return _p5._0;
-         } else {
-            return _U.crashCase("Orchestrator",
-            {start: {line: 332,column: 5},end: {line: 334,column: 69}},
-            _p5)(A2($Basics._op["++"],
-            "Can\'t find node: ",
-            $Basics.toString(id)));
-         }
-   });
-   var getInputNode$ = F2(function (graph,input) {
-      var _p7 = input;
-      switch (_p7.ctor)
-      {case "ID": return A2(getInputNode,graph,_p7._0);
-         case "Value": return _U.crashCase("Orchestrator",
-           {start: {line: 338,column: 5},end: {line: 344,column: 45}},
-           _p7)("see getInputNodes");
-         default: return _U.crashCase("Orchestrator",
-           {start: {line: 338,column: 5},end: {line: 344,column: 45}},
-           _p7)("see getInputNodes");}
-   });
-   var getInputNodes = F2(function (node,graph) {
-      var getInputNodes$ = function (inputs) {
-         return A2($List.map,getInputNode$(graph),inputs);
-      };
-      var _p10 = node;
-      switch (_p10.ctor)
-      {case "FeedforwardProcessor":
-         return $Maybe.Just(_U.list([A2(getInputNode$,
-           graph,
-           _p10._0.input)]));
-         case "Destination":
-         return $Maybe.Just(_U.list([A2(getInputNode$,
-           graph,
-           _p10._0.input)]));
-         default: return $Maybe.Nothing;}
-   });
-   var ExternalState = F2(function (a,b) {
-      return {time: a,externalInputState: b};
-   });
-   var ExternalInputState = F3(function (a,b,c) {
-      return {xWindowFraction: a,yWindowFraction: b,audioOn: c};
-   });
-   var OscillatorInputs = F3(function (a,b,c) {
-      return {frequency: a,frequencyOffset: b,phaseOffset: c};
-   });
-   var Destination = function (a) {
-      return {ctor: "Destination",_0: a};
-   };
-   var Add = function (a) {    return {ctor: "Add",_0: a};};
-   var FeedforwardProcessor = function (a) {
-      return {ctor: "FeedforwardProcessor",_0: a};
-   };
-   var Gain = function (a) {    return {ctor: "Gain",_0: a};};
-   var Oscillator = function (a) {
-      return {ctor: "Oscillator",_0: a};
-   };
-   var updateGraphNode = F3(function (graph,externalState,node) {
-      var _p11 = node;
-      switch (_p11.ctor)
-      {case "Oscillator": var _p16 = _p11._0;
-           var _p12 = A3(updateGraphNode$,
-           graph,
-           externalState,
-           _p16.inputs.frequency);
-           var graph2 = _p12._0;
-           var frequencyValue = _p12._1;
-           var _p13 = A3(updateGraphNode$,
-           graph2,
-           externalState,
-           _p16.inputs.frequencyOffset);
-           var graph3 = _p13._0;
-           var frequencyOffsetValue = _p13._1;
-           var _p14 = A3(updateGraphNode$,
-           graph3,
-           externalState,
-           _p16.inputs.phaseOffset);
-           var graph4 = _p14._0;
-           var phaseOffsetValue = _p14._1;
-           var _p15 = A4(_p16.func,
-           frequencyValue,
-           frequencyOffsetValue,
-           phaseOffsetValue,
-           _p16.state.phase);
-           var newValue = _p15._0;
-           var newPhase = _p15._1;
-           var newState = {outputValue: newValue,phase: newPhase};
-           var newNode = Oscillator(_U.update(_p16,{state: newState}));
-           return {ctor: "_Tuple2"
-                  ,_0: A2(replaceGraphNode,newNode,graph4)
-                  ,_1: newValue};
-         case "FeedforwardProcessor": var _p21 = _p11._0;
-           var _p17 = A2(getInputNodes,node,graph);
-           if (_p17.ctor === "Just") {
-                 if (_p17._0.ctor === "::" && _p17._0._1.ctor === "[]") {
-                       var newPrevValues = A2(rotateList,
-                       _p21.state.outputValue,
-                       _p21.state.prevValues);
-                       var _p18 = A3(updateGraphNode,graph,externalState,_p17._0._0);
-                       var newGraph = _p18._0;
-                       var inputValue = _p18._1;
-                       var newValue = A2(_p21.func,inputValue,_p21.state.prevValues);
-                       var newState = {outputValue: newValue
-                                      ,prevValues: newPrevValues};
-                       var newNode = FeedforwardProcessor(_U.update(_p21,
-                       {state: newState}));
-                       return {ctor: "_Tuple2"
-                              ,_0: A2(replaceGraphNode,newNode,newGraph)
-                              ,_1: newValue};
-                    } else {
-                       return _U.crashCase("Orchestrator",
-                       {start: {line: 245,column: 13},end: {line: 258,column: 51}},
-                       _p17)("multiple inputs not supported yet");
-                    }
-              } else {
-                 return _U.crashCase("Orchestrator",
-                 {start: {line: 245,column: 13},end: {line: 258,column: 51}},
-                 _p17)("no input nodes!");
-              }
-         case "Destination": var _p22 = A2(getInputNodes,node,graph);
-           if (_p22.ctor === "Just") {
-                 if (_p22._0.ctor === "::" && _p22._0._1.ctor === "[]") {
-                       var _p23 = A3(updateGraphNode,
-                       graph,
-                       externalState,
-                       _p22._0._0);
-                       var newGraph = _p23._0;
-                       var inputValue = _p23._1;
-                       var newState = {outputValue: inputValue};
-                       var newNode = Destination(_U.update(_p11._0,{state: newState}));
-                       return {ctor: "_Tuple2"
-                              ,_0: A2(replaceGraphNode,newNode,newGraph)
-                              ,_1: inputValue};
-                    } else {
-                       return _U.crashCase("Orchestrator",
-                       {start: {line: 261,column: 13},end: {line: 272,column: 51}},
-                       _p22)("multiple inputs not supported yet");
-                    }
-              } else {
-                 return _U.crashCase("Orchestrator",
-                 {start: {line: 261,column: 13},end: {line: 272,column: 51}},
-                 _p22)("no input nodes!");
-              }
-         case "Add": var _p30 = _p11._0;
-           var updateFunc = F2(function (input,_p26) {
-              var _p27 = _p26;
-              var _p28 = A3(updateGraphNode$,_p27._0,externalState,input);
-              var newGraph = _p28._0;
-              var inputValue = _p28._1;
-              return {ctor: "_Tuple2"
-                     ,_0: A2(replaceGraphNode,newNode,newGraph)
-                     ,_1: _p27._1 + inputValue};
-           });
-           var newNode = Add(_U.update(_p30,{state: newState}));
-           var newState = {outputValue: newValue};
-           var _p29 = A3($List.foldl,
-           updateFunc,
-           {ctor: "_Tuple2",_0: graph,_1: 0},
-           _p30.inputs);
-           var newGraph = _p29._0;
-           var newValue = _p29._1;
-           return {ctor: "_Tuple2"
-                  ,_0: A2(replaceGraphNode,newNode,newGraph)
-                  ,_1: newValue};
-         default: var _p33 = _p11._0;
-           var _p31 = A3(updateGraphNode$,
-           graph,
-           externalState,
-           _p33.inputs.signal);
-           var graph2 = _p31._0;
-           var signalValue = _p31._1;
-           var _p32 = A3(updateGraphNode$,
-           graph2,
-           externalState,
-           _p33.inputs.gain);
-           var graph3 = _p32._0;
-           var gainValue = _p32._1;
-           var newValue = A2(_p33.func,signalValue,gainValue);
-           var newState = {outputValue: newValue};
-           var newNode = Gain(_U.update(_p33,{state: newState}));
-           return {ctor: "_Tuple2"
-                  ,_0: A2(replaceGraphNode,newNode,graph3)
-                  ,_1: newValue};}
-   });
-   var updateGraphNode$ = F3(function (graph,externalState,input) {
-      var _p34 = input;
-      switch (_p34.ctor)
-      {case "ID": return A3(updateGraphNode,
-           graph,
-           externalState,
-           A2(getInputNode,graph,_p34._0));
-         case "Value": return {ctor: "_Tuple2",_0: graph,_1: _p34._0};
-         default: return {ctor: "_Tuple2",_0: graph,_1: 0.0};}
-   });
-   var updateGraph = F2(function (graph,externalState) {
-      return A3(updateGraphNode,
-      graph,
-      externalState,
-      getDestinationNode(graph));
-   });
-   var Default = {ctor: "Default"};
-   var Value = function (a) {    return {ctor: "Value",_0: a};};
-   var squareA = Oscillator({id: "squareA"
-                            ,func: $AudioNodes.sinWave
-                            ,inputs: {frequency: Value(440.0)
-                                     ,phaseOffset: Default
-                                     ,frequencyOffset: Default}
-                            ,state: {outputValue: 0.0,phase: 0.0}});
-   var squareAT1 = Oscillator({id: "squareA"
-                              ,inputs: {frequency: Value(440.0)
-                                       ,phaseOffset: Default
-                                       ,frequencyOffset: Default}
-                              ,func: $AudioNodes.sinWave
-                              ,state: {outputValue: 1.0,phase: 0.0}});
-   var ID = function (a) {    return {ctor: "ID",_0: a};};
-   var destinationA = Destination({id: "destinationA"
-                                  ,input: ID("squareA")
-                                  ,state: {outputValue: 0.0}});
-   var testGraph = _U.list([squareA,destinationA]);
-   var testDictGraph = toDict(testGraph);
-   var destinationAT1 = Destination({id: "destinationA"
-                                    ,input: ID("squareA")
-                                    ,state: {outputValue: 1.0}});
-   return _elm.Orchestrator.values = {_op: _op
-                                     ,ID: ID
-                                     ,Value: Value
-                                     ,Default: Default
-                                     ,Oscillator: Oscillator
-                                     ,Gain: Gain
-                                     ,FeedforwardProcessor: FeedforwardProcessor
-                                     ,Add: Add
-                                     ,Destination: Destination
-                                     ,OscillatorInputs: OscillatorInputs
-                                     ,ExternalInputState: ExternalInputState
-                                     ,ExternalState: ExternalState
-                                     ,updateGraph: updateGraph
-                                     ,updateGraphNode$: updateGraphNode$
-                                     ,updateGraphNode: updateGraphNode
-                                     ,getInputNode: getInputNode
-                                     ,getInputNode$: getInputNode$
-                                     ,getInputNodes: getInputNodes
-                                     ,toDict: toDict
-                                     ,getDestinationNode: getDestinationNode
-                                     ,replaceGraphNode: replaceGraphNode
-                                     ,getNodeId: getNodeId
-                                     ,squareA: squareA
-                                     ,destinationA: destinationA
-                                     ,squareAT1: squareAT1
-                                     ,destinationAT1: destinationAT1
-                                     ,testGraph: testGraph
-                                     ,testDictGraph: testDictGraph
-                                     ,feetless: feetless
-                                     ,rotateList: rotateList
-                                     ,tests: tests};
-};
 Elm.ReactiveAudio = Elm.ReactiveAudio || {};
 Elm.ReactiveAudio.make = function (_elm) {
    "use strict";
    _elm.ReactiveAudio = _elm.ReactiveAudio || {};
    if (_elm.ReactiveAudio.values) return _elm.ReactiveAudio.values;
    var _U = Elm.Native.Utils.make(_elm),
-   $Array = Elm.Array.make(_elm),
    $AudioNodes = Elm.AudioNodes.make(_elm),
    $Basics = Elm.Basics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
    $Gui = Elm.Gui.make(_elm),
    $Html = Elm.Html.make(_elm),
    $List = Elm.List.make(_elm),
+   $MainTypes = Elm.MainTypes.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
-   $Orchestrator = Elm.Orchestrator.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm);
    var _op = {};
    var main = $Html.text("Hello, World!");
-   var destinationNode = function (_p0) {
-      var _p1 = _p0;
-      return $Orchestrator.Destination({id: "destination"
-                                       ,input: _p1.signal
-                                       ,state: {outputValue: 0.0}});
-   };
-   var adderNode = F2(function (id,inputs) {
-      return $Orchestrator.Add({id: id
-                               ,inputs: inputs
-                               ,state: {outputValue: 0.0}});
-   });
-   var gainNode = F2(function (id,_p2) {
-      var _p3 = _p2;
-      return $Orchestrator.Gain({id: id
-                                ,func: $AudioNodes.gain
-                                ,inputs: {signal: _p3.signal,gain: _p3.gain}
-                                ,state: {outputValue: 0.0}});
-   });
-   var dummyNode = F2(function (id,_p4) {
-      var _p5 = _p4;
-      return $Orchestrator.Oscillator({id: id
-                                      ,func: $AudioNodes.zeroWave
-                                      ,inputs: {frequency: _p5.frequency
-                                               ,frequencyOffset: _p5.frequencyOffset
-                                               ,phaseOffset: _p5.phaseOffset}
-                                      ,state: {outputValue: 0.0,phase: 0.0}});
-   });
-   var squareNode = F2(function (id,_p6) {
-      var _p7 = _p6;
-      return $Orchestrator.Oscillator({id: id
-                                      ,func: $AudioNodes.squareWave
-                                      ,inputs: {frequency: _p7.frequency
-                                               ,frequencyOffset: _p7.frequencyOffset
-                                               ,phaseOffset: _p7.phaseOffset}
-                                      ,state: {outputValue: 0.0,phase: 0.0}});
-   });
-   var sinNode = F2(function (id,_p8) {
-      var _p9 = _p8;
-      return $Orchestrator.Oscillator({id: id
-                                      ,func: $AudioNodes.sinWave
-                                      ,inputs: {frequency: _p9.frequency
-                                               ,frequencyOffset: _p9.frequencyOffset
-                                               ,phaseOffset: _p9.phaseOffset}
-                                      ,state: {outputValue: 0.0,phase: 0.0}});
-   });
-   var commaHelper = A2(sinNode,
-   "dummy123456789",
-   {frequency: $Orchestrator.Default
-   ,frequencyOffset: $Orchestrator.Default
-   ,phaseOffset: $Orchestrator.Default});
+   var audioGraph2 = _U.list([$AudioNodes.commaHelper
+                             ,A2($AudioNodes.sinNode,
+                             "mod3",
+                             {frequency: $MainTypes.Value(800.0)
+                             ,frequencyOffset: $MainTypes.Default
+                             ,phaseOffset: $MainTypes.Default})
+                             ,A2($AudioNodes.sinNode,
+                             "mod2",
+                             {frequency: $MainTypes.Value(600.0)
+                             ,frequencyOffset: $MainTypes.Default
+                             ,phaseOffset: $MainTypes.ID("mod3")})
+                             ,A2($AudioNodes.gainNode,
+                             "mod1Frequency",
+                             {signal: $MainTypes.ID("pitch"),gain: $MainTypes.Value(3.0)})
+                             ,A2($AudioNodes.sinNode,
+                             "mod1",
+                             {frequency: $MainTypes.Value(400.0)
+                             ,frequencyOffset: $MainTypes.Default
+                             ,phaseOffset: $MainTypes.ID("mod2")})
+                             ,A2($AudioNodes.sinNode,
+                             "root1",
+                             {frequency: $MainTypes.Value(200.0)
+                             ,frequencyOffset: $MainTypes.Default
+                             ,phaseOffset: $MainTypes.ID("mod1")})
+                             ,$AudioNodes.destinationNode({signal: $MainTypes.ID("root1")})]);
    var additiveSynthAudioGraph = F2(function (baseFrequency,
    numOscillators) {
       var getId = function (n) {
@@ -13393,87 +13156,30 @@ Elm.ReactiveAudio.make = function (_elm) {
       var getSinNode = function (n) {
          var id = getId(n);
          var frequency = n * baseFrequency;
-         return A2(sinNode,
+         return A2($AudioNodes.sinNode,
          id,
-         {frequency: $Orchestrator.Value(frequency)
-         ,frequencyOffset: $Orchestrator.Default
-         ,phaseOffset: $Orchestrator.Default});
+         {frequency: $MainTypes.Value(frequency)
+         ,frequencyOffset: $MainTypes.Default
+         ,phaseOffset: $MainTypes.Default});
       };
       var oscs = A2($List.map,getSinNode,_U.range(1,numOscillators));
       var mixerInputs = A2($List.map,
       function (n) {
-         return $Orchestrator.ID(getId(n));
+         return $MainTypes.ID(getId(n));
       },
       _U.range(1,numOscillators));
       return A2($Basics._op["++"],
       oscs,
-      _U.list([A2(adderNode,"additiveSynth",mixerInputs)]));
+      _U.list([A2($AudioNodes.adderNode,
+      "additiveSynth",
+      mixerInputs)]));
    });
    var audioGraph = A2($Basics._op["++"],
    A2(additiveSynthAudioGraph,100.0,30),
-   _U.list([destinationNode({signal: $Orchestrator.ID("additiveSynth")})]));
-   var audioGraph2 = _U.list([commaHelper
-                             ,A2(sinNode,
-                             "mod3",
-                             {frequency: $Orchestrator.Value(800.0)
-                             ,frequencyOffset: $Orchestrator.Default
-                             ,phaseOffset: $Orchestrator.Default})
-                             ,A2(sinNode,
-                             "mod2",
-                             {frequency: $Orchestrator.Value(600.0)
-                             ,frequencyOffset: $Orchestrator.Default
-                             ,phaseOffset: $Orchestrator.ID("mod3")})
-                             ,A2(gainNode,
-                             "mod1Frequency",
-                             {signal: $Orchestrator.ID("pitch")
-                             ,gain: $Orchestrator.Value(3.0)})
-                             ,A2(sinNode,
-                             "mod1",
-                             {frequency: $Orchestrator.Value(400.0)
-                             ,frequencyOffset: $Orchestrator.Default
-                             ,phaseOffset: $Orchestrator.ID("mod2")})
-                             ,A2(sinNode,
-                             "root1",
-                             {frequency: $Orchestrator.Value(200.0)
-                             ,frequencyOffset: $Orchestrator.Default
-                             ,phaseOffset: $Orchestrator.ID("mod1")})
-                             ,destinationNode({signal: $Orchestrator.ID("root1")})]);
-   var destinationA = $Orchestrator.Destination({id: "destinationA"
-                                                ,input: $Orchestrator.ID("squareA")
-                                                ,state: {outputValue: 0.0}});
-   var foldn = F3(function (func,initial,count) {
-      foldn: while (true) if (_U.cmp(count,0) > 0) {
-            var _v5 = func,_v6 = func(initial),_v7 = count - 1;
-            func = _v5;
-            initial = _v6;
-            count = _v7;
-            continue foldn;
-         } else return initial;
-   });
+   _U.list([$AudioNodes.destinationNode({signal: $MainTypes.ID("additiveSynth")})]));
    var reallyDumb = $Gui.dummy;
-   var BufferState = F5(function (a,b,c,d,e) {
-      return {time: a
-             ,graph: b
-             ,buffer: c
-             ,bufferIndex: d
-             ,externalInputState: e};
-   });
-   var ExternalInputState = F3(function (a,b,c) {
-      return {xWindowFraction: a,yWindowFraction: b,audioOn: c};
-   });
    return _elm.ReactiveAudio.values = {_op: _op
-                                      ,ExternalInputState: ExternalInputState
-                                      ,BufferState: BufferState
                                       ,reallyDumb: reallyDumb
-                                      ,foldn: foldn
-                                      ,destinationA: destinationA
-                                      ,sinNode: sinNode
-                                      ,squareNode: squareNode
-                                      ,dummyNode: dummyNode
-                                      ,gainNode: gainNode
-                                      ,adderNode: adderNode
-                                      ,destinationNode: destinationNode
-                                      ,commaHelper: commaHelper
                                       ,additiveSynthAudioGraph: additiveSynthAudioGraph
                                       ,audioGraph2: audioGraph2
                                       ,audioGraph: audioGraph
