@@ -1,46 +1,14 @@
 module ReactiveAudio where
-import Html exposing (text)
 import Gui exposing(dummy)
 
 
 import AudioNodes exposing(..)
 import MainTypes exposing(..)
+import Components exposing(..)
 
--- import Orchestrator exposing
---     ( DictGraph
---     , ListGraph
---     , toDict
---     , AudioNode(Oscillator, Destination, Add, FeedforwardProcessor, Gain)
---     , Input(ID, Default, Value)
---     , updateGraph
---     , ExternalState
---     , ExternalInputState
---     )
-
+-- This is necessary so that The Gui code is linked so we can expose it. I have no idea why.
 reallyDumb : String
 reallyDumb = dummy
-
-
-additiveSynthAudioGraph : Float -> Float -> ListGraph
-additiveSynthAudioGraph baseFrequency numOscillators =
-    let
-        getId n =
-            "harmonic" ++ toString n
-        getSinNode n =
-            let
-                frequency = n * baseFrequency
-                id = getId n
-            in
-                sinNode id {frequency = Value frequency, frequencyOffset = Default, phaseOffset = Default}
-                -- dummyNode id {frequency = Value frequency, frequencyOffset = Default, phaseOffset = Default}
-
-
-        oscs = List.map getSinNode [1..numOscillators]
-        mixerInputs = List.map (\n -> ID (getId n)) [1..numOscillators]
-
-    in
-        oscs ++ [adderNode "additiveSynth" mixerInputs]
-
 
 audioGraph2: ListGraph
 audioGraph2 =
@@ -58,7 +26,3 @@ audioGraph : ListGraph
 audioGraph =
     (additiveSynthAudioGraph 100.0 30)
     ++ [ destinationNode {signal = ID "additiveSynth"} ]
-
-
-main =
-  text "Hello, World!"
