@@ -212,20 +212,23 @@ sinWave frequency frequencyOffset phaseOffset prevPhase =
                 _ = Debug.log "-------------------------------" True
                 _ = Debug.log "-------------------------------" True
             in -}
-        (amplitude, currPhase)
+        (amplitude, currPhase)  -- I actually think returning a tuple is problematic for performance! You want to stick to as basic as possible data types.
 
 squareWave : Float -> Float -> Float -> Float -> (Float, Float)
 squareWave frequency frequencyOffset phaseOffset prevPhase =
     let
         phaseOffset = phaseOffset / 2.0
         periodSeconds = getPeriodSeconds (frequency + frequencyOffset)
-        phaseIncrement = sampleDuration / periodSeconds
+        phaseIncrement = sampleDuration / periodSeconds -- we should be able to memoize this
         currPhase = prevPhase + phaseIncrement
         outputPhase = currPhase + phaseOffset
-        outputPhaseNormed = fmod outputPhase 1.0
-        amplitude = if outputPhaseNormed > 0.5 then 1.0 else -1.0
+        outputPhaseNormed = fmod outputPhase 1.0 -- pehraps fmoddign large numbers slow?
+        amplitude = if outputPhaseNormed > 0.5 then 1.0 else -1.0 --can't really make this any simpler
     in
         (amplitude, currPhase)
+            -- I don't think updating a tuple would use much cpu (although *it would* create a new JS object everytime, but reusing an array would probably be faster)
+zeroWave : Float -> Float -> Float -> Float -> (Float, Float)
+zeroWave frequency frequencyOffset phaseOffset prevPhase = (0.0, 0.0)
 
 
 gain : GainF

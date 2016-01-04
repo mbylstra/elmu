@@ -12738,6 +12738,12 @@ Elm.AudioNodes.make = function (_elm) {
    var gain = F2(function (signalValue,gainValue) {
       return signalValue * gainValue;
    });
+   var zeroWave = F4(function (frequency,
+   frequencyOffset,
+   phaseOffset,
+   prevPhase) {
+      return {ctor: "_Tuple2",_0: 0.0,_1: 0.0};
+   });
    var sinLookupFrequency = 20.0;
    var sinLookupDuration = 1.0 / sinLookupFrequency;
    var average = function (values) {
@@ -12880,6 +12886,7 @@ Elm.AudioNodes.make = function (_elm) {
                                    ,sinLookup: sinLookup
                                    ,sinWave: sinWave
                                    ,squareWave: squareWave
+                                   ,zeroWave: zeroWave
                                    ,gain: gain
                                    ,tests: tests
                                    ,main: main};
@@ -12967,10 +12974,10 @@ Elm.Gui.make = function (_elm) {
                             ,guiMailbox: guiMailbox
                             ,guiModelSignal: guiModelSignal
                             ,audioOnCheckbox: audioOnCheckbox
-                            ,main: main
                             ,guiView: guiView
                             ,guiSignal: guiSignal
-                            ,userInputSignal: userInputSignal};
+                            ,userInputSignal: userInputSignal
+                            ,main: main};
 };
 Elm.Orchestrator = Elm.Orchestrator || {};
 Elm.Orchestrator.make = function (_elm) {
@@ -13133,7 +13140,7 @@ Elm.Orchestrator.make = function (_elm) {
            _p16.inputs.phaseOffset);
            var graph4 = _p14._0;
            var phaseOffsetValue = _p14._1;
-           var _p15 = A4(_p16.$function,
+           var _p15 = A4(_p16.func,
            frequencyValue,
            frequencyOffsetValue,
            phaseOffsetValue,
@@ -13155,9 +13162,7 @@ Elm.Orchestrator.make = function (_elm) {
                        var _p18 = A3(updateGraphNode,graph,externalState,_p17._0._0);
                        var newGraph = _p18._0;
                        var inputValue = _p18._1;
-                       var newValue = A2(_p21.$function,
-                       inputValue,
-                       _p21.state.prevValues);
+                       var newValue = A2(_p21.func,inputValue,_p21.state.prevValues);
                        var newState = {outputValue: newValue
                                       ,prevValues: newPrevValues};
                        var newNode = FeedforwardProcessor(_U.update(_p21,
@@ -13233,7 +13238,7 @@ Elm.Orchestrator.make = function (_elm) {
            _p33.inputs.gain);
            var graph3 = _p32._0;
            var gainValue = _p32._1;
-           var newValue = A2(_p33.$function,signalValue,gainValue);
+           var newValue = A2(_p33.func,signalValue,gainValue);
            var newState = {outputValue: newValue};
            var newNode = Gain(_U.update(_p33,{state: newState}));
            return {ctor: "_Tuple2"
@@ -13259,7 +13264,7 @@ Elm.Orchestrator.make = function (_elm) {
    var Default = {ctor: "Default"};
    var Value = function (a) {    return {ctor: "Value",_0: a};};
    var squareA = Oscillator({id: "squareA"
-                            ,$function: $AudioNodes.sinWave
+                            ,func: $AudioNodes.sinWave
                             ,inputs: {frequency: Value(440.0)
                                      ,phaseOffset: Default
                                      ,frequencyOffset: Default}
@@ -13268,7 +13273,7 @@ Elm.Orchestrator.make = function (_elm) {
                               ,inputs: {frequency: Value(440.0)
                                        ,phaseOffset: Default
                                        ,frequencyOffset: Default}
-                              ,$function: $AudioNodes.sinWave
+                              ,func: $AudioNodes.sinWave
                               ,state: {outputValue: 1.0,phase: 0.0}});
    var ID = function (a) {    return {ctor: "ID",_0: a};};
    var destinationA = Destination({id: "destinationA"
@@ -13344,19 +13349,42 @@ Elm.ReactiveAudio.make = function (_elm) {
    var gainNode = F2(function (id,_p2) {
       var _p3 = _p2;
       return $Orchestrator.Gain({id: id
-                                ,$function: $AudioNodes.gain
+                                ,func: $AudioNodes.gain
                                 ,inputs: {signal: _p3.signal,gain: _p3.gain}
                                 ,state: {outputValue: 0.0}});
    });
-   var squareNode = F2(function (id,_p4) {
+   var dummyNode = F2(function (id,_p4) {
       var _p5 = _p4;
       return $Orchestrator.Oscillator({id: id
-                                      ,$function: $AudioNodes.squareWave
+                                      ,func: $AudioNodes.zeroWave
                                       ,inputs: {frequency: _p5.frequency
                                                ,frequencyOffset: _p5.frequencyOffset
                                                ,phaseOffset: _p5.phaseOffset}
                                       ,state: {outputValue: 0.0,phase: 0.0}});
    });
+   var squareNode = F2(function (id,_p6) {
+      var _p7 = _p6;
+      return $Orchestrator.Oscillator({id: id
+                                      ,func: $AudioNodes.squareWave
+                                      ,inputs: {frequency: _p7.frequency
+                                               ,frequencyOffset: _p7.frequencyOffset
+                                               ,phaseOffset: _p7.phaseOffset}
+                                      ,state: {outputValue: 0.0,phase: 0.0}});
+   });
+   var sinNode = F2(function (id,_p8) {
+      var _p9 = _p8;
+      return $Orchestrator.Oscillator({id: id
+                                      ,func: $AudioNodes.sinWave
+                                      ,inputs: {frequency: _p9.frequency
+                                               ,frequencyOffset: _p9.frequencyOffset
+                                               ,phaseOffset: _p9.phaseOffset}
+                                      ,state: {outputValue: 0.0,phase: 0.0}});
+   });
+   var commaHelper = A2(sinNode,
+   "dummy123456789",
+   {frequency: $Orchestrator.Default
+   ,frequencyOffset: $Orchestrator.Default
+   ,phaseOffset: $Orchestrator.Default});
    var additiveSynthAudioGraph = F2(function (baseFrequency,
    numOscillators) {
       var getId = function (n) {
@@ -13365,7 +13393,7 @@ Elm.ReactiveAudio.make = function (_elm) {
       var getSinNode = function (n) {
          var id = getId(n);
          var frequency = n * baseFrequency;
-         return A2(squareNode,
+         return A2(sinNode,
          id,
          {frequency: $Orchestrator.Value(frequency)
          ,frequencyOffset: $Orchestrator.Default
@@ -13382,22 +13410,8 @@ Elm.ReactiveAudio.make = function (_elm) {
       _U.list([A2(adderNode,"additiveSynth",mixerInputs)]));
    });
    var audioGraph = A2($Basics._op["++"],
-   A2(additiveSynthAudioGraph,100.0,6),
+   A2(additiveSynthAudioGraph,100.0,30),
    _U.list([destinationNode({signal: $Orchestrator.ID("additiveSynth")})]));
-   var sinNode = F2(function (id,_p6) {
-      var _p7 = _p6;
-      return $Orchestrator.Oscillator({id: id
-                                      ,$function: $AudioNodes.sinWave
-                                      ,inputs: {frequency: _p7.frequency
-                                               ,frequencyOffset: _p7.frequencyOffset
-                                               ,phaseOffset: _p7.phaseOffset}
-                                      ,state: {outputValue: 0.0,phase: 0.0}});
-   });
-   var commaHelper = A2(sinNode,
-   "dummy123456789",
-   {frequency: $Orchestrator.Default
-   ,frequencyOffset: $Orchestrator.Default
-   ,phaseOffset: $Orchestrator.Default});
    var audioGraph2 = _U.list([commaHelper
                              ,A2(sinNode,
                              "mod3",
@@ -13429,10 +13443,10 @@ Elm.ReactiveAudio.make = function (_elm) {
                                                 ,state: {outputValue: 0.0}});
    var foldn = F3(function (func,initial,count) {
       foldn: while (true) if (_U.cmp(count,0) > 0) {
-            var _v4 = func,_v5 = func(initial),_v6 = count - 1;
-            func = _v4;
-            initial = _v5;
-            count = _v6;
+            var _v5 = func,_v6 = func(initial),_v7 = count - 1;
+            func = _v5;
+            initial = _v6;
+            count = _v7;
             continue foldn;
          } else return initial;
    });
@@ -13455,6 +13469,7 @@ Elm.ReactiveAudio.make = function (_elm) {
                                       ,destinationA: destinationA
                                       ,sinNode: sinNode
                                       ,squareNode: squareNode
+                                      ,dummyNode: dummyNode
                                       ,gainNode: gainNode
                                       ,adderNode: adderNode
                                       ,destinationNode: destinationNode

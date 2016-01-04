@@ -24,6 +24,7 @@ import AudioNodes exposing
     , oscillator
     , simpleLowPassFilter
     , sinWave
+    , zeroWave
     )
 
 -- import Gui exposing (UserInput)
@@ -69,7 +70,7 @@ reallyDumb : String
 reallyDumb = dummy
 
 
-{- a helper function -}
+{- a helper func -}
 foldn : (a -> a) -> a -> Int -> a
 foldn func initial count =
     if
@@ -94,7 +95,7 @@ sinNode : String -> {frequency: Input, frequencyOffset: Input, phaseOffset: Inpu
 sinNode id {frequency, frequencyOffset, phaseOffset} =
   Oscillator
     { id = id
-    , function = sinWave
+    , func = sinWave
     , inputs = { frequency = frequency, frequencyOffset = frequencyOffset, phaseOffset = phaseOffset }
     , state =
         { outputValue = 0.0, phase = 0.0  }
@@ -104,7 +105,18 @@ squareNode : String -> {frequency: Input, frequencyOffset: Input, phaseOffset: I
 squareNode id {frequency, frequencyOffset, phaseOffset} =
   Oscillator
     { id = id
-    , function = squareWave
+    , func = squareWave
+    , inputs = { frequency = frequency, frequencyOffset = frequencyOffset, phaseOffset = phaseOffset }
+    , state =
+        { outputValue = 0.0, phase = 0.0  }
+    }
+
+
+dummyNode : String -> {frequency: Input, frequencyOffset: Input, phaseOffset: Input} -> AudioNode
+dummyNode id {frequency, frequencyOffset, phaseOffset} =
+  Oscillator
+    { id = id
+    , func = zeroWave
     , inputs = { frequency = frequency, frequencyOffset = frequencyOffset, phaseOffset = phaseOffset }
     , state =
         { outputValue = 0.0, phase = 0.0  }
@@ -114,7 +126,7 @@ gainNode : String -> {signal: Input, gain: Input} -> AudioNode
 gainNode id {signal, gain} =
     Gain
         { id = id
-        , function = AudioNodes.gain
+        , func = AudioNodes.gain
         , inputs = { signal = signal, gain = gain }
         , state =
             { outputValue = 0.0 }
@@ -152,7 +164,8 @@ additiveSynthAudioGraph baseFrequency numOscillators =
                 frequency = n * baseFrequency
                 id = getId n
             in
-                squareNode id {frequency = Value frequency, frequencyOffset = Default, phaseOffset = Default}
+                sinNode id {frequency = Value frequency, frequencyOffset = Default, phaseOffset = Default}
+                -- dummyNode id {frequency = Value frequency, frequencyOffset = Default, phaseOffset = Default}
 
 
         oscs = List.map getSinNode [1..numOscillators]
@@ -175,7 +188,7 @@ audioGraph2 =
 
 
 audioGraph =
-    (additiveSynthAudioGraph 100.0 6)
+    (additiveSynthAudioGraph 100.0 30)
     ++ [ destinationNode {signal = ID "additiveSynth"} ]
 
 

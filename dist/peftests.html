@@ -1,0 +1,58 @@
+<html>
+
+  <script>
+
+    timeElapsed = 0.0;
+    var BUFFER_SIZE = 4096;  //92 milliseconds, pretty shit!
+    // var BUFFER_SIZE = 4096;  //92 milliseconds, pretty shit!
+    // var BUFFER_SIZE = 2048;  //92 milliseconds, pretty shit!
+    // var BUFFER_SIZE = 1024;  //92 milliseconds, pretty shit!
+    // var BUFFER_SIZE = 512;  //92 milliseconds, pretty shit!
+    var SAMPLE_RATE = 44100;
+    var SAMPLE_DURATION = 1.0 / SAMPLE_RATE;
+    var BUFFER_DURATION = SAMPLE_DURATION * BUFFER_SIZE;
+
+
+
+    var calcCpuUsage = function(iterations, durationMillis) {
+      var secondsElapsed = (durationMillis / 1000.0);
+      var maxAllowedDuration = iterations * BUFFER_DURATION;
+      console.log('CPU percent:', (secondsElapsed / maxAllowedDuration) * 100.0);
+    }
+
+    function doPerf(iterations) {
+      console.log('doing', iterations, "iterations");
+      var startTime = window.performance.now();
+      for (var i = 0; i < iterations * BUFFER_SIZE; i++) {
+          var x = ["a", "b"];
+      }
+      var endTime = window.performance.now();
+      var duration = endTime - startTime;
+      calcCpuUsage("arrays", iterations, duration);
+
+      var startTime = window.performance.now();
+      for (var i = 0; i < iterations * BUFFER_SIZE; i++) {
+          var x = 1
+      }
+      var endTime = window.performance.now();
+      var duration = endTime - startTime;
+      calcCpuUsage("single int", iterations, duration);
+
+      var startTime = window.performance.now();
+      for (var i = 0; i < iterations * BUFFER_SIZE; i++) {
+          var x = {ctor: "tuple", _0:"a", _1:"b"}
+      }
+      var endTime = window.performance.now();
+      var duration = endTime - startTime;
+      calcCpuUsage(iterations, duration);
+      calcCpuUsage("single int", iterations, duration);
+
+    }
+
+    doPerf(10000);
+
+
+
+  </script>
+
+</html>

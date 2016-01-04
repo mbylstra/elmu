@@ -39,12 +39,12 @@ type Input = ID String | Value Float | Default   -- or it could be an AudioNode!
      -- for now just make a dict, and put a dict key in.
      -- Or make a special node that connects to an exaternal value (?)
          -- the good thing about "External" is that you can tap into the signal for debugging easily.
-             -- and maybe apply a smoothing function to the inputs?
+             -- and maybe apply a smoothing func to the inputs?
 
 type AudioNode =
     Oscillator
         { id : String
-        , function : OscillatorF
+        , func : OscillatorF
         , inputs: OscillatorInputs
         , state :
             { phase: Float
@@ -53,7 +53,7 @@ type AudioNode =
         }
     | Gain
         { id : String
-        , function : GainF
+        , func : GainF
         , inputs: {signal: Input, gain: Input}
         , state :
             { outputValue : Float -- do we really need this? Is it just for feedback? Doesn't really hurt to keep as we need inputs anyway.
@@ -62,7 +62,7 @@ type AudioNode =
     | FeedforwardProcessor
         { id : String
         , input : Input
-        , function : FeedforwardProcessorF -- this is the "update"
+        , func : FeedforwardProcessorF -- this is the "update"
         , state :  -- this is the "model"
             { outputValue : Float
             , prevValues : List Float
@@ -92,7 +92,7 @@ type AudioNode =
 
 
 -- an insteresting idea is explicitly putting in a delay, whenever you want feedback.
--- would this make inline functions possible??
+-- would this make inline funcs possible??
 --     Yeah, but it puts some responsiblity on the developer to avoid infinite loops.
 --        - Seeing as it's a rare thing, it's ok for dev to know about it
 --        - might  make Orchestrator a little more efficient, as it doesn't need to look for loops
@@ -153,7 +153,7 @@ type AudioNode =
     -- BIG BUT: you must pass the dealy state to delay! (so the orchestrator really needs to manage this)
 
 
--- Update functions
+-- Update funcs
 type alias ProcessorF = TimeFloat -> ValueFloat -> ValueFloat
 type alias FeedforwardProcessorF = Float -> List ValueFloat -> ValueFloat
 
@@ -222,13 +222,13 @@ updateGraphNode graph externalState node =
                 -- phaseOffsetInput = props.inputs.phaseOffsetInput (just ignore this one for now)
 
 --                 frequencyInputNode = getInputNode graph frequencyInput
-                    -- this should be abstracted into a function that just gets the value and updates the graph at the same time (regardless of input type etc)
+                    -- this should be abstracted into a func that just gets the value and updates the graph at the same time (regardless of input type etc)
 --                 _ = Debug.log "------------------------" True
                 (graph2, frequencyValue) = updateGraphNode' graph externalState props.inputs.frequency
                 (graph3, frequencyOffsetValue) = updateGraphNode' graph2 externalState props.inputs.frequencyOffset
                 (graph4, phaseOffsetValue) = updateGraphNode' graph3 externalState props.inputs.phaseOffset
 --                 _ = Debug.log "phaseOffsetValue" phaseOffsetValue
-                (newValue, newPhase) = props.function frequencyValue frequencyOffsetValue phaseOffsetValue props.state.phase -- this function should start accepting frequency
+                (newValue, newPhase) = props.func frequencyValue frequencyOffsetValue phaseOffsetValue props.state.phase -- this func should start accepting frequency
 {-                 _ = Debug.log "newValue" newValue
                 _ = Debug.log "newPhase" newPhase -}
                 newState = {outputValue = newValue, phase = newPhase}
@@ -246,7 +246,7 @@ updateGraphNode graph externalState node =
                 Just [inputNode] ->
                     let
                         (newGraph, inputValue) = updateGraphNode graph externalState inputNode
-                        newValue = props.function inputValue props.state.prevValues
+                        newValue = props.func inputValue props.state.prevValues
                         newPrevValues = rotateList props.state.outputValue props.state.prevValues
                         newState = {outputValue = newValue, prevValues = newPrevValues }
                         newNode = FeedforwardProcessor { props | state = newState }
@@ -290,12 +290,12 @@ updateGraphNode graph externalState node =
                 -- phaseOffsetInput = props.inputs.phaseOffsetInput (just ignore this one for now)
 
 --                 frequencyInputNode = getInputNode graph frequencyInput
-                    -- this should be abstracted into a function that just gets the value and updates the graph at the same externalState (regardless of input type etc)
+                    -- this should be abstracted into a func that just gets the value and updates the graph at the same externalState (regardless of input type etc)
 --                 _ = Debug.log "------------------------" True
                 (graph2, signalValue) = updateGraphNode' graph externalState props.inputs.signal
                 (graph3, gainValue) = updateGraphNode' graph2 externalState props.inputs.gain
 --                 _ = Debug.log "phaseOffsetValue" phaseOffsetValue
-                newValue = props.function signalValue gainValue -- this function should start accepting frequency
+                newValue = props.func signalValue gainValue -- this func should start accepting frequency
 {-                 _ = Debug.log "newValue" newValue
                 _ = Debug.log "newPhase" newPhase -}
                 newState = {outputValue = newValue}
@@ -314,7 +314,7 @@ updateGraphNode graph externalState node =
 --                 (graph2, signalvalue) = updategraphnode' graph externalState props.input
 --                 (graph3, gainvalue) = updategraphnode' graph2 externalState props.inputs.gain
 -- --                 _ = debug.log "phaseoffsetvalue" phaseoffsetvalue
---                 newvalue = props.function signalvalue gainvalue -- this function should start accepting frequency
+--                 newvalue = props.func signalvalue gainvalue -- this func should start accepting frequency
 -- {-                 _ = debug.log "newvalue" newvalue
 --                 _ = debug.log "newphase" newphase -}
 --                 newstate = {outputvalue = newvalue}
@@ -470,7 +470,7 @@ squareA : AudioNode
 squareA =
     Oscillator
         { id = "squareA"
-        , function = sinWave
+        , func = sinWave
         , inputs = { frequency = Value 440.0, phaseOffset = Default, frequencyOffset = Default }
         , state =
             { outputValue = 0.0, phase = 0.0  }
@@ -490,7 +490,7 @@ squareAT1 =
     Oscillator
         { id = "squareA"
         , inputs = { frequency = Value 440.0, phaseOffset = Default, frequencyOffset = Default }
-        , function = sinWave
+        , func = sinWave
         , state =
             { outputValue = 1.0, phase = 0.0  }
         }
@@ -518,7 +518,7 @@ testDictGraph = toDict testGraph
 {- squareB =
     Oscillator
         { id = "squareB"
-        , function = sinWave
+        , func = sinWave
         , inputs = [Value 440.0, Default]
         , state =
             { outputValue = 0.0  }
@@ -529,7 +529,7 @@ lowpassB =
     FeedforwardProcessor
         { id = "lowpassB"
         , input = ID "squareB"
-        , function = simpleLowPassFilter
+        , func = simpleLowPassFilter
         , state =
             { outputValue = 0.0
             , prevValues = [0.0, 0.0, 0.0]
@@ -547,7 +547,7 @@ destinationB =
 {- squareAT1 =
     Oscillator
         { id = "squareA"
-        , function = squareWave
+        , func = squareWave
         , state =
             { outputValue = Just 1.0  }
         }
@@ -622,7 +622,7 @@ tests =
        )
     , ( "square1", Generator
         { id = "square1",
-        , $function = <function>,
+        , $func = <func>,
         , state = { outputValue = Just -1 }
         }
         )

@@ -52,8 +52,6 @@ audioOnCheckbox address isChecked =
 
 
 
-main : Signal Html
-main = guiSignal
 
 guiView : Bool -> Html
 guiView model =
@@ -78,3 +76,6 @@ userInputSignal =
 
 port outgoingUserInput : Signal UserInput
 port outgoingUserInput = userInputSignal
+
+main : Signal Html
+main = guiSignal
