@@ -52,7 +52,7 @@ var _Utils = exposeElmModule(Elm.Native.Utils);
 var _List = exposeElmModule(Elm.Native.List);
 
 var initialAudioGraph = _List.toArray(ReactiveAudio.audioGraph);
-// console.log(initialAudioGraph);
+console.log(initialAudioGraph);
 
 
 var graphListToObject = function(graphList) {
@@ -78,7 +78,7 @@ var state = {
 
 // console.log(graphListToObject(initialAudioGraph));
 var audioGraph = graphListToObject(initialAudioGraph);
-// console.log('audioGraph', audioGraph);
+console.log('audioGraph', audioGraph);
 
 // no need - state is already there as an object. just mutate the fucker!
 var ids = Object.keys(audioGraph);

@@ -13032,14 +13032,40 @@ Elm.Components.make = function (_elm) {
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm);
    var _op = {};
-   var additiveSynthAudioGraph = F2(function (baseFrequency,
+   var fmSynth = F2(function (id,_p0) {
+      var _p1 = _p0;
+      var _p2 = _p1.frequency;
+      var createModulatorNode = F2(function (fundamentalFrequency,
+      spec) {
+         return A2($AudioNodes.sinNode,
+         spec.id,
+         {frequency: $MainTypes.Value(_p2 * spec.multiple)
+         ,frequencyOffset: $MainTypes.Default
+         ,phaseOffset: spec.modulator});
+      });
+      var carrierNode = A2($AudioNodes.sinNode,
+      id,
+      {frequency: $MainTypes.Value(_p2)
+      ,frequencyOffset: $MainTypes.Default
+      ,phaseOffset: _p1.modulator});
+      return A2($Basics._op["++"],
+      _U.list([carrierNode]),
+      A2($List.map,createModulatorNode(_p2),_p1.modulatorNodes));
+   });
+   var FMSynthSpec = F3(function (a,b,c) {
+      return {frequency: a,modulator: b,modulatorNodes: c};
+   });
+   var ModulatorNodeSpec = F4(function (a,b,c,d) {
+      return {id: a,multiple: b,detune: c,modulator: d};
+   });
+   var additiveSynthAudioGraph = F2(function (fundamentalFrequency,
    numOscillators) {
       var getId = function (n) {
          return A2($Basics._op["++"],"harmonic",$Basics.toString(n));
       };
       var getSinNode = function (n) {
          var id = getId(n);
-         var frequency = n * baseFrequency;
+         var frequency = n * fundamentalFrequency;
          return A2($AudioNodes.sinNode,
          id,
          {frequency: $MainTypes.Value(frequency)
@@ -13059,7 +13085,10 @@ Elm.Components.make = function (_elm) {
       mixerInputs)]));
    });
    return _elm.Components.values = {_op: _op
-                                   ,additiveSynthAudioGraph: additiveSynthAudioGraph};
+                                   ,additiveSynthAudioGraph: additiveSynthAudioGraph
+                                   ,ModulatorNodeSpec: ModulatorNodeSpec
+                                   ,FMSynthSpec: FMSynthSpec
+                                   ,fmSynth: fmSynth};
 };
 Elm.Gui = Elm.Gui || {};
 Elm.Gui.make = function (_elm) {
@@ -13166,9 +13195,29 @@ Elm.ReactiveAudio.make = function (_elm) {
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm);
    var _op = {};
-   var audioGraph = A2($Basics._op["++"],
+   var audioGraph3 = A2($Basics._op["++"],
    A2($Components.additiveSynthAudioGraph,100.0,30),
    _U.list([$AudioNodes.destinationNode({signal: $MainTypes.ID("additiveSynth")})]));
+   var fmSynth1 = A2($Components.fmSynth,
+   "fm",
+   {frequency: 200.0
+   ,modulator: $MainTypes.ID("fm.1")
+   ,modulatorNodes: _U.list([{id: "fm.1"
+                             ,multiple: 1.0
+                             ,detune: $MainTypes.Default
+                             ,modulator: $MainTypes.ID("fm.2")}
+                            ,{id: "fm.2"
+                             ,multiple: 1.0
+                             ,detune: $MainTypes.Default
+                             ,modulator: $MainTypes.ID("fm.3")}
+                            ,{id: "fm.3"
+                             ,multiple: 4.0
+                             ,detune: $MainTypes.Default
+                             ,modulator: $MainTypes.Default}])});
+   var fmSynthGraph = A2($Basics._op["++"],
+   fmSynth1,
+   _U.list([$AudioNodes.destinationNode({signal: $MainTypes.ID("fm")})]));
+   var audioGraph = fmSynthGraph;
    var audioGraph2 = _U.list([$AudioNodes.commaHelper
                              ,A2($AudioNodes.sinNode,
                              "mod3",
@@ -13180,9 +13229,6 @@ Elm.ReactiveAudio.make = function (_elm) {
                              {frequency: $MainTypes.Value(600.0)
                              ,frequencyOffset: $MainTypes.Default
                              ,phaseOffset: $MainTypes.ID("mod3")})
-                             ,A2($AudioNodes.gainNode,
-                             "mod1Frequency",
-                             {signal: $MainTypes.ID("pitch"),gain: $MainTypes.Value(3.0)})
                              ,A2($AudioNodes.sinNode,
                              "mod1",
                              {frequency: $MainTypes.Value(400.0)
@@ -13198,5 +13244,8 @@ Elm.ReactiveAudio.make = function (_elm) {
    return _elm.ReactiveAudio.values = {_op: _op
                                       ,reallyDumb: reallyDumb
                                       ,audioGraph2: audioGraph2
+                                      ,fmSynth1: fmSynth1
+                                      ,audioGraph3: audioGraph3
+                                      ,fmSynthGraph: fmSynthGraph
                                       ,audioGraph: audioGraph};
 };
