@@ -12754,6 +12754,7 @@ Elm.MainTypes.make = function (_elm) {
    var Oscillator = function (a) {
       return {ctor: "Oscillator",_0: a};
    };
+   var GUI = function (a) {    return {ctor: "GUI",_0: a};};
    var Default = {ctor: "Default"};
    var Value = function (a) {    return {ctor: "Value",_0: a};};
    var ID = function (a) {    return {ctor: "ID",_0: a};};
@@ -12761,6 +12762,7 @@ Elm.MainTypes.make = function (_elm) {
                                   ,ID: ID
                                   ,Value: Value
                                   ,Default: Default
+                                  ,GUI: GUI
                                   ,Oscillator: Oscillator
                                   ,Gain: Gain
                                   ,FeedforwardProcessor: FeedforwardProcessor
@@ -13108,9 +13110,16 @@ Elm.Gui.make = function (_elm) {
    $Signal = Elm.Signal.make(_elm),
    $Window = Elm.Window.make(_elm);
    var _op = {};
+   var mouseWindowFraction$ = F2(function (_p1,_p0) {
+      var _p2 = _p1;
+      var _p3 = _p0;
+      var _p4 = _p3._1;
+      return {x: $Basics.toFloat(_p2._0) / $Basics.toFloat(_p3._0)
+             ,y: $Basics.toFloat(_p4 - _p2._1) / $Basics.toFloat(_p4)};
+   });
    var updateGuiModel = F2(function (action,b) {
-      var _p0 = action;
-      return _p0._0;
+      var _p5 = action;
+      return _p5._0;
    });
    var dummy = "dummy!";
    var AudioOn = function (a) {
@@ -13122,12 +13131,21 @@ Elm.Gui.make = function (_elm) {
    false,
    guiMailbox.signal);
    var userInputSignal = A4($Signal.map3,
-   F3(function (_p2,_p1,audioOn) {
-      var _p3 = _p2;
-      var _p4 = _p1;
-      return {mousePosition: {x: _p3._0,y: _p3._1}
-             ,windowDimensions: {width: _p4._0,height: _p4._1}
-             ,audioOn: audioOn};
+   F3(function (_p7,_p6,audioOn) {
+      var _p8 = _p7;
+      var _p13 = _p8._1;
+      var _p12 = _p8._0;
+      var _p9 = _p6;
+      var _p11 = _p9._0;
+      var _p10 = _p9._1;
+      var mouseWindowFraction$$ = A2(mouseWindowFraction$,
+      {ctor: "_Tuple2",_0: _p12,_1: _p13},
+      {ctor: "_Tuple2",_0: _p11,_1: _p10});
+      return {mousePosition: {x: _p12,y: _p13}
+             ,windowDimensions: {width: _p11,height: _p10}
+             ,mouseWindowFraction: mouseWindowFraction$$
+             ,audioOn: audioOn
+             ,pitch: mouseWindowFraction$$.x * 400.0 + 50.0};
    }),
    $Mouse.position,
    $Window.dimensions,
@@ -13136,8 +13154,11 @@ Elm.Gui.make = function (_elm) {
    function (v) {
       return {mousePosition: {x: v.mousePosition.x
                              ,y: v.mousePosition.y}
+             ,mouseWindowFraction: {x: v.mouseWindowFraction.x
+                                   ,y: v.mouseWindowFraction.y}
              ,windowDimensions: {width: v.windowDimensions.width
                                 ,height: v.windowDimensions.height}
+             ,pitch: v.pitch
              ,audioOn: v.audioOn};
    },
    userInputSignal);
@@ -13162,8 +13183,12 @@ Elm.Gui.make = function (_elm) {
    };
    var guiSignal = A2($Signal.map,guiView,guiModelSignal);
    var main = guiSignal;
-   var UserInput = F3(function (a,b,c) {
-      return {mousePosition: a,windowDimensions: b,audioOn: c};
+   var UserInput = F5(function (a,b,c,d,e) {
+      return {mousePosition: a
+             ,mouseWindowFraction: b
+             ,windowDimensions: c
+             ,pitch: d
+             ,audioOn: e};
    });
    return _elm.Gui.values = {_op: _op
                             ,UserInput: UserInput
@@ -13175,6 +13200,7 @@ Elm.Gui.make = function (_elm) {
                             ,audioOnCheckbox: audioOnCheckbox
                             ,guiView: guiView
                             ,guiSignal: guiSignal
+                            ,mouseWindowFraction$: mouseWindowFraction$
                             ,userInputSignal: userInputSignal
                             ,main: main};
 };
@@ -13195,6 +13221,13 @@ Elm.ReactiveAudio.make = function (_elm) {
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm);
    var _op = {};
+   var theremin = _U.list([A2($AudioNodes.sinNode,
+                          "t",
+                          {frequency: $MainTypes.GUI("pitch")
+                          ,frequencyOffset: $MainTypes.Default
+                          ,phaseOffset: $MainTypes.Default})
+                          ,$AudioNodes.destinationNode({signal: $MainTypes.ID("t")})]);
+   var audioGraph = theremin;
    var audioGraph3 = A2($Basics._op["++"],
    A2($Components.additiveSynthAudioGraph,100.0,30),
    _U.list([$AudioNodes.destinationNode({signal: $MainTypes.ID("additiveSynth")})]));
@@ -13217,7 +13250,6 @@ Elm.ReactiveAudio.make = function (_elm) {
    var fmSynthGraph = A2($Basics._op["++"],
    fmSynth1,
    _U.list([$AudioNodes.destinationNode({signal: $MainTypes.ID("fm")})]));
-   var audioGraph = fmSynthGraph;
    var audioGraph2 = _U.list([$AudioNodes.commaHelper
                              ,A2($AudioNodes.sinNode,
                              "mod3",
@@ -13247,5 +13279,6 @@ Elm.ReactiveAudio.make = function (_elm) {
                                       ,fmSynth1: fmSynth1
                                       ,audioGraph3: audioGraph3
                                       ,fmSynthGraph: fmSynthGraph
+                                      ,theremin: theremin
                                       ,audioGraph: audioGraph};
 };

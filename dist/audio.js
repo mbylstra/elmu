@@ -54,6 +54,15 @@ var _List = exposeElmModule(Elm.Native.List);
 var initialAudioGraph = _List.toArray(ReactiveAudio.audioGraph);
 console.log(initialAudioGraph);
 
+var externalState = {
+  time: 0.0,
+  externalInputState: {
+    xWindowFraction: 0.0,
+    yWindowFraction: 0.0,
+    pitch: 0.0,
+    audioOn : true,
+  }
+}
 
 var graphListToObject = function(graphList) {
   var graph = {}
@@ -133,6 +142,13 @@ var getInputValue = function(audioGraph, input) {
     // console.log("audioGraph", audioGraph);
     // console.log('input', input);
     return getNodeValue(audioGraph, audioGraph[input._0]);
+  } else if (type == "GUI") {
+    // console.log("audioGraph", audioGraph);
+    // console.log('input', input);
+    var guiId = input._0;
+    // console.log('GUI?');
+    // console.log('externalState', externalState);
+    return externalState.externalInputState[guiId];
   }
 }
 
@@ -146,14 +162,6 @@ var output = updateGraph(audioGraph);
 
 // var elmAudioGraph = initialAudioGraph;
 
-var externalState = {
-  time: 0.0,
-  externalInputState: {
-    xWindowFraction: 0.0,
-    yWindowFraction: 0.0,
-    audioOn : true,
-  }
-}
 
 var monoBuffer = [];
 
@@ -185,6 +193,7 @@ if (PROFILING) {
 } else {
     elmGui.ports.outgoingUserInput.subscribe(function(userInput) {
       externalState.externalInputState = userInput;
+      // console.log('userInput', userInput);
     });
 
     var audioCtx = new AudioContext();

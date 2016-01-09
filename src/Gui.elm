@@ -9,7 +9,9 @@ import Html.Events exposing (on, targetChecked)
 
 type alias UserInput =
     { mousePosition : { x : Int, y : Int}
+    , mouseWindowFraction : { x : Float, y : Float}
     , windowDimensions : { width: Int, height: Int}
+    , pitch : Float
     , audioOn : Bool
     }
 
@@ -58,20 +60,29 @@ guiView model =
 guiSignal : Signal Html
 guiSignal = Signal.map guiView guiModelSignal
 
+mouseWindowFraction' : (Int, Int) -> (Int, Int) -> { x : Float, y : Float}
+mouseWindowFraction' (mouseX, mouseY) (windowWidth, windowHeight) =
+  { x = toFloat mouseX / toFloat windowWidth
+  , y = toFloat (windowHeight - mouseY) / toFloat windowHeight
+  }
+
 userInputSignal : Signal UserInput
 userInputSignal =
-    Signal.map3
-        ( \(mouseX, mouseY) (windowWidth, windowHeight) audioOn ->
-            -- { wasd = wasd
-            { mousePosition = {x = mouseX, y = mouseY}
-            , windowDimensions = {width = windowWidth, height = windowHeight}
-            , audioOn = audioOn
-            }
-        )
-        -- Keyboard.wasd
-        Mouse.position
-        Window.dimensions
-        guiModelSignal
+  Signal.map3
+    (\(mouseX, mouseY) (windowWidth, windowHeight) audioOn ->
+      let
+        mouseWindowFraction'' = mouseWindowFraction' (mouseX, mouseY) (windowWidth, windowHeight)
+      in
+        { mousePosition = {x = mouseX, y = mouseY}
+        , windowDimensions = { width = windowWidth, height = windowHeight}
+        , mouseWindowFraction = mouseWindowFraction''
+        , audioOn = audioOn
+        , pitch = (mouseWindowFraction''.x * 400.0) + 50.0
+        }
+    )
+    Mouse.position
+    Window.dimensions
+    guiModelSignal
 
 port outgoingUserInput : Signal UserInput
 port outgoingUserInput = userInputSignal
