@@ -5,11 +5,14 @@ var ITERATIONS = 100;
 
 
 timeElapsed = 0.0;
-var BUFFER_SIZE = 4096;  //92 milliseconds, pretty shit!
+// var BUFFER_SIZE = 4096;  //92 milliseconds, pretty shit!
 // var BUFFER_SIZE = 4096;  //92 milliseconds, pretty shit!
 // var BUFFER_SIZE = 2048;  //92 milliseconds, pretty shit!
 // var BUFFER_SIZE = 1024;  //92 milliseconds, pretty shit!
-// var BUFFER_SIZE = 512;  //92 milliseconds, pretty shit!
+// var BUFFER_SIZE = 8192;  //92 milliseconds, pretty shit!
+// var BUFFER_SIZE = 8192;  //92 milliseconds, pretty shit!
+// var BUFFER_SIZE = 16384;  //92 milliseconds, pretty shit!
+var BUFFER_SIZE = 512;  //92 milliseconds, pretty shit!
 var SAMPLE_RATE = 44100;
 var SAMPLE_DURATION = 1.0 / SAMPLE_RATE;
 var BUFFER_DURATION = SAMPLE_DURATION * BUFFER_SIZE;
@@ -54,12 +57,13 @@ var _List = exposeElmModule(Elm.Native.List);
 var initialAudioGraph = _List.toArray(ReactiveAudio.audioGraph);
 console.log(initialAudioGraph);
 
+// TODO: get this from elm! So it's properly type checked. Should map fine.
 var externalState = {
   time: 0.0,
   externalInputState: {
     xWindowFraction: 0.0,
     yWindowFraction: 0.0,
-    pitch: 0.0,
+    keyboardFrequency: 200.0,
     audioOn : true,
   }
 }
@@ -146,9 +150,17 @@ var getInputValue = function(audioGraph, input) {
     // console.log("audioGraph", audioGraph);
     // console.log('input', input);
     var guiId = input._0;
+    // console.log('guiId', guiId);
+    // console.log('input', input);
     // console.log('GUI?');
     // console.log('externalState', externalState);
-    return externalState.externalInputState[guiId];
+    if (externalState.externalInputState.hasOwnProperty(guiId)) {
+      var value = externalState.externalInputState[guiId];
+      // console.log('value', value);
+      return value;
+    } else {
+      throw "GUI id " + guiId + " does not exist"
+    }
   }
 }
 
@@ -198,6 +210,7 @@ if (PROFILING) {
 
     var audioCtx = new AudioContext();
     source = audioCtx.createBufferSource();
+    console.log('BUFFER_SIZE', BUFFER_SIZE);
     var scriptNode = audioCtx.createScriptProcessor(BUFFER_SIZE, 1, 1);
     scriptNode.onaudioprocess = function(audioProcessingEvent) {
         var outputBuffer = audioProcessingEvent.outputBuffer;

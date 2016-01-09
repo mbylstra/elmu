@@ -10175,6 +10175,264 @@ Elm.ElmTest.make = function (_elm) {
                                 ,consoleRunner: consoleRunner
                                 ,stringRunner: stringRunner};
 };
+Elm.Set = Elm.Set || {};
+Elm.Set.make = function (_elm) {
+   "use strict";
+   _elm.Set = _elm.Set || {};
+   if (_elm.Set.values) return _elm.Set.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Dict = Elm.Dict.make(_elm),
+   $List = Elm.List.make(_elm);
+   var _op = {};
+   var foldr = F3(function (f,b,_p0) {
+      var _p1 = _p0;
+      return A3($Dict.foldr,
+      F3(function (k,_p2,b) {    return A2(f,k,b);}),
+      b,
+      _p1._0);
+   });
+   var foldl = F3(function (f,b,_p3) {
+      var _p4 = _p3;
+      return A3($Dict.foldl,
+      F3(function (k,_p5,b) {    return A2(f,k,b);}),
+      b,
+      _p4._0);
+   });
+   var toList = function (_p6) {
+      var _p7 = _p6;
+      return $Dict.keys(_p7._0);
+   };
+   var size = function (_p8) {
+      var _p9 = _p8;
+      return $Dict.size(_p9._0);
+   };
+   var member = F2(function (k,_p10) {
+      var _p11 = _p10;
+      return A2($Dict.member,k,_p11._0);
+   });
+   var isEmpty = function (_p12) {
+      var _p13 = _p12;
+      return $Dict.isEmpty(_p13._0);
+   };
+   var Set_elm_builtin = function (a) {
+      return {ctor: "Set_elm_builtin",_0: a};
+   };
+   var empty = Set_elm_builtin($Dict.empty);
+   var singleton = function (k) {
+      return Set_elm_builtin(A2($Dict.singleton,
+      k,
+      {ctor: "_Tuple0"}));
+   };
+   var insert = F2(function (k,_p14) {
+      var _p15 = _p14;
+      return Set_elm_builtin(A3($Dict.insert,
+      k,
+      {ctor: "_Tuple0"},
+      _p15._0));
+   });
+   var fromList = function (xs) {
+      return A3($List.foldl,insert,empty,xs);
+   };
+   var map = F2(function (f,s) {
+      return fromList(A2($List.map,f,toList(s)));
+   });
+   var remove = F2(function (k,_p16) {
+      var _p17 = _p16;
+      return Set_elm_builtin(A2($Dict.remove,k,_p17._0));
+   });
+   var union = F2(function (_p19,_p18) {
+      var _p20 = _p19;
+      var _p21 = _p18;
+      return Set_elm_builtin(A2($Dict.union,_p20._0,_p21._0));
+   });
+   var intersect = F2(function (_p23,_p22) {
+      var _p24 = _p23;
+      var _p25 = _p22;
+      return Set_elm_builtin(A2($Dict.intersect,_p24._0,_p25._0));
+   });
+   var diff = F2(function (_p27,_p26) {
+      var _p28 = _p27;
+      var _p29 = _p26;
+      return Set_elm_builtin(A2($Dict.diff,_p28._0,_p29._0));
+   });
+   var filter = F2(function (p,_p30) {
+      var _p31 = _p30;
+      return Set_elm_builtin(A2($Dict.filter,
+      F2(function (k,_p32) {    return p(k);}),
+      _p31._0));
+   });
+   var partition = F2(function (p,_p33) {
+      var _p34 = _p33;
+      var _p35 = A2($Dict.partition,
+      F2(function (k,_p36) {    return p(k);}),
+      _p34._0);
+      var p1 = _p35._0;
+      var p2 = _p35._1;
+      return {ctor: "_Tuple2"
+             ,_0: Set_elm_builtin(p1)
+             ,_1: Set_elm_builtin(p2)};
+   });
+   return _elm.Set.values = {_op: _op
+                            ,empty: empty
+                            ,singleton: singleton
+                            ,insert: insert
+                            ,remove: remove
+                            ,isEmpty: isEmpty
+                            ,member: member
+                            ,size: size
+                            ,foldl: foldl
+                            ,foldr: foldr
+                            ,map: map
+                            ,filter: filter
+                            ,partition: partition
+                            ,union: union
+                            ,intersect: intersect
+                            ,diff: diff
+                            ,toList: toList
+                            ,fromList: fromList};
+};
+Elm.Native.Keyboard = {};
+
+Elm.Native.Keyboard.make = function(localRuntime) {
+	localRuntime.Native = localRuntime.Native || {};
+	localRuntime.Native.Keyboard = localRuntime.Native.Keyboard || {};
+	if (localRuntime.Native.Keyboard.values)
+	{
+		return localRuntime.Native.Keyboard.values;
+	}
+
+	var NS = Elm.Native.Signal.make(localRuntime);
+
+
+	function keyEvent(event)
+	{
+		return {
+			alt: event.altKey,
+			meta: event.metaKey,
+			keyCode: event.keyCode
+		};
+	}
+
+
+	function keyStream(node, eventName, handler)
+	{
+		var stream = NS.input(eventName, { alt: false, meta: false, keyCode: 0 });
+
+		localRuntime.addListener([stream.id], node, eventName, function(e) {
+			localRuntime.notify(stream.id, handler(e));
+		});
+
+		return stream;
+	}
+
+	var downs = keyStream(document, 'keydown', keyEvent);
+	var ups = keyStream(document, 'keyup', keyEvent);
+	var presses = keyStream(document, 'keypress', keyEvent);
+	var blurs = keyStream(window, 'blur', function() { return null; });
+
+
+	return localRuntime.Native.Keyboard.values = {
+		downs: downs,
+		ups: ups,
+		blurs: blurs,
+		presses: presses
+	};
+};
+
+Elm.Keyboard = Elm.Keyboard || {};
+Elm.Keyboard.make = function (_elm) {
+   "use strict";
+   _elm.Keyboard = _elm.Keyboard || {};
+   if (_elm.Keyboard.values) return _elm.Keyboard.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Char = Elm.Char.make(_elm),
+   $Native$Keyboard = Elm.Native.Keyboard.make(_elm),
+   $Set = Elm.Set.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var _op = {};
+   var presses = A2($Signal.map,
+   function (_) {
+      return _.keyCode;
+   },
+   $Native$Keyboard.presses);
+   var toXY = F2(function (_p0,keyCodes) {
+      var _p1 = _p0;
+      var is = function (keyCode) {
+         return A2($Set.member,keyCode,keyCodes) ? 1 : 0;
+      };
+      return {x: is(_p1.right) - is(_p1.left)
+             ,y: is(_p1.up) - is(_p1.down)};
+   });
+   var Directions = F4(function (a,b,c,d) {
+      return {up: a,down: b,left: c,right: d};
+   });
+   var dropMap = F2(function (f,signal) {
+      return $Signal.dropRepeats(A2($Signal.map,f,signal));
+   });
+   var EventInfo = F3(function (a,b,c) {
+      return {alt: a,meta: b,keyCode: c};
+   });
+   var Blur = {ctor: "Blur"};
+   var Down = function (a) {    return {ctor: "Down",_0: a};};
+   var Up = function (a) {    return {ctor: "Up",_0: a};};
+   var rawEvents = $Signal.mergeMany(_U.list([A2($Signal.map,
+                                             Up,
+                                             $Native$Keyboard.ups)
+                                             ,A2($Signal.map,Down,$Native$Keyboard.downs)
+                                             ,A2($Signal.map,$Basics.always(Blur),$Native$Keyboard.blurs)]));
+   var empty = {alt: false,meta: false,keyCodes: $Set.empty};
+   var update = F2(function (event,model) {
+      var _p2 = event;
+      switch (_p2.ctor)
+      {case "Down": var _p3 = _p2._0;
+           return {alt: _p3.alt
+                  ,meta: _p3.meta
+                  ,keyCodes: A2($Set.insert,_p3.keyCode,model.keyCodes)};
+         case "Up": var _p4 = _p2._0;
+           return {alt: _p4.alt
+                  ,meta: _p4.meta
+                  ,keyCodes: A2($Set.remove,_p4.keyCode,model.keyCodes)};
+         default: return empty;}
+   });
+   var model = A3($Signal.foldp,update,empty,rawEvents);
+   var alt = A2(dropMap,function (_) {    return _.alt;},model);
+   var meta = A2(dropMap,function (_) {    return _.meta;},model);
+   var keysDown = A2(dropMap,
+   function (_) {
+      return _.keyCodes;
+   },
+   model);
+   var arrows = A2(dropMap,
+   toXY({up: 38,down: 40,left: 37,right: 39}),
+   keysDown);
+   var wasd = A2(dropMap,
+   toXY({up: 87,down: 83,left: 65,right: 68}),
+   keysDown);
+   var isDown = function (keyCode) {
+      return A2(dropMap,$Set.member(keyCode),keysDown);
+   };
+   var ctrl = isDown(17);
+   var shift = isDown(16);
+   var space = isDown(32);
+   var enter = isDown(13);
+   var Model = F3(function (a,b,c) {
+      return {alt: a,meta: b,keyCodes: c};
+   });
+   return _elm.Keyboard.values = {_op: _op
+                                 ,arrows: arrows
+                                 ,wasd: wasd
+                                 ,enter: enter
+                                 ,space: space
+                                 ,ctrl: ctrl
+                                 ,shift: shift
+                                 ,alt: alt
+                                 ,meta: meta
+                                 ,isDown: isDown
+                                 ,keysDown: keysDown
+                                 ,presses: presses};
+};
 Elm.Native = Elm.Native || {};
 Elm.Native.Mouse = {};
 Elm.Native.Mouse.make = function(localRuntime) {
@@ -13099,10 +13357,12 @@ Elm.Gui.make = function (_elm) {
    if (_elm.Gui.values) return _elm.Gui.values;
    var _U = Elm.Native.Utils.make(_elm),
    $Basics = Elm.Basics.make(_elm),
+   $Char = Elm.Char.make(_elm),
    $Debug = Elm.Debug.make(_elm),
    $Html = Elm.Html.make(_elm),
    $Html$Attributes = Elm.Html.Attributes.make(_elm),
    $Html$Events = Elm.Html.Events.make(_elm),
+   $Keyboard = Elm.Keyboard.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Mouse = Elm.Mouse.make(_elm),
@@ -13121,6 +13381,22 @@ Elm.Gui.make = function (_elm) {
       var _p5 = action;
       return _p5._0;
    });
+   var pitchToFrequency = function (pitch) {
+      return Math.pow(2,(pitch - 49.0) / 12.0) * 440.0;
+   };
+   var charToPitch = function (c) {
+      var _p6 = c;
+      switch (_p6.valueOf())
+      {case "s": return $Maybe.Just(60.0);
+         case "d": return $Maybe.Just(62.0);
+         case "f": return $Maybe.Just(64.0);
+         case "g": return $Maybe.Just(65.0);
+         case "h": return $Maybe.Just(67.0);
+         case "j": return $Maybe.Just(69.0);
+         case "k": return $Maybe.Just(71.0);
+         case "l": return $Maybe.Just(72.0);
+         default: return $Maybe.Nothing;}
+   };
    var dummy = "dummy!";
    var AudioOn = function (a) {
       return {ctor: "AudioOn",_0: a};
@@ -13130,25 +13406,29 @@ Elm.Gui.make = function (_elm) {
    updateGuiModel,
    false,
    guiMailbox.signal);
-   var userInputSignal = A4($Signal.map3,
-   F3(function (_p7,_p6,audioOn) {
-      var _p8 = _p7;
-      var _p13 = _p8._1;
-      var _p12 = _p8._0;
-      var _p9 = _p6;
-      var _p11 = _p9._0;
-      var _p10 = _p9._1;
+   var userInputSignal = A5($Signal.map4,
+   F4(function (_p8,_p7,keyCode,audioOn) {
+      var _p9 = _p8;
+      var _p14 = _p9._1;
+      var _p13 = _p9._0;
+      var _p10 = _p7;
+      var _p12 = _p10._0;
+      var _p11 = _p10._1;
       var mouseWindowFraction$$ = A2(mouseWindowFraction$,
-      {ctor: "_Tuple2",_0: _p12,_1: _p13},
-      {ctor: "_Tuple2",_0: _p11,_1: _p10});
-      return {mousePosition: {x: _p12,y: _p13}
-             ,windowDimensions: {width: _p11,height: _p10}
+      {ctor: "_Tuple2",_0: _p13,_1: _p14},
+      {ctor: "_Tuple2",_0: _p12,_1: _p11});
+      return {mousePosition: {x: _p13,y: _p14}
+             ,windowDimensions: {width: _p12,height: _p11}
              ,mouseWindowFraction: mouseWindowFraction$$
              ,audioOn: audioOn
-             ,pitch: mouseWindowFraction$$.x * 400.0 + 50.0};
+             ,windowMouseXPitch: mouseWindowFraction$$.x * 400.0 + 50.0
+             ,keyboardFrequency: pitchToFrequency(A2($Maybe.withDefault,
+             60.0,
+             charToPitch($Char.fromCode(keyCode))))};
    }),
    $Mouse.position,
    $Window.dimensions,
+   $Keyboard.presses,
    guiModelSignal);
    var outgoingUserInput = Elm.Native.Port.make(_elm).outboundSignal("outgoingUserInput",
    function (v) {
@@ -13158,7 +13438,8 @@ Elm.Gui.make = function (_elm) {
                                    ,y: v.mouseWindowFraction.y}
              ,windowDimensions: {width: v.windowDimensions.width
                                 ,height: v.windowDimensions.height}
-             ,pitch: v.pitch
+             ,keyboardFrequency: v.keyboardFrequency
+             ,windowMouseXPitch: v.windowMouseXPitch
              ,audioOn: v.audioOn};
    },
    userInputSignal);
@@ -13183,17 +13464,20 @@ Elm.Gui.make = function (_elm) {
    };
    var guiSignal = A2($Signal.map,guiView,guiModelSignal);
    var main = guiSignal;
-   var UserInput = F5(function (a,b,c,d,e) {
+   var UserInput = F6(function (a,b,c,d,e,f) {
       return {mousePosition: a
              ,mouseWindowFraction: b
              ,windowDimensions: c
-             ,pitch: d
-             ,audioOn: e};
+             ,keyboardFrequency: d
+             ,windowMouseXPitch: e
+             ,audioOn: f};
    });
    return _elm.Gui.values = {_op: _op
                             ,UserInput: UserInput
                             ,AudioOn: AudioOn
                             ,dummy: dummy
+                            ,charToPitch: charToPitch
+                            ,pitchToFrequency: pitchToFrequency
                             ,updateGuiModel: updateGuiModel
                             ,guiMailbox: guiMailbox
                             ,guiModelSignal: guiModelSignal
@@ -13223,7 +13507,7 @@ Elm.ReactiveAudio.make = function (_elm) {
    var _op = {};
    var theremin = _U.list([A2($AudioNodes.sinNode,
                           "t",
-                          {frequency: $MainTypes.GUI("pitch")
+                          {frequency: $MainTypes.GUI("keyboardFrequency")
                           ,frequencyOffset: $MainTypes.Default
                           ,phaseOffset: $MainTypes.Default})
                           ,$AudioNodes.destinationNode({signal: $MainTypes.ID("t")})]);
