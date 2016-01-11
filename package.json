@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/mbylstra/elm-99-problems#readme",
   "dependencies": {
-    "gulp-elm": "^0.2.0"
+    "gulp-elm": "^0.2.0",
+    "gulp-sass": "^2.1.1"
   }
 }

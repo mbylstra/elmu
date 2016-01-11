@@ -1,5 +1,6 @@
-var Elm = Elm || { Native: {} };
-Elm.Native.Basics = {};
+<!DOCTYPE HTML>
+<html><head><meta charset="UTF-8"><title>GUI.Piano</title><style>html,head,body { padding:0; margin:0; }
+body { font-family: calibri, helvetica, arial, sans-serif; }</style><script type="text/javascript">var Elm = Elm || { Native: {} };Elm.Native.Basics = {};
 Elm.Native.Basics.make = function(localRuntime) {
 	localRuntime.Native = localRuntime.Native || {};
 	localRuntime.Native.Basics = localRuntime.Native.Basics || {};
@@ -135,7 +136,6 @@ Elm.Native.Basics.make = function(localRuntime) {
 		isInfinite: isInfinite
 	};
 };
-
 Elm.Native.Port = {};
 
 Elm.Native.Port.make = function(localRuntime) {
@@ -267,7 +267,6 @@ Elm.Native.Port.make = function(localRuntime) {
 		outboundSignal: outboundSignal
 	};
 };
-
 if (!Elm.fullscreen) {
 	(function() {
 		'use strict';
@@ -904,7 +903,6 @@ if (!Elm.fullscreen) {
 			: fun(a)(b)(c)(d)(e)(f)(g)(h)(i);
 	}
 }
-
 Elm.Native = Elm.Native || {};
 Elm.Native.Utils = {};
 Elm.Native.Utils.make = function(localRuntime) {
@@ -1435,7 +1433,6 @@ Elm.Native.Utils.make = function(localRuntime) {
 		toString: toString
 	};
 };
-
 Elm.Basics = Elm.Basics || {};
 Elm.Basics.make = function (_elm) {
    "use strict";
@@ -1557,8 +1554,7 @@ Elm.Basics.make = function (_elm) {
                                ,LT: LT
                                ,EQ: EQ
                                ,GT: GT};
-};
-Elm.Maybe = Elm.Maybe || {};
+};Elm.Maybe = Elm.Maybe || {};
 Elm.Maybe.make = function (_elm) {
    "use strict";
    _elm.Maybe = _elm.Maybe || {};
@@ -1670,8 +1666,7 @@ Elm.Maybe.make = function (_elm) {
                               ,oneOf: oneOf
                               ,Just: Just
                               ,Nothing: Nothing};
-};
-Elm.Native.List = {};
+};Elm.Native.List = {};
 Elm.Native.List.make = function(localRuntime) {
 	localRuntime.Native = localRuntime.Native || {};
 	localRuntime.Native.List = localRuntime.Native.List || {};
@@ -1835,7 +1830,6 @@ Elm.Native.List.make = function(localRuntime) {
 	};
 	return localRuntime.Native.List.values = Elm.Native.List.values;
 };
-
 Elm.List = Elm.List || {};
 Elm.List.make = function (_elm) {
    "use strict";
@@ -2107,8 +2101,7 @@ Elm.List.make = function (_elm) {
                              ,sort: sort
                              ,sortBy: sortBy
                              ,sortWith: sortWith};
-};
-Elm.Native.Transform2D = {};
+};Elm.Native.Transform2D = {};
 Elm.Native.Transform2D.make = function(localRuntime) {
 	localRuntime.Native = localRuntime.Native || {};
 	localRuntime.Native.Transform2D = localRuntime.Native.Transform2D || {};
@@ -2218,7 +2211,6 @@ Elm.Native.Transform2D.make = function(localRuntime) {
 		*/
 	};
 };
-
 Elm.Transform2D = Elm.Transform2D || {};
 Elm.Transform2D.make = function (_elm) {
    "use strict";
@@ -2248,7 +2240,6 @@ Elm.Transform2D.make = function (_elm) {
                                     ,scaleX: scaleX
                                     ,scaleY: scaleY};
 };
-
 // setup
 Elm.Native = Elm.Native || {};
 Elm.Native.Graphics = Elm.Native.Graphics || {};
@@ -2912,7 +2903,6 @@ Elm.Native.Graphics.Collage.make = function(localRuntime) {
 		collage: F3(collage)
 	};
 };
-
 Elm.Native.Color = {};
 Elm.Native.Color.make = function(localRuntime) {
 	localRuntime.Native = localRuntime.Native || {};
@@ -2952,7 +2942,6 @@ Elm.Native.Color.make = function(localRuntime) {
 		toCss: toCss
 	};
 };
-
 Elm.Color = Elm.Color || {};
 Elm.Color.make = function (_elm) {
    "use strict";
@@ -3165,7 +3154,6 @@ Elm.Color.make = function (_elm) {
                               ,gray: gray
                               ,darkGray: darkGray};
 };
-
 // setup
 Elm.Native = Elm.Native || {};
 Elm.Native.Graphics = Elm.Native.Graphics || {};
@@ -3901,7 +3889,6 @@ Elm.Native.Graphics.Element.make = function(localRuntime) {
 		markdown: markdown
 	};
 };
-
 Elm.Native.Text = {};
 Elm.Native.Text.make = function(localRuntime) {
 	localRuntime.Native = localRuntime.Native || {};
@@ -4189,7 +4176,6 @@ Elm.Native.Text.make = function(localRuntime) {
 		renderHtml: renderHtml
 	};
 };
-
 Elm.Text = Elm.Text || {};
 Elm.Text.make = function (_elm) {
    "use strict";
@@ -4257,8 +4243,7 @@ Elm.Text.make = function (_elm) {
                              ,Under: Under
                              ,Over: Over
                              ,Through: Through};
-};
-Elm.Graphics = Elm.Graphics || {};
+};Elm.Graphics = Elm.Graphics || {};
 Elm.Graphics.Element = Elm.Graphics.Element || {};
 Elm.Graphics.Element.make = function (_elm) {
    "use strict";
@@ -4587,8 +4572,7 @@ Elm.Graphics.Element.make = function (_elm) {
                                          ,topRightAt: topRightAt
                                          ,bottomLeftAt: bottomLeftAt
                                          ,bottomRightAt: bottomRightAt};
-};
-Elm.Graphics = Elm.Graphics || {};
+};Elm.Graphics = Elm.Graphics || {};
 Elm.Graphics.Collage = Elm.Graphics.Collage || {};
 Elm.Graphics.Collage.make = function (_elm) {
    "use strict";
@@ -4818,8 +4802,7 @@ Elm.Graphics.Collage.make = function (_elm) {
                                          ,Smooth: Smooth
                                          ,Sharp: Sharp
                                          ,Clipped: Clipped};
-};
-Elm.Native.Debug = {};
+};Elm.Native.Debug = {};
 Elm.Native.Debug.make = function(localRuntime) {
 	localRuntime.Native = localRuntime.Native || {};
 	localRuntime.Native.Debug = localRuntime.Native.Debug || {};
@@ -4885,7 +4868,6 @@ Elm.Native.Debug.make = function(localRuntime) {
 		watchSummary: F3(watchSummary)
 	};
 };
-
 Elm.Debug = Elm.Debug || {};
 Elm.Debug.make = function (_elm) {
    "use strict";
@@ -4906,8 +4888,7 @@ Elm.Debug.make = function (_elm) {
                               ,watch: watch
                               ,watchSummary: watchSummary
                               ,trace: trace};
-};
-Elm.Result = Elm.Result || {};
+};Elm.Result = Elm.Result || {};
 Elm.Result.make = function (_elm) {
    "use strict";
    _elm.Result = _elm.Result || {};
@@ -5060,8 +5041,7 @@ Elm.Result.make = function (_elm) {
                                ,formatError: formatError
                                ,Ok: Ok
                                ,Err: Err};
-};
-Elm.Native.Signal = {};
+};Elm.Native.Signal = {};
 
 Elm.Native.Signal.make = function(localRuntime) {
 	localRuntime.Native = localRuntime.Native || {};
@@ -5531,7 +5511,6 @@ Elm.Native.Signal.make = function(localRuntime) {
 		delay: F2(delay)
 	};
 };
-
 Elm.Native.Task = {};
 
 Elm.Native.Task.make = function(localRuntime) {
@@ -5757,7 +5736,6 @@ Elm.Native.Task.make = function(localRuntime) {
 		sleep: sleep
 	};
 };
-
 Elm.Task = Elm.Task || {};
 Elm.Task.make = function (_elm) {
    "use strict";
@@ -5932,8 +5910,7 @@ Elm.Task.make = function (_elm) {
                              ,fromResult: fromResult
                              ,spawn: spawn
                              ,sleep: sleep};
-};
-Elm.Signal = Elm.Signal || {};
+};Elm.Signal = Elm.Signal || {};
 Elm.Signal.make = function (_elm) {
    "use strict";
    _elm.Signal = _elm.Signal || {};
@@ -6026,8 +6003,7 @@ Elm.Signal.make = function (_elm) {
                                ,message: message
                                ,forwardTo: forwardTo
                                ,Mailbox: Mailbox};
-};
-Elm.Native.String = {};
+};Elm.Native.String = {};
 
 Elm.Native.String.make = function(localRuntime) {
 	localRuntime.Native = localRuntime.Native || {};
@@ -6368,7 +6344,6 @@ Elm.Native.String.make = function(localRuntime) {
 		fromList: fromList
 	};
 };
-
 Elm.Native.Char = {};
 Elm.Native.Char.make = function(localRuntime) {
 	localRuntime.Native = localRuntime.Native || {};
@@ -6389,7 +6364,6 @@ Elm.Native.Char.make = function(localRuntime) {
 		toLocaleLower: function(c) { return Utils.chr(c.toLocaleLowerCase()); }
 	};
 };
-
 Elm.Char = Elm.Char || {};
 Elm.Char.make = function (_elm) {
    "use strict";
@@ -6432,8 +6406,7 @@ Elm.Char.make = function (_elm) {
                              ,toLocaleLower: toLocaleLower
                              ,toCode: toCode
                              ,fromCode: fromCode};
-};
-Elm.String = Elm.String || {};
+};Elm.String = Elm.String || {};
 Elm.String.make = function (_elm) {
    "use strict";
    _elm.String = _elm.String || {};
@@ -6526,166 +6499,7 @@ Elm.String.make = function (_elm) {
                                ,foldr: foldr
                                ,any: any
                                ,all: all};
-};
-Elm.Console = Elm.Console || {};
-Elm.Console.Core = Elm.Console.Core || {};
-Elm.Console.Core.make = function (_elm) {
-   "use strict";
-   _elm.Console = _elm.Console || {};
-   _elm.Console.Core = _elm.Console.Core || {};
-   if (_elm.Console.Core.values) return _elm.Console.Core.values;
-   var _U = Elm.Native.Utils.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $Debug = Elm.Debug.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm),
-   $String = Elm.String.make(_elm);
-   var _op = {};
-   var Impure = function (a) {    return {ctor: "Impure",_0: a};};
-   var Pure = function (a) {    return {ctor: "Pure",_0: a};};
-   var WriteF = F2(function (a,b) {
-      return {ctor: "WriteF",_0: a,_1: b};
-   });
-   var Exit = function (a) {    return {ctor: "Exit",_0: a};};
-   var GetC = function (a) {    return {ctor: "GetC",_0: a};};
-   var PutS = F2(function (a,b) {
-      return {ctor: "PutS",_0: a,_1: b};
-   });
-   var mapF = F2(function (f,iof) {
-      var _p0 = iof;
-      switch (_p0.ctor)
-      {case "PutS": return A2(PutS,
-           _p0._0,
-           function (_p1) {
-              return f(_p0._1(_p1));
-           });
-         case "GetC": return GetC(function (_p2) {
-              return f(_p0._0(_p2));
-           });
-         case "Exit": return Exit(_p0._0);
-         default: return A2(WriteF,
-           _p0._0,
-           function (_p3) {
-              return f(_p0._1(_p3));
-           });}
-   });
-   var andThen = F2(function (io,f) {
-      var _p4 = io;
-      if (_p4.ctor === "Pure") {
-            return f(_p4._0);
-         } else {
-            return Impure(A2(mapF,A2($Basics.flip,andThen,f),_p4._0));
-         }
-   });
-   _op[">>="] = andThen;
-   var seq = F2(function (x,y) {
-      return A2(_op[">>="],x,function (_p5) {    return y;});
-   });
-   _op[">>>"] = seq;
-   var forever = function (m) {
-      return A2(_op[">>="],
-      m,
-      function (_p6) {
-         return forever(m);
-      });
-   };
-   var pure = Pure;
-   var apply = F2(function (iof,iom) {
-      return A2(_op[">>="],
-      iof,
-      function (f) {
-         return A2(_op[">>="],
-         iom,
-         function (m) {
-            return pure(f(m));
-         });
-      });
-   });
-   _op["<*>"] = apply;
-   var mapIO = F2(function (f,xs) {
-      return A3($List.foldr,
-      function (_p7) {
-         return seq(f(_p7));
-      },
-      pure({ctor: "_Tuple0"}),
-      xs);
-   });
-   var forEach = F2(function (xs,f) {    return A2(mapIO,f,xs);});
-   var map = F2(function (f,io) {
-      var _p8 = io;
-      if (_p8.ctor === "Pure") {
-            return Pure(f(_p8._0));
-         } else {
-            return Impure(A2(mapF,map(f),_p8._0));
-         }
-   });
-   var writeFile = function (obj) {
-      return Impure(A2(WriteF,
-      obj,
-      function (_p9) {
-         return Pure({ctor: "_Tuple0"});
-      }));
-   };
-   var putStr = function (s) {
-      return Impure(A2(PutS,
-      s,
-      function (_p10) {
-         return Pure({ctor: "_Tuple0"});
-      }));
-   };
-   var exit = function (_p11) {    return Impure(Exit(_p11));};
-   var getChar = Impure(GetC(Pure));
-   var readUntil = function (end) {
-      var go = function (s) {
-         return A2(_op[">>="],
-         getChar,
-         function (c) {
-            return _U.eq(c,end) ? pure(s) : go(A2($String.append,
-            s,
-            A2($String.cons,c,"")));
-         });
-      };
-      return go("");
-   };
-   var getLine = readUntil(_U.chr("\n"));
-   var putChar = function (c) {
-      return Impure(A2(PutS,
-      A2($String.cons,c,""),
-      function (_p12) {
-         return Pure({ctor: "_Tuple0"});
-      }));
-   };
-   var putStrLn = function (s) {
-      return A2(_op[">>>"],putStr(s),putChar(_U.chr("\n")));
-   };
-   return _elm.Console.Core.values = {_op: _op
-                                     ,putChar: putChar
-                                     ,getChar: getChar
-                                     ,exit: exit
-                                     ,putStr: putStr
-                                     ,putStrLn: putStrLn
-                                     ,readUntil: readUntil
-                                     ,writeFile: writeFile
-                                     ,getLine: getLine
-                                     ,map: map
-                                     ,mapIO: mapIO
-                                     ,forEach: forEach
-                                     ,pure: pure
-                                     ,apply: apply
-                                     ,andThen: andThen
-                                     ,seq: seq
-                                     ,forever: forever
-                                     ,PutS: PutS
-                                     ,GetC: GetC
-                                     ,Exit: Exit
-                                     ,WriteF: WriteF
-                                     ,Pure: Pure
-                                     ,Impure: Impure
-                                     ,mapF: mapF};
-};
-Elm.Dict = Elm.Dict || {};
+};Elm.Dict = Elm.Dict || {};
 Elm.Dict.make = function (_elm) {
    "use strict";
    _elm.Dict = _elm.Dict || {};
@@ -7444,8 +7258,7 @@ Elm.Dict.make = function (_elm) {
                              ,values: values
                              ,toList: toList
                              ,fromList: fromList};
-};
-Elm.Native.Json = {};
+};Elm.Native.Json = {};
 
 Elm.Native.Json.make = function(localRuntime) {
 	localRuntime.Native = localRuntime.Native || {};
@@ -7940,7 +7753,6 @@ Elm.Native.Json.make = function(localRuntime) {
 
 	};
 };
-
 Elm.Native.Array = {};
 Elm.Native.Array.make = function(localRuntime) {
 
@@ -8921,7 +8733,6 @@ Elm.Native.Array.make = function(localRuntime) {
 
 	return localRuntime.Native.Array.values = Elm.Native.Array.values;
 };
-
 Elm.Array = Elm.Array || {};
 Elm.Array.make = function (_elm) {
    "use strict";
@@ -8992,8 +8803,7 @@ Elm.Array.make = function (_elm) {
                               ,filter: filter
                               ,foldl: foldl
                               ,foldr: foldr};
-};
-Elm.Json = Elm.Json || {};
+};Elm.Json = Elm.Json || {};
 Elm.Json.Encode = Elm.Json.Encode || {};
 Elm.Json.Encode.make = function (_elm) {
    "use strict";
@@ -9024,8 +8834,7 @@ Elm.Json.Encode.make = function (_elm) {
                                     ,list: list
                                     ,array: array
                                     ,object: object};
-};
-Elm.Json = Elm.Json || {};
+};Elm.Json = Elm.Json || {};
 Elm.Json.Decode = Elm.Json.Decode || {};
 Elm.Json.Decode.make = function (_elm) {
    "use strict";
@@ -9123,1468 +8932,7 @@ Elm.Json.Decode.make = function (_elm) {
                                     ,andThen: andThen
                                     ,value: value
                                     ,customDecoder: customDecoder};
-};
-Elm.Trampoline = Elm.Trampoline || {};
-Elm.Trampoline.make = function (_elm) {
-   "use strict";
-   _elm.Trampoline = _elm.Trampoline || {};
-   if (_elm.Trampoline.values) return _elm.Trampoline.values;
-   var _U = Elm.Native.Utils.make(_elm);
-   var _op = {};
-   var trampoline = function (tramp) {
-      trampoline: while (true) {
-         var _p0 = tramp;
-         if (_p0.ctor === "Done") {
-               return _p0._0;
-            } else {
-               var _v1 = _p0._0({ctor: "_Tuple0"});
-               tramp = _v1;
-               continue trampoline;
-            }
-      }
-   };
-   var Continue = function (a) {
-      return {ctor: "Continue",_0: a};
-   };
-   var Done = function (a) {    return {ctor: "Done",_0: a};};
-   return _elm.Trampoline.values = {_op: _op
-                                   ,trampoline: trampoline
-                                   ,Done: Done
-                                   ,Continue: Continue};
-};
-Elm.Native.Console = {};
-Elm.Native.Console.NativeCom = {};
-Elm.Native.Console.NativeCom.make = function(localRuntime) {
-
-    localRuntime.Native = localRuntime.Native || {};
-    localRuntime.Native.Console = localRuntime.Console.Native || {};
-    localRuntime.Native.Console.NativeCom = localRuntime.Native.Console.NativeCom || {};
-    if (localRuntime.Native.Console.NativeCom.values) {
-    return localRuntime.Native.Console.NativeCom.values;
-    }
-
-    /* Elm imports */
-    var List = Elm.Native.List.make(localRuntime);
-    var Maybe = Elm.Maybe.make(localRuntime);
-    var NS = Elm.Native.Signal.make(localRuntime);
-    var Task = Elm.Native.Task.make(localRuntime);
-    var Utils = Elm.Native.Utils.make(localRuntime);
-
-
-    var fs = null;
-
-    /* Node.js imports */
-    if (typeof module !== 'undefined' && module.exports) {
-        fs = require('fs');
-
-        process.stdin.on('data', function(chunk) {
-            process.stdin.pause();
-            sendResponseString(chunk.toString());
-        })
-    }
-
-    var responsesSignal = NS.input('Console.NativeCom.responses', Maybe.Nothing);
-
-    var sendResponseString = function(str) {
-        var value = Maybe.Nothing;
-        if (str !== null && str.length > 0) {
-            value = Maybe.Just(str);
-        }
-        setTimeout(function() {
-            localRuntime.notify(responsesSignal.id, value);
-        }, 0);
-    }
-
-    var sendRequestBatch = function(list) {
-        var requests = List.toArray(list);
-        if (requests.length == 0) {
-            return Task.succeed(Utils.Tuple0);
-        }
-
-        return Task.asyncFunction(function(callback) {
-
-            requests.forEach(doRequest);
-
-            var lastReq = requests[requests.length - 1];
-            if (lastReq.ctor !== 'Get') {
-                // if we are not waiting for stdin,
-                // trigger the next IO requests immediately
-                sendResponseString(null);
-            }
-
-            return callback(Task.succeed(Utils.Tuple0));
-        });
-    }
-
-    var doRequest = function(request) {
-        switch(request.ctor) {
-            case 'Put':
-                process.stdout.write(request._0);
-                break;
-            case 'Get':
-                process.stdin.resume();
-                break;
-            case 'Exit':
-                process.exit(request._0);
-                break;
-            case 'WriteFile':
-                fs.writeFileSync(request._0.file, request._0.content);
-                break;
-            case 'Init':
-                // trigger the initial IO requests
-                sendResponseString(null);
-                break;
-        }
-    }
-
-    return localRuntime.Native.Console.NativeCom.values = {
-        sendRequestBatch: sendRequestBatch,
-        responses: responsesSignal
-    };
-};
-
-Elm.Console = Elm.Console || {};
-Elm.Console.NativeCom = Elm.Console.NativeCom || {};
-Elm.Console.NativeCom.make = function (_elm) {
-   "use strict";
-   _elm.Console = _elm.Console || {};
-   _elm.Console.NativeCom = _elm.Console.NativeCom || {};
-   if (_elm.Console.NativeCom.values)
-   return _elm.Console.NativeCom.values;
-   var _U = Elm.Native.Utils.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $Debug = Elm.Debug.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Native$Console$NativeCom = Elm.Native.Console.NativeCom.make(_elm),
-   $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm),
-   $Task = Elm.Task.make(_elm);
-   var _op = {};
-   var responses = $Native$Console$NativeCom.responses;
-   var sendRequestBatch = function (requests) {
-      return $Native$Console$NativeCom.sendRequestBatch(requests);
-   };
-   var sendRequests = function (requests) {
-      return A2($Signal.map,sendRequestBatch,requests);
-   };
-   var Init = {ctor: "Init"};
-   var WriteFile = function (a) {
-      return {ctor: "WriteFile",_0: a};
-   };
-   var Get = {ctor: "Get"};
-   var Exit = function (a) {    return {ctor: "Exit",_0: a};};
-   var Put = function (a) {    return {ctor: "Put",_0: a};};
-   return _elm.Console.NativeCom.values = {_op: _op
-                                          ,Put: Put
-                                          ,Exit: Exit
-                                          ,Get: Get
-                                          ,WriteFile: WriteFile
-                                          ,Init: Init
-                                          ,sendRequests: sendRequests
-                                          ,sendRequestBatch: sendRequestBatch
-                                          ,responses: responses};
-};
-Elm.Console = Elm.Console || {};
-Elm.Console.Runner = Elm.Console.Runner || {};
-Elm.Console.Runner.make = function (_elm) {
-   "use strict";
-   _elm.Console = _elm.Console || {};
-   _elm.Console.Runner = _elm.Console.Runner || {};
-   if (_elm.Console.Runner.values)
-   return _elm.Console.Runner.values;
-   var _U = Elm.Native.Utils.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $Console$Core = Elm.Console.Core.make(_elm),
-   $Console$NativeCom = Elm.Console.NativeCom.make(_elm),
-   $Debug = Elm.Debug.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm),
-   $String = Elm.String.make(_elm),
-   $Task = Elm.Task.make(_elm),
-   $Trampoline = Elm.Trampoline.make(_elm);
-   var _op = {};
-   var mapFst = F2(function (f,_p0) {
-      var _p1 = _p0;
-      return {ctor: "_Tuple2",_0: f(_p1._0),_1: _p1._1};
-   });
-   var put = F2(function (s,_p2) {
-      return {ctor: "_Tuple2",_0: s,_1: {ctor: "_Tuple0"}};
-   });
-   var get = function (s) {
-      return {ctor: "_Tuple2",_0: s,_1: s};
-   };
-   _op[">>="] = F3(function (f,k,s) {
-      var _p3 = f(s);
-      var s$ = _p3._0;
-      var y = _p3._1;
-      return A2(k,y,s$);
-   });
-   var pure = F2(function (x,s) {
-      return {ctor: "_Tuple2",_0: s,_1: x};
-   });
-   var mapSt = F2(function (f,sf) {
-      return A2(_op[">>="],
-      sf,
-      function (_p4) {
-         return pure(f(_p4));
-      });
-   });
-   var writeF = $Console$NativeCom.WriteFile;
-   var getS = $Console$NativeCom.Get;
-   var exit = $Console$NativeCom.Exit;
-   var putS = $Console$NativeCom.Put;
-   var extractRequests = function (io) {
-      var _p5 = io;
-      if (_p5.ctor === "Pure") {
-            return pure({ctor: "_Tuple2"
-                        ,_0: _U.list([exit(0)])
-                        ,_1: function (_p6) {
-                           return $Console$Core.Pure(_p5._0);
-                        }});
-         } else {
-            var _p7 = _p5._0;
-            switch (_p7.ctor)
-            {case "PutS": return A2(mapSt,
-                 mapFst(function (rs) {
-                    return A2($List._op["::"],putS(_p7._0),rs);
-                 }),
-                 pure({ctor: "_Tuple2",_0: _U.list([]),_1: _p7._1}));
-               case "WriteF": return A2(mapSt,
-                 mapFst(function (rs) {
-                    return A2($List._op["::"],writeF(_p7._0),rs);
-                 }),
-                 pure({ctor: "_Tuple2",_0: _U.list([]),_1: _p7._1}));
-               case "Exit": return pure({ctor: "_Tuple2"
-                                        ,_0: _U.list([exit(_p7._0)])
-                                        ,_1: function (_p8) {
-                                           return io;
-                                        }});
-               default: return A2(_op[">>="],
-                 get,
-                 function (st) {
-                    var _p9 = $String.uncons(st.buffer);
-                    if (_p9.ctor === "Nothing") {
-                          return pure({ctor: "_Tuple2"
-                                      ,_0: _U.list([getS])
-                                      ,_1: function (_p10) {
-                                         return io;
-                                      }});
-                       } else {
-                          return A2(_op[">>="],
-                          put({buffer: _p9._0._1}),
-                          function (_p11) {
-                             return extractRequests(_p7._0(_p9._0._0));
-                          });
-                       }
-                 });}
-         }
-   };
-   var step = F3(function (resp,io,st) {
-      var newST = function () {
-         var _p12 = resp;
-         if (_p12.ctor === "Nothing") {
-               return st;
-            } else {
-               return {buffer: A2($String.append,st.buffer,_p12._0)};
-            }
-      }();
-      var _p13 = A2(extractRequests,io({ctor: "_Tuple0"}),newST);
-      var newST$ = _p13._0;
-      var rs = _p13._1._0;
-      var k = _p13._1._1;
-      return {ctor: "_Tuple3",_0: k,_1: newST$,_2: rs};
-   });
-   var flattenReqs = function (rs) {
-      var loop = F3(function (rs,acc,n) {
-         loop: while (true) if (_U.cmp(n,100) > -1)
-         return $Trampoline.Continue(function (_p14) {
-               return A3(loop,rs,acc,0);
-            }); else {
-               var _p15 = rs;
-               if (_p15.ctor === "[]") {
-                     return $Trampoline.Done($List.reverse(acc));
-                  } else {
-                     if (_p15._1.ctor === "[]") {
-                           var _v6 = _U.list([]),
-                           _v7 = A2($List._op["::"],_p15._0,acc),
-                           _v8 = n + 1;
-                           rs = _v6;
-                           acc = _v7;
-                           n = _v8;
-                           continue loop;
-                        } else {
-                           var _p19 = _p15._1._1;
-                           var _p18 = _p15._1._0;
-                           var _p17 = _p15._0;
-                           var _p16 = {ctor: "_Tuple2",_0: _p17,_1: _p18};
-                           _v9_2: do {
-                              if (_p16.ctor === "_Tuple2") {
-                                    switch (_p16._0.ctor)
-                                    {case "Exit": var _v10 = _U.list([]),
-                                         _v11 = A2($List._op["::"],_p17,acc),
-                                         _v12 = _p16._0._0 + 1;
-                                         rs = _v10;
-                                         acc = _v11;
-                                         n = _v12;
-                                         continue loop;
-                                       case "Put": if (_p16._1.ctor === "Put") {
-                                               var _v13 = A2($List._op["::"],
-                                               putS(A2($Basics._op["++"],_p16._0._0,_p16._1._0)),
-                                               _p19),
-                                               _v14 = acc,
-                                               _v15 = n + 1;
-                                               rs = _v13;
-                                               acc = _v14;
-                                               n = _v15;
-                                               continue loop;
-                                            } else {
-                                               break _v9_2;
-                                            }
-                                       default: break _v9_2;}
-                                 } else {
-                                    break _v9_2;
-                                 }
-                           } while (false);
-                           var _v16 = A2($List._op["::"],_p18,_p19),
-                           _v17 = A2($List._op["::"],_p17,acc),
-                           _v18 = n + 1;
-                           rs = _v16;
-                           acc = _v17;
-                           n = _v18;
-                           continue loop;
-                        }
-                  }
-            }
-      });
-      return $Trampoline.trampoline(A3(loop,rs,_U.list([]),0));
-   };
-   var start = {buffer: ""};
-   var run = function (io) {
-      var third = function (_p20) {
-         var _p21 = _p20;
-         return _p21._2;
-      };
-      var f = F2(function (resp,_p22) {
-         var _p23 = _p22;
-         return A3(step,resp,_p23._0,_p23._1);
-      });
-      var init = {ctor: "_Tuple3"
-                 ,_0: function (_p24) {
-                    return io;
-                 }
-                 ,_1: start
-                 ,_2: _U.list([$Console$NativeCom.Init])};
-      return $Console$NativeCom.sendRequests(A2($Signal.map,
-      third,
-      A3($Signal.foldp,f,init,$Console$NativeCom.responses)));
-   };
-   var IOState = function (a) {    return {buffer: a};};
-   return _elm.Console.Runner.values = {_op: _op
-                                       ,IOState: IOState
-                                       ,start: start
-                                       ,run: run
-                                       ,putS: putS
-                                       ,exit: exit
-                                       ,getS: getS
-                                       ,writeF: writeF
-                                       ,extractRequests: extractRequests
-                                       ,flattenReqs: flattenReqs
-                                       ,step: step
-                                       ,pure: pure
-                                       ,mapSt: mapSt
-                                       ,get: get
-                                       ,put: put
-                                       ,mapFst: mapFst};
-};
-Elm.Console = Elm.Console || {};
-Elm.Console.make = function (_elm) {
-   "use strict";
-   _elm.Console = _elm.Console || {};
-   if (_elm.Console.values) return _elm.Console.values;
-   var _U = Elm.Native.Utils.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $Console$Core = Elm.Console.Core.make(_elm),
-   $Console$Runner = Elm.Console.Runner.make(_elm),
-   $Debug = Elm.Debug.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm),
-   $Task = Elm.Task.make(_elm);
-   var _op = {};
-   var run = $Console$Runner.run;
-   var forever = $Console$Core.forever;
-   _op[">>>"] = $Console$Core.seq;
-   var seq = $Console$Core.seq;
-   _op[">>="] = $Console$Core.andThen;
-   var andThen = $Console$Core.andThen;
-   _op["<*>"] = $Console$Core.apply;
-   var apply = $Console$Core.apply;
-   var pure = $Console$Core.pure;
-   var forEach = $Console$Core.forEach;
-   var mapIO = $Console$Core.mapIO;
-   var map = $Console$Core.map;
-   var getLine = $Console$Core.getLine;
-   var writeFile = $Console$Core.writeFile;
-   var readUntil = $Console$Core.readUntil;
-   var putStrLn = $Console$Core.putStrLn;
-   var putStr = $Console$Core.putStr;
-   var exit = $Console$Core.exit;
-   var getChar = $Console$Core.getChar;
-   var putChar = $Console$Core.putChar;
-   return _elm.Console.values = {_op: _op
-                                ,putChar: putChar
-                                ,putStr: putStr
-                                ,putStrLn: putStrLn
-                                ,getChar: getChar
-                                ,getLine: getLine
-                                ,readUntil: readUntil
-                                ,writeFile: writeFile
-                                ,exit: exit
-                                ,map: map
-                                ,mapIO: mapIO
-                                ,forEach: forEach
-                                ,pure: pure
-                                ,apply: apply
-                                ,andThen: andThen
-                                ,seq: seq
-                                ,forever: forever
-                                ,run: run};
-};
-Elm.ElmTest = Elm.ElmTest || {};
-Elm.ElmTest.Assertion = Elm.ElmTest.Assertion || {};
-Elm.ElmTest.Assertion.make = function (_elm) {
-   "use strict";
-   _elm.ElmTest = _elm.ElmTest || {};
-   _elm.ElmTest.Assertion = _elm.ElmTest.Assertion || {};
-   if (_elm.ElmTest.Assertion.values)
-   return _elm.ElmTest.Assertion.values;
-   var _U = Elm.Native.Utils.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $Debug = Elm.Debug.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
-   var _op = {};
-   var AssertNotEqual = F3(function (a,b,c) {
-      return {ctor: "AssertNotEqual",_0: a,_1: b,_2: c};
-   });
-   var assertNotEqual = F2(function (a,b) {
-      return A3(AssertNotEqual,
-      function (_p0) {
-         return !_U.eq(a,b);
-      },
-      $Basics.toString(a),
-      $Basics.toString(b));
-   });
-   var AssertEqual = F3(function (a,b,c) {
-      return {ctor: "AssertEqual",_0: a,_1: b,_2: c};
-   });
-   var assertEqual = F2(function (a,b) {
-      return A3(AssertEqual,
-      function (_p1) {
-         return _U.eq(a,b);
-      },
-      $Basics.toString(a),
-      $Basics.toString(b));
-   });
-   var assertionList = F2(function (xs,ys) {
-      return A3($List.map2,assertEqual,xs,ys);
-   });
-   var AssertFalse = function (a) {
-      return {ctor: "AssertFalse",_0: a};
-   };
-   var AssertTrue = function (a) {
-      return {ctor: "AssertTrue",_0: a};
-   };
-   var assertT = AssertTrue;
-   var assert = function (b) {
-      return AssertTrue(function (_p2) {    return b;});
-   };
-   return _elm.ElmTest.Assertion.values = {_op: _op
-                                          ,assertionList: assertionList
-                                          ,assertT: assertT
-                                          ,assert: assert
-                                          ,assertEqual: assertEqual
-                                          ,assertNotEqual: assertNotEqual
-                                          ,AssertTrue: AssertTrue
-                                          ,AssertFalse: AssertFalse
-                                          ,AssertEqual: AssertEqual
-                                          ,AssertNotEqual: AssertNotEqual};
-};
-Elm.ElmTest = Elm.ElmTest || {};
-Elm.ElmTest.Test = Elm.ElmTest.Test || {};
-Elm.ElmTest.Test.make = function (_elm) {
-   "use strict";
-   _elm.ElmTest = _elm.ElmTest || {};
-   _elm.ElmTest.Test = _elm.ElmTest.Test || {};
-   if (_elm.ElmTest.Test.values) return _elm.ElmTest.Test.values;
-   var _U = Elm.Native.Utils.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $Debug = Elm.Debug.make(_elm),
-   $ElmTest$Assertion = Elm.ElmTest.Assertion.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
-   var _op = {};
-   var numberOfSuites = function (test) {
-      var _p0 = test;
-      if (_p0.ctor === "TestCase") {
-            return 0;
-         } else {
-            return 1 + function (_p1) {
-               return $List.sum(A2($List.map,numberOfSuites,_p1));
-            }(_p0._1);
-         }
-   };
-   var numberOfTests = function (test) {
-      var _p2 = test;
-      if (_p2.ctor === "TestCase") {
-            return 1;
-         } else {
-            return function (_p3) {
-               return $List.sum(A2($List.map,numberOfTests,_p3));
-            }(_p2._1);
-         }
-   };
-   var nameOf = function (test) {
-      var _p4 = test;
-      if (_p4.ctor === "TestCase") {
-            return _p4._0;
-         } else {
-            return _p4._0;
-         }
-   };
-   var Suite = F2(function (a,b) {
-      return {ctor: "Suite",_0: a,_1: b};
-   });
-   var suite = Suite;
-   var TestCase = F2(function (a,b) {
-      return {ctor: "TestCase",_0: a,_1: b};
-   });
-   var test = F2(function (name,a) {
-      return A2(TestCase,name,a);
-   });
-   var defaultTest = function (a) {
-      var name = function () {
-         var _p5 = a;
-         switch (_p5.ctor)
-         {case "AssertTrue": return "True";
-            case "AssertFalse": return "False";
-            case "AssertEqual": return A2($Basics._op["++"],
-              _p5._1,
-              A2($Basics._op["++"]," == ",_p5._2));
-            default: return A2($Basics._op["++"],
-              _p5._1,
-              A2($Basics._op["++"]," /= ",_p5._2));}
-      }();
-      return A2(test,name,a);
-   };
-   var equals = F2(function (a,b) {
-      return defaultTest(A2($ElmTest$Assertion.assertEqual,a,b));
-   });
-   return _elm.ElmTest.Test.values = {_op: _op
-                                     ,test: test
-                                     ,equals: equals
-                                     ,defaultTest: defaultTest
-                                     ,suite: suite
-                                     ,numberOfTests: numberOfTests
-                                     ,numberOfSuites: numberOfSuites
-                                     ,TestCase: TestCase
-                                     ,Suite: Suite};
-};
-Elm.ElmTest = Elm.ElmTest || {};
-Elm.ElmTest.Run = Elm.ElmTest.Run || {};
-Elm.ElmTest.Run.make = function (_elm) {
-   "use strict";
-   _elm.ElmTest = _elm.ElmTest || {};
-   _elm.ElmTest.Run = _elm.ElmTest.Run || {};
-   if (_elm.ElmTest.Run.values) return _elm.ElmTest.Run.values;
-   var _U = Elm.Native.Utils.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $Debug = Elm.Debug.make(_elm),
-   $ElmTest$Assertion = Elm.ElmTest.Assertion.make(_elm),
-   $ElmTest$Test = Elm.ElmTest.Test.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
-   var _op = {};
-   var failedSuites = function (result) {
-      var _p0 = result;
-      if (_p0.ctor === "Report") {
-            var _p2 = _p0._1;
-            var failed = _U.cmp($List.length(_p2.failures),0) > 0 ? 1 : 0;
-            return failed + function (_p1) {
-               return $List.sum(A2($List.map,failedSuites,_p1));
-            }(_p2.results);
-         } else {
-            return 0;
-         }
-   };
-   var passedSuites = function (result) {
-      var _p3 = result;
-      if (_p3.ctor === "Report") {
-            var _p5 = _p3._1;
-            var passed = _U.eq($List.length(_p5.failures),0) ? 1 : 0;
-            return passed + function (_p4) {
-               return $List.sum(A2($List.map,passedSuites,_p4));
-            }(_p5.results);
-         } else {
-            return 0;
-         }
-   };
-   var failedTests = function (result) {
-      var _p6 = result;
-      switch (_p6.ctor)
-      {case "Pass": return 0;
-         case "Fail": return 1;
-         default: return function (_p7) {
-              return $List.sum(A2($List.map,failedTests,_p7));
-           }(_p6._1.results);}
-   };
-   var passedTests = function (result) {
-      var _p8 = result;
-      switch (_p8.ctor)
-      {case "Pass": return 1;
-         case "Fail": return 0;
-         default: return function (_p9) {
-              return $List.sum(A2($List.map,passedTests,_p9));
-           }(_p8._1.results);}
-   };
-   var pass = function (m) {
-      var _p10 = m;
-      switch (_p10.ctor)
-      {case "Pass": return true;
-         case "Fail": return false;
-         default: return _U.cmp($List.length(function (_) {
-              return _.failures;
-           }(_p10._1)),
-           0) > 0 ? false : true;}
-   };
-   var fail = function (_p11) {
-      return $Basics.not(pass(_p11));
-   };
-   var Report = F2(function (a,b) {
-      return {ctor: "Report",_0: a,_1: b};
-   });
-   var Fail = F2(function (a,b) {
-      return {ctor: "Fail",_0: a,_1: b};
-   });
-   var Pass = function (a) {    return {ctor: "Pass",_0: a};};
-   var run = function (test) {
-      var _p12 = test;
-      if (_p12.ctor === "TestCase") {
-            var _p14 = _p12._0;
-            var runAssertion = F2(function (t,m) {
-               return t({ctor: "_Tuple0"}) ? Pass(_p14) : A2(Fail,_p14,m);
-            });
-            var _p13 = _p12._1;
-            switch (_p13.ctor)
-            {case "AssertEqual": return A2(runAssertion,
-                 _p13._0,
-                 A2($Basics._op["++"],
-                 "Expected: ",
-                 A2($Basics._op["++"],
-                 _p13._1,
-                 A2($Basics._op["++"],"; got: ",_p13._2))));
-               case "AssertNotEqual": return A2(runAssertion,
-                 _p13._0,
-                 A2($Basics._op["++"],
-                 _p13._1,
-                 A2($Basics._op["++"]," equals ",_p13._2)));
-               case "AssertTrue": return A2(runAssertion,_p13._0,"not True");
-               default: return A2(runAssertion,_p13._0,"not False");}
-         } else {
-            var results = A2($List.map,run,_p12._1);
-            var _p15 = A2($List.partition,pass,results);
-            var passes = _p15._0;
-            var fails = _p15._1;
-            return A2(Report,
-            _p12._0,
-            {results: results,passes: passes,failures: fails});
-         }
-   };
-   var Summary = F3(function (a,b,c) {
-      return {results: a,passes: b,failures: c};
-   });
-   return _elm.ElmTest.Run.values = {_op: _op
-                                    ,run: run
-                                    ,pass: pass
-                                    ,fail: fail
-                                    ,failedTests: failedTests
-                                    ,passedTests: passedTests
-                                    ,failedSuites: failedSuites
-                                    ,passedSuites: passedSuites
-                                    ,Pass: Pass
-                                    ,Fail: Fail
-                                    ,Report: Report};
-};
-Elm.ElmTest = Elm.ElmTest || {};
-Elm.ElmTest.Runner = Elm.ElmTest.Runner || {};
-Elm.ElmTest.Runner.String = Elm.ElmTest.Runner.String || {};
-Elm.ElmTest.Runner.String.make = function (_elm) {
-   "use strict";
-   _elm.ElmTest = _elm.ElmTest || {};
-   _elm.ElmTest.Runner = _elm.ElmTest.Runner || {};
-   _elm.ElmTest.Runner.String = _elm.ElmTest.Runner.String || {};
-   if (_elm.ElmTest.Runner.String.values)
-   return _elm.ElmTest.Runner.String.values;
-   var _U = Elm.Native.Utils.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $Debug = Elm.Debug.make(_elm),
-   $ElmTest$Run = Elm.ElmTest.Run.make(_elm),
-   $ElmTest$Test = Elm.ElmTest.Test.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm),
-   $String = Elm.String.make(_elm);
-   var _op = {};
-   var replicate = F2(function (n,c) {
-      var go = function (n) {
-         return _U.cmp(n,0) < 1 ? _U.list([]) : A2($List._op["::"],
-         c,
-         go(n - 1));
-      };
-      return function (_p0) {
-         return $String.fromList(go(_p0));
-      }(n);
-   });
-   var vcat = function (_p1) {
-      return $String.concat(A2($List.intersperse,"\n",_p1));
-   };
-   var indent = function (n) {
-      var indents = A2(replicate,n,_U.chr(" "));
-      return function (_p2) {
-         return vcat(A2($List.map,
-         $String.append(indents),
-         $String.lines(_p2)));
-      };
-   };
-   var pretty = F2(function (n,result) {
-      var passed = $ElmTest$Run.pass(result);
-      var _p3 = result;
-      switch (_p3.ctor)
-      {case "Pass": return _U.list([{ctor: "_Tuple2"
-                                    ,_0: A2(indent,n,A2($Basics._op["++"],_p3._0,": passed."))
-                                    ,_1: result}]);
-         case "Fail": return _U.list([{ctor: "_Tuple2"
-                                      ,_0: A2(indent,
-                                      n,
-                                      A2($Basics._op["++"],
-                                      _p3._0,
-                                      A2($Basics._op["++"],": FAILED. ",_p3._1)))
-                                      ,_1: result}]);
-         default: var allPassed = _U.eq($ElmTest$Run.failedTests(result),
-           0);
-           var subResults = allPassed ? _U.list([]) : A2($List.concatMap,
-           pretty(n + 2),
-           _p3._1.results);
-           var msg = A2($Basics._op["++"],
-           "Test Suite: ",
-           A2($Basics._op["++"],
-           _p3._0,
-           A2($Basics._op["++"],
-           ": ",
-           passed ? "all tests passed" : "FAILED")));
-           return A2($List._op["::"],
-           {ctor: "_Tuple2",_0: A2(indent,n,msg),_1: result},
-           subResults);}
-   });
-   var run = function (t) {
-      var tests = function () {
-         var _p4 = t;
-         if (_p4.ctor === "TestCase") {
-               return _U.list([A2($ElmTest$Test.TestCase,_p4._0,_p4._1)]);
-            } else {
-               return _p4._1;
-            }
-      }();
-      var result = $ElmTest$Run.run(t);
-      var passedTests$ = $ElmTest$Run.passedTests(result);
-      var passedSuites$ = $ElmTest$Run.passedSuites(result);
-      var failedTests$ = $ElmTest$Run.failedTests(result);
-      var allPassed = _U.eq(failedTests$,
-      0) ? $ElmTest$Run.Pass("") : A2($ElmTest$Run.Fail,"","");
-      var failedSuites$ = $ElmTest$Run.failedSuites(result);
-      var summary = function (_p5) {
-         return vcat(A2($List.map,indent(2),_p5));
-      }(_U.list([A2($Basics._op["++"],
-                $Basics.toString($ElmTest$Test.numberOfSuites(t)),
-                A2($Basics._op["++"],
-                " suites run, containing ",
-                A2($Basics._op["++"],
-                $Basics.toString($ElmTest$Test.numberOfTests(t)),
-                " tests")))
-                ,_U.eq(failedTests$,
-                0) ? "All tests passed" : A2($Basics._op["++"],
-                $Basics.toString(passedSuites$),
-                A2($Basics._op["++"],
-                " suites and ",
-                A2($Basics._op["++"],
-                $Basics.toString(passedTests$),
-                " tests passed")))
-                ,_U.eq(failedTests$,0) ? "" : A2($Basics._op["++"],
-                $Basics.toString(failedSuites$),
-                A2($Basics._op["++"],
-                " suites and ",
-                A2($Basics._op["++"],
-                $Basics.toString(failedTests$),
-                " tests failed")))]));
-      var results$ = function () {
-         var _p6 = allPassed;
-         if (_p6.ctor === "Pass") {
-               return _U.list([{ctor: "_Tuple2",_0: "",_1: allPassed}]);
-            } else {
-               return A2(pretty,0,result);
-            }
-      }();
-      return A2($List._op["::"],
-      {ctor: "_Tuple2",_0: summary,_1: allPassed},
-      results$);
-   };
-   var runDisplay = function (t) {
-      var _p7 = run(t);
-      if (_p7.ctor === "::" && _p7._0.ctor === "_Tuple2") {
-            return vcat(A2($List._op["::"],
-            A2($Basics._op["++"],_p7._0._0,"\n"),
-            A2($List.map,$Basics.fst,_p7._1)));
-         } else {
-            return "";
-         }
-   };
-   return _elm.ElmTest.Runner.String.values = {_op: _op
-                                              ,runDisplay: runDisplay
-                                              ,run: run};
-};
-Elm.ElmTest = Elm.ElmTest || {};
-Elm.ElmTest.Runner = Elm.ElmTest.Runner || {};
-Elm.ElmTest.Runner.Element = Elm.ElmTest.Runner.Element || {};
-Elm.ElmTest.Runner.Element.make = function (_elm) {
-   "use strict";
-   _elm.ElmTest = _elm.ElmTest || {};
-   _elm.ElmTest.Runner = _elm.ElmTest.Runner || {};
-   _elm.ElmTest.Runner.Element = _elm.ElmTest.Runner.Element || {};
-   if (_elm.ElmTest.Runner.Element.values)
-   return _elm.ElmTest.Runner.Element.values;
-   var _U = Elm.Native.Utils.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $Color = Elm.Color.make(_elm),
-   $Debug = Elm.Debug.make(_elm),
-   $ElmTest$Run = Elm.ElmTest.Run.make(_elm),
-   $ElmTest$Runner$String = Elm.ElmTest.Runner.String.make(_elm),
-   $ElmTest$Test = Elm.ElmTest.Test.make(_elm),
-   $Graphics$Element = Elm.Graphics.Element.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm),
-   $String = Elm.String.make(_elm),
-   $Text = Elm.Text.make(_elm);
-   var _op = {};
-   var maxOrZero = function (l) {
-      return A3($List.foldl,$Basics.max,0,l);
-   };
-   var indent = function (s) {
-      var trimmed = $String.trimLeft(s);
-      return $String.length(s) - $String.length(trimmed);
-   };
-   var plainText = function (s) {
-      return $Graphics$Element.leftAligned($Text.fromString(s));
-   };
-   var pretty = function (_p0) {
-      var _p1 = _p0;
-      var _p5 = _p1._0;
-      var _p4 = _p1._1;
-      var w$ = 5;
-      var w = indent(_p5) * 10;
-      var _p2 = _p4;
-      switch (_p2.ctor)
-      {case "Pass": return A2($Graphics$Element.color,
-           $Color.green,
-           A2($Graphics$Element.flow,
-           $Graphics$Element.right,
-           _U.list([A2($Graphics$Element.spacer,w,1)
-                   ,plainText(_p5)
-                   ,A2($Graphics$Element.spacer,w$,1)])));
-         case "Fail": return A2($Graphics$Element.color,
-           $Color.red,
-           A2($Graphics$Element.flow,
-           $Graphics$Element.right,
-           _U.list([A2($Graphics$Element.spacer,w,1)
-                   ,plainText(_p5)
-                   ,A2($Graphics$Element.spacer,w$,1)])));
-         default: var c = _U.cmp($ElmTest$Run.failedTests(_p4),
-           0) > 0 ? $Color.red : $Color.green;
-           return A2($Graphics$Element.color,
-           c,
-           A2($Graphics$Element.flow,
-           $Graphics$Element.right,
-           _U.list([A2($Graphics$Element.spacer,w,1)
-                   ,function (_p3) {
-                      return $Graphics$Element.leftAligned($Text.bold($Text.fromString(_p3)));
-                   }(_p5)
-                   ,A2($Graphics$Element.spacer,w$,1)])));}
-   };
-   var runDisplay = function (tests) {
-      var _p6 = $ElmTest$Runner$String.run(tests);
-      if (_p6.ctor === "::" && _p6._0.ctor === "_Tuple2") {
-            var _p10 = _p6._1;
-            var results$ = A2($List.map,pretty,_p10);
-            var maxWidth = function (_p7) {
-               return maxOrZero(A2($List.map,
-               $Graphics$Element.widthOf,
-               _p7));
-            }(results$);
-            var maxHeight = function (_p8) {
-               return maxOrZero(A2($List.map,
-               $Graphics$Element.heightOf,
-               _p8));
-            }(results$);
-            var elements = _U.eq(_p10,
-            _U.list([{ctor: "_Tuple2"
-                     ,_0: ""
-                     ,_1: _p6._0._1}])) ? _U.list([]) : A2($List.map,
-            function (_p9) {
-               return A2($Graphics$Element.color,
-               $Color.black,
-               A4($Graphics$Element.container,
-               maxWidth + 2,
-               maxHeight + 2,
-               $Graphics$Element.midLeft,
-               A2($Graphics$Element.width,maxWidth,_p9)));
-            },
-            results$);
-            return A2($Graphics$Element.flow,
-            $Graphics$Element.down,
-            A2($List._op["::"],
-            plainText(_p6._0._0),
-            A2($List._op["::"],
-            A2($Graphics$Element.spacer,1,10),
-            elements)));
-         } else {
-            return A2($Graphics$Element.flow,
-            $Graphics$Element.down,
-            _U.list([]));
-         }
-   };
-   return _elm.ElmTest.Runner.Element.values = {_op: _op
-                                               ,runDisplay: runDisplay};
-};
-Elm.ElmTest = Elm.ElmTest || {};
-Elm.ElmTest.Runner = Elm.ElmTest.Runner || {};
-Elm.ElmTest.Runner.Console = Elm.ElmTest.Runner.Console || {};
-Elm.ElmTest.Runner.Console.make = function (_elm) {
-   "use strict";
-   _elm.ElmTest = _elm.ElmTest || {};
-   _elm.ElmTest.Runner = _elm.ElmTest.Runner || {};
-   _elm.ElmTest.Runner.Console = _elm.ElmTest.Runner.Console || {};
-   if (_elm.ElmTest.Runner.Console.values)
-   return _elm.ElmTest.Runner.Console.values;
-   var _U = Elm.Native.Utils.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $Console = Elm.Console.make(_elm),
-   $Debug = Elm.Debug.make(_elm),
-   $ElmTest$Run = Elm.ElmTest.Run.make(_elm),
-   $ElmTest$Runner$String = Elm.ElmTest.Runner.String.make(_elm),
-   $ElmTest$Test = Elm.ElmTest.Test.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm),
-   $String = Elm.String.make(_elm);
-   var _op = {};
-   var runDisplay = function (tests) {
-      var _p0 = $ElmTest$Runner$String.run(tests);
-      if (_p0.ctor === "::" && _p0._0.ctor === "_Tuple2") {
-            var out = A2($Basics._op["++"],
-            _p0._0._0,
-            A2($Basics._op["++"],
-            "\n\n",
-            function (_p1) {
-               return $String.concat(A2($List.intersperse,
-               "\n",
-               A2($List.map,$Basics.fst,_p1)));
-            }(_p0._1)));
-            return A2($Console._op[">>>"],
-            $Console.putStrLn(out),
-            function () {
-               var _p2 = $ElmTest$Run.pass(_p0._0._1);
-               if (_p2 === true) {
-                     return $Console.exit(0);
-                  } else {
-                     return $Console.exit(1);
-                  }
-            }());
-         } else {
-            return $Console.exit(1);
-         }
-   };
-   return _elm.ElmTest.Runner.Console.values = {_op: _op
-                                               ,runDisplay: runDisplay};
-};
-Elm.ElmTest = Elm.ElmTest || {};
-Elm.ElmTest.make = function (_elm) {
-   "use strict";
-   _elm.ElmTest = _elm.ElmTest || {};
-   if (_elm.ElmTest.values) return _elm.ElmTest.values;
-   var _U = Elm.Native.Utils.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $Console = Elm.Console.make(_elm),
-   $Debug = Elm.Debug.make(_elm),
-   $ElmTest$Assertion = Elm.ElmTest.Assertion.make(_elm),
-   $ElmTest$Runner$Console = Elm.ElmTest.Runner.Console.make(_elm),
-   $ElmTest$Runner$Element = Elm.ElmTest.Runner.Element.make(_elm),
-   $ElmTest$Runner$String = Elm.ElmTest.Runner.String.make(_elm),
-   $ElmTest$Test = Elm.ElmTest.Test.make(_elm),
-   $Graphics$Element = Elm.Graphics.Element.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
-   var _op = {};
-   var stringRunner = $ElmTest$Runner$String.runDisplay;
-   var consoleRunner = $ElmTest$Runner$Console.runDisplay;
-   var elementRunner = $ElmTest$Runner$Element.runDisplay;
-   var assertionList = $ElmTest$Assertion.assertionList;
-   var lazyAssert = $ElmTest$Assertion.assertT;
-   var assertNotEqual = $ElmTest$Assertion.assertNotEqual;
-   var assertEqual = $ElmTest$Assertion.assertEqual;
-   var assert = $ElmTest$Assertion.assert;
-   var suite = $ElmTest$Test.suite;
-   var equals = $ElmTest$Test.equals;
-   var defaultTest = $ElmTest$Test.defaultTest;
-   var test = $ElmTest$Test.test;
-   return _elm.ElmTest.values = {_op: _op
-                                ,test: test
-                                ,defaultTest: defaultTest
-                                ,equals: equals
-                                ,suite: suite
-                                ,assert: assert
-                                ,assertEqual: assertEqual
-                                ,assertNotEqual: assertNotEqual
-                                ,lazyAssert: lazyAssert
-                                ,assertionList: assertionList
-                                ,elementRunner: elementRunner
-                                ,consoleRunner: consoleRunner
-                                ,stringRunner: stringRunner};
-};
-Elm.Set = Elm.Set || {};
-Elm.Set.make = function (_elm) {
-   "use strict";
-   _elm.Set = _elm.Set || {};
-   if (_elm.Set.values) return _elm.Set.values;
-   var _U = Elm.Native.Utils.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $Dict = Elm.Dict.make(_elm),
-   $List = Elm.List.make(_elm);
-   var _op = {};
-   var foldr = F3(function (f,b,_p0) {
-      var _p1 = _p0;
-      return A3($Dict.foldr,
-      F3(function (k,_p2,b) {    return A2(f,k,b);}),
-      b,
-      _p1._0);
-   });
-   var foldl = F3(function (f,b,_p3) {
-      var _p4 = _p3;
-      return A3($Dict.foldl,
-      F3(function (k,_p5,b) {    return A2(f,k,b);}),
-      b,
-      _p4._0);
-   });
-   var toList = function (_p6) {
-      var _p7 = _p6;
-      return $Dict.keys(_p7._0);
-   };
-   var size = function (_p8) {
-      var _p9 = _p8;
-      return $Dict.size(_p9._0);
-   };
-   var member = F2(function (k,_p10) {
-      var _p11 = _p10;
-      return A2($Dict.member,k,_p11._0);
-   });
-   var isEmpty = function (_p12) {
-      var _p13 = _p12;
-      return $Dict.isEmpty(_p13._0);
-   };
-   var Set_elm_builtin = function (a) {
-      return {ctor: "Set_elm_builtin",_0: a};
-   };
-   var empty = Set_elm_builtin($Dict.empty);
-   var singleton = function (k) {
-      return Set_elm_builtin(A2($Dict.singleton,
-      k,
-      {ctor: "_Tuple0"}));
-   };
-   var insert = F2(function (k,_p14) {
-      var _p15 = _p14;
-      return Set_elm_builtin(A3($Dict.insert,
-      k,
-      {ctor: "_Tuple0"},
-      _p15._0));
-   });
-   var fromList = function (xs) {
-      return A3($List.foldl,insert,empty,xs);
-   };
-   var map = F2(function (f,s) {
-      return fromList(A2($List.map,f,toList(s)));
-   });
-   var remove = F2(function (k,_p16) {
-      var _p17 = _p16;
-      return Set_elm_builtin(A2($Dict.remove,k,_p17._0));
-   });
-   var union = F2(function (_p19,_p18) {
-      var _p20 = _p19;
-      var _p21 = _p18;
-      return Set_elm_builtin(A2($Dict.union,_p20._0,_p21._0));
-   });
-   var intersect = F2(function (_p23,_p22) {
-      var _p24 = _p23;
-      var _p25 = _p22;
-      return Set_elm_builtin(A2($Dict.intersect,_p24._0,_p25._0));
-   });
-   var diff = F2(function (_p27,_p26) {
-      var _p28 = _p27;
-      var _p29 = _p26;
-      return Set_elm_builtin(A2($Dict.diff,_p28._0,_p29._0));
-   });
-   var filter = F2(function (p,_p30) {
-      var _p31 = _p30;
-      return Set_elm_builtin(A2($Dict.filter,
-      F2(function (k,_p32) {    return p(k);}),
-      _p31._0));
-   });
-   var partition = F2(function (p,_p33) {
-      var _p34 = _p33;
-      var _p35 = A2($Dict.partition,
-      F2(function (k,_p36) {    return p(k);}),
-      _p34._0);
-      var p1 = _p35._0;
-      var p2 = _p35._1;
-      return {ctor: "_Tuple2"
-             ,_0: Set_elm_builtin(p1)
-             ,_1: Set_elm_builtin(p2)};
-   });
-   return _elm.Set.values = {_op: _op
-                            ,empty: empty
-                            ,singleton: singleton
-                            ,insert: insert
-                            ,remove: remove
-                            ,isEmpty: isEmpty
-                            ,member: member
-                            ,size: size
-                            ,foldl: foldl
-                            ,foldr: foldr
-                            ,map: map
-                            ,filter: filter
-                            ,partition: partition
-                            ,union: union
-                            ,intersect: intersect
-                            ,diff: diff
-                            ,toList: toList
-                            ,fromList: fromList};
-};
-Elm.Native.Keyboard = {};
-
-Elm.Native.Keyboard.make = function(localRuntime) {
-	localRuntime.Native = localRuntime.Native || {};
-	localRuntime.Native.Keyboard = localRuntime.Native.Keyboard || {};
-	if (localRuntime.Native.Keyboard.values)
-	{
-		return localRuntime.Native.Keyboard.values;
-	}
-
-	var NS = Elm.Native.Signal.make(localRuntime);
-
-
-	function keyEvent(event)
-	{
-		return {
-			alt: event.altKey,
-			meta: event.metaKey,
-			keyCode: event.keyCode
-		};
-	}
-
-
-	function keyStream(node, eventName, handler)
-	{
-		var stream = NS.input(eventName, { alt: false, meta: false, keyCode: 0 });
-
-		localRuntime.addListener([stream.id], node, eventName, function(e) {
-			localRuntime.notify(stream.id, handler(e));
-		});
-
-		return stream;
-	}
-
-	var downs = keyStream(document, 'keydown', keyEvent);
-	var ups = keyStream(document, 'keyup', keyEvent);
-	var presses = keyStream(document, 'keypress', keyEvent);
-	var blurs = keyStream(window, 'blur', function() { return null; });
-
-
-	return localRuntime.Native.Keyboard.values = {
-		downs: downs,
-		ups: ups,
-		blurs: blurs,
-		presses: presses
-	};
-};
-
-Elm.Keyboard = Elm.Keyboard || {};
-Elm.Keyboard.make = function (_elm) {
-   "use strict";
-   _elm.Keyboard = _elm.Keyboard || {};
-   if (_elm.Keyboard.values) return _elm.Keyboard.values;
-   var _U = Elm.Native.Utils.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $Char = Elm.Char.make(_elm),
-   $Native$Keyboard = Elm.Native.Keyboard.make(_elm),
-   $Set = Elm.Set.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
-   var _op = {};
-   var presses = A2($Signal.map,
-   function (_) {
-      return _.keyCode;
-   },
-   $Native$Keyboard.presses);
-   var toXY = F2(function (_p0,keyCodes) {
-      var _p1 = _p0;
-      var is = function (keyCode) {
-         return A2($Set.member,keyCode,keyCodes) ? 1 : 0;
-      };
-      return {x: is(_p1.right) - is(_p1.left)
-             ,y: is(_p1.up) - is(_p1.down)};
-   });
-   var Directions = F4(function (a,b,c,d) {
-      return {up: a,down: b,left: c,right: d};
-   });
-   var dropMap = F2(function (f,signal) {
-      return $Signal.dropRepeats(A2($Signal.map,f,signal));
-   });
-   var EventInfo = F3(function (a,b,c) {
-      return {alt: a,meta: b,keyCode: c};
-   });
-   var Blur = {ctor: "Blur"};
-   var Down = function (a) {    return {ctor: "Down",_0: a};};
-   var Up = function (a) {    return {ctor: "Up",_0: a};};
-   var rawEvents = $Signal.mergeMany(_U.list([A2($Signal.map,
-                                             Up,
-                                             $Native$Keyboard.ups)
-                                             ,A2($Signal.map,Down,$Native$Keyboard.downs)
-                                             ,A2($Signal.map,$Basics.always(Blur),$Native$Keyboard.blurs)]));
-   var empty = {alt: false,meta: false,keyCodes: $Set.empty};
-   var update = F2(function (event,model) {
-      var _p2 = event;
-      switch (_p2.ctor)
-      {case "Down": var _p3 = _p2._0;
-           return {alt: _p3.alt
-                  ,meta: _p3.meta
-                  ,keyCodes: A2($Set.insert,_p3.keyCode,model.keyCodes)};
-         case "Up": var _p4 = _p2._0;
-           return {alt: _p4.alt
-                  ,meta: _p4.meta
-                  ,keyCodes: A2($Set.remove,_p4.keyCode,model.keyCodes)};
-         default: return empty;}
-   });
-   var model = A3($Signal.foldp,update,empty,rawEvents);
-   var alt = A2(dropMap,function (_) {    return _.alt;},model);
-   var meta = A2(dropMap,function (_) {    return _.meta;},model);
-   var keysDown = A2(dropMap,
-   function (_) {
-      return _.keyCodes;
-   },
-   model);
-   var arrows = A2(dropMap,
-   toXY({up: 38,down: 40,left: 37,right: 39}),
-   keysDown);
-   var wasd = A2(dropMap,
-   toXY({up: 87,down: 83,left: 65,right: 68}),
-   keysDown);
-   var isDown = function (keyCode) {
-      return A2(dropMap,$Set.member(keyCode),keysDown);
-   };
-   var ctrl = isDown(17);
-   var shift = isDown(16);
-   var space = isDown(32);
-   var enter = isDown(13);
-   var Model = F3(function (a,b,c) {
-      return {alt: a,meta: b,keyCodes: c};
-   });
-   return _elm.Keyboard.values = {_op: _op
-                                 ,arrows: arrows
-                                 ,wasd: wasd
-                                 ,enter: enter
-                                 ,space: space
-                                 ,ctrl: ctrl
-                                 ,shift: shift
-                                 ,alt: alt
-                                 ,meta: meta
-                                 ,isDown: isDown
-                                 ,keysDown: keysDown
-                                 ,presses: presses};
-};
-Elm.Native = Elm.Native || {};
-Elm.Native.Mouse = {};
-Elm.Native.Mouse.make = function(localRuntime) {
-	localRuntime.Native = localRuntime.Native || {};
-	localRuntime.Native.Mouse = localRuntime.Native.Mouse || {};
-	if (localRuntime.Native.Mouse.values)
-	{
-		return localRuntime.Native.Mouse.values;
-	}
-
-	var NS = Elm.Native.Signal.make(localRuntime);
-	var Utils = Elm.Native.Utils.make(localRuntime);
-
-	var position = NS.input('Mouse.position', Utils.Tuple2(0, 0));
-
-	var isDown = NS.input('Mouse.isDown', false);
-
-	var clicks = NS.input('Mouse.clicks', Utils.Tuple0);
-
-	var node = localRuntime.isFullscreen()
-		? document
-		: localRuntime.node;
-
-	localRuntime.addListener([clicks.id], node, 'click', function click() {
-		localRuntime.notify(clicks.id, Utils.Tuple0);
-	});
-	localRuntime.addListener([isDown.id], node, 'mousedown', function down() {
-		localRuntime.notify(isDown.id, true);
-	});
-	localRuntime.addListener([isDown.id], node, 'mouseup', function up() {
-		localRuntime.notify(isDown.id, false);
-	});
-	localRuntime.addListener([position.id], node, 'mousemove', function move(e) {
-		localRuntime.notify(position.id, Utils.getXY(e));
-	});
-
-	return localRuntime.Native.Mouse.values = {
-		position: position,
-		isDown: isDown,
-		clicks: clicks
-	};
-};
-
-Elm.Mouse = Elm.Mouse || {};
-Elm.Mouse.make = function (_elm) {
-   "use strict";
-   _elm.Mouse = _elm.Mouse || {};
-   if (_elm.Mouse.values) return _elm.Mouse.values;
-   var _U = Elm.Native.Utils.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $Native$Mouse = Elm.Native.Mouse.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
-   var _op = {};
-   var clicks = $Native$Mouse.clicks;
-   var isDown = $Native$Mouse.isDown;
-   var position = $Native$Mouse.position;
-   var x = A2($Signal.map,$Basics.fst,position);
-   var y = A2($Signal.map,$Basics.snd,position);
-   return _elm.Mouse.values = {_op: _op
-                              ,position: position
-                              ,x: x
-                              ,y: y
-                              ,isDown: isDown
-                              ,clicks: clicks};
-};
-Elm.Native = Elm.Native || {};
-Elm.Native.Window = {};
-Elm.Native.Window.make = function make(localRuntime) {
-	localRuntime.Native = localRuntime.Native || {};
-	localRuntime.Native.Window = localRuntime.Native.Window || {};
-	if (localRuntime.Native.Window.values)
-	{
-		return localRuntime.Native.Window.values;
-	}
-
-	var NS = Elm.Native.Signal.make(localRuntime);
-	var Tuple2 = Elm.Native.Utils.make(localRuntime).Tuple2;
-
-
-	function getWidth()
-	{
-		return localRuntime.node.clientWidth;
-	}
-
-
-	function getHeight()
-	{
-		if (localRuntime.isFullscreen())
-		{
-			return window.innerHeight;
-		}
-		return localRuntime.node.clientHeight;
-	}
-
-
-	var dimensions = NS.input('Window.dimensions', Tuple2(getWidth(), getHeight()));
-
-
-	function resizeIfNeeded()
-	{
-		// Do not trigger event if the dimensions have not changed.
-		// This should be most of the time.
-		var w = getWidth();
-		var h = getHeight();
-		if (dimensions.value._0 === w && dimensions.value._1 === h)
-		{
-			return;
-		}
-
-		setTimeout(function() {
-			// Check again to see if the dimensions have changed.
-			// It is conceivable that the dimensions have changed
-			// again while some other event was being processed.
-			w = getWidth();
-			h = getHeight();
-			if (dimensions.value._0 === w && dimensions.value._1 === h)
-			{
-				return;
-			}
-			localRuntime.notify(dimensions.id, Tuple2(w, h));
-		}, 0);
-	}
-
-
-	localRuntime.addListener([dimensions.id], window, 'resize', resizeIfNeeded);
-
-
-	return localRuntime.Native.Window.values = {
-		dimensions: dimensions,
-		resizeIfNeeded: resizeIfNeeded
-	};
-};
-
-Elm.Window = Elm.Window || {};
-Elm.Window.make = function (_elm) {
-   "use strict";
-   _elm.Window = _elm.Window || {};
-   if (_elm.Window.values) return _elm.Window.values;
-   var _U = Elm.Native.Utils.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $Native$Window = Elm.Native.Window.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
-   var _op = {};
-   var dimensions = $Native$Window.dimensions;
-   var width = A2($Signal.map,$Basics.fst,dimensions);
-   var height = A2($Signal.map,$Basics.snd,dimensions);
-   return _elm.Window.values = {_op: _op
-                               ,dimensions: dimensions
-                               ,width: width
-                               ,height: height};
-};
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+};(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 
 },{}],2:[function(require,module,exports){
 (function (global){
@@ -12178,7 +10526,6 @@ Elm.Native.VirtualDom.make = function(elm)
 };
 
 },{"virtual-dom/vdom/create-element":6,"virtual-dom/vdom/patch":9,"virtual-dom/vnode/is-vhook":13,"virtual-dom/vnode/vnode":18,"virtual-dom/vnode/vtext":20,"virtual-dom/vtree/diff":22}]},{},[23]);
-
 Elm.VirtualDom = Elm.VirtualDom || {};
 Elm.VirtualDom.make = function (_elm) {
    "use strict";
@@ -12235,8 +10582,7 @@ Elm.VirtualDom.make = function (_elm) {
                                    ,lazy2: lazy2
                                    ,lazy3: lazy3
                                    ,Options: Options};
-};
-Elm.Html = Elm.Html || {};
+};Elm.Html = Elm.Html || {};
 Elm.Html.make = function (_elm) {
    "use strict";
    _elm.Html = _elm.Html || {};
@@ -12458,8 +10804,7 @@ Elm.Html.make = function (_elm) {
                              ,summary: summary
                              ,menuitem: menuitem
                              ,menu: menu};
-};
-Elm.Html = Elm.Html || {};
+};Elm.Html = Elm.Html || {};
 Elm.Html.Attributes = Elm.Html.Attributes || {};
 Elm.Html.Attributes.make = function (_elm) {
    "use strict";
@@ -12889,844 +11234,71 @@ Elm.Html.Attributes.make = function (_elm) {
                                         ,manifest: manifest
                                         ,property: property
                                         ,attribute: attribute};
-};
-Elm.Html = Elm.Html || {};
-Elm.Html.Events = Elm.Html.Events || {};
-Elm.Html.Events.make = function (_elm) {
+};Elm.GUI = Elm.GUI || {};
+Elm.GUI.Piano = Elm.GUI.Piano || {};
+Elm.GUI.Piano.make = function (_elm) {
    "use strict";
-   _elm.Html = _elm.Html || {};
-   _elm.Html.Events = _elm.Html.Events || {};
-   if (_elm.Html.Events.values) return _elm.Html.Events.values;
-   var _U = Elm.Native.Utils.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $Debug = Elm.Debug.make(_elm),
-   $Html = Elm.Html.make(_elm),
-   $Json$Decode = Elm.Json.Decode.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm),
-   $VirtualDom = Elm.VirtualDom.make(_elm);
-   var _op = {};
-   var keyCode = A2($Json$Decode._op[":="],
-   "keyCode",
-   $Json$Decode.$int);
-   var targetChecked = A2($Json$Decode.at,
-   _U.list(["target","checked"]),
-   $Json$Decode.bool);
-   var targetValue = A2($Json$Decode.at,
-   _U.list(["target","value"]),
-   $Json$Decode.string);
-   var defaultOptions = $VirtualDom.defaultOptions;
-   var Options = F2(function (a,b) {
-      return {stopPropagation: a,preventDefault: b};
-   });
-   var onWithOptions = $VirtualDom.onWithOptions;
-   var on = $VirtualDom.on;
-   var messageOn = F3(function (name,addr,msg) {
-      return A3(on,
-      name,
-      $Json$Decode.value,
-      function (_p0) {
-         return A2($Signal.message,addr,msg);
-      });
-   });
-   var onClick = messageOn("click");
-   var onDoubleClick = messageOn("dblclick");
-   var onMouseMove = messageOn("mousemove");
-   var onMouseDown = messageOn("mousedown");
-   var onMouseUp = messageOn("mouseup");
-   var onMouseEnter = messageOn("mouseenter");
-   var onMouseLeave = messageOn("mouseleave");
-   var onMouseOver = messageOn("mouseover");
-   var onMouseOut = messageOn("mouseout");
-   var onBlur = messageOn("blur");
-   var onFocus = messageOn("focus");
-   var onSubmit = messageOn("submit");
-   var onKey = F3(function (name,addr,handler) {
-      return A3(on,
-      name,
-      keyCode,
-      function (code) {
-         return A2($Signal.message,addr,handler(code));
-      });
-   });
-   var onKeyUp = onKey("keyup");
-   var onKeyDown = onKey("keydown");
-   var onKeyPress = onKey("keypress");
-   return _elm.Html.Events.values = {_op: _op
-                                    ,onBlur: onBlur
-                                    ,onFocus: onFocus
-                                    ,onSubmit: onSubmit
-                                    ,onKeyUp: onKeyUp
-                                    ,onKeyDown: onKeyDown
-                                    ,onKeyPress: onKeyPress
-                                    ,onClick: onClick
-                                    ,onDoubleClick: onDoubleClick
-                                    ,onMouseMove: onMouseMove
-                                    ,onMouseDown: onMouseDown
-                                    ,onMouseUp: onMouseUp
-                                    ,onMouseEnter: onMouseEnter
-                                    ,onMouseLeave: onMouseLeave
-                                    ,onMouseOver: onMouseOver
-                                    ,onMouseOut: onMouseOut
-                                    ,on: on
-                                    ,onWithOptions: onWithOptions
-                                    ,defaultOptions: defaultOptions
-                                    ,targetValue: targetValue
-                                    ,targetChecked: targetChecked
-                                    ,keyCode: keyCode
-                                    ,Options: Options};
-};
-Elm.MainTypes = Elm.MainTypes || {};
-Elm.MainTypes.make = function (_elm) {
-   "use strict";
-   _elm.MainTypes = _elm.MainTypes || {};
-   if (_elm.MainTypes.values) return _elm.MainTypes.values;
-   var _U = Elm.Native.Utils.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $Debug = Elm.Debug.make(_elm),
-   $Dict = Elm.Dict.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
-   var _op = {};
-   var ExternalState = F2(function (a,b) {
-      return {time: a,externalInputState: b};
-   });
-   var ExternalInputState = F3(function (a,b,c) {
-      return {xWindowFraction: a,yWindowFraction: b,audioOn: c};
-   });
-   var OscillatorInputs = F3(function (a,b,c) {
-      return {frequency: a,frequencyOffset: b,phaseOffset: c};
-   });
-   var Destination = function (a) {
-      return {ctor: "Destination",_0: a};
-   };
-   var Add = function (a) {    return {ctor: "Add",_0: a};};
-   var FeedforwardProcessor = function (a) {
-      return {ctor: "FeedforwardProcessor",_0: a};
-   };
-   var Gain = function (a) {    return {ctor: "Gain",_0: a};};
-   var Oscillator = function (a) {
-      return {ctor: "Oscillator",_0: a};
-   };
-   var GUI = function (a) {    return {ctor: "GUI",_0: a};};
-   var Default = {ctor: "Default"};
-   var Value = function (a) {    return {ctor: "Value",_0: a};};
-   var ID = function (a) {    return {ctor: "ID",_0: a};};
-   return _elm.MainTypes.values = {_op: _op
-                                  ,ID: ID
-                                  ,Value: Value
-                                  ,Default: Default
-                                  ,GUI: GUI
-                                  ,Oscillator: Oscillator
-                                  ,Gain: Gain
-                                  ,FeedforwardProcessor: FeedforwardProcessor
-                                  ,Add: Add
-                                  ,Destination: Destination
-                                  ,OscillatorInputs: OscillatorInputs
-                                  ,ExternalInputState: ExternalInputState
-                                  ,ExternalState: ExternalState};
-};
-Elm.AudioNodeFunctions = Elm.AudioNodeFunctions || {};
-Elm.AudioNodeFunctions.make = function (_elm) {
-   "use strict";
-   _elm.AudioNodeFunctions = _elm.AudioNodeFunctions || {};
-   if (_elm.AudioNodeFunctions.values)
-   return _elm.AudioNodeFunctions.values;
-   var _U = Elm.Native.Utils.make(_elm),
-   $Array = Elm.Array.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $Debug = Elm.Debug.make(_elm),
-   $ElmTest = Elm.ElmTest.make(_elm),
-   $List = Elm.List.make(_elm),
-   $MainTypes = Elm.MainTypes.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
-   var _op = {};
-   var gain = F2(function (signalValue,gainValue) {
-      return signalValue * gainValue;
-   });
-   var zeroWave = F4(function (frequency,
-   frequencyOffset,
-   phaseOffset,
-   prevPhase) {
-      return {ctor: "_Tuple2",_0: 0.0,_1: 0.0};
-   });
-   var sinLookupFrequency = 20.0;
-   var sinLookupDuration = 1.0 / sinLookupFrequency;
-   var average = function (values) {
-      return $List.sum(values) / $Basics.toFloat($List.length(values));
-   };
-   var simpleLowPassFilter = F2(function (currValue,prevValues) {
-      var value = average(A2($Basics._op["++"],
-      _U.list([currValue]),
-      prevValues));
-      return value * 1.1;
-   });
-   var sinWave$ = function (phase) {
-      return $Basics.sin(phase * 2.0 * $Basics.pi);
-   };
-   var squareWave$ = function (phase) {
-      return _U.cmp(phase,0.5) < 0 ? 1.0 : -1.0;
-   };
-   var bias = function (value) {    return value * 2.0 - 1.0;};
-   var sawWave = function (phase) {    return bias(phase);};
-   var triangleWave = function (phase) {
-      return bias(_U.cmp(phase,
-      0.5) < 0 ? phase * 2.0 : (1.0 - phase) * 2.0);
-   };
-   var getPeriodSeconds = function (frequency) {
-      return 1.0 / frequency;
-   };
-   var sampleLength = function (sampleRate) {
-      return 1.0 / $Basics.toFloat(sampleRate);
-   };
-   var timeSeconds = F3(function (buffersElapsed,
-   bufferSize,
-   sampleRate) {
-      return $Basics.toFloat(buffersElapsed) * $Basics.toFloat(bufferSize) * sampleLength(sampleRate);
-   });
-   var fmod = F2(function (a,b) {
-      var divided = a / b;
-      return divided - $Basics.toFloat($Basics.floor(divided));
-   });
-   var getPhaseFraction = F2(function (frequency,currTime) {
-      var period = getPeriodSeconds(frequency);
-      return A2(fmod,currTime,period);
-   });
-   var oscillator = F3(function (oscillatorType,
-   frequency,
-   currTime) {
-      var phase = A2(getPhaseFraction,frequency,currTime);
-      var _p0 = oscillatorType;
-      switch (_p0.ctor)
-      {case "Saw": return sawWave(phase);
-         case "Square": return squareWave$(phase);
-         case "Triangle": return triangleWave(phase);
-         default: return sinWave$(phase);}
-   });
-   var sampleRate = 44100;
-   var sampleDuration = 1.0 / $Basics.toFloat(sampleRate);
-   var sinLookupArrayLength = $Basics.floor(sinLookupDuration / sampleDuration);
-   var sinLookup = function () {
-      var getSample = function (n) {
-         var phase = $Basics.toFloat(n) / $Basics.toFloat(sinLookupArrayLength);
-         return $Basics.sin(phase * 2.0 * $Basics.pi);
-      };
-      return A2($Array.initialize,sinLookupArrayLength,getSample);
-   }();
-   var sinWave = F4(function (frequency,
-   frequencyOffset,
-   phaseOffset,
-   prevPhase) {
-      var periodSeconds = getPeriodSeconds(frequency + frequencyOffset);
-      var phaseIncrement = sampleDuration / periodSeconds;
-      var currPhase = prevPhase + phaseIncrement;
-      var phaseOffset = phaseOffset / 2.0;
-      var outputPhase = currPhase + phaseOffset;
-      var outputPhaseNormed = A2(fmod,outputPhase,1.0);
-      var lookupArrayIndex = $Basics.floor(outputPhaseNormed * $Basics.toFloat(sinLookupArrayLength));
-      var amplitude = function () {
-         var _p1 = A2($Array.get,lookupArrayIndex,sinLookup);
-         if (_p1.ctor === "Just") {
-               return _p1._0;
-            } else {
-               return _U.crashCase("AudioNodeFunctions",
-               {start: {line: 155,column: 13},end: {line: 157,column: 67}},
-               _p1)("arraylookup out of index");
-            }
-      }();
-      return {ctor: "_Tuple2",_0: amplitude,_1: currPhase};
-   });
-   var tests = A2($ElmTest.suite,
-   "sineWave",
-   _U.list([A2($ElmTest.test,
-           "sineWave",
-           A2($ElmTest.assertEqual,
-           {ctor: "_Tuple2",_0: 0.0,_1: 0.0},
-           A4(sinWave,11025.0,0.0,0.0,0.0)))
-           ,A2($ElmTest.test,
-           "sinLookup",
-           A2($ElmTest.assertEqual,
-           $Array.fromList(_U.list([0.0])),
-           sinLookup))]));
-   var main = $ElmTest.elementRunner(tests);
-   var squareWave = F4(function (frequency,
-   frequencyOffset,
-   phaseOffset,
-   prevPhase) {
-      var periodSeconds = getPeriodSeconds(frequency + frequencyOffset);
-      var phaseIncrement = sampleDuration / periodSeconds;
-      var currPhase = prevPhase + phaseIncrement;
-      var phaseOffset = phaseOffset / 2.0;
-      var outputPhase = currPhase + phaseOffset;
-      var outputPhaseNormed = A2(fmod,outputPhase,1.0);
-      var amplitude = _U.cmp(outputPhaseNormed,0.5) > 0 ? 1.0 : -1.0;
-      return {ctor: "_Tuple2",_0: amplitude,_1: currPhase};
-   });
-   var Sin = {ctor: "Sin"};
-   var Triangle = {ctor: "Triangle"};
-   var Square = {ctor: "Square"};
-   var Saw = {ctor: "Saw"};
-   return _elm.AudioNodeFunctions.values = {_op: _op
-                                           ,Saw: Saw
-                                           ,Square: Square
-                                           ,Triangle: Triangle
-                                           ,Sin: Sin
-                                           ,sampleRate: sampleRate
-                                           ,sampleDuration: sampleDuration
-                                           ,fmod: fmod
-                                           ,sampleLength: sampleLength
-                                           ,timeSeconds: timeSeconds
-                                           ,getPeriodSeconds: getPeriodSeconds
-                                           ,getPhaseFraction: getPhaseFraction
-                                           ,bias: bias
-                                           ,sawWave: sawWave
-                                           ,squareWave$: squareWave$
-                                           ,triangleWave: triangleWave
-                                           ,sinWave$: sinWave$
-                                           ,oscillator: oscillator
-                                           ,average: average
-                                           ,simpleLowPassFilter: simpleLowPassFilter
-                                           ,sinLookupFrequency: sinLookupFrequency
-                                           ,sinLookupDuration: sinLookupDuration
-                                           ,sinLookupArrayLength: sinLookupArrayLength
-                                           ,sinLookup: sinLookup
-                                           ,sinWave: sinWave
-                                           ,squareWave: squareWave
-                                           ,zeroWave: zeroWave
-                                           ,gain: gain
-                                           ,tests: tests
-                                           ,main: main};
-};
-Elm.AudioNodes = Elm.AudioNodes || {};
-Elm.AudioNodes.make = function (_elm) {
-   "use strict";
-   _elm.AudioNodes = _elm.AudioNodes || {};
-   if (_elm.AudioNodes.values) return _elm.AudioNodes.values;
-   var _U = Elm.Native.Utils.make(_elm),
-   $AudioNodeFunctions = Elm.AudioNodeFunctions.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $Debug = Elm.Debug.make(_elm),
-   $List = Elm.List.make(_elm),
-   $MainTypes = Elm.MainTypes.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
-   var _op = {};
-   var destinationNode = function (_p0) {
-      var _p1 = _p0;
-      return $MainTypes.Destination({id: "destination"
-                                    ,input: _p1.signal
-                                    ,state: {outputValue: 0.0}});
-   };
-   var adderNode = F2(function (id,inputs) {
-      return $MainTypes.Add({id: id
-                            ,inputs: inputs
-                            ,state: {outputValue: 0.0}});
-   });
-   var gainNode = F2(function (id,_p2) {
-      var _p3 = _p2;
-      return $MainTypes.Gain({id: id
-                             ,func: $AudioNodeFunctions.gain
-                             ,inputs: {signal: _p3.signal,gain: _p3.gain}
-                             ,state: {outputValue: 0.0}});
-   });
-   var dummyNode = F2(function (id,_p4) {
-      var _p5 = _p4;
-      return $MainTypes.Oscillator({id: id
-                                   ,func: $AudioNodeFunctions.zeroWave
-                                   ,inputs: {frequency: _p5.frequency
-                                            ,frequencyOffset: _p5.frequencyOffset
-                                            ,phaseOffset: _p5.phaseOffset}
-                                   ,state: {outputValue: 0.0,phase: 0.0}});
-   });
-   var squareNode = F2(function (id,_p6) {
-      var _p7 = _p6;
-      return $MainTypes.Oscillator({id: id
-                                   ,func: $AudioNodeFunctions.squareWave
-                                   ,inputs: {frequency: _p7.frequency
-                                            ,frequencyOffset: _p7.frequencyOffset
-                                            ,phaseOffset: _p7.phaseOffset}
-                                   ,state: {outputValue: 0.0,phase: 0.0}});
-   });
-   var sinNode = F2(function (id,_p8) {
-      var _p9 = _p8;
-      return $MainTypes.Oscillator({id: id
-                                   ,func: $AudioNodeFunctions.sinWave
-                                   ,inputs: {frequency: _p9.frequency
-                                            ,frequencyOffset: _p9.frequencyOffset
-                                            ,phaseOffset: _p9.phaseOffset}
-                                   ,state: {outputValue: 0.0,phase: 0.0}});
-   });
-   var commaHelper = A2(sinNode,
-   "dummy123456789",
-   {frequency: $MainTypes.Default
-   ,frequencyOffset: $MainTypes.Default
-   ,phaseOffset: $MainTypes.Default});
-   return _elm.AudioNodes.values = {_op: _op
-                                   ,sinNode: sinNode
-                                   ,squareNode: squareNode
-                                   ,dummyNode: dummyNode
-                                   ,gainNode: gainNode
-                                   ,adderNode: adderNode
-                                   ,destinationNode: destinationNode
-                                   ,commaHelper: commaHelper};
-};
-Elm.Components = Elm.Components || {};
-Elm.Components.make = function (_elm) {
-   "use strict";
-   _elm.Components = _elm.Components || {};
-   if (_elm.Components.values) return _elm.Components.values;
-   var _U = Elm.Native.Utils.make(_elm),
-   $AudioNodes = Elm.AudioNodes.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $Debug = Elm.Debug.make(_elm),
-   $List = Elm.List.make(_elm),
-   $MainTypes = Elm.MainTypes.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
-   var _op = {};
-   var fmSynth = F2(function (id,_p0) {
-      var _p1 = _p0;
-      var _p2 = _p1.frequency;
-      var createModulatorNode = F2(function (fundamentalFrequency,
-      spec) {
-         return A2($AudioNodes.sinNode,
-         spec.id,
-         {frequency: $MainTypes.Value(_p2 * spec.multiple)
-         ,frequencyOffset: $MainTypes.Default
-         ,phaseOffset: spec.modulator});
-      });
-      var carrierNode = A2($AudioNodes.sinNode,
-      id,
-      {frequency: $MainTypes.Value(_p2)
-      ,frequencyOffset: $MainTypes.Default
-      ,phaseOffset: _p1.modulator});
-      return A2($Basics._op["++"],
-      _U.list([carrierNode]),
-      A2($List.map,createModulatorNode(_p2),_p1.modulatorNodes));
-   });
-   var FMSynthSpec = F3(function (a,b,c) {
-      return {frequency: a,modulator: b,modulatorNodes: c};
-   });
-   var ModulatorNodeSpec = F4(function (a,b,c,d) {
-      return {id: a,multiple: b,detune: c,modulator: d};
-   });
-   var additiveSynthAudioGraph = F2(function (fundamentalFrequency,
-   numOscillators) {
-      var getId = function (n) {
-         return A2($Basics._op["++"],"harmonic",$Basics.toString(n));
-      };
-      var getSinNode = function (n) {
-         var id = getId(n);
-         var frequency = n * fundamentalFrequency;
-         return A2($AudioNodes.sinNode,
-         id,
-         {frequency: $MainTypes.Value(frequency)
-         ,frequencyOffset: $MainTypes.Default
-         ,phaseOffset: $MainTypes.Default});
-      };
-      var oscs = A2($List.map,getSinNode,_U.range(1,numOscillators));
-      var mixerInputs = A2($List.map,
-      function (n) {
-         return $MainTypes.ID(getId(n));
-      },
-      _U.range(1,numOscillators));
-      return A2($Basics._op["++"],
-      oscs,
-      _U.list([A2($AudioNodes.adderNode,
-      "additiveSynth",
-      mixerInputs)]));
-   });
-   return _elm.Components.values = {_op: _op
-                                   ,additiveSynthAudioGraph: additiveSynthAudioGraph
-                                   ,ModulatorNodeSpec: ModulatorNodeSpec
-                                   ,FMSynthSpec: FMSynthSpec
-                                   ,fmSynth: fmSynth};
-};
-Elm.Piano = Elm.Piano || {};
-Elm.Piano.make = function (_elm) {
-   "use strict";
-   _elm.Piano = _elm.Piano || {};
-   if (_elm.Piano.values) return _elm.Piano.values;
+   _elm.GUI = _elm.GUI || {};
+   _elm.GUI.Piano = _elm.GUI.Piano || {};
+   if (_elm.GUI.Piano.values) return _elm.GUI.Piano.values;
    var _U = Elm.Native.Utils.make(_elm),
    $Basics = Elm.Basics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
    $Html = Elm.Html.make(_elm),
    $Html$Attributes = Elm.Html.Attributes.make(_elm),
-   $Html$Events = Elm.Html.Events.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm);
    var _op = {};
-   var White = {ctor: "White"};
-   var Black = {ctor: "Black"};
-   var pianoMailbox = $Signal.mailbox(60.0);
-   var pianoSignal = pianoMailbox.signal;
-   var pianoKey = F2(function (keyType,pitch) {
-      var _p0 = keyType;
-      if (_p0.ctor === "Black") {
-            return A2($Html.div,
-            _U.list([$Html$Attributes.$class("black-key-wrapper")]),
-            _U.list([A2($Html.div,
-            _U.list([$Html$Attributes.$class("black-key")
-                    ,A2($Html$Events.onMouseDown,pianoMailbox.address,pitch)]),
-            _U.list([]))]));
-         } else {
-            return A2($Html.div,
-            _U.list([$Html$Attributes.$class("white-key")
-                    ,A2($Html$Events.onMouseDown,pianoMailbox.address,pitch)]),
-            _U.list([]));
-         }
-   });
-   var pianoOctave = function (cPitch) {
-      return _U.list([A2(pianoKey,White,cPitch)
-                     ,A2(pianoKey,Black,cPitch + 1.0)
-                     ,A2(pianoKey,White,cPitch + 2.0)
-                     ,A2(pianoKey,Black,cPitch + 3.0)
-                     ,A2(pianoKey,White,cPitch + 4.0)
-                     ,A2(pianoKey,White,cPitch + 5.0)
-                     ,A2(pianoKey,Black,cPitch + 6.0)
-                     ,A2(pianoKey,White,cPitch + 7.0)
-                     ,A2(pianoKey,Black,cPitch + 8.0)
-                     ,A2(pianoKey,White,cPitch + 9.0)
-                     ,A2(pianoKey,Black,cPitch + 10.0)
-                     ,A2(pianoKey,White,cPitch + 11.0)]);
-   };
-   var piano = F2(function (numOctaves,bottomPitch) {
-      var bottomPitches = A2($List.map,
-      function (n) {
-         return bottomPitch + $Basics.toFloat(n) * 12.0;
-      },
-      _U.range(1,numOctaves));
-      var pianoOctaves = A2($List.concatMap,
-      function (octaveBottomPitch) {
-         return pianoOctave(octaveBottomPitch);
-      },
-      bottomPitches);
-      return A2($Html.div,
-      _U.list([$Html$Attributes.$class("piano")]),
-      pianoOctaves);
-   });
-   return _elm.Piano.values = {_op: _op
-                              ,piano: piano
-                              ,pianoSignal: pianoSignal};
-};
-Elm.Slider = Elm.Slider || {};
-Elm.Slider.make = function (_elm) {
-   "use strict";
-   _elm.Slider = _elm.Slider || {};
-   if (_elm.Slider.values) return _elm.Slider.values;
-   var _U = Elm.Native.Utils.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $Debug = Elm.Debug.make(_elm),
-   $Html = Elm.Html.make(_elm),
-   $Html$Attributes = Elm.Html.Attributes.make(_elm),
-   $Html$Events = Elm.Html.Events.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm),
-   $String = Elm.String.make(_elm);
-   var _op = {};
-   var decodeSliderValue = function (result) {
-      return A2($Result.withDefault,0.0,$String.toFloat(result));
-   };
-   var slider = function (address) {
-      var eventHandler = A3($Html$Events.on,
-      "input",
-      $Html$Events.targetValue,
-      function (result) {
-         return A2($Signal.message,address,decodeSliderValue(result));
-      });
-      return A2($Html.input,
-      _U.list([$Html$Attributes.type$("range")
-              ,$Html$Attributes.min("0")
-              ,$Html$Attributes.max("1")
-              ,$Html$Attributes.step("0.001")
-              ,eventHandler]),
-      _U.list([]));
-   };
-   return _elm.Slider.values = {_op: _op
-                               ,decodeSliderValue: decodeSliderValue
-                               ,slider: slider};
-};
-Elm.Gui = Elm.Gui || {};
-Elm.Gui.make = function (_elm) {
-   "use strict";
-   _elm.Gui = _elm.Gui || {};
-   if (_elm.Gui.values) return _elm.Gui.values;
-   var _U = Elm.Native.Utils.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $Char = Elm.Char.make(_elm),
-   $Debug = Elm.Debug.make(_elm),
-   $Html = Elm.Html.make(_elm),
-   $Html$Attributes = Elm.Html.Attributes.make(_elm),
-   $Html$Events = Elm.Html.Events.make(_elm),
-   $Keyboard = Elm.Keyboard.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Mouse = Elm.Mouse.make(_elm),
-   $Piano = Elm.Piano.make(_elm),
-   $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm),
-   $Slider = Elm.Slider.make(_elm),
-   $Window = Elm.Window.make(_elm);
-   var _op = {};
-   var mouseWindowFraction$ = F2(function (_p1,_p0) {
-      var _p2 = _p1;
-      var _p3 = _p0;
-      var _p4 = _p3._1;
-      return {x: $Basics.toFloat(_p2._0) / $Basics.toFloat(_p3._0)
-             ,y: $Basics.toFloat(_p4 - _p2._1) / $Basics.toFloat(_p4)};
-   });
-   var initialModel = {audioOn: true,slider1: 0.0};
-   var updateGuiModel = F2(function (action,model) {
-      var _p5 = action;
-      if (_p5.ctor === "AudioOn") {
-            return _U.update(model,{audioOn: _p5._0});
-         } else {
-            return _U.update(model,{slider1: _p5._0});
-         }
-   });
-   var pitchToFrequency = function (pitch) {
-      return Math.pow(2,(pitch - 49.0) / 12.0) * 440.0;
-   };
-   var pianoGuiFrequency = A2($Signal.map,
-   pitchToFrequency,
-   $Piano.pianoSignal);
-   var charToPitch = function (c) {
-      var _p6 = c;
-      switch (_p6.valueOf())
-      {case "s": return $Maybe.Just(60.0);
-         case "d": return $Maybe.Just(62.0);
-         case "f": return $Maybe.Just(64.0);
-         case "g": return $Maybe.Just(65.0);
-         case "h": return $Maybe.Just(67.0);
-         case "j": return $Maybe.Just(69.0);
-         case "k": return $Maybe.Just(71.0);
-         case "l": return $Maybe.Just(72.0);
-         default: return $Maybe.Nothing;}
-   };
-   var keyboardGuiPitch = A2($Signal.map,
-   function (keyCode) {
-      return A2($Maybe.withDefault,
-      0.0,
-      charToPitch($Char.fromCode(keyCode)));
-   },
-   $Keyboard.presses);
-   var keyboardGuiFrequency = A2($Signal.map,
-   pitchToFrequency,
-   keyboardGuiPitch);
-   var guiFrequency = A2($Signal.merge,
-   keyboardGuiFrequency,
-   pianoGuiFrequency);
-   var dummy = "dummy!";
-   var Slider1 = function (a) {
-      return {ctor: "Slider1",_0: a};
-   };
-   var AudioOn = function (a) {
-      return {ctor: "AudioOn",_0: a};
-   };
-   var guiMailbox = $Signal.mailbox(AudioOn(true));
-   var guiModelSignal = A3($Signal.foldp,
-   updateGuiModel,
-   initialModel,
-   guiMailbox.signal);
-   var userInputSignal = A5($Signal.map4,
-   F4(function (_p8,_p7,guiFrequency,guiModel) {
-      var _p9 = _p8;
-      var _p14 = _p9._1;
-      var _p13 = _p9._0;
-      var _p10 = _p7;
-      var _p12 = _p10._0;
-      var _p11 = _p10._1;
-      var mouseWindowFraction$$ = A2(mouseWindowFraction$,
-      {ctor: "_Tuple2",_0: _p13,_1: _p14},
-      {ctor: "_Tuple2",_0: _p12,_1: _p11});
-      return {mousePosition: {x: _p13,y: _p14}
-             ,windowDimensions: {width: _p12,height: _p11}
-             ,mouseWindowFraction: mouseWindowFraction$$
-             ,audioOn: guiModel.audioOn
-             ,slider1: guiModel.slider1
-             ,windowMouseXPitch: mouseWindowFraction$$.x * 400.0 + 50.0
-             ,guiFrequency: guiFrequency};
-   }),
-   $Mouse.position,
-   $Window.dimensions,
-   guiFrequency,
-   guiModelSignal);
-   var outgoingUserInput = Elm.Native.Port.make(_elm).outboundSignal("outgoingUserInput",
-   function (v) {
-      return {mousePosition: {x: v.mousePosition.x
-                             ,y: v.mousePosition.y}
-             ,mouseWindowFraction: {x: v.mouseWindowFraction.x
-                                   ,y: v.mouseWindowFraction.y}
-             ,windowDimensions: {width: v.windowDimensions.width
-                                ,height: v.windowDimensions.height}
-             ,guiFrequency: v.guiFrequency
-             ,windowMouseXPitch: v.windowMouseXPitch
-             ,audioOn: v.audioOn
-             ,slider1: v.slider1};
-   },
-   userInputSignal);
-   var audioOnCheckbox = F2(function (address,isChecked) {
-      return A2($Html.div,
-      _U.list([]),
-      _U.list([A2($Html.input,
-              _U.list([$Html$Attributes.type$("checkbox")
-                      ,$Html$Attributes.checked(isChecked)
-                      ,A3($Html$Events.on,
-                      "change",
-                      $Html$Events.targetChecked,
-                      function (isChecked) {
-                         return A2($Signal.message,address,AudioOn(isChecked));
-                      })]),
-              _U.list([]))
-              ,$Html.text("AUDIO ON")
-              ,$Html.text(isChecked ? " (ON)" : " (OFF)")]));
-   });
-   var guiView = function (model) {
-      return A2($Html.div,
-      _U.list([]),
-      _U.list([A2($Html.h1,
-              _U.list([]),
-              _U.list([$Html.text("Elm Reactive Audio")]))
-              ,A2($Html.div,
-              _U.list([$Html$Attributes.$class("synth")]),
-              _U.list([A2(audioOnCheckbox,guiMailbox.address,model.audioOn)
-                      ,$Slider.slider(A2($Signal.forwardTo,
-                      guiMailbox.address,
-                      Slider1))
-                      ,A2($Piano.piano,4,12.0)]))]));
-   };
-   var guiSignal = A2($Signal.map,guiView,guiModelSignal);
-   var main = guiSignal;
-   var initialUserInput = {mousePosition: {x: 0,y: 0}
-                          ,mouseWindowFraction: {x: 0.0,y: 0.0}
-                          ,windowDimensions: {width: 0,height: 0}
-                          ,guiFrequency: 400.0
-                          ,windowMouseXPitch: 200
-                          ,audioOn: false
-                          ,slider1: 0.0};
-   var GuiModel = F2(function (a,b) {
-      return {audioOn: a,slider1: b};
-   });
-   var UserInput = F7(function (a,b,c,d,e,f,g) {
-      return {mousePosition: a
-             ,mouseWindowFraction: b
-             ,windowDimensions: c
-             ,guiFrequency: d
-             ,windowMouseXPitch: e
-             ,audioOn: f
-             ,slider1: g};
-   });
-   return _elm.Gui.values = {_op: _op
-                            ,UserInput: UserInput
-                            ,GuiModel: GuiModel
-                            ,initialUserInput: initialUserInput
-                            ,AudioOn: AudioOn
-                            ,Slider1: Slider1
-                            ,dummy: dummy
-                            ,charToPitch: charToPitch
-                            ,pitchToFrequency: pitchToFrequency
-                            ,updateGuiModel: updateGuiModel
-                            ,guiMailbox: guiMailbox
-                            ,initialModel: initialModel
-                            ,guiModelSignal: guiModelSignal
-                            ,audioOnCheckbox: audioOnCheckbox
-                            ,guiView: guiView
-                            ,guiSignal: guiSignal
-                            ,mouseWindowFraction$: mouseWindowFraction$
-                            ,keyboardGuiPitch: keyboardGuiPitch
-                            ,keyboardGuiFrequency: keyboardGuiFrequency
-                            ,pianoGuiFrequency: pianoGuiFrequency
-                            ,guiFrequency: guiFrequency
-                            ,userInputSignal: userInputSignal
-                            ,main: main};
-};
-Elm.ReactiveAudio = Elm.ReactiveAudio || {};
-Elm.ReactiveAudio.make = function (_elm) {
-   "use strict";
-   _elm.ReactiveAudio = _elm.ReactiveAudio || {};
-   if (_elm.ReactiveAudio.values) return _elm.ReactiveAudio.values;
-   var _U = Elm.Native.Utils.make(_elm),
-   $AudioNodes = Elm.AudioNodes.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $Components = Elm.Components.make(_elm),
-   $Debug = Elm.Debug.make(_elm),
-   $Gui = Elm.Gui.make(_elm),
-   $List = Elm.List.make(_elm),
-   $MainTypes = Elm.MainTypes.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
-   var _op = {};
-   var theremin = _U.list([A2($AudioNodes.sinNode,
-                          "t",
-                          {frequency: $MainTypes.GUI("guiFrequency")
-                          ,frequencyOffset: $MainTypes.Default
-                          ,phaseOffset: $MainTypes.Default})
-                          ,$AudioNodes.destinationNode({signal: $MainTypes.ID("t")})]);
-   var audioGraph = theremin;
-   var audioGraph3 = A2($Basics._op["++"],
-   A2($Components.additiveSynthAudioGraph,100.0,30),
-   _U.list([$AudioNodes.destinationNode({signal: $MainTypes.ID("additiveSynth")})]));
-   var fmSynth1 = A2($Components.fmSynth,
-   "fm",
-   {frequency: 200.0
-   ,modulator: $MainTypes.ID("fm.1")
-   ,modulatorNodes: _U.list([{id: "fm.1"
-                             ,multiple: 1.0
-                             ,detune: $MainTypes.Default
-                             ,modulator: $MainTypes.ID("fm.2")}
-                            ,{id: "fm.2"
-                             ,multiple: 1.0
-                             ,detune: $MainTypes.Default
-                             ,modulator: $MainTypes.ID("fm.3")}
-                            ,{id: "fm.3"
-                             ,multiple: 4.0
-                             ,detune: $MainTypes.Default
-                             ,modulator: $MainTypes.Default}])});
-   var fmSynthGraph = A2($Basics._op["++"],
-   fmSynth1,
-   _U.list([$AudioNodes.destinationNode({signal: $MainTypes.ID("fm")})]));
-   var audioGraph2 = _U.list([$AudioNodes.commaHelper
-                             ,A2($AudioNodes.sinNode,
-                             "mod3",
-                             {frequency: $MainTypes.Value(800.0)
-                             ,frequencyOffset: $MainTypes.Default
-                             ,phaseOffset: $MainTypes.Default})
-                             ,A2($AudioNodes.sinNode,
-                             "mod2",
-                             {frequency: $MainTypes.Value(600.0)
-                             ,frequencyOffset: $MainTypes.Default
-                             ,phaseOffset: $MainTypes.ID("mod3")})
-                             ,A2($AudioNodes.sinNode,
-                             "mod1",
-                             {frequency: $MainTypes.Value(400.0)
-                             ,frequencyOffset: $MainTypes.Default
-                             ,phaseOffset: $MainTypes.ID("mod2")})
-                             ,A2($AudioNodes.sinNode,
-                             "root1",
-                             {frequency: $MainTypes.Value(200.0)
-                             ,frequencyOffset: $MainTypes.Default
-                             ,phaseOffset: $MainTypes.ID("mod1")})
-                             ,$AudioNodes.destinationNode({signal: $MainTypes.ID("root1")})]);
-   var reallyDumb = $Gui.dummy;
-   return _elm.ReactiveAudio.values = {_op: _op
-                                      ,reallyDumb: reallyDumb
-                                      ,audioGraph2: audioGraph2
-                                      ,fmSynth1: fmSynth1
-                                      ,audioGraph3: audioGraph3
-                                      ,fmSynthGraph: fmSynthGraph
-                                      ,theremin: theremin
-                                      ,audioGraph: audioGraph};
-};
+   var piano = A2($Html.div,
+   _U.list([$Html$Attributes.id("p-wrapper")]),
+   _U.list([A2($Html.ul,
+   _U.list([$Html$Attributes.id("piano")]),
+   _U.list([A2($Html.li,
+           _U.list([]),
+           _U.list([A2($Html.div,
+           _U.list([$Html$Attributes.$class("anchor")]),
+           _U.list([]))]))
+           ,A2($Html.li,
+           _U.list([]),
+           _U.list([A2($Html.div,
+                   _U.list([$Html$Attributes.$class("anchor")]),
+                   _U.list([]))
+                   ,A2($Html.span,_U.list([]),_U.list([]))]))
+           ,A2($Html.li,
+           _U.list([]),
+           _U.list([A2($Html.div,
+                   _U.list([$Html$Attributes.$class("anchor")]),
+                   _U.list([]))
+                   ,A2($Html.span,_U.list([]),_U.list([]))]))
+           ,A2($Html.li,
+           _U.list([]),
+           _U.list([A2($Html.div,
+           _U.list([$Html$Attributes.$class("anchor")]),
+           _U.list([]))]))
+           ,A2($Html.li,
+           _U.list([]),
+           _U.list([A2($Html.div,
+                   _U.list([$Html$Attributes.$class("anchor")]),
+                   _U.list([]))
+                   ,A2($Html.span,_U.list([]),_U.list([]))]))
+           ,A2($Html.li,
+           _U.list([]),
+           _U.list([A2($Html.div,
+                   _U.list([$Html$Attributes.$class("anchor")]),
+                   _U.list([]))
+                   ,A2($Html.span,_U.list([]),_U.list([]))]))
+           ,A2($Html.li,
+           _U.list([]),
+           _U.list([A2($Html.div,
+                   _U.list([$Html$Attributes.$class("anchor")]),
+                   _U.list([]))
+                   ,A2($Html.span,_U.list([]),_U.list([]))]))
+           ,A2($Html.li,
+           _U.list([]),
+           _U.list([A2($Html.div,
+           _U.list([$Html$Attributes.$class("anchor")]),
+           _U.list([]))]))]))]));
+   return _elm.GUI.Piano.values = {_op: _op,piano: piano};
+};</script></head><body><script type="text/javascript">Elm.fullscreen(Elm.GUI.Piano)</script></body></html>

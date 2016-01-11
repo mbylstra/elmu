@@ -8,19 +8,40 @@ import Char exposing (KeyCode, fromCode)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (on, targetChecked)
+import Piano exposing (piano, pianoSignal)
+import Slider exposing (slider)
 
 import Maybe exposing (withDefault)
 
-type alias UserInput =
-    { mousePosition : { x : Int, y : Int}
-    , mouseWindowFraction : { x : Float, y : Float}
-    , windowDimensions : { width: Int, height: Int}
-    , keyboardFrequency : Float
-    , windowMouseXPitch : Float
-    , audioOn : Bool
-    }
 
-type GuiAction = AudioOn Bool
+
+type alias UserInput =
+  { mousePosition : { x : Int, y : Int}
+  , mouseWindowFraction : { x : Float, y : Float}
+  , windowDimensions : { width: Int, height: Int}
+  , guiFrequency : Float
+  , windowMouseXPitch : Float
+  , audioOn : Bool
+  , slider1 : Float
+  }
+
+type alias GuiModel =
+  { audioOn : Bool
+  , slider1: Float
+  }
+
+initialUserInput : UserInput
+initialUserInput =
+  { mousePosition = { x = 0, y = 0}
+  , mouseWindowFraction = { x = 0.0, y = 0.0}
+  , windowDimensions = { width= 0, height= 0}
+  , guiFrequency = 400.0
+  , windowMouseXPitch = 200
+  , audioOn = False
+  , slider1 = 0.0
+  }
+
+type Action = AudioOn Bool | Slider1 Float
 
 dummy : String
 dummy = "dummy!"
@@ -52,25 +73,33 @@ pitchToFrequency pitch =
   2^((pitch - 49.0) / 12.0) * 440.0
 
 
-updateGuiModel : GuiAction -> Bool -> Bool
-updateGuiModel action b =
-    case action of
-        AudioOn bool ->
-            bool
+updateGuiModel : Action -> GuiModel -> GuiModel
+updateGuiModel action model =
+  case action of
+    AudioOn value ->
+        { model | audioOn = value }
+    Slider1 value ->
+        { model | slider1 = value }
 
-guiMailbox : Signal.Mailbox GuiAction
+guiMailbox : Signal.Mailbox Action
 guiMailbox = Signal.mailbox (AudioOn True)
 
-guiModelSignal : Signal Bool
+initialModel : GuiModel
+initialModel =
+  { audioOn = True
+  , slider1 = 0.0
+  }
+
+guiModelSignal : Signal GuiModel
 guiModelSignal =
     Signal.foldp
         updateGuiModel
-        False
+        initialModel
         guiMailbox.signal
 
 
 
-audioOnCheckbox : Signal.Address GuiAction -> Bool -> Html
+audioOnCheckbox : Signal.Address Action -> Bool -> Html
 audioOnCheckbox address isChecked =
   div []
       [ input
@@ -86,9 +115,20 @@ audioOnCheckbox address isChecked =
 
 
 
-guiView : Bool -> Html
+
+
+
+guiView : GuiModel -> Html
 guiView model =
-    audioOnCheckbox guiMailbox.address model
+    div []
+        [ h1 [] [text "Elm Reactive Audio"]
+        , div [class "synth"]
+          [ audioOnCheckbox guiMailbox.address model.audioOn
+          , slider (Signal.forwardTo guiMailbox.address Slider1)
+          , piano 4 12.0
+          ]
+        ]
+
 guiSignal : Signal Html
 guiSignal = Signal.map guiView guiModelSignal
 
@@ -98,24 +138,43 @@ mouseWindowFraction' (mouseX, mouseY) (windowWidth, windowHeight) =
   , y = toFloat (windowHeight - mouseY) / toFloat windowHeight
   }
 
+-- keyboardFrequency =
+
+keyboardGuiPitch : Signal Float
+keyboardGuiPitch =
+  Signal.map (\keyCode -> keyCode |> fromCode |> charToPitch |> withDefault 0.0) Keyboard.presses
+
+keyboardGuiFrequency : Signal Float
+keyboardGuiFrequency =
+  Signal.map pitchToFrequency keyboardGuiPitch
+
+pianoGuiFrequency : Signal Float
+pianoGuiFrequency =
+  Signal.map pitchToFrequency pianoSignal
+
+guiFrequency : Signal Float
+guiFrequency =
+  Signal.merge keyboardGuiFrequency pianoGuiFrequency
+
 userInputSignal : Signal UserInput
 userInputSignal =
   Signal.map4
-    (\(mouseX, mouseY) (windowWidth, windowHeight) keyCode audioOn ->
+    (\(mouseX, mouseY) (windowWidth, windowHeight) guiFrequency guiModel ->
       let
         mouseWindowFraction'' = mouseWindowFraction' (mouseX, mouseY) (windowWidth, windowHeight)
       in
         { mousePosition = {x = mouseX, y = mouseY}
         , windowDimensions = { width = windowWidth, height = windowHeight}
         , mouseWindowFraction = mouseWindowFraction''
-        , audioOn = audioOn
+        , audioOn = guiModel.audioOn
+        , slider1 = guiModel.slider1
         , windowMouseXPitch = (mouseWindowFraction''.x * 400.0) + 50.0
-        , keyboardFrequency = keyCode |> fromCode |> charToPitch |> withDefault 60.0 |> pitchToFrequency
+        , guiFrequency = guiFrequency
         }
     )
     Mouse.position
     Window.dimensions
-    Keyboard.presses
+    guiFrequency
     guiModelSignal
 
 port outgoingUserInput : Signal UserInput

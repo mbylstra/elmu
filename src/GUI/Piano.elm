@@ -1,0 +1,40 @@
+module GUI.Piano where
+
+import Html exposing (..)
+import Html.Attributes exposing(..)
+
+piano : Html.Html
+piano =
+  div [id "p-wrapper"]
+    [ ul [id "piano"]
+        [ li []
+          [ div [class "anchor"] []
+          ]
+        , li []
+          [ div [class "anchor"] []
+          , span [] []
+          ]
+        , li []
+          [ div [class "anchor"] []
+          , span [] []
+          ]
+        , li []
+          [ div [class "anchor"] []
+          ]
+        , li []
+          [ div [class "anchor"] []
+          , span [] []
+          ]
+        , li []
+          [ div [class "anchor"] []
+          , span [] []
+          ]
+        , li []
+          [ div [class "anchor"] []
+          , span [] []
+          ]
+        , li []
+          [ div [class "anchor"] []
+          ]
+        ]
+    ]

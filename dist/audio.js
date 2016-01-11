@@ -12,7 +12,8 @@ timeElapsed = 0.0;
 // var BUFFER_SIZE = 8192;  //92 milliseconds, pretty shit!
 // var BUFFER_SIZE = 8192;  //92 milliseconds, pretty shit!
 // var BUFFER_SIZE = 16384;  //92 milliseconds, pretty shit!
-var BUFFER_SIZE = 512;  //92 milliseconds, pretty shit!
+// var BUFFER_SIZE = 512;  //92 milliseconds, pretty shit!
+var BUFFER_SIZE = 1024;  //92 milliseconds, pretty shit!
 var SAMPLE_RATE = 44100;
 var SAMPLE_DURATION = 1.0 / SAMPLE_RATE;
 var BUFFER_DURATION = SAMPLE_DURATION * BUFFER_SIZE;
@@ -57,14 +58,27 @@ var _List = exposeElmModule(Elm.Native.List);
 var initialAudioGraph = _List.toArray(ReactiveAudio.audioGraph);
 console.log(initialAudioGraph);
 
+// type alias UserInput =
+//     { mousePosition : { x : Int, y : Int}
+//     , mouseWindowFraction : { x : Float, y : Float}
+//     , windowDimensions : { width: Int, height: Int}
+//     , keyboardFrequency : Float
+//     , pianoGuiFrequency : Float
+//     , windowMouseXPitch : Float
+//     , audioOn : Bool
+//     }
+
 // TODO: get this from elm! So it's properly type checked. Should map fine.
 var externalState = {
   time: 0.0,
   externalInputState: {
     xWindowFraction: 0.0,
     yWindowFraction: 0.0,
-    keyboardFrequency: 200.0,
+    // keyboardFrequency: 200.0,
+    // pianoGuiFrequency: 200.0,
+    guiFrequency: 0.0,
     audioOn : true,
+    slider1 : 0.0
   }
 }
 
@@ -206,6 +220,7 @@ if (PROFILING) {
     elmGui.ports.outgoingUserInput.subscribe(function(userInput) {
       externalState.externalInputState = userInput;
       // console.log('userInput', userInput);
+      // console.log('userInput', userInput.slider1);
     });
 
     var audioCtx = new AudioContext();

@@ -1,0 +1,41 @@
+$HEIGHT: 100px;
+
+$black-key-height: $HEIGHT * 0.6;
+
+.piano {
+  display: flex;
+  background-color: black;
+  padding: 5px;
+
+  .white-key {
+    background-color: white;
+    border: 1px solid black;
+    width: 50px;
+    height: $HEIGHT;
+    border-radius: 0px 0px 4px 4px;
+
+    &:active, &:hover {
+      background-color: #eee;
+      height: $HEIGHT - 1;
+    }
+  }
+  .black-key-wrapper {
+    position: relative;
+    height: 0px;
+    width: 0px;
+  }
+  .black-key {
+    width: 0px;
+    height: $black-key-height;
+    width: 20px;
+    background-color: black;
+    position: absolute;
+    border-radius: 0px 0px 4px 4px;
+    left: -10px;
+    &:active, &:hover {
+      background-color: #333;
+      height: $black-key-height - 1;
+    }
+  }
+
+}
