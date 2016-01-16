@@ -33,7 +33,7 @@ $black-key-height: $HEIGHT * 0.6;
     border-radius: 0px 0px 4px 4px;
     left: -10px;
     &:active, &:hover {
-      background-color: #333;
+      background-color: #444;
       height: $black-key-height - 1;
     }
   }

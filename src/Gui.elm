@@ -13,6 +13,10 @@ import Slider exposing (slider)
 
 import Maybe exposing (withDefault)
 
+import MouseExtra
+
+import Effects
+
 
 
 type alias UserInput =
@@ -158,10 +162,11 @@ guiFrequency =
 
 userInputSignal : Signal UserInput
 userInputSignal =
-  Signal.map4
-    (\(mouseX, mouseY) (windowWidth, windowHeight) guiFrequency guiModel ->
+  Signal.map5
+    (\(mouseX, mouseY) (windowWidth, windowHeight) guiFrequency guiModel mouseVelocity ->
       let
         mouseWindowFraction'' = mouseWindowFraction' (mouseX, mouseY) (windowWidth, windowHeight)
+        -- _ = Debug.log "velocity" velocity
       in
         { mousePosition = {x = mouseX, y = mouseY}
         , windowDimensions = { width = windowWidth, height = windowHeight}
@@ -176,6 +181,23 @@ userInputSignal =
     Window.dimensions
     guiFrequency
     guiModelSignal
+    MouseExtra.velocity
+
+
+
+type DragAction
+    = DragStart (Signal.Address Action) Int
+    | DragAt Int
+    | DragEnd
+
+
+-- task: Task Never a -> Effects a
+
+
+trackDrags : Signal.Address DragAction -> Effects.Effects DragAction
+trackDrags address =
+  Effects.task (Native.Drag.track (Signal.send address << DragAt) DragEnd)
+
 
 port outgoingUserInput : Signal UserInput
 port outgoingUserInput = userInputSignal

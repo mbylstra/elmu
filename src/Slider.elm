@@ -33,11 +33,13 @@ slider address =
               (decodeSliderValue result)
         )
   in
-    input
-      [ type' "range"
-      , Html.Attributes.min "0"
-      , Html.Attributes.max "1"
-      , Html.Attributes.step "0.001"
-      , eventHandler
+    div [class "slider-wrapper"]
+      [ input
+        [ type' "range"
+        , Html.Attributes.min "0"
+        , Html.Attributes.max "1"
+        , Html.Attributes.step "0.001"
+        , eventHandler
+        ]
+        []
       ]
-      []

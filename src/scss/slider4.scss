@@ -1,0 +1,308 @@
+// @import "compass/css3";
+
+$bg: #e7e7e7;
+
+$data: (
+  #04aac6 #15a5e2 90,
+  #7dd704 #72c32d 70,
+  #f8d208 #eb9c07 80,
+  #dc029d #d610a9 75,
+  #fc7a00 #e35702 70
+);
+$n-data: length($data);
+
+$thumb-d: 1.75em;
+$thumb-bg-c: #f7f7f7;
+$thumb-refl-c: #888;
+$thumb-p-rad: 71%;
+$thumb-p-lin: 37%;
+// $thumb-bg-base:
+//   radial-gradient(#{at 50% 0}, $thumb-refl-c,
+//       rgba($thumb-refl-c, 0) $thumb-p-rad)
+//     no-repeat 50% 0 border-box,
+//   radial-gradient(#{at 50% 100%}, $thumb-refl-c,
+//       rgba($thumb-refl-c, 0) $thumb-p-rad)
+//     no-repeat 50% 100% border-box,
+//   linear-gradient(90deg,
+//       rgba($thumb-refl-c, 0) $thumb-p-lin,
+//       rgba($thumb-refl-c, .32),
+//       rgba($thumb-refl-c, 0) 100% - $thumb-p-lin)
+//     repeat-y 50% 0
+//   $thumb-bg-c;
+
+$track-w: 25em;
+$track-h: .75em;
+$track-sh:
+  0 1px 1px #fcfcfc,
+  inset 0 .125em .125em #555;
+$track-bg:
+  linear-gradient(#777, #666);
+
+$fill-sh:
+  inset -.125em .125em .125em rgba(#555, .8);
+
+$n-major: 10;
+$u-major: $track-w/$n-major;
+$l-major: .5em;
+$l-minor: .25em;
+$ruler-line-c: #c8c8c8;
+$ruler-line-thck: .125em;
+
+@function ruler-lines($d: $u-major, $th: $ruler-line-thck, $c: $ruler-line-c) {
+  @return repeating-linear-gradient(90deg,
+    $c, $c $th, transparent $th, transparent $d);
+}
+
+@mixin track() {
+  border: none;
+  padding: 0 $track-h/2;
+  width: $track-w; height: $track-h;
+  border-radius: $track-h/2;
+  box-shadow: $track-sh;
+  background: $track-bg;
+}
+
+@mixin fill($i: 1, $size-it: true, $double: false) {
+  $curr: nth($data, $i);
+  $track-fill:
+    linear-gradient(nth($curr, 1), nth($curr, 1))
+    no-repeat;
+  $perc: (nth($curr, 3))*1%;
+
+  @if $size-it {
+    .js & {
+      @if $i != 4 {
+        background:
+          $track-fill, $track-bg;
+        background-size: if($double, $track-h/2, $perc) 100%;
+      }
+      @else {
+        box-shadow: none;
+        background:
+          radial-gradient(circle at 50% $track-h/2,
+              transparent .8*$track-h/2, rgba(#333, .5) $track-h/2, $bg $track-h/2)
+            repeat-x ($track-h -$track-w/4)/2 0,
+          radial-gradient(circle at 50% -.125em,
+              transparent $track-h/2, $bg $track-h/2)
+            repeat-x ($track-h -$track-w/4)/2 100%,
+          $track-fill, $track-bg;
+        background-size:
+          $track-w/4 ($track-h - .25em)/2,
+          $track-w/4 ($track-h - .25em)/2,
+          $perc 100%, 100% 100%;
+      }
+    }
+  }
+  @else {
+    box-shadow: $fill-sh;
+    background: $track-fill;
+  }
+}
+
+@mixin thumb() {
+  border: none;
+  width: $thumb-d; height: $thumb-d;
+  border-radius: 50%;
+  transform: rotate(-45deg);
+  // box-shadow: -.125em .125em .125em #6a6a6a;
+  // background: $thumb-bg-base;
+  background-size: 85% 50%;
+}
+
+@mixin thumb-rect() {
+  transform: none;
+  box-shadow:
+    0 .125em .125em #6a6a6a;
+  width: 1em; height: 2em;
+  border-radius: 0;
+  background:
+    linear-gradient(#fff .5em, #bcbcbc .5em, #d2d2d2);
+  background-size: cover;
+}
+
+@mixin thumb-lines() {
+  transform: none;
+  box-shadow:
+    inset -1px 1px .125em #fff,
+    inset -.125em .125em .125em #aaa,
+    0 .125em .125em #6a6a6a;
+  background:
+    repeating-linear-gradient(90deg,
+        #eee, #eee 1px,
+        #ccc 1px, #ccc 2px,
+        transparent 2px, transparent 5px)
+      no-repeat 47% 53%
+    #f2f2f2;
+  background-size: .75em 50%;
+}
+
+@mixin thumb-mid() {
+  box-sizing: border-box;
+  border: solid $thumb-d/4 transparent;
+  // box-shadow:
+  //   -.125em .125em .125em #6a6a6a,
+  //   inset 1px -1px 1px rgba(#fff, .5),
+  //   inset -.125em 0 .125em #996456;
+  background-color: pink;
+  // background:
+    // linear-gradient(#f97e0e, #f97e0e) content-box,
+    // $thumb-bg-base;
+  // background-size:
+  //   100% 100%,
+  //   85% 50%, 85% 50%;
+}
+
+
+input[type='range'] {
+  &,
+  &::-webkit-slider-runnable-track,
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+  }
+
+  align-self: center;
+  border: solid .5em transparent;
+  padding: 0;
+  width: $track-w + $track-h;
+  height: $track-h*3;
+  border-radius: .25em;
+  background: none;
+  background-repeat: no-repeat;
+  background-position:
+    50% 0,
+    50% $l-major - $l-minor,
+    50% 100%,
+    50% calc(100% - #{$l-major - $l-minor});
+  background-size:
+    $track-w + $ruler-line-thck $l-major,
+    $track-w + $ruler-line-thck $l-minor;
+  font-size: 1em;
+  cursor: pointer;
+
+  /* remove this marker */
+  //box-shadow: 0 0 0 .25em blue;
+
+  /* slider components */
+  &::-webkit-slider-runnable-track {
+    @include track();
+  }
+  &::-moz-range-track {
+    @include track();
+  }
+  &::-ms-track {
+    @include track();
+    color: transparent;
+  }
+
+  &::-webkit-slider-thumb {
+    margin-top: ($track-h - $thumb-d)/2;
+    @include thumb();
+  }
+  &::-moz-range-thumb {
+    @include thumb();
+  }
+  &::-ms-thumb {
+    @include thumb();
+  }
+  &::-ms-tooltip {
+    display: none;
+  }
+
+
+  /* slider-variations */
+  @for $i from 1 through $n-data {
+    $curr: nth($data, $i);
+
+    &:nth-of-type(#{$i}) {
+      color: nth($curr, 1);
+
+      &::-webkit-slider-runnable-track {
+        @include fill($i);
+      }
+      &::-moz-range-track {
+        @include fill($i);
+      }
+
+      @if $i == 1 {
+        $u-minor: $u-major/2;
+
+        background-image:
+          ruler-lines(), ruler-lines($u-minor),
+          ruler-lines(), ruler-lines($u-minor);
+      }
+
+      @if $i == 2 {
+        $u-minor: $u-major/2;
+
+        background-image:
+          ruler-lines(), ruler-lines($u-minor);
+
+        &::-webkit-slider-thumb {
+          @include thumb-rect();
+        }
+        &::-moz-range-thumb {
+          @include thumb-rect();
+        }
+        &::-ms-thumb {
+          @include thumb-rect();
+        }
+      }
+
+      @if $i == 3 {
+        background:
+          radial-gradient(circle,
+              #aaa 1px, rgba(#aaa, 0) .125em)
+            repeat-x ($track-h - $u-major)/2 0;
+        background-size: $u-major $l-major;
+
+        &::-webkit-slider-thumb {
+          @include thumb-lines();
+        }
+        &::-moz-range-thumb {
+          @include thumb-lines();
+        }
+        &::-ms-thumb {
+          @include thumb-lines();
+        }
+      }
+
+      @if $i == 4 {
+        &::-ms-track {
+          @include fill($i);
+        }
+        &::-ms-fill-lower { display: none; }
+      }
+      @else {
+        &::-ms-track {
+          @include fill($i, true, true);
+        }
+        &::-ms-fill-lower {
+          @include fill($i, false);
+        }
+      }
+
+      @if $i == 5 {
+        $u-minor: $u-major/5;
+
+        background-image:
+          ruler-lines(), ruler-lines($u-minor);
+
+        &::-webkit-slider-thumb {
+          @include thumb-mid();
+        }
+        &::-moz-range-thumb {
+          @include thumb-mid();
+        }
+        &::-ms-thumb {
+          @include thumb-mid();
+        }
+      }
+    }
+  }
+
+  &:focus {
+    outline: none;
+
+    box-shadow: 0 0 .25em currentColor;
+  }
+}
