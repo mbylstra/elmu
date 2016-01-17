@@ -11604,47 +11604,88 @@ Elm.Main.make = function (_elm) {
    $Html = Elm.Html.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
+   $Mouse = Elm.Mouse.make(_elm),
+   $MouseExtra = Elm.MouseExtra.make(_elm),
    $Result = Elm.Result.make(_elm),
    $RotaryKnob = Elm.RotaryKnob.make(_elm),
    $Signal = Elm.Signal.make(_elm);
    var _op = {};
-   var update = F2(function (action,model) {
-      var _p0 = A2($Debug.log,"update",true);
-      var _p1 = action;
-      switch (_p1.ctor)
-      {case "Knob1": return _U.update(model,
-           {knob1: A2($RotaryKnob.update,_p1._0,model.knob1)});
-         case "Knob2": return _U.update(model,
-           {knob2: A2($RotaryKnob.update,_p1._0,model.knob2)});
-         default: return model;}
-   });
+   var globalMouseUp = A3($Signal.filter,
+   function (isDown) {
+      return $Basics.not(isDown);
+   },
+   true,
+   $Mouse.isDown);
    var NoOp = {ctor: "NoOp"};
    var mailbox = $Signal.mailbox(NoOp);
-   var Knob2 = function (a) {    return {ctor: "Knob2",_0: a};};
-   var knob2Signal = A2($Signal.map,
-   function (action) {
-      return Knob2(action);
-   },
-   $RotaryKnob.createActionSignal);
-   var Knob1 = function (a) {    return {ctor: "Knob1",_0: a};};
-   var knob1Signal = A2($Signal.map,
-   function (action) {
-      return Knob1(action);
-   },
-   $RotaryKnob.createActionSignal);
+   var MouseMove = function (a) {
+      return {ctor: "MouseMove",_0: a};
+   };
+   var GlobalMouseUp = {ctor: "GlobalMouseUp"};
    var actionSignal = $Signal.mergeMany(_U.list([mailbox.signal
-                                                ,knob1Signal]));
+                                                ,A2($Signal.map,MouseMove,$MouseExtra.yVelocity)
+                                                ,A2($Signal.map,
+                                                function (_p0) {
+                                                   return GlobalMouseUp;
+                                                },
+                                                globalMouseUp)]));
+   var Knob2Action = function (a) {
+      return {ctor: "Knob2Action",_0: a};
+   };
+   var Knob1Action = function (a) {
+      return {ctor: "Knob1Action",_0: a};
+   };
    var view = F2(function (address,model) {
       return A2($Html.div,
       _U.list([]),
       _U.list([A2($RotaryKnob.view,
-              A2($Signal.forwardTo,address,Knob1),
+              A2($Signal.forwardTo,address,Knob1Action),
               model.knob1)
               ,A2($RotaryKnob.view,
-              A2($Signal.forwardTo,address,Knob2),
+              A2($Signal.forwardTo,address,Knob2Action),
               model.knob2)]));
    });
-   var init = {knob1: $RotaryKnob.init,knob2: $RotaryKnob.init};
+   var None = {ctor: "None"};
+   var Knob2 = {ctor: "Knob2"};
+   var Knob1 = {ctor: "Knob1"};
+   var update = F2(function (action,model) {
+      var _p1 = A2($Debug.log,"main update",true);
+      var _p2 = action;
+      switch (_p2.ctor)
+      {case "Knob1Action": return _U.update(model,
+           {knob1: A2($RotaryKnob.update,_p2._0,model.knob1)
+           ,currentKnob: Knob1});
+         case "Knob2Action": return _U.update(model,
+           {knob2: A2($RotaryKnob.update,_p2._0,model.knob2)
+           ,currentKnob: Knob2});
+         case "MouseMove": var _p4 = _p2._0;
+           var _p3 = model.currentKnob;
+           switch (_p3.ctor)
+           {case "Knob1": return _U.update(model,
+                {knob1: A2($RotaryKnob.update,
+                $RotaryKnob.MouseMove(_p4),
+                model.knob1)});
+              case "Knob2": return _U.update(model,
+                {knob2: A2($RotaryKnob.update,
+                $RotaryKnob.MouseMove(_p4),
+                model.knob2)});
+              default: return model;}
+         case "GlobalMouseUp": var _p5 = model.currentKnob;
+           switch (_p5.ctor)
+           {case "Knob1": return _U.update(model,
+                {knob1: A2($RotaryKnob.update,
+                $RotaryKnob.GlobalMouseUp,
+                model.knob1)});
+              case "Knob2": return _U.update(model,
+                {knob2: A2($RotaryKnob.update,
+                $RotaryKnob.GlobalMouseUp,
+                model.knob2)});
+              default: return model;}
+         default: return model;}
+   });
+   var init = {knob1: $RotaryKnob.init
+              ,knob2: $RotaryKnob.init
+              ,currentKnob: None};
    var modelSignal = A3($Signal.foldp,update,init,actionSignal);
    var viewSignal = A2($Signal.map,
    function (model) {
@@ -11652,19 +11693,23 @@ Elm.Main.make = function (_elm) {
    },
    modelSignal);
    var main = viewSignal;
-   var Model = F2(function (a,b) {
-      return {knob1: a,knob2: b};
+   var Model = F3(function (a,b,c) {
+      return {knob1: a,knob2: b,currentKnob: c};
    });
    return _elm.Main.values = {_op: _op
                              ,Model: Model
                              ,init: init
                              ,Knob1: Knob1
                              ,Knob2: Knob2
+                             ,None: None
+                             ,Knob1Action: Knob1Action
+                             ,Knob2Action: Knob2Action
+                             ,GlobalMouseUp: GlobalMouseUp
+                             ,MouseMove: MouseMove
                              ,NoOp: NoOp
                              ,update: update
                              ,mailbox: mailbox
-                             ,knob1Signal: knob1Signal
-                             ,knob2Signal: knob2Signal
+                             ,globalMouseUp: globalMouseUp
                              ,actionSignal: actionSignal
                              ,view: view
                              ,modelSignal: modelSignal
