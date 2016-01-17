@@ -2,12 +2,12 @@ import RotaryKnob
 
 import Mouse
 import MouseExtra
-
-import Html exposing (..)
+import Html exposing (div)
 -- import Html.Attributes exposing(..)
 -- import Html.Events exposing(onMouseDown)
 -- import Mouse
 -- import MouseExtra
+
 
 
 -- MODEL
@@ -49,46 +49,43 @@ type Action
 
 update : Action -> Model -> Model
 update action model =
-  let
-    _ = Debug.log "main update" True
-  in
-    case action of
-      Knob1Action action' ->
-        { model |
-            knob1 = RotaryKnob.update action' model.knob1
-          , currentKnob = Knob1
-        }
-      Knob2Action action' ->
-        { model |
-            knob2 = RotaryKnob.update action' model.knob2
-          , currentKnob = Knob2
-        }
-      MouseMove i ->
-        case model.currentKnob of
-          Knob1 ->
-            { model |
-              knob1 = RotaryKnob.update (RotaryKnob.MouseMove i) model.knob1
-            }
-          Knob2 ->
-            { model |
-              knob2 = RotaryKnob.update (RotaryKnob.MouseMove i) model.knob2
-            }
-          None ->
-            model
-      GlobalMouseUp ->
-        case model.currentKnob of
-          Knob1 ->
-            { model |
-              knob1 = RotaryKnob.update (RotaryKnob.GlobalMouseUp) model.knob1
-            }
-          Knob2 ->
-            { model |
-              knob2 = RotaryKnob.update (RotaryKnob.GlobalMouseUp) model.knob2
-            }
-          None ->
-            model
-      NoOp ->
-        model
+  case action of
+    Knob1Action action' ->
+      { model |
+          knob1 = RotaryKnob.update action' model.knob1
+        , currentKnob = Knob1
+      }
+    Knob2Action action' ->
+      { model |
+          knob2 = RotaryKnob.update action' model.knob2
+        , currentKnob = Knob2
+      }
+    MouseMove i ->
+      case model.currentKnob of
+        Knob1 ->
+          { model |
+            knob1 = RotaryKnob.update (RotaryKnob.MouseMove i) model.knob1
+          }
+        Knob2 ->
+          { model |
+            knob2 = RotaryKnob.update (RotaryKnob.MouseMove i) model.knob2
+          }
+        None ->
+          model
+    GlobalMouseUp ->
+      case model.currentKnob of
+        Knob1 ->
+          { model |
+            knob1 = RotaryKnob.update (RotaryKnob.GlobalMouseUp) model.knob1
+          }
+        Knob2 ->
+          { model |
+            knob2 = RotaryKnob.update (RotaryKnob.GlobalMouseUp) model.knob2
+          }
+        None ->
+          model
+    NoOp ->
+      model
 
 
 -- VIEW
@@ -135,19 +132,36 @@ actionSignal = Signal.mergeMany
 -- we also need to forward on shit?
 
 
-view : Signal.Address Action -> Model -> Html
+
+view : Signal.Address Action -> Model -> Html.Html
 view address model =
   div []
     [ RotaryKnob.view (Signal.forwardTo address Knob1Action) model.knob1
     , RotaryKnob.view (Signal.forwardTo address Knob2Action) model.knob2
+    -- , svg
+    --     [ width "200" , height "200" , viewBox "0 0 200 200" ]
+    --     [ path
+    --         [ d (arc
+    --               { radius=80.0
+    --               , centerPoint=(100.0,100.0)
+    --               , startAngle=45.0
+    --               , endAngle=315.0
+    --               }
+    --             )
+    --         , stroke "black"
+    --         , fill "none"
+    --         , strokeWidth "40"
+    --         ]
+    --         []
+    --     ]
     ]
 
 
 modelSignal : Signal Model
 modelSignal = Signal.foldp update init actionSignal
 
-viewSignal : Signal Html
+viewSignal : Signal Html.Html
 viewSignal = Signal.map (\model -> view mailbox.address model) modelSignal
 
-main : Signal Html
+main : Signal Html.Html
 main = viewSignal

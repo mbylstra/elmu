@@ -1,12 +1,17 @@
 module RotaryKnob where
 
-import Html exposing (..)
-import Html.Attributes exposing(..)
+import Html exposing (div)
 import Html.Events exposing(onMouseDown)
-import Mouse
-import MouseExtra
+import Html.Attributes exposing (style)
+-- import Mouse
+-- import MouseExtra
 
 import Signal exposing (Address)
+
+import Arc exposing (arc)
+
+import Svg exposing (svg, path, rect)
+import Svg.Attributes exposing (d, stroke, fill, strokeWidth, x, y, width, height, viewBox)
 
 
 -- Mouse.position
@@ -73,53 +78,78 @@ clamp x =
 
 update : Action -> Model -> Model
 update action model =
-  let
-    _ = Debug.log "knob update" True
-    _ = Debug.log "action" action
-
-  in
-    case action of
-      LocalMouseDown ->
-        { model | mouseDown = True}
-      GlobalMouseUp ->
-        { model | mouseDown = False}
-      MouseMove pixels ->
-        if
-          model.mouseDown
-        then
-          let
-            valueAdjust = (toFloat pixels) * 0.05   -- every pixel adjusts 0.01 of the value
-          in
-            { model | value = model.value + valueAdjust }
-        else
-          model
-      NoOp ->
+  case action of
+    LocalMouseDown ->
+      { model | mouseDown = True}
+    GlobalMouseUp ->
+      { model | mouseDown = False}
+    MouseMove pixels ->
+      if
+        model.mouseDown
+      then
+        let
+          valueAdjust = (toFloat pixels) * 0.01   -- every pixel adjusts 0.01 of the value
+        in
+          { model | value = clamp (model.value + valueAdjust) }
+      else
         model
+    NoOp ->
+      model
+
+knobDisplay : Float -> Html.Html
+knobDisplay value =
+  let
+    emptyAngle = 180.0 + 45.0
+    fullAngle = -45.0
+    valueAngle = (emptyAngle + 45.0) * value - 45.0
+    radius = 80.0
+    centerPoint = (100.0, 100.0)
+  in
+    svg
+      [ width "200" , height "200" , viewBox "0 0 200 200" ]
+      [ path
+          [ d (arc
+                { radius=radius
+                , centerPoint=centerPoint
+                , startAngle=fullAngle
+                , endAngle=valueAngle
+                }
+              )
+          , stroke "black"
+          , fill "none"
+          , strokeWidth "40"
+          ]
+          []
+      , path
+          [ d (arc
+                { radius=radius
+                , centerPoint=centerPoint
+                , startAngle=valueAngle
+                , endAngle=emptyAngle
+                }
+              )
+          , stroke "pink"
+          , fill "none"
+          , strokeWidth "40"
+          ]
+          []
+      ]
 
 -- model is just used for display here
-view : Address Action -> Model -> Html
+view : Address Action -> Model -> Html.Html
 view address model =
-  div
-    [ style
-        [ "width" => "200px"
-        , "height" => "200px"
-        , "backgroundColor" => "green"
-        , "position" => "relative"
-        , "margin" => "20px"
-        ]
-    , onMouseDown address LocalMouseDown
-    ]
+  div []
     [ div
       [ style
-          [ "width" => "5px"
-          , "height" => "5px"
-          , "backgroundColor" => "blue"
-          , "position" => "absolute"
-          , "left" => "100px"
-          , "top" => ((model.value * 100.0 |> floor |> toString) ++ "px")
+          [ "width" => "200px"
+          , "height" => "200px"
+          , "position" => "relative"
+          , "margin" => "20px"
           ]
+      , onMouseDown address LocalMouseDown
       ]
-      []
+      [ knobDisplay model.value
+      ]
     ]
 
 
@@ -131,25 +161,23 @@ view address model =
 -- so the hell do we update the view? This might only work if main is here ??
 -- htmlSignal = Signal.foldp update (init 0.0) mailbox.signal
 
-globalMouseUp : Signal Bool
-globalMouseUp = Signal.filter (\isDown -> not isDown) True Mouse.isDown
 
 -- ok so a HUGE problem here, is that we can't merge signals inside the
 -- component. It has to be done in Main.elm!! So every component's cruft would
 -- end up in main.elm
 -- the problem is that there's just on e
 
-createActionSignal : Signal Action
-createActionSignal =
-  let
-    mailbox : Signal.Mailbox Action
-    mailbox = Signal.mailbox NoOp
-  in
-    Signal.mergeMany
-      [ Signal.map MouseMove MouseExtra.yVelocity
-      , Signal.map (\_ -> GlobalMouseUp) globalMouseUp
-      , mailbox.signal
-      ]
+-- createActionSignal : Signal Action
+-- createActionSignal =
+--   let
+--     mailbox : Signal.Mailbox Action
+--     mailbox = Signal.mailbox NoOp
+--   in
+--     Signal.mergeMany
+--       [ Signal.map MouseMove MouseExtra.yVelocity
+--       , Signal.map (\_ -> GlobalMouseUp) globalMouseUp
+--       , mailbox.signal
+--       ]
 
       -- To avoid overlaps, I think we want to only keep events when mouse is down
       -- We do still want to keep the mouse up and down events, because we

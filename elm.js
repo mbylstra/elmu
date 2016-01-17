@@ -8966,6 +8966,71 @@ Elm.Json.Decode.make = function (_elm) {
                                     ,value: value
                                     ,customDecoder: customDecoder};
 };
+Elm.Native = Elm.Native || {};
+Elm.Native.Mouse = {};
+Elm.Native.Mouse.make = function(localRuntime) {
+	localRuntime.Native = localRuntime.Native || {};
+	localRuntime.Native.Mouse = localRuntime.Native.Mouse || {};
+	if (localRuntime.Native.Mouse.values)
+	{
+		return localRuntime.Native.Mouse.values;
+	}
+
+	var NS = Elm.Native.Signal.make(localRuntime);
+	var Utils = Elm.Native.Utils.make(localRuntime);
+
+	var position = NS.input('Mouse.position', Utils.Tuple2(0, 0));
+
+	var isDown = NS.input('Mouse.isDown', false);
+
+	var clicks = NS.input('Mouse.clicks', Utils.Tuple0);
+
+	var node = localRuntime.isFullscreen()
+		? document
+		: localRuntime.node;
+
+	localRuntime.addListener([clicks.id], node, 'click', function click() {
+		localRuntime.notify(clicks.id, Utils.Tuple0);
+	});
+	localRuntime.addListener([isDown.id], node, 'mousedown', function down() {
+		localRuntime.notify(isDown.id, true);
+	});
+	localRuntime.addListener([isDown.id], node, 'mouseup', function up() {
+		localRuntime.notify(isDown.id, false);
+	});
+	localRuntime.addListener([position.id], node, 'mousemove', function move(e) {
+		localRuntime.notify(position.id, Utils.getXY(e));
+	});
+
+	return localRuntime.Native.Mouse.values = {
+		position: position,
+		isDown: isDown,
+		clicks: clicks
+	};
+};
+
+Elm.Mouse = Elm.Mouse || {};
+Elm.Mouse.make = function (_elm) {
+   "use strict";
+   _elm.Mouse = _elm.Mouse || {};
+   if (_elm.Mouse.values) return _elm.Mouse.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Native$Mouse = Elm.Native.Mouse.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var _op = {};
+   var clicks = $Native$Mouse.clicks;
+   var isDown = $Native$Mouse.isDown;
+   var position = $Native$Mouse.position;
+   var x = A2($Signal.map,$Basics.fst,position);
+   var y = A2($Signal.map,$Basics.snd,position);
+   return _elm.Mouse.values = {_op: _op
+                              ,position: position
+                              ,x: x
+                              ,y: y
+                              ,isDown: isDown
+                              ,clicks: clicks};
+};
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 
 },{}],2:[function(require,module,exports){
@@ -11272,6 +11337,94 @@ Elm.Html.Attributes.make = function (_elm) {
                                         ,property: property
                                         ,attribute: attribute};
 };
+Elm.Html = Elm.Html || {};
+Elm.Html.Events = Elm.Html.Events || {};
+Elm.Html.Events.make = function (_elm) {
+   "use strict";
+   _elm.Html = _elm.Html || {};
+   _elm.Html.Events = _elm.Html.Events || {};
+   if (_elm.Html.Events.values) return _elm.Html.Events.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Html = Elm.Html.make(_elm),
+   $Json$Decode = Elm.Json.Decode.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $VirtualDom = Elm.VirtualDom.make(_elm);
+   var _op = {};
+   var keyCode = A2($Json$Decode._op[":="],
+   "keyCode",
+   $Json$Decode.$int);
+   var targetChecked = A2($Json$Decode.at,
+   _U.list(["target","checked"]),
+   $Json$Decode.bool);
+   var targetValue = A2($Json$Decode.at,
+   _U.list(["target","value"]),
+   $Json$Decode.string);
+   var defaultOptions = $VirtualDom.defaultOptions;
+   var Options = F2(function (a,b) {
+      return {stopPropagation: a,preventDefault: b};
+   });
+   var onWithOptions = $VirtualDom.onWithOptions;
+   var on = $VirtualDom.on;
+   var messageOn = F3(function (name,addr,msg) {
+      return A3(on,
+      name,
+      $Json$Decode.value,
+      function (_p0) {
+         return A2($Signal.message,addr,msg);
+      });
+   });
+   var onClick = messageOn("click");
+   var onDoubleClick = messageOn("dblclick");
+   var onMouseMove = messageOn("mousemove");
+   var onMouseDown = messageOn("mousedown");
+   var onMouseUp = messageOn("mouseup");
+   var onMouseEnter = messageOn("mouseenter");
+   var onMouseLeave = messageOn("mouseleave");
+   var onMouseOver = messageOn("mouseover");
+   var onMouseOut = messageOn("mouseout");
+   var onBlur = messageOn("blur");
+   var onFocus = messageOn("focus");
+   var onSubmit = messageOn("submit");
+   var onKey = F3(function (name,addr,handler) {
+      return A3(on,
+      name,
+      keyCode,
+      function (code) {
+         return A2($Signal.message,addr,handler(code));
+      });
+   });
+   var onKeyUp = onKey("keyup");
+   var onKeyDown = onKey("keydown");
+   var onKeyPress = onKey("keypress");
+   return _elm.Html.Events.values = {_op: _op
+                                    ,onBlur: onBlur
+                                    ,onFocus: onFocus
+                                    ,onSubmit: onSubmit
+                                    ,onKeyUp: onKeyUp
+                                    ,onKeyDown: onKeyDown
+                                    ,onKeyPress: onKeyPress
+                                    ,onClick: onClick
+                                    ,onDoubleClick: onDoubleClick
+                                    ,onMouseMove: onMouseMove
+                                    ,onMouseDown: onMouseDown
+                                    ,onMouseUp: onMouseUp
+                                    ,onMouseEnter: onMouseEnter
+                                    ,onMouseLeave: onMouseLeave
+                                    ,onMouseOver: onMouseOver
+                                    ,onMouseOut: onMouseOut
+                                    ,on: on
+                                    ,onWithOptions: onWithOptions
+                                    ,defaultOptions: defaultOptions
+                                    ,targetValue: targetValue
+                                    ,targetChecked: targetChecked
+                                    ,keyCode: keyCode
+                                    ,Options: Options};
+};
 Elm.Svg = Elm.Svg || {};
 Elm.Svg.make = function (_elm) {
    "use strict";
@@ -12008,30 +12161,26 @@ Elm.Svg.Attributes.make = function (_elm) {
                                        ,wordSpacing: wordSpacing
                                        ,writingMode: writingMode};
 };
-Elm.Main = Elm.Main || {};
-Elm.Main.make = function (_elm) {
+Elm.Arc = Elm.Arc || {};
+Elm.Arc.make = function (_elm) {
    "use strict";
-   _elm.Main = _elm.Main || {};
-   if (_elm.Main.values) return _elm.Main.values;
+   _elm.Arc = _elm.Arc || {};
+   if (_elm.Arc.values) return _elm.Arc.values;
    var _U = Elm.Native.Utils.make(_elm),
    $Basics = Elm.Basics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
-   $Html = Elm.Html.make(_elm),
-   $Html$Attributes = Elm.Html.Attributes.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm),
-   $String = Elm.String.make(_elm),
-   $Svg = Elm.Svg.make(_elm),
-   $Svg$Attributes = Elm.Svg.Attributes.make(_elm);
+   $String = Elm.String.make(_elm);
    var _op = {};
    var fromRadians = $Basics.radians;
    var fromDegrees = $Basics.degrees;
-   var ArcShapeArgs = F4(function (a,b,c,d) {
+   var ArcArgs = F4(function (a,b,c,d) {
       return {radius: a,centerPoint: b,startAngle: c,endAngle: d};
    });
-   var ArcArgs = F6(function (a,b,c,d,e,f) {
+   var ArcSegmentArcs = F6(function (a,b,c,d,e,f) {
       return {absolute: a
              ,radius: b
              ,xAxisRotation: c
@@ -12065,111 +12214,336 @@ Elm.Main.make = function (_elm) {
               ,$Basics.toString(endX)
               ,$Basics.toString(endY)]));
    };
-   var arcShape = function (args) {
-      var _p3 = A2($Debug.log,"endAngleDegrees",args.endAngle);
-      var largeArc = _U.cmp(args.endAngle,180.0) > -1 ? true : false;
-      var _p4 = args.centerPoint;
-      var centerX = _p4._0;
-      var centerY = _p4._1;
-      var startPointYAngle0 = centerY;
+   var arc = function (args) {
+      var largeArc = _U.cmp(args.endAngle - args.startAngle,
+      180.0) > -1 ? true : false;
+      var _p3 = args.centerPoint;
+      var centerX = _p3._0;
+      var centerY = _p3._1;
       var radius = args.radius;
-      var startPointXAngle0 = centerX + radius;
-      var _p5 = A2($Debug.log,"radius",radius);
-      var endAngleRadians = fromDegrees(args.endAngle);
-      var _p6 = $Basics.fromPolar({ctor: "_Tuple2"
-                                  ,_0: radius
-                                  ,_1: endAngleRadians});
+      var toAbsoluteCoords = function (angleDegrees) {
+         var _p4 = $Basics.fromPolar({ctor: "_Tuple2"
+                                     ,_0: 1.0
+                                     ,_1: fromDegrees(angleDegrees)});
+         var normPointX = _p4._0;
+         var normPointY = _p4._1;
+         var pointX = centerX + normPointX * radius;
+         var pointY = centerY - normPointY * radius;
+         return {ctor: "_Tuple2",_0: pointX,_1: pointY};
+      };
+      var _p5 = toAbsoluteCoords(args.startAngle);
+      var startPointX = _p5._0;
+      var startPointY = _p5._1;
+      var _p6 = toAbsoluteCoords(args.endAngle);
       var endPointX = _p6._0;
       var endPointY = _p6._1;
-      var endPointX$ = endPointX + radius;
-      var _p7 = A2($Debug.log,"endPointX\'",endPointX$);
-      var endPointY$ = radius * 2.0 - (endPointY + radius);
-      var _p8 = A2($Debug.log,"endPointY\'",endPointY$);
-      var _p9 = A2($Debug.log,"endPointX",endPointX);
-      var _p10 = A2($Debug.log,"endPointY",endPointY);
-      var _p11 = A2($Debug.log,"endAngleRadians",endAngleRadians);
       var startAngleRadians = 0.0;
       return A2($Basics._op["++"],
       "M ",
       A2($Basics._op["++"],
-      $Basics.toString(startPointXAngle0),
+      $Basics.toString(startPointX),
       A2($Basics._op["++"],
       " ",
       A2($Basics._op["++"],
-      $Basics.toString(startPointYAngle0),
+      $Basics.toString(startPointY),
       A2($Basics._op["++"],
       " ",
       arcSegment({absolute: true
-                 ,endPoint: {ctor: "_Tuple2",_0: endPointX$,_1: endPointY$}
+                 ,endPoint: {ctor: "_Tuple2",_0: endPointX,_1: endPointY}
                  ,radius: {ctor: "_Tuple2",_0: args.radius,_1: args.radius}
                  ,sweep: false
                  ,largeArc: largeArc
                  ,xAxisRotation: 0.0}))))));
    };
-   var example2 = A2($Svg.svg,
-   _U.list([$Html$Attributes.style(_U.list([{ctor: "_Tuple2"
-                                            ,_0: "border"
-                                            ,_1: "1px solid red"}
-                                           ,{ctor: "_Tuple2",_0: "margin",_1: "50px"}]))
-           ,$Svg$Attributes.width("200")
-           ,$Svg$Attributes.height("200")
-           ,$Svg$Attributes.viewBox("0 0 200 200")]),
-   _U.list([A2($Svg.rect,
-           _U.list([$Svg$Attributes.x("0")
-                   ,$Svg$Attributes.y("0")
-                   ,$Svg$Attributes.width("200")
-                   ,$Svg$Attributes.height("200")
-                   ,$Svg$Attributes.fill("none")
-                   ,$Svg$Attributes.stroke("red")]),
-           _U.list([]))
-           ,A2($Svg.path,
-           _U.list([$Svg$Attributes.d(arcShape({radius: 100.0
-                                               ,centerPoint: {ctor: "_Tuple2",_0: 100.0,_1: 100.0}
-                                               ,startAngle: 0.0
-                                               ,endAngle: 90.0}))
-                   ,$Svg$Attributes.stroke("black")
-                   ,$Svg$Attributes.fill("none")
-                   ,$Svg$Attributes.strokeWidth("10")]),
-           _U.list([]))]));
-   var main = example2;
-   var example1 = A2($Html.div,
-   _U.list([$Html$Attributes.style(_U.list([{ctor: "_Tuple2"
-                                            ,_0: "margin"
-                                            ,_1: "100px"}]))]),
-   _U.list([A2($Svg.svg,
-   _U.list([]),
-   _U.list([A2($Svg.path,
-   _U.list([$Svg$Attributes.d(A2($Basics._op["++"],
-           "M 50 50 M -50 -50 ",
-           arcSegment({absolute: true
-                      ,endPoint: {ctor: "_Tuple2",_0: 100.0,_1: 100.0}
-                      ,radius: {ctor: "_Tuple2",_0: 1.0e-6,_1: 1.0e-6}
-                      ,sweep: false
-                      ,largeArc: false
-                      ,xAxisRotation: 0.0})))
-           ,$Svg$Attributes.stroke("black")
-           ,$Svg$Attributes.fill("none")
-           ,$Svg$Attributes.strokeWidth("10")]),
-   _U.list([]))]))]));
-   var polarToCartesian = F4(function (centerX,
-   centerY,
-   radius,
-   angleInDegrees) {
-      var angleInRadians = (angleInDegrees - 90.0) * $Basics.pi / 180.0;
-      return {ctor: "_Tuple2"
-             ,_0: centerX + radius * $Basics.cos(angleInRadians)
-             ,_1: centerY + radius * $Basics.sin(angleInRadians)};
+   return _elm.Arc.values = {_op: _op
+                            ,arc: arc
+                            ,arcSegment: arcSegment};
+};
+Elm.RotaryKnob = Elm.RotaryKnob || {};
+Elm.RotaryKnob.make = function (_elm) {
+   "use strict";
+   _elm.RotaryKnob = _elm.RotaryKnob || {};
+   if (_elm.RotaryKnob.values) return _elm.RotaryKnob.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Arc = Elm.Arc.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Html = Elm.Html.make(_elm),
+   $Html$Attributes = Elm.Html.Attributes.make(_elm),
+   $Html$Events = Elm.Html.Events.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $Svg = Elm.Svg.make(_elm),
+   $Svg$Attributes = Elm.Svg.Attributes.make(_elm);
+   var _op = {};
+   var knobDisplay = function (value) {
+      var centerPoint = {ctor: "_Tuple2",_0: 100.0,_1: 100.0};
+      var radius = 80.0;
+      var fullAngle = -45.0;
+      var emptyAngle = 180.0 + 45.0;
+      var valueAngle = (emptyAngle + 45.0) * value - 45.0;
+      return A2($Svg.svg,
+      _U.list([$Svg$Attributes.width("200")
+              ,$Svg$Attributes.height("200")
+              ,$Svg$Attributes.viewBox("0 0 200 200")]),
+      _U.list([A2($Svg.path,
+              _U.list([$Svg$Attributes.d($Arc.arc({radius: radius
+                                                  ,centerPoint: centerPoint
+                                                  ,startAngle: fullAngle
+                                                  ,endAngle: valueAngle}))
+                      ,$Svg$Attributes.stroke("black")
+                      ,$Svg$Attributes.fill("none")
+                      ,$Svg$Attributes.strokeWidth("40")]),
+              _U.list([]))
+              ,A2($Svg.path,
+              _U.list([$Svg$Attributes.d($Arc.arc({radius: radius
+                                                  ,centerPoint: centerPoint
+                                                  ,startAngle: valueAngle
+                                                  ,endAngle: emptyAngle}))
+                      ,$Svg$Attributes.stroke("pink")
+                      ,$Svg$Attributes.fill("none")
+                      ,$Svg$Attributes.strokeWidth("40")]),
+              _U.list([]))]));
+   };
+   var clamp = function (x) {
+      return _U.cmp(x,1.0) > 0 ? 1.0 : _U.cmp(x,0.0) < 0 ? 0.0 : x;
+   };
+   var update = F2(function (action,model) {
+      var _p0 = action;
+      switch (_p0.ctor)
+      {case "LocalMouseDown": return _U.update(model,
+           {mouseDown: true});
+         case "GlobalMouseUp": return _U.update(model,
+           {mouseDown: false});
+         case "MouseMove": if (model.mouseDown) {
+                 var valueAdjust = $Basics.toFloat(_p0._0) * 1.0e-2;
+                 return _U.update(model,
+                 {value: clamp(model.value + valueAdjust)});
+              } else return model;
+         default: return model;}
+   });
+   var NoOp = {ctor: "NoOp"};
+   var MouseMove = function (a) {
+      return {ctor: "MouseMove",_0: a};
+   };
+   var LocalMouseDown = {ctor: "LocalMouseDown"};
+   var GlobalMouseUp = {ctor: "GlobalMouseUp"};
+   var init = {mouseDown: false,value: 0.0};
+   var Model = F2(function (a,b) {
+      return {mouseDown: a,value: b};
+   });
+   _op["=>"] = F2(function (v0,v1) {
+      return {ctor: "_Tuple2",_0: v0,_1: v1};
+   });
+   var view = F2(function (address,model) {
+      return A2($Html.div,
+      _U.list([]),
+      _U.list([A2($Html.div,
+      _U.list([$Html$Attributes.style(_U.list([A2(_op["=>"],
+                                              "width",
+                                              "200px")
+                                              ,A2(_op["=>"],"height","200px")
+                                              ,A2(_op["=>"],"position","relative")
+                                              ,A2(_op["=>"],"margin","20px")]))
+              ,A2($Html$Events.onMouseDown,address,LocalMouseDown)]),
+      _U.list([knobDisplay(model.value)]))]));
+   });
+   return _elm.RotaryKnob.values = {_op: _op
+                                   ,Model: Model
+                                   ,init: init
+                                   ,GlobalMouseUp: GlobalMouseUp
+                                   ,LocalMouseDown: LocalMouseDown
+                                   ,MouseMove: MouseMove
+                                   ,NoOp: NoOp
+                                   ,clamp: clamp
+                                   ,update: update
+                                   ,knobDisplay: knobDisplay
+                                   ,view: view};
+};
+Elm.MouseExtra = Elm.MouseExtra || {};
+Elm.MouseExtra.make = function (_elm) {
+   "use strict";
+   _elm.MouseExtra = _elm.MouseExtra || {};
+   if (_elm.MouseExtra.values) return _elm.MouseExtra.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Html = Elm.Html.make(_elm),
+   $Html$Events = Elm.Html.Events.make(_elm),
+   $Json$Decode = Elm.Json.Decode.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Mouse = Elm.Mouse.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var _op = {};
+   var createVelocitySignal = function (positionSignal) {
+      var update = F2(function (x,state) {
+         return {x: x,velocity: x - state.x};
+      });
+      var initialState = {x: 0,velocity: 0};
+      var rawSignal = A3($Signal.foldp,
+      update,
+      initialState,
+      positionSignal);
+      var signal = A2($Signal.map,
+      function (_) {
+         return _.velocity;
+      },
+      rawSignal);
+      return signal;
+   };
+   var xVelocity = createVelocitySignal($Mouse.x);
+   var yVelocity = createVelocitySignal($Mouse.y);
+   var velocity = A3($Signal.map2,
+   F2(function (x,y) {    return {ctor: "_Tuple2",_0: x,_1: y};}),
+   xVelocity,
+   yVelocity);
+   var VelocityState = F2(function (a,b) {
+      return {x: a,velocity: b};
+   });
+   var onMouseMove = function (mousePositionAddress) {
+      var sendPosition = function (position) {
+         return A2($Signal.message,mousePositionAddress,position);
+      };
+      var mouseOffsetDecoder = A3($Json$Decode.object2,
+      F2(function (x,y) {    return {x: x,y: y};}),
+      A2($Json$Decode._op[":="],"offsetX",$Json$Decode.$int),
+      A2($Json$Decode._op[":="],"offsetY",$Json$Decode.$int));
+      return A3($Html$Events.on,
+      "mousemove",
+      mouseOffsetDecoder,
+      sendPosition);
+   };
+   var MousePosition = F2(function (a,b) {
+      return {x: a,y: b};
+   });
+   return _elm.MouseExtra.values = {_op: _op
+                                   ,velocity: velocity
+                                   ,xVelocity: xVelocity
+                                   ,yVelocity: yVelocity};
+};
+Elm.Main = Elm.Main || {};
+Elm.Main.make = function (_elm) {
+   "use strict";
+   _elm.Main = _elm.Main || {};
+   if (_elm.Main.values) return _elm.Main.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Html = Elm.Html.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Mouse = Elm.Mouse.make(_elm),
+   $MouseExtra = Elm.MouseExtra.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $RotaryKnob = Elm.RotaryKnob.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var _op = {};
+   var globalMouseUp = A3($Signal.filter,
+   function (isDown) {
+      return $Basics.not(isDown);
+   },
+   true,
+   $Mouse.isDown);
+   var NoOp = {ctor: "NoOp"};
+   var mailbox = $Signal.mailbox(NoOp);
+   var MouseMove = function (a) {
+      return {ctor: "MouseMove",_0: a};
+   };
+   var GlobalMouseUp = {ctor: "GlobalMouseUp"};
+   var actionSignal = $Signal.mergeMany(_U.list([mailbox.signal
+                                                ,A2($Signal.map,MouseMove,$MouseExtra.yVelocity)
+                                                ,A2($Signal.map,
+                                                function (_p0) {
+                                                   return GlobalMouseUp;
+                                                },
+                                                globalMouseUp)]));
+   var Knob2Action = function (a) {
+      return {ctor: "Knob2Action",_0: a};
+   };
+   var Knob1Action = function (a) {
+      return {ctor: "Knob1Action",_0: a};
+   };
+   var view = F2(function (address,model) {
+      return A2($Html.div,
+      _U.list([]),
+      _U.list([A2($RotaryKnob.view,
+              A2($Signal.forwardTo,address,Knob1Action),
+              model.knob1)
+              ,A2($RotaryKnob.view,
+              A2($Signal.forwardTo,address,Knob2Action),
+              model.knob2)]));
+   });
+   var None = {ctor: "None"};
+   var Knob2 = {ctor: "Knob2"};
+   var Knob1 = {ctor: "Knob1"};
+   var update = F2(function (action,model) {
+      var _p1 = action;
+      switch (_p1.ctor)
+      {case "Knob1Action": return _U.update(model,
+           {knob1: A2($RotaryKnob.update,_p1._0,model.knob1)
+           ,currentKnob: Knob1});
+         case "Knob2Action": return _U.update(model,
+           {knob2: A2($RotaryKnob.update,_p1._0,model.knob2)
+           ,currentKnob: Knob2});
+         case "MouseMove": var _p3 = _p1._0;
+           var _p2 = model.currentKnob;
+           switch (_p2.ctor)
+           {case "Knob1": return _U.update(model,
+                {knob1: A2($RotaryKnob.update,
+                $RotaryKnob.MouseMove(_p3),
+                model.knob1)});
+              case "Knob2": return _U.update(model,
+                {knob2: A2($RotaryKnob.update,
+                $RotaryKnob.MouseMove(_p3),
+                model.knob2)});
+              default: return model;}
+         case "GlobalMouseUp": var _p4 = model.currentKnob;
+           switch (_p4.ctor)
+           {case "Knob1": return _U.update(model,
+                {knob1: A2($RotaryKnob.update,
+                $RotaryKnob.GlobalMouseUp,
+                model.knob1)});
+              case "Knob2": return _U.update(model,
+                {knob2: A2($RotaryKnob.update,
+                $RotaryKnob.GlobalMouseUp,
+                model.knob2)});
+              default: return model;}
+         default: return model;}
+   });
+   var init = {knob1: $RotaryKnob.init
+              ,knob2: $RotaryKnob.init
+              ,currentKnob: None};
+   var modelSignal = A3($Signal.foldp,update,init,actionSignal);
+   var viewSignal = A2($Signal.map,
+   function (model) {
+      return A2(view,mailbox.address,model);
+   },
+   modelSignal);
+   var main = viewSignal;
+   var Model = F3(function (a,b,c) {
+      return {knob1: a,knob2: b,currentKnob: c};
    });
    return _elm.Main.values = {_op: _op
-                             ,polarToCartesian: polarToCartesian
-                             ,boolToIntString: boolToIntString
-                             ,ArcArgs: ArcArgs
-                             ,arcSegment: arcSegment
-                             ,ArcShapeArgs: ArcShapeArgs
-                             ,fromDegrees: fromDegrees
-                             ,fromRadians: fromRadians
-                             ,arcShape: arcShape
-                             ,example1: example1
-                             ,example2: example2
+                             ,Model: Model
+                             ,init: init
+                             ,Knob1: Knob1
+                             ,Knob2: Knob2
+                             ,None: None
+                             ,Knob1Action: Knob1Action
+                             ,Knob2Action: Knob2Action
+                             ,GlobalMouseUp: GlobalMouseUp
+                             ,MouseMove: MouseMove
+                             ,NoOp: NoOp
+                             ,update: update
+                             ,mailbox: mailbox
+                             ,globalMouseUp: globalMouseUp
+                             ,actionSignal: actionSignal
+                             ,view: view
+                             ,modelSignal: modelSignal
+                             ,viewSignal: viewSignal
                              ,main: main};
 };
