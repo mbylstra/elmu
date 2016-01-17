@@ -67,10 +67,13 @@ arcShape args =
     -- radius = 1.0
     radius = args.radius
     -- startPoint = fromPolar (radius, 0.0)
-    (endPointX, endPointY) = fromPolar (radius, endAngleRadians)
+    (normEndPointX, normEndPointY) = fromPolar (1.0, endAngleRadians)
     (centerX, centerY) = args.centerPoint
-    endPointX' = endPointX + radius
-    endPointY' =  (radius * 2.0) - (endPointY + radius)
+    endPointX = normEndPointX * radius
+    endPointY = normEndPointY * radius
+    endPointX' = centerX + endPointX
+    endPointY' = centerY - endPointY
+    -- endPointY' =  (radius * 2.0) - (endPointY + radius)
     largeArc = if args.endAngle >= 180.0 then True else False
 
     startPointXAngle0 = centerX + radius
@@ -80,6 +83,8 @@ arcShape args =
     _ = Debug.log "endAngleDegrees" args.endAngle
     _ = Debug.log "endAngleRadians" endAngleRadians
     -- _ = Debug.log "startPoint" startPoint
+    _ = Debug.log "normEndPointX" normEndPointX
+    _ = Debug.log "normEndPointY" normEndPointY
     _ = Debug.log "endPointX" endPointX
     _ = Debug.log "endPointY" endPointY
     _ = Debug.log "endPointX'" endPointX'
@@ -161,10 +166,10 @@ example2 =
 
     [ rect [x "0", y "0", width "200", height "200", fill "none", stroke "red"] []
     , path
-        [ d (arcShape {radius=100.0,centerPoint=(100.0,100.0),startAngle=0.0,endAngle=90.0})
+        [ d (arcShape {radius=90.0,centerPoint=(100.0,100.0),startAngle=0.0,endAngle=270.0})
         , stroke "black"
         , fill "none"
-        , strokeWidth "10"
+        , strokeWidth "20"
         ]
         []
     ]
