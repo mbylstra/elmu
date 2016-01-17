@@ -8966,71 +8966,6 @@ Elm.Json.Decode.make = function (_elm) {
                                     ,value: value
                                     ,customDecoder: customDecoder};
 };
-Elm.Native = Elm.Native || {};
-Elm.Native.Mouse = {};
-Elm.Native.Mouse.make = function(localRuntime) {
-	localRuntime.Native = localRuntime.Native || {};
-	localRuntime.Native.Mouse = localRuntime.Native.Mouse || {};
-	if (localRuntime.Native.Mouse.values)
-	{
-		return localRuntime.Native.Mouse.values;
-	}
-
-	var NS = Elm.Native.Signal.make(localRuntime);
-	var Utils = Elm.Native.Utils.make(localRuntime);
-
-	var position = NS.input('Mouse.position', Utils.Tuple2(0, 0));
-
-	var isDown = NS.input('Mouse.isDown', false);
-
-	var clicks = NS.input('Mouse.clicks', Utils.Tuple0);
-
-	var node = localRuntime.isFullscreen()
-		? document
-		: localRuntime.node;
-
-	localRuntime.addListener([clicks.id], node, 'click', function click() {
-		localRuntime.notify(clicks.id, Utils.Tuple0);
-	});
-	localRuntime.addListener([isDown.id], node, 'mousedown', function down() {
-		localRuntime.notify(isDown.id, true);
-	});
-	localRuntime.addListener([isDown.id], node, 'mouseup', function up() {
-		localRuntime.notify(isDown.id, false);
-	});
-	localRuntime.addListener([position.id], node, 'mousemove', function move(e) {
-		localRuntime.notify(position.id, Utils.getXY(e));
-	});
-
-	return localRuntime.Native.Mouse.values = {
-		position: position,
-		isDown: isDown,
-		clicks: clicks
-	};
-};
-
-Elm.Mouse = Elm.Mouse || {};
-Elm.Mouse.make = function (_elm) {
-   "use strict";
-   _elm.Mouse = _elm.Mouse || {};
-   if (_elm.Mouse.values) return _elm.Mouse.values;
-   var _U = Elm.Native.Utils.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $Native$Mouse = Elm.Native.Mouse.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
-   var _op = {};
-   var clicks = $Native$Mouse.clicks;
-   var isDown = $Native$Mouse.isDown;
-   var position = $Native$Mouse.position;
-   var x = A2($Signal.map,$Basics.fst,position);
-   var y = A2($Signal.map,$Basics.snd,position);
-   return _elm.Mouse.values = {_op: _op
-                              ,position: position
-                              ,x: x
-                              ,y: y
-                              ,isDown: isDown
-                              ,clicks: clicks};
-};
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 
 },{}],2:[function(require,module,exports){
@@ -11337,261 +11272,741 @@ Elm.Html.Attributes.make = function (_elm) {
                                         ,property: property
                                         ,attribute: attribute};
 };
-Elm.Html = Elm.Html || {};
-Elm.Html.Events = Elm.Html.Events || {};
-Elm.Html.Events.make = function (_elm) {
+Elm.Svg = Elm.Svg || {};
+Elm.Svg.make = function (_elm) {
    "use strict";
-   _elm.Html = _elm.Html || {};
-   _elm.Html.Events = _elm.Html.Events || {};
-   if (_elm.Html.Events.values) return _elm.Html.Events.values;
+   _elm.Svg = _elm.Svg || {};
+   if (_elm.Svg.values) return _elm.Svg.values;
    var _U = Elm.Native.Utils.make(_elm),
    $Basics = Elm.Basics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
    $Html = Elm.Html.make(_elm),
-   $Json$Decode = Elm.Json.Decode.make(_elm),
+   $Json$Encode = Elm.Json.Encode.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm),
    $VirtualDom = Elm.VirtualDom.make(_elm);
    var _op = {};
-   var keyCode = A2($Json$Decode._op[":="],
-   "keyCode",
-   $Json$Decode.$int);
-   var targetChecked = A2($Json$Decode.at,
-   _U.list(["target","checked"]),
-   $Json$Decode.bool);
-   var targetValue = A2($Json$Decode.at,
-   _U.list(["target","value"]),
-   $Json$Decode.string);
-   var defaultOptions = $VirtualDom.defaultOptions;
-   var Options = F2(function (a,b) {
-      return {stopPropagation: a,preventDefault: b};
-   });
-   var onWithOptions = $VirtualDom.onWithOptions;
-   var on = $VirtualDom.on;
-   var messageOn = F3(function (name,addr,msg) {
-      return A3(on,
+   var text = $VirtualDom.text;
+   var svgNamespace = A2($VirtualDom.property,
+   "namespace",
+   $Json$Encode.string("http://www.w3.org/2000/svg"));
+   var node = F3(function (name,attributes,children) {
+      return A3($VirtualDom.node,
       name,
-      $Json$Decode.value,
-      function (_p0) {
-         return A2($Signal.message,addr,msg);
-      });
+      A2($List._op["::"],svgNamespace,attributes),
+      children);
    });
-   var onClick = messageOn("click");
-   var onDoubleClick = messageOn("dblclick");
-   var onMouseMove = messageOn("mousemove");
-   var onMouseDown = messageOn("mousedown");
-   var onMouseUp = messageOn("mouseup");
-   var onMouseEnter = messageOn("mouseenter");
-   var onMouseLeave = messageOn("mouseleave");
-   var onMouseOver = messageOn("mouseover");
-   var onMouseOut = messageOn("mouseout");
-   var onBlur = messageOn("blur");
-   var onFocus = messageOn("focus");
-   var onSubmit = messageOn("submit");
-   var onKey = F3(function (name,addr,handler) {
-      return A3(on,
-      name,
-      keyCode,
-      function (code) {
-         return A2($Signal.message,addr,handler(code));
-      });
-   });
-   var onKeyUp = onKey("keyup");
-   var onKeyDown = onKey("keydown");
-   var onKeyPress = onKey("keypress");
-   return _elm.Html.Events.values = {_op: _op
-                                    ,onBlur: onBlur
-                                    ,onFocus: onFocus
-                                    ,onSubmit: onSubmit
-                                    ,onKeyUp: onKeyUp
-                                    ,onKeyDown: onKeyDown
-                                    ,onKeyPress: onKeyPress
-                                    ,onClick: onClick
-                                    ,onDoubleClick: onDoubleClick
-                                    ,onMouseMove: onMouseMove
-                                    ,onMouseDown: onMouseDown
-                                    ,onMouseUp: onMouseUp
-                                    ,onMouseEnter: onMouseEnter
-                                    ,onMouseLeave: onMouseLeave
-                                    ,onMouseOver: onMouseOver
-                                    ,onMouseOut: onMouseOut
-                                    ,on: on
-                                    ,onWithOptions: onWithOptions
-                                    ,defaultOptions: defaultOptions
-                                    ,targetValue: targetValue
-                                    ,targetChecked: targetChecked
-                                    ,keyCode: keyCode
-                                    ,Options: Options};
+   var svg = node("svg");
+   var foreignObject = node("foreignObject");
+   var animate = node("animate");
+   var animateColor = node("animateColor");
+   var animateMotion = node("animateMotion");
+   var animateTransform = node("animateTransform");
+   var mpath = node("mpath");
+   var set = node("set");
+   var a = node("a");
+   var defs = node("defs");
+   var g = node("g");
+   var marker = node("marker");
+   var mask = node("mask");
+   var missingGlyph = node("missingGlyph");
+   var pattern = node("pattern");
+   var $switch = node("switch");
+   var symbol = node("symbol");
+   var desc = node("desc");
+   var metadata = node("metadata");
+   var title = node("title");
+   var feBlend = node("feBlend");
+   var feColorMatrix = node("feColorMatrix");
+   var feComponentTransfer = node("feComponentTransfer");
+   var feComposite = node("feComposite");
+   var feConvolveMatrix = node("feConvolveMatrix");
+   var feDiffuseLighting = node("feDiffuseLighting");
+   var feDisplacementMap = node("feDisplacementMap");
+   var feFlood = node("feFlood");
+   var feFuncA = node("feFuncA");
+   var feFuncB = node("feFuncB");
+   var feFuncG = node("feFuncG");
+   var feFuncR = node("feFuncR");
+   var feGaussianBlur = node("feGaussianBlur");
+   var feImage = node("feImage");
+   var feMerge = node("feMerge");
+   var feMergeNode = node("feMergeNode");
+   var feMorphology = node("feMorphology");
+   var feOffset = node("feOffset");
+   var feSpecularLighting = node("feSpecularLighting");
+   var feTile = node("feTile");
+   var feTurbulence = node("feTurbulence");
+   var font = node("font");
+   var fontFace = node("fontFace");
+   var fontFaceFormat = node("fontFaceFormat");
+   var fontFaceName = node("fontFaceName");
+   var fontFaceSrc = node("fontFaceSrc");
+   var fontFaceUri = node("fontFaceUri");
+   var hkern = node("hkern");
+   var vkern = node("vkern");
+   var linearGradient = node("linearGradient");
+   var radialGradient = node("radialGradient");
+   var stop = node("stop");
+   var circle = node("circle");
+   var ellipse = node("ellipse");
+   var image = node("image");
+   var line = node("line");
+   var path = node("path");
+   var polygon = node("polygon");
+   var polyline = node("polyline");
+   var rect = node("rect");
+   var use = node("use");
+   var feDistantLight = node("feDistantLight");
+   var fePointLight = node("fePointLight");
+   var feSpotLight = node("feSpotLight");
+   var altGlyph = node("altGlyph");
+   var altGlyphDef = node("altGlyphDef");
+   var altGlyphItem = node("altGlyphItem");
+   var glyph = node("glyph");
+   var glyphRef = node("glyphRef");
+   var textPath = node("textPath");
+   var text$ = node("text");
+   var tref = node("tref");
+   var tspan = node("tspan");
+   var clipPath = node("clipPath");
+   var colorProfile = node("colorProfile");
+   var cursor = node("cursor");
+   var filter = node("filter");
+   var script = node("script");
+   var style = node("style");
+   var view = node("view");
+   return _elm.Svg.values = {_op: _op
+                            ,text: text
+                            ,node: node
+                            ,svg: svg
+                            ,foreignObject: foreignObject
+                            ,circle: circle
+                            ,ellipse: ellipse
+                            ,image: image
+                            ,line: line
+                            ,path: path
+                            ,polygon: polygon
+                            ,polyline: polyline
+                            ,rect: rect
+                            ,use: use
+                            ,animate: animate
+                            ,animateColor: animateColor
+                            ,animateMotion: animateMotion
+                            ,animateTransform: animateTransform
+                            ,mpath: mpath
+                            ,set: set
+                            ,desc: desc
+                            ,metadata: metadata
+                            ,title: title
+                            ,a: a
+                            ,defs: defs
+                            ,g: g
+                            ,marker: marker
+                            ,mask: mask
+                            ,missingGlyph: missingGlyph
+                            ,pattern: pattern
+                            ,$switch: $switch
+                            ,symbol: symbol
+                            ,altGlyph: altGlyph
+                            ,altGlyphDef: altGlyphDef
+                            ,altGlyphItem: altGlyphItem
+                            ,glyph: glyph
+                            ,glyphRef: glyphRef
+                            ,textPath: textPath
+                            ,text$: text$
+                            ,tref: tref
+                            ,tspan: tspan
+                            ,font: font
+                            ,fontFace: fontFace
+                            ,fontFaceFormat: fontFaceFormat
+                            ,fontFaceName: fontFaceName
+                            ,fontFaceSrc: fontFaceSrc
+                            ,fontFaceUri: fontFaceUri
+                            ,hkern: hkern
+                            ,vkern: vkern
+                            ,linearGradient: linearGradient
+                            ,radialGradient: radialGradient
+                            ,stop: stop
+                            ,feBlend: feBlend
+                            ,feColorMatrix: feColorMatrix
+                            ,feComponentTransfer: feComponentTransfer
+                            ,feComposite: feComposite
+                            ,feConvolveMatrix: feConvolveMatrix
+                            ,feDiffuseLighting: feDiffuseLighting
+                            ,feDisplacementMap: feDisplacementMap
+                            ,feFlood: feFlood
+                            ,feFuncA: feFuncA
+                            ,feFuncB: feFuncB
+                            ,feFuncG: feFuncG
+                            ,feFuncR: feFuncR
+                            ,feGaussianBlur: feGaussianBlur
+                            ,feImage: feImage
+                            ,feMerge: feMerge
+                            ,feMergeNode: feMergeNode
+                            ,feMorphology: feMorphology
+                            ,feOffset: feOffset
+                            ,feSpecularLighting: feSpecularLighting
+                            ,feTile: feTile
+                            ,feTurbulence: feTurbulence
+                            ,feDistantLight: feDistantLight
+                            ,fePointLight: fePointLight
+                            ,feSpotLight: feSpotLight
+                            ,clipPath: clipPath
+                            ,colorProfile: colorProfile
+                            ,cursor: cursor
+                            ,filter: filter
+                            ,script: script
+                            ,style: style
+                            ,view: view};
 };
-Elm.MouseExtra = Elm.MouseExtra || {};
-Elm.MouseExtra.make = function (_elm) {
+Elm.Svg = Elm.Svg || {};
+Elm.Svg.Attributes = Elm.Svg.Attributes || {};
+Elm.Svg.Attributes.make = function (_elm) {
    "use strict";
-   _elm.MouseExtra = _elm.MouseExtra || {};
-   if (_elm.MouseExtra.values) return _elm.MouseExtra.values;
+   _elm.Svg = _elm.Svg || {};
+   _elm.Svg.Attributes = _elm.Svg.Attributes || {};
+   if (_elm.Svg.Attributes.values)
+   return _elm.Svg.Attributes.values;
    var _U = Elm.Native.Utils.make(_elm),
    $Basics = Elm.Basics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
-   $Html = Elm.Html.make(_elm),
-   $Html$Events = Elm.Html.Events.make(_elm),
-   $Json$Decode = Elm.Json.Decode.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
-   $Mouse = Elm.Mouse.make(_elm),
    $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
+   $Signal = Elm.Signal.make(_elm),
+   $Svg = Elm.Svg.make(_elm),
+   $VirtualDom = Elm.VirtualDom.make(_elm);
    var _op = {};
-   var createVelocitySignal = function (positionSignal) {
-      var update = F2(function (x,state) {
-         return {x: x,velocity: x - state.x};
-      });
-      var initialState = {x: 0,velocity: 0};
-      var rawSignal = A3($Signal.foldp,
-      update,
-      initialState,
-      positionSignal);
-      var signal = A2($Signal.map,
-      function (_) {
-         return _.velocity;
-      },
-      rawSignal);
-      return signal;
-   };
-   var xVelocity = createVelocitySignal($Mouse.x);
-   var yVelocity = createVelocitySignal($Mouse.y);
-   var velocity = A3($Signal.map2,
-   F2(function (x,y) {    return {ctor: "_Tuple2",_0: x,_1: y};}),
-   xVelocity,
-   yVelocity);
-   var VelocityState = F2(function (a,b) {
-      return {x: a,velocity: b};
-   });
-   var onMouseMove = function (mousePositionAddress) {
-      var sendPosition = function (position) {
-         return A2($Signal.message,mousePositionAddress,position);
-      };
-      var mouseOffsetDecoder = A3($Json$Decode.object2,
-      F2(function (x,y) {    return {x: x,y: y};}),
-      A2($Json$Decode._op[":="],"offsetX",$Json$Decode.$int),
-      A2($Json$Decode._op[":="],"offsetY",$Json$Decode.$int));
-      return A3($Html$Events.on,
-      "mousemove",
-      mouseOffsetDecoder,
-      sendPosition);
-   };
-   var MousePosition = F2(function (a,b) {
-      return {x: a,y: b};
-   });
-   return _elm.MouseExtra.values = {_op: _op
-                                   ,velocity: velocity
-                                   ,xVelocity: xVelocity
-                                   ,yVelocity: yVelocity};
-};
-Elm.RotaryKnob = Elm.RotaryKnob || {};
-Elm.RotaryKnob.make = function (_elm) {
-   "use strict";
-   _elm.RotaryKnob = _elm.RotaryKnob || {};
-   if (_elm.RotaryKnob.values) return _elm.RotaryKnob.values;
-   var _U = Elm.Native.Utils.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $Debug = Elm.Debug.make(_elm),
-   $Html = Elm.Html.make(_elm),
-   $Html$Attributes = Elm.Html.Attributes.make(_elm),
-   $Html$Events = Elm.Html.Events.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Mouse = Elm.Mouse.make(_elm),
-   $MouseExtra = Elm.MouseExtra.make(_elm),
-   $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
-   var _op = {};
-   var globalMouseUp = A3($Signal.filter,
-   function (isDown) {
-      return $Basics.not(isDown);
-   },
-   true,
-   $Mouse.isDown);
-   var update = F2(function (action,model) {
-      var _p0 = A2($Debug.log,"action",action);
-      var _p1 = A2($Debug.log,"knob update",true);
-      var _p2 = action;
-      switch (_p2.ctor)
-      {case "LocalMouseDown": return _U.update(model,
-           {mouseDown: true});
-         case "GlobalMouseUp": return _U.update(model,
-           {mouseDown: false});
-         case "MouseMove": if (model.mouseDown) {
-                 var valueAdjust = $Basics.toFloat(_p2._0) * 5.0e-2;
-                 return _U.update(model,{value: model.value + valueAdjust});
-              } else return model;
-         default: return model;}
-   });
-   var clamp = function (x) {
-      return _U.cmp(x,1.0) > 0 ? 1.0 : _U.cmp(x,0.0) < 0 ? 0.0 : x;
-   };
-   var NoOp = {ctor: "NoOp"};
-   var MouseMove = function (a) {
-      return {ctor: "MouseMove",_0: a};
-   };
-   var LocalMouseDown = {ctor: "LocalMouseDown"};
-   var GlobalMouseUp = {ctor: "GlobalMouseUp"};
-   var createActionSignal = function () {
-      var mailbox = $Signal.mailbox(NoOp);
-      return $Signal.mergeMany(_U.list([A2($Signal.map,
-                                       MouseMove,
-                                       $MouseExtra.yVelocity)
-                                       ,A2($Signal.map,
-                                       function (_p3) {
-                                          return GlobalMouseUp;
-                                       },
-                                       globalMouseUp)
-                                       ,mailbox.signal]));
-   }();
-   var init = {mouseDown: false,value: 0.0};
-   var Model = F2(function (a,b) {
-      return {mouseDown: a,value: b};
-   });
-   _op["=>"] = F2(function (v0,v1) {
-      return {ctor: "_Tuple2",_0: v0,_1: v1};
-   });
-   var view = F2(function (address,model) {
-      return A2($Html.div,
-      _U.list([$Html$Attributes.style(_U.list([A2(_op["=>"],
-                                              "width",
-                                              "200px")
-                                              ,A2(_op["=>"],"height","200px")
-                                              ,A2(_op["=>"],"backgroundColor","green")
-                                              ,A2(_op["=>"],"position","relative")
-                                              ,A2(_op["=>"],"margin","20px")]))
-              ,A2($Html$Events.onMouseDown,address,LocalMouseDown)]),
-      _U.list([A2($Html.div,
-      _U.list([$Html$Attributes.style(_U.list([A2(_op["=>"],
-                                              "width",
-                                              "5px")
-                                              ,A2(_op["=>"],"height","5px")
-                                              ,A2(_op["=>"],"backgroundColor","blue")
-                                              ,A2(_op["=>"],"position","absolute")
-                                              ,A2(_op["=>"],"left","100px")
-                                              ,A2(_op["=>"],
-                                              "top",
-                                              A2($Basics._op["++"],
-                                              $Basics.toString($Basics.floor(model.value * 100.0)),
-                                              "px"))]))]),
-      _U.list([]))]));
-   });
-   return _elm.RotaryKnob.values = {_op: _op
-                                   ,Model: Model
-                                   ,init: init
-                                   ,GlobalMouseUp: GlobalMouseUp
-                                   ,LocalMouseDown: LocalMouseDown
-                                   ,MouseMove: MouseMove
-                                   ,NoOp: NoOp
-                                   ,clamp: clamp
-                                   ,update: update
-                                   ,view: view
-                                   ,globalMouseUp: globalMouseUp
-                                   ,createActionSignal: createActionSignal};
+   var writingMode = $VirtualDom.attribute("writing-mode");
+   var wordSpacing = $VirtualDom.attribute("word-spacing");
+   var visibility = $VirtualDom.attribute("visibility");
+   var unicodeBidi = $VirtualDom.attribute("unicode-bidi");
+   var textRendering = $VirtualDom.attribute("text-rendering");
+   var textDecoration = $VirtualDom.attribute("text-decoration");
+   var textAnchor = $VirtualDom.attribute("text-anchor");
+   var stroke = $VirtualDom.attribute("stroke");
+   var strokeWidth = $VirtualDom.attribute("stroke-width");
+   var strokeOpacity = $VirtualDom.attribute("stroke-opacity");
+   var strokeMiterlimit = $VirtualDom.attribute("stroke-miterlimit");
+   var strokeLinejoin = $VirtualDom.attribute("stroke-linejoin");
+   var strokeLinecap = $VirtualDom.attribute("stroke-linecap");
+   var strokeDashoffset = $VirtualDom.attribute("stroke-dashoffset");
+   var strokeDasharray = $VirtualDom.attribute("stroke-dasharray");
+   var stopOpacity = $VirtualDom.attribute("stop-opacity");
+   var stopColor = $VirtualDom.attribute("stop-color");
+   var shapeRendering = $VirtualDom.attribute("shape-rendering");
+   var pointerEvents = $VirtualDom.attribute("pointer-events");
+   var overflow = $VirtualDom.attribute("overflow");
+   var opacity = $VirtualDom.attribute("opacity");
+   var mask = $VirtualDom.attribute("mask");
+   var markerStart = $VirtualDom.attribute("marker-start");
+   var markerMid = $VirtualDom.attribute("marker-mid");
+   var markerEnd = $VirtualDom.attribute("marker-end");
+   var lightingColor = $VirtualDom.attribute("lighting-color");
+   var letterSpacing = $VirtualDom.attribute("letter-spacing");
+   var kerning = $VirtualDom.attribute("kerning");
+   var imageRendering = $VirtualDom.attribute("image-rendering");
+   var glyphOrientationVertical = $VirtualDom.attribute("glyph-orientation-vertical");
+   var glyphOrientationHorizontal = $VirtualDom.attribute("glyph-orientation-horizontal");
+   var fontWeight = $VirtualDom.attribute("font-weight");
+   var fontVariant = $VirtualDom.attribute("font-variant");
+   var fontStyle = $VirtualDom.attribute("font-style");
+   var fontStretch = $VirtualDom.attribute("font-stretch");
+   var fontSize = $VirtualDom.attribute("font-size");
+   var fontSizeAdjust = $VirtualDom.attribute("font-size-adjust");
+   var fontFamily = $VirtualDom.attribute("font-family");
+   var floodOpacity = $VirtualDom.attribute("flood-opacity");
+   var floodColor = $VirtualDom.attribute("flood-color");
+   var filter = $VirtualDom.attribute("filter");
+   var fill = $VirtualDom.attribute("fill");
+   var fillRule = $VirtualDom.attribute("fill-rule");
+   var fillOpacity = $VirtualDom.attribute("fill-opacity");
+   var enableBackground = $VirtualDom.attribute("enable-background");
+   var dominantBaseline = $VirtualDom.attribute("dominant-baseline");
+   var display = $VirtualDom.attribute("display");
+   var direction = $VirtualDom.attribute("direction");
+   var cursor = $VirtualDom.attribute("cursor");
+   var color = $VirtualDom.attribute("color");
+   var colorRendering = $VirtualDom.attribute("color-rendering");
+   var colorProfile = $VirtualDom.attribute("color-profile");
+   var colorInterpolation = $VirtualDom.attribute("color-interpolation");
+   var colorInterpolationFilters = $VirtualDom.attribute("color-interpolation-filters");
+   var clip = $VirtualDom.attribute("clip");
+   var clipRule = $VirtualDom.attribute("clip-rule");
+   var clipPath = $VirtualDom.attribute("clip-path");
+   var baselineShift = $VirtualDom.attribute("baseline-shift");
+   var alignmentBaseline = $VirtualDom.attribute("alignment-baseline");
+   var zoomAndPan = $VirtualDom.attribute("zoomAndPan");
+   var z = $VirtualDom.attribute("z");
+   var yChannelSelector = $VirtualDom.attribute("yChannelSelector");
+   var y2 = $VirtualDom.attribute("y2");
+   var y1 = $VirtualDom.attribute("y1");
+   var y = $VirtualDom.attribute("y");
+   var xmlSpace = A2($VirtualDom.attributeNS,
+   "http://www.w3.org/XML/1998/namespace",
+   "xml:space");
+   var xmlLang = A2($VirtualDom.attributeNS,
+   "http://www.w3.org/XML/1998/namespace",
+   "xml:lang");
+   var xmlBase = A2($VirtualDom.attributeNS,
+   "http://www.w3.org/XML/1998/namespace",
+   "xml:base");
+   var xlinkType = A2($VirtualDom.attributeNS,
+   "http://www.w3.org/1999/xlink",
+   "xlink:type");
+   var xlinkTitle = A2($VirtualDom.attributeNS,
+   "http://www.w3.org/1999/xlink",
+   "xlink:title");
+   var xlinkShow = A2($VirtualDom.attributeNS,
+   "http://www.w3.org/1999/xlink",
+   "xlink:show");
+   var xlinkRole = A2($VirtualDom.attributeNS,
+   "http://www.w3.org/1999/xlink",
+   "xlink:role");
+   var xlinkHref = A2($VirtualDom.attributeNS,
+   "http://www.w3.org/1999/xlink",
+   "xlink:href");
+   var xlinkArcrole = A2($VirtualDom.attributeNS,
+   "http://www.w3.org/1999/xlink",
+   "xlink:arcrole");
+   var xlinkActuate = A2($VirtualDom.attributeNS,
+   "http://www.w3.org/1999/xlink",
+   "xlink:actuate");
+   var xChannelSelector = $VirtualDom.attribute("xChannelSelector");
+   var x2 = $VirtualDom.attribute("x2");
+   var x1 = $VirtualDom.attribute("x1");
+   var xHeight = $VirtualDom.attribute("x-height");
+   var x = $VirtualDom.attribute("x");
+   var widths = $VirtualDom.attribute("widths");
+   var width = $VirtualDom.attribute("width");
+   var viewTarget = $VirtualDom.attribute("viewTarget");
+   var viewBox = $VirtualDom.attribute("viewBox");
+   var vertOriginY = $VirtualDom.attribute("vert-origin-y");
+   var vertOriginX = $VirtualDom.attribute("vert-origin-x");
+   var vertAdvY = $VirtualDom.attribute("vert-adv-y");
+   var version = $VirtualDom.attribute("version");
+   var values = $VirtualDom.attribute("values");
+   var vMathematical = $VirtualDom.attribute("v-mathematical");
+   var vIdeographic = $VirtualDom.attribute("v-ideographic");
+   var vHanging = $VirtualDom.attribute("v-hanging");
+   var vAlphabetic = $VirtualDom.attribute("v-alphabetic");
+   var unitsPerEm = $VirtualDom.attribute("units-per-em");
+   var unicodeRange = $VirtualDom.attribute("unicode-range");
+   var unicode = $VirtualDom.attribute("unicode");
+   var underlineThickness = $VirtualDom.attribute("underline-thickness");
+   var underlinePosition = $VirtualDom.attribute("underline-position");
+   var u2 = $VirtualDom.attribute("u2");
+   var u1 = $VirtualDom.attribute("u1");
+   var type$ = $VirtualDom.attribute("type");
+   var transform = $VirtualDom.attribute("transform");
+   var to = $VirtualDom.attribute("to");
+   var title = $VirtualDom.attribute("title");
+   var textLength = $VirtualDom.attribute("textLength");
+   var targetY = $VirtualDom.attribute("targetY");
+   var targetX = $VirtualDom.attribute("targetX");
+   var target = $VirtualDom.attribute("target");
+   var tableValues = $VirtualDom.attribute("tableValues");
+   var systemLanguage = $VirtualDom.attribute("systemLanguage");
+   var surfaceScale = $VirtualDom.attribute("surfaceScale");
+   var style = $VirtualDom.attribute("style");
+   var string = $VirtualDom.attribute("string");
+   var strikethroughThickness = $VirtualDom.attribute("strikethrough-thickness");
+   var strikethroughPosition = $VirtualDom.attribute("strikethrough-position");
+   var stitchTiles = $VirtualDom.attribute("stitchTiles");
+   var stemv = $VirtualDom.attribute("stemv");
+   var stemh = $VirtualDom.attribute("stemh");
+   var stdDeviation = $VirtualDom.attribute("stdDeviation");
+   var startOffset = $VirtualDom.attribute("startOffset");
+   var spreadMethod = $VirtualDom.attribute("spreadMethod");
+   var speed = $VirtualDom.attribute("speed");
+   var specularExponent = $VirtualDom.attribute("specularExponent");
+   var specularConstant = $VirtualDom.attribute("specularConstant");
+   var spacing = $VirtualDom.attribute("spacing");
+   var slope = $VirtualDom.attribute("slope");
+   var seed = $VirtualDom.attribute("seed");
+   var scale = $VirtualDom.attribute("scale");
+   var ry = $VirtualDom.attribute("ry");
+   var rx = $VirtualDom.attribute("rx");
+   var rotate = $VirtualDom.attribute("rotate");
+   var result = $VirtualDom.attribute("result");
+   var restart = $VirtualDom.attribute("restart");
+   var requiredFeatures = $VirtualDom.attribute("requiredFeatures");
+   var requiredExtensions = $VirtualDom.attribute("requiredExtensions");
+   var repeatDur = $VirtualDom.attribute("repeatDur");
+   var repeatCount = $VirtualDom.attribute("repeatCount");
+   var renderingIntent = $VirtualDom.attribute("rendering-intent");
+   var refY = $VirtualDom.attribute("refY");
+   var refX = $VirtualDom.attribute("refX");
+   var radius = $VirtualDom.attribute("radius");
+   var r = $VirtualDom.attribute("r");
+   var primitiveUnits = $VirtualDom.attribute("primitiveUnits");
+   var preserveAspectRatio = $VirtualDom.attribute("preserveAspectRatio");
+   var preserveAlpha = $VirtualDom.attribute("preserveAlpha");
+   var pointsAtZ = $VirtualDom.attribute("pointsAtZ");
+   var pointsAtY = $VirtualDom.attribute("pointsAtY");
+   var pointsAtX = $VirtualDom.attribute("pointsAtX");
+   var points = $VirtualDom.attribute("points");
+   var pointOrder = $VirtualDom.attribute("point-order");
+   var patternUnits = $VirtualDom.attribute("patternUnits");
+   var patternTransform = $VirtualDom.attribute("patternTransform");
+   var patternContentUnits = $VirtualDom.attribute("patternContentUnits");
+   var pathLength = $VirtualDom.attribute("pathLength");
+   var path = $VirtualDom.attribute("path");
+   var panose1 = $VirtualDom.attribute("panose-1");
+   var overlineThickness = $VirtualDom.attribute("overline-thickness");
+   var overlinePosition = $VirtualDom.attribute("overline-position");
+   var origin = $VirtualDom.attribute("origin");
+   var orientation = $VirtualDom.attribute("orientation");
+   var orient = $VirtualDom.attribute("orient");
+   var order = $VirtualDom.attribute("order");
+   var operator = $VirtualDom.attribute("operator");
+   var offset = $VirtualDom.attribute("offset");
+   var numOctaves = $VirtualDom.attribute("numOctaves");
+   var name = $VirtualDom.attribute("name");
+   var mode = $VirtualDom.attribute("mode");
+   var min = $VirtualDom.attribute("min");
+   var method = $VirtualDom.attribute("method");
+   var media = $VirtualDom.attribute("media");
+   var max = $VirtualDom.attribute("max");
+   var mathematical = $VirtualDom.attribute("mathematical");
+   var maskUnits = $VirtualDom.attribute("maskUnits");
+   var maskContentUnits = $VirtualDom.attribute("maskContentUnits");
+   var markerWidth = $VirtualDom.attribute("markerWidth");
+   var markerUnits = $VirtualDom.attribute("markerUnits");
+   var markerHeight = $VirtualDom.attribute("markerHeight");
+   var local = $VirtualDom.attribute("local");
+   var limitingConeAngle = $VirtualDom.attribute("limitingConeAngle");
+   var lengthAdjust = $VirtualDom.attribute("lengthAdjust");
+   var lang = $VirtualDom.attribute("lang");
+   var keyTimes = $VirtualDom.attribute("keyTimes");
+   var keySplines = $VirtualDom.attribute("keySplines");
+   var keyPoints = $VirtualDom.attribute("keyPoints");
+   var kernelUnitLength = $VirtualDom.attribute("kernelUnitLength");
+   var kernelMatrix = $VirtualDom.attribute("kernelMatrix");
+   var k4 = $VirtualDom.attribute("k4");
+   var k3 = $VirtualDom.attribute("k3");
+   var k2 = $VirtualDom.attribute("k2");
+   var k1 = $VirtualDom.attribute("k1");
+   var k = $VirtualDom.attribute("k");
+   var intercept = $VirtualDom.attribute("intercept");
+   var in2 = $VirtualDom.attribute("in2");
+   var in$ = $VirtualDom.attribute("in");
+   var ideographic = $VirtualDom.attribute("ideographic");
+   var id = $VirtualDom.attribute("id");
+   var horizOriginY = $VirtualDom.attribute("horiz-origin-y");
+   var horizOriginX = $VirtualDom.attribute("horiz-origin-x");
+   var horizAdvX = $VirtualDom.attribute("horiz-adv-x");
+   var height = $VirtualDom.attribute("height");
+   var hanging = $VirtualDom.attribute("hanging");
+   var gradientUnits = $VirtualDom.attribute("gradientUnits");
+   var gradientTransform = $VirtualDom.attribute("gradientTransform");
+   var glyphRef = $VirtualDom.attribute("glyphRef");
+   var glyphName = $VirtualDom.attribute("glyph-name");
+   var g2 = $VirtualDom.attribute("g2");
+   var g1 = $VirtualDom.attribute("g1");
+   var fy = $VirtualDom.attribute("fy");
+   var fx = $VirtualDom.attribute("fx");
+   var from = $VirtualDom.attribute("from");
+   var format = $VirtualDom.attribute("format");
+   var filterUnits = $VirtualDom.attribute("filterUnits");
+   var filterRes = $VirtualDom.attribute("filterRes");
+   var externalResourcesRequired = $VirtualDom.attribute("externalResourcesRequired");
+   var exponent = $VirtualDom.attribute("exponent");
+   var end = $VirtualDom.attribute("end");
+   var elevation = $VirtualDom.attribute("elevation");
+   var edgeMode = $VirtualDom.attribute("edgeMode");
+   var dy = $VirtualDom.attribute("dy");
+   var dx = $VirtualDom.attribute("dx");
+   var dur = $VirtualDom.attribute("dur");
+   var divisor = $VirtualDom.attribute("divisor");
+   var diffuseConstant = $VirtualDom.attribute("diffuseConstant");
+   var descent = $VirtualDom.attribute("descent");
+   var decelerate = $VirtualDom.attribute("decelerate");
+   var d = $VirtualDom.attribute("d");
+   var cy = $VirtualDom.attribute("cy");
+   var cx = $VirtualDom.attribute("cx");
+   var contentStyleType = $VirtualDom.attribute("contentStyleType");
+   var contentScriptType = $VirtualDom.attribute("contentScriptType");
+   var clipPathUnits = $VirtualDom.attribute("clipPathUnits");
+   var $class = $VirtualDom.attribute("class");
+   var capHeight = $VirtualDom.attribute("cap-height");
+   var calcMode = $VirtualDom.attribute("calcMode");
+   var by = $VirtualDom.attribute("by");
+   var bias = $VirtualDom.attribute("bias");
+   var begin = $VirtualDom.attribute("begin");
+   var bbox = $VirtualDom.attribute("bbox");
+   var baseProfile = $VirtualDom.attribute("baseProfile");
+   var baseFrequency = $VirtualDom.attribute("baseFrequency");
+   var azimuth = $VirtualDom.attribute("azimuth");
+   var autoReverse = $VirtualDom.attribute("autoReverse");
+   var attributeType = $VirtualDom.attribute("attributeType");
+   var attributeName = $VirtualDom.attribute("attributeName");
+   var ascent = $VirtualDom.attribute("ascent");
+   var arabicForm = $VirtualDom.attribute("arabic-form");
+   var amplitude = $VirtualDom.attribute("amplitude");
+   var allowReorder = $VirtualDom.attribute("allowReorder");
+   var alphabetic = $VirtualDom.attribute("alphabetic");
+   var additive = $VirtualDom.attribute("additive");
+   var accumulate = $VirtualDom.attribute("accumulate");
+   var accelerate = $VirtualDom.attribute("accelerate");
+   var accentHeight = $VirtualDom.attribute("accent-height");
+   return _elm.Svg.Attributes.values = {_op: _op
+                                       ,accentHeight: accentHeight
+                                       ,accelerate: accelerate
+                                       ,accumulate: accumulate
+                                       ,additive: additive
+                                       ,alphabetic: alphabetic
+                                       ,allowReorder: allowReorder
+                                       ,amplitude: amplitude
+                                       ,arabicForm: arabicForm
+                                       ,ascent: ascent
+                                       ,attributeName: attributeName
+                                       ,attributeType: attributeType
+                                       ,autoReverse: autoReverse
+                                       ,azimuth: azimuth
+                                       ,baseFrequency: baseFrequency
+                                       ,baseProfile: baseProfile
+                                       ,bbox: bbox
+                                       ,begin: begin
+                                       ,bias: bias
+                                       ,by: by
+                                       ,calcMode: calcMode
+                                       ,capHeight: capHeight
+                                       ,$class: $class
+                                       ,clipPathUnits: clipPathUnits
+                                       ,contentScriptType: contentScriptType
+                                       ,contentStyleType: contentStyleType
+                                       ,cx: cx
+                                       ,cy: cy
+                                       ,d: d
+                                       ,decelerate: decelerate
+                                       ,descent: descent
+                                       ,diffuseConstant: diffuseConstant
+                                       ,divisor: divisor
+                                       ,dur: dur
+                                       ,dx: dx
+                                       ,dy: dy
+                                       ,edgeMode: edgeMode
+                                       ,elevation: elevation
+                                       ,end: end
+                                       ,exponent: exponent
+                                       ,externalResourcesRequired: externalResourcesRequired
+                                       ,filterRes: filterRes
+                                       ,filterUnits: filterUnits
+                                       ,format: format
+                                       ,from: from
+                                       ,fx: fx
+                                       ,fy: fy
+                                       ,g1: g1
+                                       ,g2: g2
+                                       ,glyphName: glyphName
+                                       ,glyphRef: glyphRef
+                                       ,gradientTransform: gradientTransform
+                                       ,gradientUnits: gradientUnits
+                                       ,hanging: hanging
+                                       ,height: height
+                                       ,horizAdvX: horizAdvX
+                                       ,horizOriginX: horizOriginX
+                                       ,horizOriginY: horizOriginY
+                                       ,id: id
+                                       ,ideographic: ideographic
+                                       ,in$: in$
+                                       ,in2: in2
+                                       ,intercept: intercept
+                                       ,k: k
+                                       ,k1: k1
+                                       ,k2: k2
+                                       ,k3: k3
+                                       ,k4: k4
+                                       ,kernelMatrix: kernelMatrix
+                                       ,kernelUnitLength: kernelUnitLength
+                                       ,keyPoints: keyPoints
+                                       ,keySplines: keySplines
+                                       ,keyTimes: keyTimes
+                                       ,lang: lang
+                                       ,lengthAdjust: lengthAdjust
+                                       ,limitingConeAngle: limitingConeAngle
+                                       ,local: local
+                                       ,markerHeight: markerHeight
+                                       ,markerUnits: markerUnits
+                                       ,markerWidth: markerWidth
+                                       ,maskContentUnits: maskContentUnits
+                                       ,maskUnits: maskUnits
+                                       ,mathematical: mathematical
+                                       ,max: max
+                                       ,media: media
+                                       ,method: method
+                                       ,min: min
+                                       ,mode: mode
+                                       ,name: name
+                                       ,numOctaves: numOctaves
+                                       ,offset: offset
+                                       ,operator: operator
+                                       ,order: order
+                                       ,orient: orient
+                                       ,orientation: orientation
+                                       ,origin: origin
+                                       ,overlinePosition: overlinePosition
+                                       ,overlineThickness: overlineThickness
+                                       ,panose1: panose1
+                                       ,path: path
+                                       ,pathLength: pathLength
+                                       ,patternContentUnits: patternContentUnits
+                                       ,patternTransform: patternTransform
+                                       ,patternUnits: patternUnits
+                                       ,pointOrder: pointOrder
+                                       ,points: points
+                                       ,pointsAtX: pointsAtX
+                                       ,pointsAtY: pointsAtY
+                                       ,pointsAtZ: pointsAtZ
+                                       ,preserveAlpha: preserveAlpha
+                                       ,preserveAspectRatio: preserveAspectRatio
+                                       ,primitiveUnits: primitiveUnits
+                                       ,r: r
+                                       ,radius: radius
+                                       ,refX: refX
+                                       ,refY: refY
+                                       ,renderingIntent: renderingIntent
+                                       ,repeatCount: repeatCount
+                                       ,repeatDur: repeatDur
+                                       ,requiredExtensions: requiredExtensions
+                                       ,requiredFeatures: requiredFeatures
+                                       ,restart: restart
+                                       ,result: result
+                                       ,rotate: rotate
+                                       ,rx: rx
+                                       ,ry: ry
+                                       ,scale: scale
+                                       ,seed: seed
+                                       ,slope: slope
+                                       ,spacing: spacing
+                                       ,specularConstant: specularConstant
+                                       ,specularExponent: specularExponent
+                                       ,speed: speed
+                                       ,spreadMethod: spreadMethod
+                                       ,startOffset: startOffset
+                                       ,stdDeviation: stdDeviation
+                                       ,stemh: stemh
+                                       ,stemv: stemv
+                                       ,stitchTiles: stitchTiles
+                                       ,strikethroughPosition: strikethroughPosition
+                                       ,strikethroughThickness: strikethroughThickness
+                                       ,string: string
+                                       ,style: style
+                                       ,surfaceScale: surfaceScale
+                                       ,systemLanguage: systemLanguage
+                                       ,tableValues: tableValues
+                                       ,target: target
+                                       ,targetX: targetX
+                                       ,targetY: targetY
+                                       ,textLength: textLength
+                                       ,title: title
+                                       ,to: to
+                                       ,transform: transform
+                                       ,type$: type$
+                                       ,u1: u1
+                                       ,u2: u2
+                                       ,underlinePosition: underlinePosition
+                                       ,underlineThickness: underlineThickness
+                                       ,unicode: unicode
+                                       ,unicodeRange: unicodeRange
+                                       ,unitsPerEm: unitsPerEm
+                                       ,vAlphabetic: vAlphabetic
+                                       ,vHanging: vHanging
+                                       ,vIdeographic: vIdeographic
+                                       ,vMathematical: vMathematical
+                                       ,values: values
+                                       ,version: version
+                                       ,vertAdvY: vertAdvY
+                                       ,vertOriginX: vertOriginX
+                                       ,vertOriginY: vertOriginY
+                                       ,viewBox: viewBox
+                                       ,viewTarget: viewTarget
+                                       ,width: width
+                                       ,widths: widths
+                                       ,x: x
+                                       ,xHeight: xHeight
+                                       ,x1: x1
+                                       ,x2: x2
+                                       ,xChannelSelector: xChannelSelector
+                                       ,xlinkActuate: xlinkActuate
+                                       ,xlinkArcrole: xlinkArcrole
+                                       ,xlinkHref: xlinkHref
+                                       ,xlinkRole: xlinkRole
+                                       ,xlinkShow: xlinkShow
+                                       ,xlinkTitle: xlinkTitle
+                                       ,xlinkType: xlinkType
+                                       ,xmlBase: xmlBase
+                                       ,xmlLang: xmlLang
+                                       ,xmlSpace: xmlSpace
+                                       ,y: y
+                                       ,y1: y1
+                                       ,y2: y2
+                                       ,yChannelSelector: yChannelSelector
+                                       ,z: z
+                                       ,zoomAndPan: zoomAndPan
+                                       ,alignmentBaseline: alignmentBaseline
+                                       ,baselineShift: baselineShift
+                                       ,clipPath: clipPath
+                                       ,clipRule: clipRule
+                                       ,clip: clip
+                                       ,colorInterpolationFilters: colorInterpolationFilters
+                                       ,colorInterpolation: colorInterpolation
+                                       ,colorProfile: colorProfile
+                                       ,colorRendering: colorRendering
+                                       ,color: color
+                                       ,cursor: cursor
+                                       ,direction: direction
+                                       ,display: display
+                                       ,dominantBaseline: dominantBaseline
+                                       ,enableBackground: enableBackground
+                                       ,fillOpacity: fillOpacity
+                                       ,fillRule: fillRule
+                                       ,fill: fill
+                                       ,filter: filter
+                                       ,floodColor: floodColor
+                                       ,floodOpacity: floodOpacity
+                                       ,fontFamily: fontFamily
+                                       ,fontSizeAdjust: fontSizeAdjust
+                                       ,fontSize: fontSize
+                                       ,fontStretch: fontStretch
+                                       ,fontStyle: fontStyle
+                                       ,fontVariant: fontVariant
+                                       ,fontWeight: fontWeight
+                                       ,glyphOrientationHorizontal: glyphOrientationHorizontal
+                                       ,glyphOrientationVertical: glyphOrientationVertical
+                                       ,imageRendering: imageRendering
+                                       ,kerning: kerning
+                                       ,letterSpacing: letterSpacing
+                                       ,lightingColor: lightingColor
+                                       ,markerEnd: markerEnd
+                                       ,markerMid: markerMid
+                                       ,markerStart: markerStart
+                                       ,mask: mask
+                                       ,opacity: opacity
+                                       ,overflow: overflow
+                                       ,pointerEvents: pointerEvents
+                                       ,shapeRendering: shapeRendering
+                                       ,stopColor: stopColor
+                                       ,stopOpacity: stopOpacity
+                                       ,strokeDasharray: strokeDasharray
+                                       ,strokeDashoffset: strokeDashoffset
+                                       ,strokeLinecap: strokeLinecap
+                                       ,strokeLinejoin: strokeLinejoin
+                                       ,strokeMiterlimit: strokeMiterlimit
+                                       ,strokeOpacity: strokeOpacity
+                                       ,strokeWidth: strokeWidth
+                                       ,stroke: stroke
+                                       ,textAnchor: textAnchor
+                                       ,textDecoration: textDecoration
+                                       ,textRendering: textRendering
+                                       ,unicodeBidi: unicodeBidi
+                                       ,visibility: visibility
+                                       ,wordSpacing: wordSpacing
+                                       ,writingMode: writingMode};
 };
 Elm.Main = Elm.Main || {};
 Elm.Main.make = function (_elm) {
@@ -11602,117 +12017,159 @@ Elm.Main.make = function (_elm) {
    $Basics = Elm.Basics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
    $Html = Elm.Html.make(_elm),
+   $Html$Attributes = Elm.Html.Attributes.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
-   $Mouse = Elm.Mouse.make(_elm),
-   $MouseExtra = Elm.MouseExtra.make(_elm),
    $Result = Elm.Result.make(_elm),
-   $RotaryKnob = Elm.RotaryKnob.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
+   $Signal = Elm.Signal.make(_elm),
+   $String = Elm.String.make(_elm),
+   $Svg = Elm.Svg.make(_elm),
+   $Svg$Attributes = Elm.Svg.Attributes.make(_elm);
    var _op = {};
-   var globalMouseUp = A3($Signal.filter,
-   function (isDown) {
-      return $Basics.not(isDown);
-   },
-   true,
-   $Mouse.isDown);
-   var NoOp = {ctor: "NoOp"};
-   var mailbox = $Signal.mailbox(NoOp);
-   var MouseMove = function (a) {
-      return {ctor: "MouseMove",_0: a};
-   };
-   var GlobalMouseUp = {ctor: "GlobalMouseUp"};
-   var actionSignal = $Signal.mergeMany(_U.list([mailbox.signal
-                                                ,A2($Signal.map,MouseMove,$MouseExtra.yVelocity)
-                                                ,A2($Signal.map,
-                                                function (_p0) {
-                                                   return GlobalMouseUp;
-                                                },
-                                                globalMouseUp)]));
-   var Knob2Action = function (a) {
-      return {ctor: "Knob2Action",_0: a};
-   };
-   var Knob1Action = function (a) {
-      return {ctor: "Knob1Action",_0: a};
-   };
-   var view = F2(function (address,model) {
-      return A2($Html.div,
-      _U.list([]),
-      _U.list([A2($RotaryKnob.view,
-              A2($Signal.forwardTo,address,Knob1Action),
-              model.knob1)
-              ,A2($RotaryKnob.view,
-              A2($Signal.forwardTo,address,Knob2Action),
-              model.knob2)]));
+   var fromRadians = $Basics.radians;
+   var fromDegrees = $Basics.degrees;
+   var ArcShapeArgs = F4(function (a,b,c,d) {
+      return {radius: a,centerPoint: b,startAngle: c,endAngle: d};
    });
-   var None = {ctor: "None"};
-   var Knob2 = {ctor: "Knob2"};
-   var Knob1 = {ctor: "Knob1"};
-   var update = F2(function (action,model) {
-      var _p1 = A2($Debug.log,"main update",true);
-      var _p2 = action;
-      switch (_p2.ctor)
-      {case "Knob1Action": return _U.update(model,
-           {knob1: A2($RotaryKnob.update,_p2._0,model.knob1)
-           ,currentKnob: Knob1});
-         case "Knob2Action": return _U.update(model,
-           {knob2: A2($RotaryKnob.update,_p2._0,model.knob2)
-           ,currentKnob: Knob2});
-         case "MouseMove": var _p4 = _p2._0;
-           var _p3 = model.currentKnob;
-           switch (_p3.ctor)
-           {case "Knob1": return _U.update(model,
-                {knob1: A2($RotaryKnob.update,
-                $RotaryKnob.MouseMove(_p4),
-                model.knob1)});
-              case "Knob2": return _U.update(model,
-                {knob2: A2($RotaryKnob.update,
-                $RotaryKnob.MouseMove(_p4),
-                model.knob2)});
-              default: return model;}
-         case "GlobalMouseUp": var _p5 = model.currentKnob;
-           switch (_p5.ctor)
-           {case "Knob1": return _U.update(model,
-                {knob1: A2($RotaryKnob.update,
-                $RotaryKnob.GlobalMouseUp,
-                model.knob1)});
-              case "Knob2": return _U.update(model,
-                {knob2: A2($RotaryKnob.update,
-                $RotaryKnob.GlobalMouseUp,
-                model.knob2)});
-              default: return model;}
-         default: return model;}
+   var ArcArgs = F6(function (a,b,c,d,e,f) {
+      return {absolute: a
+             ,radius: b
+             ,xAxisRotation: c
+             ,largeArc: d
+             ,sweep: e
+             ,endPoint: f};
    });
-   var init = {knob1: $RotaryKnob.init
-              ,knob2: $RotaryKnob.init
-              ,currentKnob: None};
-   var modelSignal = A3($Signal.foldp,update,init,actionSignal);
-   var viewSignal = A2($Signal.map,
-   function (model) {
-      return A2(view,mailbox.address,model);
-   },
-   modelSignal);
-   var main = viewSignal;
-   var Model = F3(function (a,b,c) {
-      return {knob1: a,knob2: b,currentKnob: c};
+   var boolToIntString = function (b) {
+      var _p0 = b;
+      if (_p0 === true) {
+            return "1";
+         } else {
+            return "0";
+         }
+   };
+   var arcSegment = function (args) {
+      var _p1 = args.endPoint;
+      var endX = _p1._0;
+      var endY = _p1._1;
+      var _p2 = args.radius;
+      var radiusX = _p2._0;
+      var radiusY = _p2._1;
+      return A2($String.join,
+      " ",
+      _U.list([args.absolute ? "A" : "a"
+              ,$Basics.toString(radiusX)
+              ,$Basics.toString(radiusY)
+              ,$Basics.toString(args.xAxisRotation)
+              ,boolToIntString(args.largeArc)
+              ,boolToIntString(args.sweep)
+              ,$Basics.toString(endX)
+              ,$Basics.toString(endY)]));
+   };
+   var arcShape = function (args) {
+      var _p3 = A2($Debug.log,"endAngleDegrees",args.endAngle);
+      var largeArc = _U.cmp(args.endAngle,180.0) > -1 ? true : false;
+      var _p4 = args.centerPoint;
+      var centerX = _p4._0;
+      var centerY = _p4._1;
+      var startPointYAngle0 = centerY;
+      var radius = args.radius;
+      var startPointXAngle0 = centerX + radius;
+      var _p5 = A2($Debug.log,"radius",radius);
+      var endAngleRadians = fromDegrees(args.endAngle);
+      var _p6 = $Basics.fromPolar({ctor: "_Tuple2"
+                                  ,_0: radius
+                                  ,_1: endAngleRadians});
+      var endPointX = _p6._0;
+      var endPointY = _p6._1;
+      var endPointX$ = endPointX + radius;
+      var _p7 = A2($Debug.log,"endPointX\'",endPointX$);
+      var endPointY$ = radius * 2.0 - (endPointY + radius);
+      var _p8 = A2($Debug.log,"endPointY\'",endPointY$);
+      var _p9 = A2($Debug.log,"endPointX",endPointX);
+      var _p10 = A2($Debug.log,"endPointY",endPointY);
+      var _p11 = A2($Debug.log,"endAngleRadians",endAngleRadians);
+      var startAngleRadians = 0.0;
+      return A2($Basics._op["++"],
+      "M ",
+      A2($Basics._op["++"],
+      $Basics.toString(startPointXAngle0),
+      A2($Basics._op["++"],
+      " ",
+      A2($Basics._op["++"],
+      $Basics.toString(startPointYAngle0),
+      A2($Basics._op["++"],
+      " ",
+      arcSegment({absolute: true
+                 ,endPoint: {ctor: "_Tuple2",_0: endPointX$,_1: endPointY$}
+                 ,radius: {ctor: "_Tuple2",_0: args.radius,_1: args.radius}
+                 ,sweep: false
+                 ,largeArc: largeArc
+                 ,xAxisRotation: 0.0}))))));
+   };
+   var example2 = A2($Svg.svg,
+   _U.list([$Html$Attributes.style(_U.list([{ctor: "_Tuple2"
+                                            ,_0: "border"
+                                            ,_1: "1px solid red"}
+                                           ,{ctor: "_Tuple2",_0: "margin",_1: "50px"}]))
+           ,$Svg$Attributes.width("200")
+           ,$Svg$Attributes.height("200")
+           ,$Svg$Attributes.viewBox("0 0 200 200")]),
+   _U.list([A2($Svg.rect,
+           _U.list([$Svg$Attributes.x("0")
+                   ,$Svg$Attributes.y("0")
+                   ,$Svg$Attributes.width("200")
+                   ,$Svg$Attributes.height("200")
+                   ,$Svg$Attributes.fill("none")
+                   ,$Svg$Attributes.stroke("red")]),
+           _U.list([]))
+           ,A2($Svg.path,
+           _U.list([$Svg$Attributes.d(arcShape({radius: 100.0
+                                               ,centerPoint: {ctor: "_Tuple2",_0: 100.0,_1: 100.0}
+                                               ,startAngle: 0.0
+                                               ,endAngle: 90.0}))
+                   ,$Svg$Attributes.stroke("black")
+                   ,$Svg$Attributes.fill("none")
+                   ,$Svg$Attributes.strokeWidth("10")]),
+           _U.list([]))]));
+   var main = example2;
+   var example1 = A2($Html.div,
+   _U.list([$Html$Attributes.style(_U.list([{ctor: "_Tuple2"
+                                            ,_0: "margin"
+                                            ,_1: "100px"}]))]),
+   _U.list([A2($Svg.svg,
+   _U.list([]),
+   _U.list([A2($Svg.path,
+   _U.list([$Svg$Attributes.d(A2($Basics._op["++"],
+           "M 50 50 M -50 -50 ",
+           arcSegment({absolute: true
+                      ,endPoint: {ctor: "_Tuple2",_0: 100.0,_1: 100.0}
+                      ,radius: {ctor: "_Tuple2",_0: 1.0e-6,_1: 1.0e-6}
+                      ,sweep: false
+                      ,largeArc: false
+                      ,xAxisRotation: 0.0})))
+           ,$Svg$Attributes.stroke("black")
+           ,$Svg$Attributes.fill("none")
+           ,$Svg$Attributes.strokeWidth("10")]),
+   _U.list([]))]))]));
+   var polarToCartesian = F4(function (centerX,
+   centerY,
+   radius,
+   angleInDegrees) {
+      var angleInRadians = (angleInDegrees - 90.0) * $Basics.pi / 180.0;
+      return {ctor: "_Tuple2"
+             ,_0: centerX + radius * $Basics.cos(angleInRadians)
+             ,_1: centerY + radius * $Basics.sin(angleInRadians)};
    });
    return _elm.Main.values = {_op: _op
-                             ,Model: Model
-                             ,init: init
-                             ,Knob1: Knob1
-                             ,Knob2: Knob2
-                             ,None: None
-                             ,Knob1Action: Knob1Action
-                             ,Knob2Action: Knob2Action
-                             ,GlobalMouseUp: GlobalMouseUp
-                             ,MouseMove: MouseMove
-                             ,NoOp: NoOp
-                             ,update: update
-                             ,mailbox: mailbox
-                             ,globalMouseUp: globalMouseUp
-                             ,actionSignal: actionSignal
-                             ,view: view
-                             ,modelSignal: modelSignal
-                             ,viewSignal: viewSignal
+                             ,polarToCartesian: polarToCartesian
+                             ,boolToIntString: boolToIntString
+                             ,ArcArgs: ArcArgs
+                             ,arcSegment: arcSegment
+                             ,ArcShapeArgs: ArcShapeArgs
+                             ,fromDegrees: fromDegrees
+                             ,fromRadians: fromRadians
+                             ,arcShape: arcShape
+                             ,example1: example1
+                             ,example2: example2
                              ,main: main};
 };
