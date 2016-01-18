@@ -2,6 +2,7 @@ module MouseExtra
     ( velocity
     , xVelocity
     , yVelocity
+    , onMouseMove
     ) where
 
 
@@ -11,25 +12,25 @@ import Html exposing(Attribute)
 import Mouse
 
 
-type alias MousePosition = {x:Int, y:Int}
+type alias MousePosition = (Int, Int)
 
 
 onMouseMove : Signal.Address MousePosition -> Attribute
 onMouseMove mousePositionAddress =
   let
-    mouseOffsetDecoder : Decoder MousePosition
-    mouseOffsetDecoder =
+    mousePositionDecoder : Decoder MousePosition
+    mousePositionDecoder =
       object2
-        (\x y -> {x=x, y=y})
-        ("offsetX" := int)
-        ("offsetY" := int)
+        (\x y -> (x,y))
+        ("pageX" := int)
+        ("pageY" := int)
 
     sendPosition : MousePosition -> Signal.Message
     sendPosition position =
       Signal.message mousePositionAddress position
 
   in
-    on "mousemove" mouseOffsetDecoder sendPosition
+    on "mousemove" mousePositionDecoder sendPosition
 
 
 type alias VelocityState = {x : Int, velocity: Int}

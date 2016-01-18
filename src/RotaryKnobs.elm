@@ -72,7 +72,8 @@ updateKnob action =
 type Action
   = KnobAction ID RotaryKnob.Action
   | GlobalMouseUp -- a mouse up event anywhere
-  | MouseMove Int  -- the number of pixels moved since the last one of these events
+  -- | MouseMove Int  -- the number of pixels moved since the last one of these events
+  | MousePosition (Int, Int)  -- the number of pixels moved since the last one of these events
   | NoOp
 
 update : Action -> Model -> Model
@@ -84,14 +85,23 @@ update action model =
         , currentKnob = Just id
       }
 
-    MouseMove i ->
-      case model.currentKnob of
-        Just id ->
-          { model |
-            knobs = Dict.update id (updateKnob (RotaryKnob.MouseMove i)) model.knobs
-          }
-        Nothing ->
-          model
+    -- MouseMove i ->
+    --   case model.currentKnob of
+    --     Just id ->
+    --       { model |
+    --         knobs = Dict.update id (updateKnob (RotaryKnob.MouseMove i)) model.knobs
+    --       }
+    --     Nothing ->
+    --       model
+    MousePosition (x,y) ->
+      model
+      -- case model.currentKnob of
+      --   Just id ->
+      --     { model |
+      --       knobs = Dict.update id (updateKnob (RotaryKnob.MouseMove i)) model.knobs
+      --     }
+      --   Nothing ->
+      --     model
 
     GlobalMouseUp ->
       case model.currentKnob of
@@ -117,13 +127,15 @@ globalMouseUp = Signal.filter (\isDown -> not isDown) True Mouse.isDown
 actionSignal : Signal Action
 actionSignal = Signal.mergeMany
   [ mailbox.signal
-  , Signal.map MouseMove MouseExtra.yVelocity
+  -- , Signal.map MouseMove MouseExtra.yVelocity
   , Signal.map (\_ -> GlobalMouseUp) globalMouseUp
   ]
 
 
 -- maybe if we used the mouse events rather than the signals, we could use
 -- the regular startApp.simple, and this would reduce lines of code!
+
+-- although, we need to get mouse position (using pageX)
 
 modelSignal : Signal Model
 modelSignal = Signal.foldp update init actionSignal
@@ -139,7 +151,9 @@ getKnobView model address id =
 
 view : Signal.Address Action -> Model -> Html.Html
 view address model =
-  div []
+  div
+    [ MouseExtra.onMouseMove (Signal.forwardTo address MousePosition)]
+    -- [ ]
     [ getKnobView model address "A"
     , getKnobView model address "B"
     , getKnobView model address "C"
