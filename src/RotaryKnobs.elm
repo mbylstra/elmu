@@ -39,6 +39,7 @@ init =
       [ ("A", RotaryKnob.init)
       , ("B", RotaryKnob.init)
       , ("C", RotaryKnob.init)
+      , ("D", RotaryKnob.init)
       ]
     , currentKnob = Nothing
     }
@@ -120,6 +121,10 @@ actionSignal = Signal.mergeMany
   , Signal.map (\_ -> GlobalMouseUp) globalMouseUp
   ]
 
+
+-- maybe if we used the mouse events rather than the signals, we could use
+-- the regular startApp.simple, and this would reduce lines of code!
+
 modelSignal : Signal Model
 modelSignal = Signal.foldp update init actionSignal
 
@@ -138,6 +143,7 @@ view address model =
     [ getKnobView model address "A"
     , getKnobView model address "B"
     , getKnobView model address "C"
+    , getKnobView model address "D"
     ]
 
 viewSignal : Signal Html.Html

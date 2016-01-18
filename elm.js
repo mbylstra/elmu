@@ -12511,7 +12511,7 @@ Elm.Main.make = function (_elm) {
             return _p6._0;
          } else {
             return _U.crashCase("Main",
-            {start: {line: 49,column: 3},end: {line: 51,column: 61}},
+            {start: {line: 50,column: 3},end: {line: 52,column: 61}},
             _p6)(A2($Basics._op["++"],"No knob exists with id: ",id));
          }
    });
@@ -12526,13 +12526,15 @@ Elm.Main.make = function (_elm) {
       _U.list([]),
       _U.list([A3(getKnobView,model,address,"A")
               ,A3(getKnobView,model,address,"B")
-              ,A3(getKnobView,model,address,"C")]));
+              ,A3(getKnobView,model,address,"C")
+              ,A3(getKnobView,model,address,"D")]));
    });
    var init = {knobs: $Dict.fromList(_U.list([{ctor: "_Tuple2"
                                               ,_0: "A"
                                               ,_1: $RotaryKnob.init}
                                              ,{ctor: "_Tuple2",_0: "B",_1: $RotaryKnob.init}
-                                             ,{ctor: "_Tuple2",_0: "C",_1: $RotaryKnob.init}]))
+                                             ,{ctor: "_Tuple2",_0: "C",_1: $RotaryKnob.init}
+                                             ,{ctor: "_Tuple2",_0: "D",_1: $RotaryKnob.init}]))
               ,currentKnob: $Maybe.Nothing};
    var modelSignal = A3($Signal.foldp,update,init,actionSignal);
    var viewSignal = A2($Signal.map,
