@@ -118,8 +118,12 @@ view address model =
       [ style
           [ "width" => "200px"
           , "height" => "200px"
+          , "padding" => "20px"
+          -- , "border-radius" => "10px"
           , "position" => "relative"
           , "margin" => "20px"
+          , "background-color" => if model.mouseDown then "#EEE" else "white"
+          , "border" => "1px solid #CCC"
           ]
       , onMouseDown address LocalMouseDown
       ]

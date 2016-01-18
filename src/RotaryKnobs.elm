@@ -1,4 +1,3 @@
-
 import Mouse
 import Html exposing (div)
 import Dict exposing(Dict)
@@ -6,6 +5,8 @@ import Dict exposing(Dict)
 import MouseExtra
 
 import RotaryKnob
+
+import Html.Events exposing (onMouseUp)
 
 type alias ID = String
 
@@ -24,6 +25,7 @@ type alias Knobs = Dict ID RotaryKnob.Model
 type alias Model =
   { knobs : Knobs
   , currentKnob : Maybe ID
+  , mouse : { y : Int, yVelocity : Int}
   }
 
 
@@ -42,6 +44,7 @@ init =
       , ("D", RotaryKnob.init)
       ]
     , currentKnob = Nothing
+    , mouse = { y = 0, yVelocity = 0}
     }
 
 
@@ -78,42 +81,48 @@ type Action
 
 update : Action -> Model -> Model
 update action model =
-  case action of
-    KnobAction id action' ->
-      { model |
-          knobs = Dict.update id (updateKnob action') model.knobs
-        , currentKnob = Just id
-      }
+  let
+    _ = Debug.log "model" model
+  in
+    case action of
+      KnobAction id action' ->
+        { model |
+            knobs = Dict.update id (updateKnob action') model.knobs
+          , currentKnob = Just id
+        }
 
-    -- MouseMove i ->
-    --   case model.currentKnob of
-    --     Just id ->
-    --       { model |
-    --         knobs = Dict.update id (updateKnob (RotaryKnob.MouseMove i)) model.knobs
-    --       }
-    --     Nothing ->
-    --       model
-    MousePosition (x,y) ->
-      model
-      -- case model.currentKnob of
-      --   Just id ->
-      --     { model |
-      --       knobs = Dict.update id (updateKnob (RotaryKnob.MouseMove i)) model.knobs
-      --     }
-      --   Nothing ->
-      --     model
+      MousePosition (x,y) ->
+        let
+          newMouse =
+            { y = y
+            , yVelocity = y - model.mouse.y
+            }
 
-    GlobalMouseUp ->
-      case model.currentKnob of
-        Just id ->
-          { model |
-            knobs = Dict.update id (updateKnob RotaryKnob.GlobalMouseUp) model.knobs
-          }
-        Nothing ->
-          model
+        in
+          case model.currentKnob of
+            Just id ->
+              { model |
+                  knobs = Dict.update
+                    id
+                    (updateKnob (RotaryKnob.MouseMove newMouse.yVelocity))
+                    model.knobs
+                , mouse = newMouse
+              }
+            Nothing ->
+              { model | mouse = newMouse }
 
-    NoOp ->
-      model
+
+      GlobalMouseUp ->
+        case model.currentKnob of
+          Just id ->
+            { model |
+              knobs = Dict.update id (updateKnob RotaryKnob.GlobalMouseUp) model.knobs
+            }
+          Nothing ->
+            model
+
+      NoOp ->
+        model
 
 
 -- VIEW
@@ -125,11 +134,12 @@ globalMouseUp : Signal Bool
 globalMouseUp = Signal.filter (\isDown -> not isDown) True Mouse.isDown
 
 actionSignal : Signal Action
-actionSignal = Signal.mergeMany
-  [ mailbox.signal
-  -- , Signal.map MouseMove MouseExtra.yVelocity
-  , Signal.map (\_ -> GlobalMouseUp) globalMouseUp
-  ]
+actionSignal = mailbox.signal
+-- actionSignal = Signal.mergeMany
+--   [ mailbox.signal
+--   -- , Signal.map MouseMove MouseExtra.yVelocity
+--   -- , Signal.map (\_ -> GlobalMouseUp) globalMouseUp
+--   ]
 
 
 -- maybe if we used the mouse events rather than the signals, we could use
@@ -152,8 +162,9 @@ getKnobView model address id =
 view : Signal.Address Action -> Model -> Html.Html
 view address model =
   div
-    [ MouseExtra.onMouseMove (Signal.forwardTo address MousePosition)]
-    -- [ ]
+    [ MouseExtra.onMouseMove (Signal.forwardTo address MousePosition)
+    , onMouseUp address GlobalMouseUp
+    ]
     [ getKnobView model address "A"
     , getKnobView model address "B"
     , getKnobView model address "C"
