@@ -1,6 +1,7 @@
 import Mouse
 import Html exposing (div)
 import Dict exposing(Dict)
+import StartApp.Simple as StartApp
 
 import MouseExtra
 
@@ -35,8 +36,8 @@ type alias Model =
 --     }
 
 
-init : Model
-init =
+model : Model
+model =
     { knobs = Dict.fromList
       [ ("A", RotaryKnob.init)
       , ("B", RotaryKnob.init)
@@ -147,8 +148,8 @@ actionSignal = mailbox.signal
 
 -- although, we need to get mouse position (using pageX)
 
-modelSignal : Signal Model
-modelSignal = Signal.foldp update init actionSignal
+-- modelSignal : Signal Model
+-- modelSignal = Signal.foldp update init actionSignal
 
 getKnobView : Model -> Signal.Address Action -> ID -> Html.Html
 getKnobView model address id =
@@ -171,8 +172,6 @@ view address model =
     , getKnobView model address "D"
     ]
 
-viewSignal : Signal Html.Html
-viewSignal = Signal.map (\model -> view mailbox.address model) modelSignal
-
 main : Signal Html.Html
-main = viewSignal
+main =
+  StartApp.start { model = model, view = view, update = update }
