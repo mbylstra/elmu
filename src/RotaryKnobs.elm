@@ -1,130 +1,57 @@
 import Html exposing (div)
-import Dict exposing(Dict)
 import StartApp.Simple as StartApp
-
-import MouseExtra
-
-import RotaryKnob
-
 import Html.Events exposing (onMouseUp)
 
-type alias ID = String
-
-type alias Knobs = Dict ID RotaryKnob.Model
-
+import MouseExtra
+import KnobRegistry exposing (Action(GlobalMouseUp, MousePosition))
 
 
 -- MODEL
 
 type alias Model =
-  { knobs : Knobs
-  , currentKnob : Maybe ID
-  , mouse : { y : Int, yVelocity : Int}
+  { knobRegistry : KnobRegistry.Model
   }
 
 model : Model
 model =
-    { knobs = Dict.fromList
-      [ ("A", RotaryKnob.init)
-      , ("B", RotaryKnob.init)
-      , ("C", RotaryKnob.init)
-      , ("D", RotaryKnob.init)
-      ]
-    , currentKnob = Nothing
-    , mouse = { y = 0, yVelocity = 0}
-    }
-
-getKnob : Knobs -> ID -> RotaryKnob.Model
-getKnob knobs id =
-  case (Dict.get id knobs) of
-    Just knob -> knob
-    Nothing -> Debug.crash("No knob exists with id: " ++ id)
-
-updateKnob : RotaryKnob.Action -> Maybe RotaryKnob.Model -> Maybe RotaryKnob.Model
-updateKnob action =
-  let
-    updateKnob' : Maybe RotaryKnob.Model -> Maybe RotaryKnob.Model
-    updateKnob' knob =
-      case knob of
-        Just knob' ->
-          Just (RotaryKnob.update action knob')
-        Nothing ->
-          Nothing
-  in
-    updateKnob'
+  { knobRegistry = KnobRegistry.init ["attack", "decay", "sustain", "release"]
+  }
 
 
 -- UPDATE
-
 type Action
-  = KnobAction ID RotaryKnob.Action
-  | GlobalMouseUp
-  | MousePosition (Int, Int)
-  | NoOp
+  = KnobRegistryAction KnobRegistry.Action
 
 update : Action -> Model -> Model
 update action model =
   case action of
-    KnobAction id action' ->
+    KnobRegistryAction subAction ->
       { model |
-          knobs = Dict.update id (updateKnob action') model.knobs
-        , currentKnob = Just id
+          knobRegistry = KnobRegistry.update subAction model.knobRegistry
       }
-
-    MousePosition (x,y) ->
-      let
-        newMouse =
-          { y = y
-          , yVelocity = y - model.mouse.y
-          }
-
-      in
-        case model.currentKnob of
-          Just id ->
-            { model |
-                knobs = Dict.update
-                  id
-                  (updateKnob (RotaryKnob.MouseMove newMouse.yVelocity))
-                  model.knobs
-              , mouse = newMouse
-            }
-          Nothing ->
-            { model | mouse = newMouse }
-
-    GlobalMouseUp ->
-      case model.currentKnob of
-        Just id ->
-          { model |
-            knobs = Dict.update id (updateKnob RotaryKnob.GlobalMouseUp) model.knobs
-          }
-        Nothing ->
-          model
-
-    NoOp ->
-      model
 
 
 -- VIEW
 
-knobView : Model -> Signal.Address Action -> ID -> Html.Html
-knobView model address id =
-  let
-    knob = getKnob model.knobs id
-  in
-    RotaryKnob.view (Signal.forwardTo address (KnobAction id)) knob
-
-
 view : Signal.Address Action -> Model -> Html.Html
 view address model =
-  div
-    [ MouseExtra.onMouseMove (Signal.forwardTo address MousePosition)
-    , onMouseUp address GlobalMouseUp
-    ]
-    [ knobView model address "A"
-    , knobView model address "B"
-    , knobView model address "C"
-    , knobView model address "D"
-    ]
+  let
+    krAddress = (Signal.forwardTo address KnobRegistryAction)
+    knobView id =
+      KnobRegistry.view krAddress model.knobRegistry id
+
+  in
+    div
+      [ MouseExtra.onMouseMove
+          address
+          (\position -> KnobRegistryAction (MousePosition position))
+      , onMouseUp address (KnobRegistryAction GlobalMouseUp)
+      ]
+      [ knobView "attack"
+      , knobView "decay"
+      , knobView "sustain"
+      , knobView "release"
+      ]
 
 main : Signal Html.Html
 main =

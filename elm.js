@@ -12302,72 +12302,11 @@ Elm.Arc.make = function (_elm) {
                             ,arc: arc
                             ,arcSegment: arcSegment};
 };
-Elm.MouseExtra = Elm.MouseExtra || {};
-Elm.MouseExtra.make = function (_elm) {
+Elm.Knob = Elm.Knob || {};
+Elm.Knob.make = function (_elm) {
    "use strict";
-   _elm.MouseExtra = _elm.MouseExtra || {};
-   if (_elm.MouseExtra.values) return _elm.MouseExtra.values;
-   var _U = Elm.Native.Utils.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $Debug = Elm.Debug.make(_elm),
-   $Html = Elm.Html.make(_elm),
-   $Html$Events = Elm.Html.Events.make(_elm),
-   $Json$Decode = Elm.Json.Decode.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Mouse = Elm.Mouse.make(_elm),
-   $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
-   var _op = {};
-   var createVelocitySignal = function (positionSignal) {
-      var update = F2(function (x,state) {
-         return {x: x,velocity: x - state.x};
-      });
-      var initialState = {x: 0,velocity: 0};
-      var rawSignal = A3($Signal.foldp,
-      update,
-      initialState,
-      positionSignal);
-      var signal = A2($Signal.map,
-      function (_) {
-         return _.velocity;
-      },
-      rawSignal);
-      return signal;
-   };
-   var xVelocity = createVelocitySignal($Mouse.x);
-   var yVelocity = createVelocitySignal($Mouse.y);
-   var velocity = A3($Signal.map2,
-   F2(function (x,y) {    return {ctor: "_Tuple2",_0: x,_1: y};}),
-   xVelocity,
-   yVelocity);
-   var VelocityState = F2(function (a,b) {
-      return {x: a,velocity: b};
-   });
-   var onMouseMove = function (mousePositionAddress) {
-      var sendPosition = function (position) {
-         return A2($Signal.message,mousePositionAddress,position);
-      };
-      var mousePositionDecoder = A3($Json$Decode.object2,
-      F2(function (x,y) {    return {ctor: "_Tuple2",_0: x,_1: y};}),
-      A2($Json$Decode._op[":="],"pageX",$Json$Decode.$int),
-      A2($Json$Decode._op[":="],"pageY",$Json$Decode.$int));
-      return A3($Html$Events.on,
-      "mousemove",
-      mousePositionDecoder,
-      sendPosition);
-   };
-   return _elm.MouseExtra.values = {_op: _op
-                                   ,velocity: velocity
-                                   ,xVelocity: xVelocity
-                                   ,yVelocity: yVelocity
-                                   ,onMouseMove: onMouseMove};
-};
-Elm.RotaryKnob = Elm.RotaryKnob || {};
-Elm.RotaryKnob.make = function (_elm) {
-   "use strict";
-   _elm.RotaryKnob = _elm.RotaryKnob || {};
-   if (_elm.RotaryKnob.values) return _elm.RotaryKnob.values;
+   _elm.Knob = _elm.Knob || {};
+   if (_elm.Knob.values) return _elm.Knob.values;
    var _U = Elm.Native.Utils.make(_elm),
    $Arc = Elm.Arc.make(_elm),
    $Basics = Elm.Basics.make(_elm),
@@ -12421,14 +12360,12 @@ Elm.RotaryKnob.make = function (_elm) {
            {mouseDown: true});
          case "GlobalMouseUp": return _U.update(model,
            {mouseDown: false});
-         case "MouseMove": if (model.mouseDown) {
+         default: if (model.mouseDown) {
                  var valueAdjust = $Basics.toFloat(_p0._0) * 1.0e-2;
                  return _U.update(model,
                  {value: clamp(model.value + valueAdjust)});
-              } else return model;
-         default: return model;}
+              } else return model;}
    });
-   var NoOp = {ctor: "NoOp"};
    var MouseMove = function (a) {
       return {ctor: "MouseMove",_0: a};
    };
@@ -12459,17 +12396,180 @@ Elm.RotaryKnob.make = function (_elm) {
               ,A2($Html$Events.onMouseDown,address,LocalMouseDown)]),
       _U.list([knobDisplay(model.value)]))]));
    });
-   return _elm.RotaryKnob.values = {_op: _op
-                                   ,Model: Model
-                                   ,init: init
-                                   ,GlobalMouseUp: GlobalMouseUp
-                                   ,LocalMouseDown: LocalMouseDown
-                                   ,MouseMove: MouseMove
-                                   ,NoOp: NoOp
-                                   ,clamp: clamp
-                                   ,update: update
-                                   ,knobDisplay: knobDisplay
-                                   ,view: view};
+   return _elm.Knob.values = {_op: _op
+                             ,Model: Model
+                             ,init: init
+                             ,GlobalMouseUp: GlobalMouseUp
+                             ,LocalMouseDown: LocalMouseDown
+                             ,MouseMove: MouseMove
+                             ,clamp: clamp
+                             ,update: update
+                             ,knobDisplay: knobDisplay
+                             ,view: view};
+};
+Elm.KnobRegistry = Elm.KnobRegistry || {};
+Elm.KnobRegistry.make = function (_elm) {
+   "use strict";
+   _elm.KnobRegistry = _elm.KnobRegistry || {};
+   if (_elm.KnobRegistry.values) return _elm.KnobRegistry.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Dict = Elm.Dict.make(_elm),
+   $Html = Elm.Html.make(_elm),
+   $Knob = Elm.Knob.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var _op = {};
+   var updateKnob = function (action) {
+      var updateKnob$ = function (knob) {
+         var _p0 = knob;
+         if (_p0.ctor === "Just") {
+               return $Maybe.Just(A2($Knob.update,action,_p0._0));
+            } else {
+               return $Maybe.Nothing;
+            }
+      };
+      return updateKnob$;
+   };
+   var update = F2(function (action,model) {
+      var _p1 = action;
+      switch (_p1.ctor)
+      {case "KnobAction": var _p2 = _p1._0;
+           return _U.update(model,
+           {knobs: A3($Dict.update,_p2,updateKnob(_p1._1),model.knobs)
+           ,currentKnob: $Maybe.Just(_p2)});
+         case "MousePosition": var _p4 = _p1._0._1;
+           var newMouse = {y: _p4,yVelocity: _p4 - model.mouse.y};
+           var _p3 = model.currentKnob;
+           if (_p3.ctor === "Just") {
+                 return _U.update(model,
+                 {knobs: A3($Dict.update,
+                 _p3._0,
+                 updateKnob($Knob.MouseMove(newMouse.yVelocity)),
+                 model.knobs)
+                 ,mouse: newMouse});
+              } else {
+                 return _U.update(model,{mouse: newMouse});
+              }
+         default: var _p5 = model.currentKnob;
+           if (_p5.ctor === "Just") {
+                 return _U.update(model,
+                 {knobs: A3($Dict.update,
+                 _p5._0,
+                 updateKnob($Knob.GlobalMouseUp),
+                 model.knobs)});
+              } else {
+                 return model;
+              }}
+   });
+   var getKnob = F2(function (knobs,id) {
+      var _p6 = A2($Dict.get,id,knobs);
+      if (_p6.ctor === "Just") {
+            return _p6._0;
+         } else {
+            return _U.crashCase("KnobRegistry",
+            {start: {line: 37,column: 3},end: {line: 39,column: 61}},
+            _p6)(A2($Basics._op["++"],"No knob exists with id: ",id));
+         }
+   });
+   var init = function (names) {
+      return {knobs: $Dict.fromList(A2($List.map,
+             function (name) {
+                return {ctor: "_Tuple2",_0: name,_1: $Knob.init};
+             },
+             names))
+             ,currentKnob: $Maybe.Nothing
+             ,mouse: {y: 0,yVelocity: 0}};
+   };
+   var Model = F3(function (a,b,c) {
+      return {knobs: a,currentKnob: b,mouse: c};
+   });
+   var MousePosition = function (a) {
+      return {ctor: "MousePosition",_0: a};
+   };
+   var GlobalMouseUp = {ctor: "GlobalMouseUp"};
+   var KnobAction = F2(function (a,b) {
+      return {ctor: "KnobAction",_0: a,_1: b};
+   });
+   var view = F3(function (address,model,id) {
+      var knob = A2(getKnob,model.knobs,id);
+      return A2($Knob.view,
+      A2($Signal.forwardTo,address,KnobAction(id)),
+      knob);
+   });
+   return _elm.KnobRegistry.values = {_op: _op
+                                     ,init: init
+                                     ,update: update
+                                     ,view: view
+                                     ,Model: Model
+                                     ,GlobalMouseUp: GlobalMouseUp
+                                     ,MousePosition: MousePosition};
+};
+Elm.MouseExtra = Elm.MouseExtra || {};
+Elm.MouseExtra.make = function (_elm) {
+   "use strict";
+   _elm.MouseExtra = _elm.MouseExtra || {};
+   if (_elm.MouseExtra.values) return _elm.MouseExtra.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Html = Elm.Html.make(_elm),
+   $Html$Events = Elm.Html.Events.make(_elm),
+   $Json$Decode = Elm.Json.Decode.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Mouse = Elm.Mouse.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var _op = {};
+   var createVelocitySignal = function (positionSignal) {
+      var update = F2(function (x,state) {
+         return {x: x,velocity: x - state.x};
+      });
+      var initialState = {x: 0,velocity: 0};
+      var rawSignal = A3($Signal.foldp,
+      update,
+      initialState,
+      positionSignal);
+      var signal = A2($Signal.map,
+      function (_) {
+         return _.velocity;
+      },
+      rawSignal);
+      return signal;
+   };
+   var xVelocity = createVelocitySignal($Mouse.x);
+   var yVelocity = createVelocitySignal($Mouse.y);
+   var velocity = A3($Signal.map2,
+   F2(function (x,y) {    return {ctor: "_Tuple2",_0: x,_1: y};}),
+   xVelocity,
+   yVelocity);
+   var VelocityState = F2(function (a,b) {
+      return {x: a,velocity: b};
+   });
+   var onMouseMove = F2(function (mousePositionAddress,handler) {
+      var sendPosition = function (position) {
+         return A2($Signal.message,
+         mousePositionAddress,
+         handler(position));
+      };
+      var mousePositionDecoder = A3($Json$Decode.object2,
+      F2(function (x,y) {    return {ctor: "_Tuple2",_0: x,_1: y};}),
+      A2($Json$Decode._op[":="],"pageX",$Json$Decode.$int),
+      A2($Json$Decode._op[":="],"pageY",$Json$Decode.$int));
+      return A3($Html$Events.on,
+      "mousemove",
+      mousePositionDecoder,
+      sendPosition);
+   });
+   return _elm.MouseExtra.values = {_op: _op
+                                   ,velocity: velocity
+                                   ,xVelocity: xVelocity
+                                   ,yVelocity: yVelocity
+                                   ,onMouseMove: onMouseMove};
 };
 Elm.Main = Elm.Main || {};
 Elm.Main.make = function (_elm) {
@@ -12479,133 +12579,63 @@ Elm.Main.make = function (_elm) {
    var _U = Elm.Native.Utils.make(_elm),
    $Basics = Elm.Basics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
-   $Dict = Elm.Dict.make(_elm),
    $Html = Elm.Html.make(_elm),
    $Html$Events = Elm.Html.Events.make(_elm),
+   $KnobRegistry = Elm.KnobRegistry.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
-   $Mouse = Elm.Mouse.make(_elm),
    $MouseExtra = Elm.MouseExtra.make(_elm),
    $Result = Elm.Result.make(_elm),
-   $RotaryKnob = Elm.RotaryKnob.make(_elm),
    $Signal = Elm.Signal.make(_elm),
    $StartApp$Simple = Elm.StartApp.Simple.make(_elm);
    var _op = {};
-   var globalMouseUp = A3($Signal.filter,
-   function (isDown) {
-      return $Basics.not(isDown);
-   },
-   true,
-   $Mouse.isDown);
-   var NoOp = {ctor: "NoOp"};
-   var mailbox = $Signal.mailbox(NoOp);
-   var actionSignal = mailbox.signal;
-   var MousePosition = function (a) {
-      return {ctor: "MousePosition",_0: a};
-   };
-   var GlobalMouseUp = {ctor: "GlobalMouseUp"};
-   var KnobAction = F2(function (a,b) {
-      return {ctor: "KnobAction",_0: a,_1: b};
-   });
-   var updateKnob = function (action) {
-      var updateKnob$ = function (knob) {
-         var _p0 = knob;
-         if (_p0.ctor === "Just") {
-               return $Maybe.Just(A2($RotaryKnob.update,action,_p0._0));
-            } else {
-               return $Maybe.Nothing;
-            }
-      };
-      return updateKnob$;
-   };
    var update = F2(function (action,model) {
-      var _p1 = A2($Debug.log,"model",model);
-      var _p2 = action;
-      switch (_p2.ctor)
-      {case "KnobAction": var _p3 = _p2._0;
-           return _U.update(model,
-           {knobs: A3($Dict.update,_p3,updateKnob(_p2._1),model.knobs)
-           ,currentKnob: $Maybe.Just(_p3)});
-         case "MousePosition": var _p5 = _p2._0._1;
-           var newMouse = {y: _p5,yVelocity: _p5 - model.mouse.y};
-           var _p4 = model.currentKnob;
-           if (_p4.ctor === "Just") {
-                 return _U.update(model,
-                 {knobs: A3($Dict.update,
-                 _p4._0,
-                 updateKnob($RotaryKnob.MouseMove(newMouse.yVelocity)),
-                 model.knobs)
-                 ,mouse: newMouse});
-              } else {
-                 return _U.update(model,{mouse: newMouse});
-              }
-         case "GlobalMouseUp": var _p6 = model.currentKnob;
-           if (_p6.ctor === "Just") {
-                 return _U.update(model,
-                 {knobs: A3($Dict.update,
-                 _p6._0,
-                 updateKnob($RotaryKnob.GlobalMouseUp),
-                 model.knobs)});
-              } else {
-                 return model;
-              }
-         default: return model;}
+      var _p0 = action;
+      return _U.update(model,
+      {knobRegistry: A2($KnobRegistry.update,
+      _p0._0,
+      model.knobRegistry)});
    });
-   var getKnob = F2(function (knobs,id) {
-      var _p7 = A2($Dict.get,id,knobs);
-      if (_p7.ctor === "Just") {
-            return _p7._0;
-         } else {
-            return _U.crashCase("Main",
-            {start: {line: 54,column: 3},end: {line: 56,column: 61}},
-            _p7)(A2($Basics._op["++"],"No knob exists with id: ",id));
-         }
-   });
-   var getKnobView = F3(function (model,address,id) {
-      var knob = A2(getKnob,model.knobs,id);
-      return A2($RotaryKnob.view,
-      A2($Signal.forwardTo,address,KnobAction(id)),
-      knob);
-   });
+   var KnobRegistryAction = function (a) {
+      return {ctor: "KnobRegistryAction",_0: a};
+   };
    var view = F2(function (address,model) {
+      var krAddress = A2($Signal.forwardTo,
+      address,
+      KnobRegistryAction);
+      var knobView = function (id) {
+         return A3($KnobRegistry.view,
+         krAddress,
+         model.knobRegistry,
+         id);
+      };
       return A2($Html.div,
-      _U.list([$MouseExtra.onMouseMove(A2($Signal.forwardTo,
+      _U.list([A2($MouseExtra.onMouseMove,
               address,
-              MousePosition))
-              ,A2($Html$Events.onMouseUp,address,GlobalMouseUp)]),
-      _U.list([A3(getKnobView,model,address,"A")
-              ,A3(getKnobView,model,address,"B")
-              ,A3(getKnobView,model,address,"C")
-              ,A3(getKnobView,model,address,"D")]));
+              function (position) {
+                 return KnobRegistryAction($KnobRegistry.MousePosition(position));
+              })
+              ,A2($Html$Events.onMouseUp,
+              address,
+              KnobRegistryAction($KnobRegistry.GlobalMouseUp))]),
+      _U.list([knobView("attack")
+              ,knobView("decay")
+              ,knobView("sustain")
+              ,knobView("release")]));
    });
-   var model = {knobs: $Dict.fromList(_U.list([{ctor: "_Tuple2"
-                                               ,_0: "A"
-                                               ,_1: $RotaryKnob.init}
-                                              ,{ctor: "_Tuple2",_0: "B",_1: $RotaryKnob.init}
-                                              ,{ctor: "_Tuple2",_0: "C",_1: $RotaryKnob.init}
-                                              ,{ctor: "_Tuple2",_0: "D",_1: $RotaryKnob.init}]))
-               ,currentKnob: $Maybe.Nothing
-               ,mouse: {y: 0,yVelocity: 0}};
+   var model = {knobRegistry: $KnobRegistry.init(_U.list(["attack"
+                                                         ,"decay"
+                                                         ,"sustain"
+                                                         ,"release"]))};
    var main = $StartApp$Simple.start({model: model
                                      ,view: view
                                      ,update: update});
-   var Model = F3(function (a,b,c) {
-      return {knobs: a,currentKnob: b,mouse: c};
-   });
+   var Model = function (a) {    return {knobRegistry: a};};
    return _elm.Main.values = {_op: _op
                              ,Model: Model
                              ,model: model
-                             ,getKnob: getKnob
-                             ,updateKnob: updateKnob
-                             ,KnobAction: KnobAction
-                             ,GlobalMouseUp: GlobalMouseUp
-                             ,MousePosition: MousePosition
-                             ,NoOp: NoOp
+                             ,KnobRegistryAction: KnobRegistryAction
                              ,update: update
-                             ,mailbox: mailbox
-                             ,globalMouseUp: globalMouseUp
-                             ,actionSignal: actionSignal
-                             ,getKnobView: getKnobView
                              ,view: view
                              ,main: main};
 };

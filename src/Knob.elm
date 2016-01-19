@@ -1,4 +1,4 @@
-module RotaryKnob where
+module Knob where
 
 import Html exposing (div)
 import Html.Events exposing(onMouseDown)
@@ -37,7 +37,6 @@ type Action
   = GlobalMouseUp -- a mouse up event anywhere
   | LocalMouseDown  -- a mouse down event on the knob
   | MouseMove Int  -- the number of pixels moved since the last one of these events
-  | NoOp
 
 
 clamp : Float -> Float
@@ -68,8 +67,6 @@ update action model =
           { model | value = clamp (model.value + valueAdjust) }
       else
         model
-    NoOp ->
-      model
 
 knobDisplay : Float -> Html.Html
 knobDisplay value =

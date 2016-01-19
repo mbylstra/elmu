@@ -12,22 +12,24 @@ import Html exposing(Attribute)
 import Mouse
 
 
-type alias MousePosition = (Int, Int)
+-- type alias MousePosition = (Int, Int)
 
 
-onMouseMove : Signal.Address MousePosition -> Attribute
-onMouseMove mousePositionAddress =
+
+-- does this need to take a variable, and pass (Int, Int) along with it??
+onMouseMove : Signal.Address a -> ((Int, Int) -> a) -> Attribute
+onMouseMove mousePositionAddress handler =
   let
-    mousePositionDecoder : Decoder MousePosition
+    mousePositionDecoder : Decoder (Int, Int)
     mousePositionDecoder =
       object2
         (\x y -> (x,y))
         ("pageX" := int)
         ("pageY" := int)
 
-    sendPosition : MousePosition -> Signal.Message
+    sendPosition : (Int, Int) -> Signal.Message
     sendPosition position =
-      Signal.message mousePositionAddress position
+      Signal.message mousePositionAddress (handler position)
 
   in
     on "mousemove" mousePositionDecoder sendPosition
