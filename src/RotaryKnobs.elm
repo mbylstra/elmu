@@ -40,6 +40,9 @@ view address model =
     knobView id =
       KnobRegistry.view krAddress model.knobRegistry id
 
+
+
+
   in
     div
       [ MouseExtra.onMouseMove
@@ -51,6 +54,7 @@ view address model =
       , knobView "decay"
       , knobView "sustain"
       , knobView "release"
+      -- , knobView address KnobRegistryAction model.knobRegistry "attack"   -- this is about as good as it could possibly get
       ]
 
 main : Signal Html.Html
