@@ -3,3 +3,6 @@ body {
   color: black;
   font-family: sans-serif;
   padding: 20px; }
+
+.knobs {
+  display: flex; }

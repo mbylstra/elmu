@@ -7,9 +7,10 @@ import Char exposing (KeyCode, fromCode)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (on, targetChecked)
+import Html.Events exposing (on, targetChecked, onMouseUp)
 import Piano exposing (piano, pianoSignal)
 import Slider exposing (slider)
+import Signal exposing (Address)
 
 import Maybe exposing (withDefault)
 
@@ -17,6 +18,8 @@ import MouseExtra
 
 import Effects
 
+import MouseExtra
+import KnobRegistry exposing (Action(GlobalMouseUp, MousePosition))
 
 
 type alias UserInput =
@@ -32,6 +35,7 @@ type alias UserInput =
 type alias GuiModel =
   { audioOn : Bool
   , slider1: Float
+  , knobRegistry : KnobRegistry.Model
   }
 
 initialUserInput : UserInput
@@ -45,7 +49,10 @@ initialUserInput =
   , slider1 = 0.0
   }
 
-type Action = AudioOn Bool | Slider1 Float
+type Action
+  = AudioOn Bool
+ | Slider1 Float
+ | KnobRegistryAction KnobRegistry.Action
 
 dummy : String
 dummy = "dummy!"
@@ -84,6 +91,10 @@ updateGuiModel action model =
         { model | audioOn = value }
     Slider1 value ->
         { model | slider1 = value }
+    KnobRegistryAction subAction ->
+      { model |
+          knobRegistry = KnobRegistry.update subAction model.knobRegistry
+      }
 
 guiMailbox : Signal.Mailbox Action
 guiMailbox = Signal.mailbox (AudioOn True)
@@ -92,6 +103,7 @@ initialModel : GuiModel
 initialModel =
   { audioOn = True
   , slider1 = 0.0
+  , knobRegistry = KnobRegistry.init ["attack", "decay", "sustain", "release"]
   }
 
 guiModelSignal : Signal GuiModel
@@ -119,22 +131,90 @@ audioOnCheckbox address isChecked =
 
 
 
+-- -- MODEL
+--
+-- type alias Model =
+--   { knobRegistry : KnobRegistry.Model
+--   }
+--
+-- model : Model
+-- model =
+--   { knobRegistry = KnobRegistry.init ["attack", "decay", "sustain", "release"]
+--   }
+--
+--
+-- -- UPDATE
+-- type Action
+--   = KnobRegistryAction KnobRegistry.Action
+--
+-- update : Action -> Model -> Model
+-- update action model =
+--   case action of
+--     KnobRegistryAction subAction ->
+--       { model |
+--           knobRegistry = KnobRegistry.update subAction model.knobRegistry
+--       }
+--
+--
+-- -- VIEW
+--
+-- view : Signal.Address Action -> Model -> Html.Html
+-- view address model =
+--   let
+--     krAddress = (Signal.forwardTo address KnobRegistryAction)
+--     knobView id =
+--       KnobRegistry.view krAddress model.knobRegistry id
+--
+--
+--
+--
+--   in
+--     div
+--       [ MouseExtra.onMouseMove
+--           address
+--           (\position -> KnobRegistryAction (MousePosition position))
+--       , onMouseUp address (KnobRegistryAction GlobalMouseUp)
+--       ]
+--       [ knobView "attack"
+--       , knobView "decay"
+--       , knobView "sustain"
+--       , knobView "release"
+--       -- , knobView address KnobRegistryAction model.knobRegistry "attack"   -- this is about as good as it could possibly get
+--       ]
 
 
 
-guiView : GuiModel -> Html
-guiView model =
-    div []
-        [ h1 [] [text "Elm Reactive Audio"]
-        , div [class "synth"]
+
+
+view : Address Action -> GuiModel -> Html
+view address model =  -- hwere is address??
+  let
+    krAddress = (Signal.forwardTo address KnobRegistryAction)
+    knobView id =
+      KnobRegistry.view krAddress model.knobRegistry id
+  in
+    div
+        [ MouseExtra.onMouseMove
+            address
+            (\position -> KnobRegistryAction (MousePosition position))
+        , onMouseUp address (KnobRegistryAction GlobalMouseUp)
+        ]
+        -- [ h1 [] [text "Elm Reactive Audio"]
+        [ div [class "synth"]
           [ audioOnCheckbox guiMailbox.address model.audioOn
-          , slider (Signal.forwardTo guiMailbox.address Slider1)
+          -- , slider (Signal.forwardTo guiMailbox.address Slider1)
+          , div [class "knobs"]
+            [ knobView "attack"
+            , knobView "decay"
+            , knobView "sustain"
+            , knobView "release"
+            ]
           , piano 4 12.0
           ]
         ]
 
 guiSignal : Signal Html
-guiSignal = Signal.map guiView guiModelSignal
+guiSignal = Signal.map (view guiMailbox.address) guiModelSignal
 
 mouseWindowFraction' : (Int, Int) -> (Int, Int) -> { x : Float, y : Float}
 mouseWindowFraction' (mouseX, mouseY) (windowWidth, windowHeight) =
