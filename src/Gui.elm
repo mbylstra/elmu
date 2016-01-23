@@ -201,13 +201,15 @@ view address model =  -- hwere is address??
         ]
         -- [ h1 [] [text "Elm Reactive Audio"]
         [ div [class "synth"]
-          [ audioOnCheckbox guiMailbox.address model.audioOn
-          -- , slider (Signal.forwardTo guiMailbox.address Slider1)
-          , div [class "knobs"]
-            [ knobView "attack"
-            , knobView "decay"
-            , knobView "sustain"
-            , knobView "release"
+          [ div [class "control-panel"]
+            [ audioOnCheckbox guiMailbox.address model.audioOn
+            -- , slider (Signal.forwardTo guiMailbox.address Slider1)
+            , div [class "knobs"]
+              [ knobView "attack"
+              , knobView "decay"
+              , knobView "sustain"
+              , knobView "release"
+              ]
             ]
           , piano 4 12.0
           ]

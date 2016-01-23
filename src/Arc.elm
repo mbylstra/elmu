@@ -1,6 +1,7 @@
 module Arc
   ( arc
   , arcSegment
+  , getArcInfo
   )
   where
 

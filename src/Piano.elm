@@ -2,7 +2,8 @@ module Piano (piano, pianoSignal) where
 
 import Html exposing (..)
 import Html.Attributes exposing(..)
-import Html.Events exposing(onMouseDown)
+import Html.Events exposing(onMouseDown, Options)
+
 
 
 pianoMailbox : Signal.Mailbox Float

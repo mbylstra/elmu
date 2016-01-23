@@ -84,7 +84,8 @@ update action model =
       case model.currentKnob of
         Just id ->
           { model |
-            knobs = Dict.update id (updateKnob Knob.GlobalMouseUp) model.knobs
+              knobs = Dict.update id (updateKnob Knob.GlobalMouseUp) model.knobs
+              , currentKnob = Nothing
           }
         Nothing ->
           model

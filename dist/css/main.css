@@ -6,3 +6,12 @@ body {
 
 .knobs {
   display: flex; }
+
+.control-panel {
+  border: 6px solid black;
+  border-bottom: 0px; }
+
+.highlighted {
+  background-color: #F2F2F2;
+  border-radius: 15px;
+  cursor: ns-resize; }

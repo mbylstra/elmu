@@ -14244,7 +14244,8 @@ Elm.Arc.make = function (_elm) {
    };
    return _elm.Arc.values = {_op: _op
                             ,arc: arc
-                            ,arcSegment: arcSegment};
+                            ,arcSegment: arcSegment
+                            ,getArcInfo: getArcInfo};
 };
 Elm.MainTypes = Elm.MainTypes || {};
 Elm.MainTypes.make = function (_elm) {
@@ -14750,6 +14751,42 @@ Elm.MouseExtra.make = function (_elm) {
                                    ,yVelocity: yVelocity
                                    ,onMouseMove: onMouseMove};
 };
+Elm.HtmlEventsExtra = Elm.HtmlEventsExtra || {};
+Elm.HtmlEventsExtra.make = function (_elm) {
+   "use strict";
+   _elm.HtmlEventsExtra = _elm.HtmlEventsExtra || {};
+   if (_elm.HtmlEventsExtra.values)
+   return _elm.HtmlEventsExtra.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Html = Elm.Html.make(_elm),
+   $Html$Events = Elm.Html.Events.make(_elm),
+   $Json$Decode = Elm.Json.Decode.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var _op = {};
+   var preventDefault = {stopPropagation: false
+                        ,preventDefault: true};
+   var messageOnWithOptions = F4(function (name,options,addr,msg) {
+      return A4($Html$Events.onWithOptions,
+      name,
+      options,
+      $Json$Decode.value,
+      function (_p0) {
+         return A2($Signal.message,addr,msg);
+      });
+   });
+   var onMouseDownWithOptions = function (options) {
+      return A2(messageOnWithOptions,"mousedown",options);
+   };
+   return _elm.HtmlEventsExtra.values = {_op: _op
+                                        ,messageOnWithOptions: messageOnWithOptions
+                                        ,onMouseDownWithOptions: onMouseDownWithOptions
+                                        ,preventDefault: preventDefault};
+};
 Elm.Knob = Elm.Knob || {};
 Elm.Knob.make = function (_elm) {
    "use strict";
@@ -14762,6 +14799,7 @@ Elm.Knob.make = function (_elm) {
    $Html = Elm.Html.make(_elm),
    $Html$Attributes = Elm.Html.Attributes.make(_elm),
    $Html$Events = Elm.Html.Events.make(_elm),
+   $HtmlEventsExtra = Elm.HtmlEventsExtra.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
@@ -14777,10 +14815,30 @@ Elm.Knob.make = function (_elm) {
       var centerPoint = {ctor: "_Tuple2"
                         ,_0: widthFloat / 2.0
                         ,_1: widthFloat / 2.0};
-      var strokeWidthStr = $Basics.toString(widthFloat / 10.0);
-      var fullAngle = -45.0;
-      var emptyAngle = 180.0 + 45.0;
-      var valueAngle = (emptyAngle + 45.0) * model.value - 45.0;
+      var strokeWidth$ = widthFloat / 10.0;
+      var strokeWidthStr = $Basics.toString(strokeWidth$);
+      var fullAngle = -90.0;
+      var emptyAngle = 180.0 + 89.0;
+      var valueAngle = (emptyAngle + 90.0) * model.value - 90.0;
+      var inactiveArcArgs = {radius: radius
+                            ,centerPoint: centerPoint
+                            ,startAngle: fullAngle
+                            ,endAngle: valueAngle};
+      var activeArcArgs = {radius: radius
+                          ,centerPoint: centerPoint
+                          ,startAngle: valueAngle
+                          ,endAngle: emptyAngle};
+      var needleArcArgs = {radius: radius + strokeWidth$ / 2.0
+                          ,centerPoint: centerPoint
+                          ,startAngle: valueAngle
+                          ,endAngle: emptyAngle};
+      var activeArcInfo = $Arc.getArcInfo(needleArcArgs);
+      var _p0 = activeArcInfo.centerPoint;
+      var needleX1 = _p0._0;
+      var needleY1 = _p0._1;
+      var _p1 = activeArcInfo.startPoint;
+      var needleX2 = _p1._0;
+      var needleY2 = _p1._1;
       return A2($Svg.svg,
       _U.list([$Svg$Attributes.width(widthStr)
               ,$Svg$Attributes.height(heightStr)
@@ -14790,48 +14848,62 @@ Elm.Knob.make = function (_elm) {
               widthStr,
               A2($Basics._op["++"]," ",heightStr))))]),
       _U.list([A2($Svg.path,
-              _U.list([$Svg$Attributes.d($Arc.arc({radius: radius
-                                                  ,centerPoint: centerPoint
-                                                  ,startAngle: fullAngle
-                                                  ,endAngle: valueAngle}))
+              _U.list([$Svg$Attributes.d($Arc.arc(inactiveArcArgs))
                       ,$Svg$Attributes.stroke("black")
                       ,$Svg$Attributes.fill("none")
                       ,$Svg$Attributes.strokeWidth(strokeWidthStr)]),
               _U.list([]))
               ,A2($Svg.path,
-              _U.list([$Svg$Attributes.d($Arc.arc({radius: radius
-                                                  ,centerPoint: centerPoint
-                                                  ,startAngle: valueAngle
-                                                  ,endAngle: emptyAngle}))
+              _U.list([$Svg$Attributes.d($Arc.arc(activeArcArgs))
                       ,$Svg$Attributes.stroke("pink")
                       ,$Svg$Attributes.fill("none")
                       ,$Svg$Attributes.strokeWidth(strokeWidthStr)]),
+              _U.list([]))
+              ,A2($Svg.line,
+              _U.list([$Svg$Attributes.x1($Basics.toString(needleX1))
+                      ,$Svg$Attributes.y1($Basics.toString(needleY1))
+                      ,$Svg$Attributes.x2($Basics.toString(needleX2))
+                      ,$Svg$Attributes.y2($Basics.toString(needleY2))
+                      ,$Svg$Attributes.stroke("black")
+                      ,$Svg$Attributes.fill("none")
+                      ,$Svg$Attributes.strokeWidth($Basics.toString(2.0))]),
               _U.list([]))]));
    };
    var clamp = function (x) {
       return _U.cmp(x,1.0) > 0 ? 1.0 : _U.cmp(x,0.0) < 0 ? 0.0 : x;
    };
    var update = F2(function (action,model) {
-      var _p0 = action;
-      switch (_p0.ctor)
-      {case "LocalMouseDown": return _U.update(model,
-           {mouseDown: true});
+      var _p2 = action;
+      switch (_p2.ctor)
+      {case "MouseDown": return _U.update(model,{mouseDown: true});
+         case "MouseEnter": return _U.update(model,{mouseInside: true});
+         case "MouseLeave": return _U.update(model,{mouseInside: false});
          case "GlobalMouseUp": return _U.update(model,
            {mouseDown: false});
          default: if (model.mouseDown) {
-                 var valueAdjust = $Basics.toFloat(_p0._0) * 1.0e-2;
+                 var valueAdjust = $Basics.toFloat(_p2._0) * 1.0e-2;
                  return _U.update(model,
                  {value: clamp(model.value + valueAdjust)});
               } else return model;}
    });
+   var MouseLeave = {ctor: "MouseLeave"};
+   var MouseEnter = {ctor: "MouseEnter"};
    var MouseMove = function (a) {
       return {ctor: "MouseMove",_0: a};
    };
-   var LocalMouseDown = {ctor: "LocalMouseDown"};
+   var MouseDown = {ctor: "MouseDown"};
    var GlobalMouseUp = {ctor: "GlobalMouseUp"};
-   var init = {mouseDown: false,value: 0.0,width: 100,height: 100};
-   var Model = F4(function (a,b,c,d) {
-      return {mouseDown: a,value: b,width: c,height: d};
+   var init = {mouseDown: false
+              ,mouseInside: false
+              ,value: 0.0
+              ,width: 100
+              ,height: 100};
+   var Model = F5(function (a,b,c,d,e) {
+      return {mouseDown: a
+             ,mouseInside: b
+             ,value: c
+             ,width: d
+             ,height: e};
    });
    _op["=>"] = F2(function (v0,v1) {
       return {ctor: "_Tuple2",_0: v0,_1: v1};
@@ -14846,20 +14918,26 @@ Elm.Knob.make = function (_elm) {
                                               ,A2(_op["=>"],"height",$Basics.toString(model.width))
                                               ,A2(_op["=>"],"padding","10px")
                                               ,A2(_op["=>"],"position","relative")
-                                              ,A2(_op["=>"],"margin","10px")
-                                              ,A2(_op["=>"],
-                                              "background-color",
-                                              model.mouseDown ? "#EEE" : "white")
-                                              ,A2(_op["=>"],"border","1px solid #CCC")]))
-              ,A2($Html$Events.onMouseDown,address,LocalMouseDown)]),
+                                              ,A2(_op["=>"],"margin","10px")]))
+              ,$Html$Attributes.classList(_U.list([{ctor: "_Tuple2"
+                                                   ,_0: "highlighted"
+                                                   ,_1: model.mouseInside || model.mouseDown}]))
+              ,A3($HtmlEventsExtra.onMouseDownWithOptions,
+              $HtmlEventsExtra.preventDefault,
+              address,
+              MouseDown)
+              ,A2($Html$Events.onMouseEnter,address,MouseEnter)
+              ,A2($Html$Events.onMouseLeave,address,MouseLeave)]),
       _U.list([knobDisplay(model)]))]));
    });
    return _elm.Knob.values = {_op: _op
                              ,Model: Model
                              ,init: init
                              ,GlobalMouseUp: GlobalMouseUp
-                             ,LocalMouseDown: LocalMouseDown
+                             ,MouseDown: MouseDown
                              ,MouseMove: MouseMove
+                             ,MouseEnter: MouseEnter
+                             ,MouseLeave: MouseLeave
                              ,clamp: clamp
                              ,update: update
                              ,knobDisplay: knobDisplay
@@ -14918,7 +14996,8 @@ Elm.KnobRegistry.make = function (_elm) {
                  {knobs: A3($Dict.update,
                  _p5._0,
                  updateKnob($Knob.GlobalMouseUp),
-                 model.knobs)});
+                 model.knobs)
+                 ,currentKnob: $Maybe.Nothing});
               } else {
                  return model;
               }}
@@ -15147,13 +15226,15 @@ Elm.Gui.make = function (_elm) {
               KnobRegistryAction($KnobRegistry.GlobalMouseUp))]),
       _U.list([A2($Html.div,
       _U.list([$Html$Attributes.$class("synth")]),
-      _U.list([A2(audioOnCheckbox,guiMailbox.address,model.audioOn)
-              ,A2($Html.div,
-              _U.list([$Html$Attributes.$class("knobs")]),
-              _U.list([knobView("attack")
-                      ,knobView("decay")
-                      ,knobView("sustain")
-                      ,knobView("release")]))
+      _U.list([A2($Html.div,
+              _U.list([$Html$Attributes.$class("control-panel")]),
+              _U.list([A2(audioOnCheckbox,guiMailbox.address,model.audioOn)
+                      ,A2($Html.div,
+                      _U.list([$Html$Attributes.$class("knobs")]),
+                      _U.list([knobView("attack")
+                              ,knobView("decay")
+                              ,knobView("sustain")
+                              ,knobView("release")]))]))
               ,A2($Piano.piano,4,12.0)]))]));
    });
    var guiSignal = A2($Signal.map,

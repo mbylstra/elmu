@@ -1,15 +1,16 @@
 module Knob where
 
 import Html exposing (div)
-import Html.Events exposing(onMouseDown)
-import Html.Attributes exposing (style)
+import Html.Events exposing(onMouseDown, onMouseEnter, onMouseLeave, Options)
+import HtmlEventsExtra exposing (onMouseDownWithOptions, preventDefault)
+import Html.Attributes exposing (style, classList)
 
 import Signal exposing (Address)
 
-import Arc exposing (arc)
+import Arc exposing (arc, getArcInfo)
 
-import Svg exposing (svg, path, rect)
-import Svg.Attributes exposing (d, stroke, fill, strokeWidth, x, y, width, height, viewBox)
+import Svg exposing (svg, path, rect, line)
+import Svg.Attributes exposing (d, stroke, fill, strokeWidth, x, y, x1, y1, x2, y2, width, height, viewBox)
 
 
 (=>) : a -> b -> ( a, b )
@@ -20,6 +21,7 @@ import Svg.Attributes exposing (d, stroke, fill, strokeWidth, x, y, width, heigh
 
 type alias Model =
   { mouseDown: Bool
+  , mouseInside: Bool
   , value: Float -- A value from 0.0 to 1.0. The main thing the parent might care about
   , width: Int
   , height: Int
@@ -29,6 +31,7 @@ type alias Model =
 init : Model
 init =
   { mouseDown = False
+  , mouseInside = False
   , value = 0.0
   , width = 100
   , height = 100
@@ -39,8 +42,10 @@ init =
 
 type Action
   = GlobalMouseUp -- a mouse up event anywhere
-  | LocalMouseDown  -- a mouse down event on the knob
+  | MouseDown  -- a mouse down event on the knob
   | MouseMove Int  -- the number of pixels moved since the last one of these events
+  | MouseEnter
+  | MouseLeave
 
 
 clamp : Float -> Float
@@ -57,8 +62,12 @@ clamp x =
 update : Action -> Model -> Model
 update action model =
   case action of
-    LocalMouseDown ->
+    MouseDown ->
       { model | mouseDown = True}
+    MouseEnter ->
+      { model | mouseInside = True}
+    MouseLeave ->
+      { model | mouseInside = False}
     GlobalMouseUp ->
       { model | mouseDown = False}
     MouseMove pixels ->
@@ -75,15 +84,39 @@ update action model =
 knobDisplay : Model -> Html.Html
 knobDisplay model =
   let
-    emptyAngle = 180.0 + 45.0
-    fullAngle = -45.0
-    valueAngle = (emptyAngle + 45.0) * model.value - 45.0
+    emptyAngle = 180.0 + 89.0
+    fullAngle = -90.0
+    -- emptyAngle = 359.0
+    -- fullAngle = 0.0
+    valueAngle = (emptyAngle + 90.0) * model.value - 90.0
     widthFloat = toFloat model.width
     radius = (widthFloat / 2.0) - 20.0
     centerPoint = (widthFloat / 2.0, widthFloat / 2.0)
     widthStr = toString model.width
     heightStr = toString model.height
-    strokeWidthStr = toString (widthFloat / 10.0)
+    strokeWidth' = widthFloat / 10.0
+    strokeWidthStr = toString strokeWidth'
+    activeArcArgs =
+      { radius=radius
+      , centerPoint=centerPoint
+      , startAngle=valueAngle
+      , endAngle=emptyAngle
+      }
+    inactiveArcArgs =
+      { radius=radius
+      , centerPoint=centerPoint
+      , startAngle=fullAngle
+      , endAngle=valueAngle
+      }
+    needleArcArgs =
+      { radius=radius + (strokeWidth' / 2.0)
+      , centerPoint=centerPoint
+      , startAngle=valueAngle
+      , endAngle=emptyAngle
+      }
+    activeArcInfo = getArcInfo needleArcArgs
+    (needleX1, needleY1) = activeArcInfo.centerPoint
+    (needleX2, needleY2) = activeArcInfo.startPoint
   in
     svg
       [ width widthStr
@@ -91,29 +124,27 @@ knobDisplay model =
       , viewBox ("0 0 " ++ widthStr ++ " " ++ heightStr) -- this should be params, coming from model (why not)
       ]
       [ path
-          [ d (arc
-                { radius=radius
-                , centerPoint=centerPoint
-                , startAngle=fullAngle
-                , endAngle=valueAngle
-                }
-              )
+          [ d (arc inactiveArcArgs)
           , stroke "black"
           , fill "none"
           , strokeWidth strokeWidthStr
           ]
           []
       , path
-          [ d (arc
-                { radius=radius
-                , centerPoint=centerPoint
-                , startAngle=valueAngle
-                , endAngle=emptyAngle
-                }
-              )
+          [ d (arc activeArcArgs)
           , stroke "pink"
           , fill "none"
           , strokeWidth strokeWidthStr
+          ]
+          []
+      , line
+          [ x1 (toString needleX1)
+          , y1 (toString needleY1)
+          , x2 (toString needleX2)
+          , y2 (toString needleY2)
+          , stroke "black"
+          , fill "none"
+          , strokeWidth (toString 2.0)
           ]
           []
       ]
@@ -127,13 +158,13 @@ view address model =
           [ "width" => toString model.width
           , "height" => toString model.width
           , "padding" => "10px"
-          -- , "border-radius" => "10px"
           , "position" => "relative"
           , "margin" => "10px"
-          , "background-color" => if model.mouseDown then "#EEE" else "white"
-          , "border" => "1px solid #CCC"
           ]
-      , onMouseDown address LocalMouseDown
+      , classList [ ("highlighted", model.mouseInside || model.mouseDown) ]
+      , onMouseDownWithOptions preventDefault address MouseDown
+      , onMouseEnter address MouseEnter
+      , onMouseLeave address MouseLeave
       ]
       [ knobDisplay model ]
     ]
