@@ -45,14 +45,31 @@ type alias ArcArgs =
   , endAngle : Float
   }
 
+type alias ArcInfo =
+  { radius : Float
+  , centerPoint : (Float, Float)
+  , startPoint : (Float, Float)
+  , endPoint : (Float, Float)
+  }
+
+
 fromDegrees : Float -> Float
 fromDegrees = degrees
 
 fromRadians : Float -> Float
 fromRadians = radians
 
-arc : ArcArgs -> String
-arc args =
+
+-- we want a function, that, given the same args, will return the center position
+-- the position of the start of the arc, and the position of the end of the arc.
+-- by giving a radius
+-- for example, you could use this function to draw a spiral.
+-- maybe its just the same, but you modify the radius?
+-- this function itself can be used by arc
+
+-- arcInfo : ArcArgs -> ?
+getArcInfo : ArcArgs -> ArcInfo
+getArcInfo args =
   let
     startAngleRadians = 0.0
     radius = args.radius
@@ -66,16 +83,32 @@ arc args =
       in
         (pointX, pointY)
 
-    (startPointX, startPointY) = toAbsoluteCoords args.startAngle
-    (endPointX, endPointY) = toAbsoluteCoords args.endAngle
+    startPoint = toAbsoluteCoords args.startAngle
+    endPoint = toAbsoluteCoords args.endAngle
+  in
+    { centerPoint = args.centerPoint
+    , radius = args.radius
+    , startPoint = startPoint
+    , endPoint = endPoint
+    }
 
+
+arc : ArcArgs -> String
+arc args =
+  let
+    arcInfo = getArcInfo args
+
+    startAngleRadians = 0.0
+    radius = args.radius
+    (centerX, centerY) = args.centerPoint
+    (startPointX, startPointY) = arcInfo.startPoint
+    (endPointX, endPointY) = arcInfo.endPoint
     largeArc = if args.endAngle - args.startAngle >= 180.0 then True else False
-
   in
     ("M " ++ (toString startPointX) ++ " " ++ (toString startPointY) ++ " " ++
       ( arcSegment
         { absolute=True
-        , endPoint=(endPointX, endPointY)
+        , endPoint=arcInfo.endPoint
         , radius=(args.radius, args.radius)
         , sweep=False
         , largeArc=largeArc

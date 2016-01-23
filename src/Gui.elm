@@ -9,7 +9,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (on, targetChecked, onMouseUp)
 import Piano exposing (piano, pianoSignal)
-import Slider exposing (slider)
+-- import Slider exposing (slider)
 import Signal exposing (Address)
 
 import Maybe exposing (withDefault)

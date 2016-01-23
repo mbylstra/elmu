@@ -21,6 +21,8 @@ import Svg.Attributes exposing (d, stroke, fill, strokeWidth, x, y, width, heigh
 type alias Model =
   { mouseDown: Bool
   , value: Float -- A value from 0.0 to 1.0. The main thing the parent might care about
+  , width: Int
+  , height: Int
   }
 
 
@@ -28,6 +30,8 @@ init : Model
 init =
   { mouseDown = False
   , value = 0.0
+  , width = 100
+  , height = 100
   }
 
 
@@ -68,17 +72,24 @@ update action model =
       else
         model
 
-knobDisplay : Float -> Html.Html
-knobDisplay value =
+knobDisplay : Model -> Html.Html
+knobDisplay model =
   let
     emptyAngle = 180.0 + 45.0
     fullAngle = -45.0
-    valueAngle = (emptyAngle + 45.0) * value - 45.0
-    radius = 80.0
-    centerPoint = (100.0, 100.0)
+    valueAngle = (emptyAngle + 45.0) * model.value - 45.0
+    widthFloat = toFloat model.width
+    radius = (widthFloat / 2.0) - 20.0
+    centerPoint = (widthFloat / 2.0, widthFloat / 2.0)
+    widthStr = toString model.width
+    heightStr = toString model.height
+    strokeWidthStr = toString (widthFloat / 10.0)
   in
     svg
-      [ width "200" , height "200" , viewBox "0 0 200 200" ]
+      [ width widthStr
+      , height heightStr
+      , viewBox ("0 0 " ++ widthStr ++ " " ++ heightStr) -- this should be params, coming from model (why not)
+      ]
       [ path
           [ d (arc
                 { radius=radius
@@ -89,7 +100,7 @@ knobDisplay value =
               )
           , stroke "black"
           , fill "none"
-          , strokeWidth "40"
+          , strokeWidth strokeWidthStr
           ]
           []
       , path
@@ -102,7 +113,7 @@ knobDisplay value =
               )
           , stroke "pink"
           , fill "none"
-          , strokeWidth "40"
+          , strokeWidth strokeWidthStr
           ]
           []
       ]
@@ -113,16 +124,16 @@ view address model =
   div []
     [ div
       [ style
-          [ "width" => "200px"
-          , "height" => "200px"
-          , "padding" => "20px"
+          [ "width" => toString model.width
+          , "height" => toString model.width
+          , "padding" => "10px"
           -- , "border-radius" => "10px"
           , "position" => "relative"
-          , "margin" => "20px"
+          , "margin" => "10px"
           , "background-color" => if model.mouseDown then "#EEE" else "white"
           , "border" => "1px solid #CCC"
           ]
       , onMouseDown address LocalMouseDown
       ]
-      [ knobDisplay model.value ]
+      [ knobDisplay model ]
     ]

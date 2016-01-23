@@ -14147,6 +14147,32 @@ Elm.Arc.make = function (_elm) {
    var _op = {};
    var fromRadians = $Basics.radians;
    var fromDegrees = $Basics.degrees;
+   var getArcInfo = function (args) {
+      var _p0 = args.centerPoint;
+      var centerX = _p0._0;
+      var centerY = _p0._1;
+      var radius = args.radius;
+      var toAbsoluteCoords = function (angleDegrees) {
+         var _p1 = $Basics.fromPolar({ctor: "_Tuple2"
+                                     ,_0: 1.0
+                                     ,_1: fromDegrees(angleDegrees)});
+         var normPointX = _p1._0;
+         var normPointY = _p1._1;
+         var pointX = centerX + normPointX * radius;
+         var pointY = centerY - normPointY * radius;
+         return {ctor: "_Tuple2",_0: pointX,_1: pointY};
+      };
+      var startPoint = toAbsoluteCoords(args.startAngle);
+      var endPoint = toAbsoluteCoords(args.endAngle);
+      var startAngleRadians = 0.0;
+      return {centerPoint: args.centerPoint
+             ,radius: args.radius
+             ,startPoint: startPoint
+             ,endPoint: endPoint};
+   };
+   var ArcInfo = F4(function (a,b,c,d) {
+      return {radius: a,centerPoint: b,startPoint: c,endPoint: d};
+   });
    var ArcArgs = F4(function (a,b,c,d) {
       return {radius: a,centerPoint: b,startAngle: c,endAngle: d};
    });
@@ -14159,20 +14185,20 @@ Elm.Arc.make = function (_elm) {
              ,endPoint: f};
    });
    var boolToIntString = function (b) {
-      var _p0 = b;
-      if (_p0 === true) {
+      var _p2 = b;
+      if (_p2 === true) {
             return "1";
          } else {
             return "0";
          }
    };
    var arcSegment = function (args) {
-      var _p1 = args.endPoint;
-      var endX = _p1._0;
-      var endY = _p1._1;
-      var _p2 = args.radius;
-      var radiusX = _p2._0;
-      var radiusY = _p2._1;
+      var _p3 = args.endPoint;
+      var endX = _p3._0;
+      var endY = _p3._1;
+      var _p4 = args.radius;
+      var radiusX = _p4._0;
+      var radiusY = _p4._1;
       return A2($String.join,
       " ",
       _U.list([args.absolute ? "A" : "a"
@@ -14187,27 +14213,18 @@ Elm.Arc.make = function (_elm) {
    var arc = function (args) {
       var largeArc = _U.cmp(args.endAngle - args.startAngle,
       180.0) > -1 ? true : false;
-      var _p3 = args.centerPoint;
-      var centerX = _p3._0;
-      var centerY = _p3._1;
+      var _p5 = args.centerPoint;
+      var centerX = _p5._0;
+      var centerY = _p5._1;
       var radius = args.radius;
-      var toAbsoluteCoords = function (angleDegrees) {
-         var _p4 = $Basics.fromPolar({ctor: "_Tuple2"
-                                     ,_0: 1.0
-                                     ,_1: fromDegrees(angleDegrees)});
-         var normPointX = _p4._0;
-         var normPointY = _p4._1;
-         var pointX = centerX + normPointX * radius;
-         var pointY = centerY - normPointY * radius;
-         return {ctor: "_Tuple2",_0: pointX,_1: pointY};
-      };
-      var _p5 = toAbsoluteCoords(args.startAngle);
-      var startPointX = _p5._0;
-      var startPointY = _p5._1;
-      var _p6 = toAbsoluteCoords(args.endAngle);
-      var endPointX = _p6._0;
-      var endPointY = _p6._1;
       var startAngleRadians = 0.0;
+      var arcInfo = getArcInfo(args);
+      var _p6 = arcInfo.startPoint;
+      var startPointX = _p6._0;
+      var startPointY = _p6._1;
+      var _p7 = arcInfo.endPoint;
+      var endPointX = _p7._0;
+      var endPointY = _p7._1;
       return A2($Basics._op["++"],
       "M ",
       A2($Basics._op["++"],
@@ -14219,7 +14236,7 @@ Elm.Arc.make = function (_elm) {
       A2($Basics._op["++"],
       " ",
       arcSegment({absolute: true
-                 ,endPoint: {ctor: "_Tuple2",_0: endPointX,_1: endPointY}
+                 ,endPoint: arcInfo.endPoint
                  ,radius: {ctor: "_Tuple2",_0: args.radius,_1: args.radius}
                  ,sweep: false
                  ,largeArc: largeArc
@@ -14670,47 +14687,6 @@ Elm.Piano.make = function (_elm) {
                               ,piano: piano
                               ,pianoSignal: pianoSignal};
 };
-Elm.Slider = Elm.Slider || {};
-Elm.Slider.make = function (_elm) {
-   "use strict";
-   _elm.Slider = _elm.Slider || {};
-   if (_elm.Slider.values) return _elm.Slider.values;
-   var _U = Elm.Native.Utils.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $Debug = Elm.Debug.make(_elm),
-   $Html = Elm.Html.make(_elm),
-   $Html$Attributes = Elm.Html.Attributes.make(_elm),
-   $Html$Events = Elm.Html.Events.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm),
-   $String = Elm.String.make(_elm);
-   var _op = {};
-   var decodeSliderValue = function (result) {
-      return A2($Result.withDefault,0.0,$String.toFloat(result));
-   };
-   var slider = function (address) {
-      var eventHandler = A3($Html$Events.on,
-      "input",
-      $Html$Events.targetValue,
-      function (result) {
-         return A2($Signal.message,address,decodeSliderValue(result));
-      });
-      return A2($Html.div,
-      _U.list([$Html$Attributes.$class("slider-wrapper")]),
-      _U.list([A2($Html.input,
-      _U.list([$Html$Attributes.type$("range")
-              ,$Html$Attributes.min("0")
-              ,$Html$Attributes.max("1")
-              ,$Html$Attributes.step("0.001")
-              ,eventHandler]),
-      _U.list([]))]));
-   };
-   return _elm.Slider.values = {_op: _op
-                               ,decodeSliderValue: decodeSliderValue
-                               ,slider: slider};
-};
 Elm.MouseExtra = Elm.MouseExtra || {};
 Elm.MouseExtra.make = function (_elm) {
    "use strict";
@@ -14793,16 +14769,26 @@ Elm.Knob.make = function (_elm) {
    $Svg = Elm.Svg.make(_elm),
    $Svg$Attributes = Elm.Svg.Attributes.make(_elm);
    var _op = {};
-   var knobDisplay = function (value) {
-      var centerPoint = {ctor: "_Tuple2",_0: 100.0,_1: 100.0};
-      var radius = 80.0;
+   var knobDisplay = function (model) {
+      var heightStr = $Basics.toString(model.height);
+      var widthStr = $Basics.toString(model.width);
+      var widthFloat = $Basics.toFloat(model.width);
+      var radius = widthFloat / 2.0 - 20.0;
+      var centerPoint = {ctor: "_Tuple2"
+                        ,_0: widthFloat / 2.0
+                        ,_1: widthFloat / 2.0};
+      var strokeWidthStr = $Basics.toString(widthFloat / 10.0);
       var fullAngle = -45.0;
       var emptyAngle = 180.0 + 45.0;
-      var valueAngle = (emptyAngle + 45.0) * value - 45.0;
+      var valueAngle = (emptyAngle + 45.0) * model.value - 45.0;
       return A2($Svg.svg,
-      _U.list([$Svg$Attributes.width("200")
-              ,$Svg$Attributes.height("200")
-              ,$Svg$Attributes.viewBox("0 0 200 200")]),
+      _U.list([$Svg$Attributes.width(widthStr)
+              ,$Svg$Attributes.height(heightStr)
+              ,$Svg$Attributes.viewBox(A2($Basics._op["++"],
+              "0 0 ",
+              A2($Basics._op["++"],
+              widthStr,
+              A2($Basics._op["++"]," ",heightStr))))]),
       _U.list([A2($Svg.path,
               _U.list([$Svg$Attributes.d($Arc.arc({radius: radius
                                                   ,centerPoint: centerPoint
@@ -14810,7 +14796,7 @@ Elm.Knob.make = function (_elm) {
                                                   ,endAngle: valueAngle}))
                       ,$Svg$Attributes.stroke("black")
                       ,$Svg$Attributes.fill("none")
-                      ,$Svg$Attributes.strokeWidth("40")]),
+                      ,$Svg$Attributes.strokeWidth(strokeWidthStr)]),
               _U.list([]))
               ,A2($Svg.path,
               _U.list([$Svg$Attributes.d($Arc.arc({radius: radius
@@ -14819,7 +14805,7 @@ Elm.Knob.make = function (_elm) {
                                                   ,endAngle: emptyAngle}))
                       ,$Svg$Attributes.stroke("pink")
                       ,$Svg$Attributes.fill("none")
-                      ,$Svg$Attributes.strokeWidth("40")]),
+                      ,$Svg$Attributes.strokeWidth(strokeWidthStr)]),
               _U.list([]))]));
    };
    var clamp = function (x) {
@@ -14843,9 +14829,9 @@ Elm.Knob.make = function (_elm) {
    };
    var LocalMouseDown = {ctor: "LocalMouseDown"};
    var GlobalMouseUp = {ctor: "GlobalMouseUp"};
-   var init = {mouseDown: false,value: 0.0};
-   var Model = F2(function (a,b) {
-      return {mouseDown: a,value: b};
+   var init = {mouseDown: false,value: 0.0,width: 100,height: 100};
+   var Model = F4(function (a,b,c,d) {
+      return {mouseDown: a,value: b,width: c,height: d};
    });
    _op["=>"] = F2(function (v0,v1) {
       return {ctor: "_Tuple2",_0: v0,_1: v1};
@@ -14856,17 +14842,17 @@ Elm.Knob.make = function (_elm) {
       _U.list([A2($Html.div,
       _U.list([$Html$Attributes.style(_U.list([A2(_op["=>"],
                                               "width",
-                                              "200px")
-                                              ,A2(_op["=>"],"height","200px")
-                                              ,A2(_op["=>"],"padding","20px")
+                                              $Basics.toString(model.width))
+                                              ,A2(_op["=>"],"height",$Basics.toString(model.width))
+                                              ,A2(_op["=>"],"padding","10px")
                                               ,A2(_op["=>"],"position","relative")
-                                              ,A2(_op["=>"],"margin","20px")
+                                              ,A2(_op["=>"],"margin","10px")
                                               ,A2(_op["=>"],
                                               "background-color",
                                               model.mouseDown ? "#EEE" : "white")
                                               ,A2(_op["=>"],"border","1px solid #CCC")]))
               ,A2($Html$Events.onMouseDown,address,LocalMouseDown)]),
-      _U.list([knobDisplay(model.value)]))]));
+      _U.list([knobDisplay(model)]))]));
    });
    return _elm.Knob.values = {_op: _op
                              ,Model: Model
