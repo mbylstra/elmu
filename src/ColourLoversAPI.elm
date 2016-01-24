@@ -11,6 +11,7 @@ import Result exposing (Result(Ok))
 import Task
 import StartApp exposing (App)
 import String
+import Array exposing (Array)
 
 import Color exposing(Color, rgb)
 import ColorExtra exposing(toCssRgb)
@@ -25,17 +26,17 @@ import StringExtra exposing (hexToInt)
 type alias Palette =
   { title : String
   , userName : String
-  , colors: List Color
+  , colors: Array Color
   }
 
 type alias Model =
-  { palettes : Maybe (List Palette)
+  { palettes : Maybe (Array Palette)
   , fetching : Bool
   }
 
 initModel : Model
 initModel =
-  { palettes = Just [], fetching = True}
+  { palettes = Just Array.empty, fetching = True}
 
 
 initEffects : Effects Action
@@ -51,7 +52,7 @@ init  =
 --------------------------------------------------------------------------------
 
 type Action
-    = PalettesFetched (Maybe (List Palette))
+    = PalettesFetched (Maybe (Array Palette))
 
 
 update : Action -> Model -> (Model, Effects Action)
@@ -104,11 +105,11 @@ colorView color =
     ]
     []
 
-palettesView : Maybe (List Palette) -> Html
+palettesView : Maybe (Array Palette) -> Html
 palettesView maybePalettes =
   case maybePalettes of
     Just palettes ->
-      div [] (List.map paletteView (List.take 1 palettes))
+      div [] (Array.toList (Array.map paletteView palettes))
     Nothing ->
       p [] [text "error fetching palettes"]
 
@@ -117,7 +118,7 @@ paletteView palette =
   div []
     [ h2 [] [text palette.title]
     , h4 [] [text palette.userName]
-    , div [] (List.map colorView palette.colors)
+    , div [] (Array.toList (Array.map colorView palette.colors))
     ]
 
 --------------------------------------------------------------------------------
@@ -138,7 +139,7 @@ decodePalette =
       (\title userName colors -> {title=title, userName=userName, colors=colors})
       ("title" := Decode.string)
       ("userName" := Decode.string)
-      ("colors" := Decode.list decodeColor)
+      ("colors" := Decode.array decodeColor)
 
 
 decodeColor : Decoder Color
@@ -146,8 +147,8 @@ decodeColor =
   Decode.customDecoder Decode.string (\s -> Ok (parseColor s))
 
 
-decodePalettes : Decoder (List Palette)
-decodePalettes = Decode.list decodePalette
+decodePalettes : Decoder (Array Palette)
+decodePalettes = Decode.array decodePalette
 
 getTopPalettes : Effects Action
 getTopPalettes =
@@ -192,7 +193,7 @@ tests =
           """
         )
         (Ok
-          []
+          Array.empty
           -- [ {title="goldfish", userName="kineko", colors=["AAA", "BBB"]}
           -- , {title="title2", userName="user2", colors=["CCC", "DDD"]}
           -- ]

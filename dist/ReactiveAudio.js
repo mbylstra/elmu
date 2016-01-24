@@ -14967,40 +14967,6 @@ Elm.ColorExtra.make = function (_elm) {
                                    ,sortByLightness: sortByLightness
                                    ,toCssRgb: toCssRgb};
 };
-Elm.ColorScheme = Elm.ColorScheme || {};
-Elm.ColorScheme.make = function (_elm) {
-   "use strict";
-   _elm.ColorScheme = _elm.ColorScheme || {};
-   if (_elm.ColorScheme.values) return _elm.ColorScheme.values;
-   var _U = Elm.Native.Utils.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $Color = Elm.Color.make(_elm),
-   $Debug = Elm.Debug.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
-   var _op = {};
-   var defaultColorScheme = {windowBackground: $Color.red
-                            ,pianoWhites: $Color.green
-                            ,pianoBlacks: $Color.blue
-                            ,knobBackground: $Color.black
-                            ,knobForeground: $Color.lightRed
-                            ,controlPanelBackground: $Color.white
-                            ,controlPanelBorders: $Color.black};
-   var ColorScheme = F7(function (a,b,c,d,e,f,g) {
-      return {windowBackground: a
-             ,pianoWhites: b
-             ,pianoBlacks: c
-             ,knobBackground: d
-             ,knobForeground: e
-             ,controlPanelBackground: f
-             ,controlPanelBorders: g};
-   });
-   return _elm.ColorScheme.values = {_op: _op
-                                    ,ColorScheme: ColorScheme
-                                    ,defaultColorScheme: defaultColorScheme};
-};
 Elm.Native.StringExtra = {};
 
 Elm.Native.StringExtra.make = function(localRuntime) {
@@ -15099,6 +15065,7 @@ Elm.ColourLoversAPI.make = function (_elm) {
    if (_elm.ColourLoversAPI.values)
    return _elm.ColourLoversAPI.values;
    var _U = Elm.Native.Utils.make(_elm),
+   $Array = Elm.Array.make(_elm),
    $Basics = Elm.Basics.make(_elm),
    $Color = Elm.Color.make(_elm),
    $ColorExtra = Elm.ColorExtra.make(_elm),
@@ -15142,8 +15109,8 @@ Elm.ColourLoversAPI.make = function (_elm) {
    A2($Json$Decode._op[":="],"userName",$Json$Decode.string),
    A2($Json$Decode._op[":="],
    "colors",
-   $Json$Decode.list(decodeColor)));
-   var decodePalettes = $Json$Decode.list(decodePalette);
+   $Json$Decode.array(decodeColor)));
+   var decodePalettes = $Json$Decode.array(decodePalette);
    var tests = A2($ElmTest.suite,
    "",
    _U.list([A2($ElmTest.test,
@@ -15152,7 +15119,7 @@ Elm.ColourLoversAPI.make = function (_elm) {
            A2($Json$Decode.decodeString,
            decodePalettes,
            "\n            [\n              {\n                \"title\": \"goldfish\",\n                \"userName\": \"kineko\",\n                \"colors\": [\"AAA\", \"BBB\"]\n              },\n              {\n                \"title\": \"title2\",\n                \"userName\": \"user2\",\n                \"colors\": [CCC\", \"DDD\"]\n              }\n            ]\n          "),
-           $Result.Ok(_U.list([]))))
+           $Result.Ok($Array.empty)))
            ,A2($ElmTest.test,
            "",
            A2($ElmTest.assertEqual,
@@ -15196,14 +15163,14 @@ Elm.ColourLoversAPI.make = function (_elm) {
               _U.list([$Html.text(palette.userName)]))
               ,A2($Html.div,
               _U.list([]),
-              A2($List.map,colorView,palette.colors))]));
+              $Array.toList(A2($Array.map,colorView,palette.colors)))]));
    };
    var palettesView = function (maybePalettes) {
       var _p1 = maybePalettes;
       if (_p1.ctor === "Just") {
             return A2($Html.div,
             _U.list([]),
-            A2($List.map,paletteView,A2($List.take,1,_p1._0)));
+            $Array.toList(A2($Array.map,paletteView,_p1._0)));
          } else {
             return A2($Html.p,
             _U.list([]),
@@ -15228,7 +15195,7 @@ Elm.ColourLoversAPI.make = function (_elm) {
    PalettesFetched,
    $Task.toMaybe(A2($Http.get,decodePalettes,coTopPalettesUrl))));
    var initEffects = getTopPalettes;
-   var initModel = {palettes: $Maybe.Just(_U.list([]))
+   var initModel = {palettes: $Maybe.Just($Array.empty)
                    ,fetching: true};
    var init = {ctor: "_Tuple2",_0: initModel,_1: initEffects};
    var app = $StartApp.start({init: init
@@ -15267,6 +15234,67 @@ Elm.ColourLoversAPI.make = function (_elm) {
                                         ,tests: tests
                                         ,app: app
                                         ,main: main};
+};
+Elm.ColorScheme = Elm.ColorScheme || {};
+Elm.ColorScheme.make = function (_elm) {
+   "use strict";
+   _elm.ColorScheme = _elm.ColorScheme || {};
+   if (_elm.ColorScheme.values) return _elm.ColorScheme.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Array = Elm.Array.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Color = Elm.Color.make(_elm),
+   $ColourLoversAPI = Elm.ColourLoversAPI.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var _op = {};
+   var defaultColorScheme = {windowBackground: $Color.white
+                            ,pianoWhites: $Color.white
+                            ,pianoBlacks: $Color.black
+                            ,knobBackground: $Color.black
+                            ,knobForeground: $Color.lightRed
+                            ,controlPanelBackground: $Color.white
+                            ,controlPanelBorders: $Color.black};
+   var fromColourLovers = function (palette) {
+      var colors = palette.colors;
+      return {windowBackground: A2($Maybe.withDefault,
+             defaultColorScheme.windowBackground,
+             A2($Array.get,0,colors))
+             ,pianoWhites: A2($Maybe.withDefault,
+             defaultColorScheme.pianoWhites,
+             A2($Array.get,1,colors))
+             ,pianoBlacks: A2($Maybe.withDefault,
+             defaultColorScheme.pianoBlacks,
+             A2($Array.get,2,colors))
+             ,knobBackground: A2($Maybe.withDefault,
+             defaultColorScheme.knobBackground,
+             A2($Array.get,3,colors))
+             ,knobForeground: A2($Maybe.withDefault,
+             defaultColorScheme.knobForeground,
+             A2($Array.get,4,colors))
+             ,controlPanelBackground: A2($Maybe.withDefault,
+             defaultColorScheme.controlPanelBackground,
+             A2($Array.get,5,colors))
+             ,controlPanelBorders: A2($Maybe.withDefault,
+             defaultColorScheme.controlPanelBorders,
+             A2($Array.get,6,colors))};
+   };
+   var ColorScheme = F7(function (a,b,c,d,e,f,g) {
+      return {windowBackground: a
+             ,pianoWhites: b
+             ,pianoBlacks: c
+             ,knobBackground: d
+             ,knobForeground: e
+             ,controlPanelBackground: f
+             ,controlPanelBorders: g};
+   });
+   return _elm.ColorScheme.values = {_op: _op
+                                    ,ColorScheme: ColorScheme
+                                    ,defaultColorScheme: defaultColorScheme
+                                    ,fromColourLovers: fromColourLovers};
 };
 Elm.Components = Elm.Components || {};
 Elm.Components.make = function (_elm) {
@@ -15865,6 +15893,7 @@ Elm.Gui.make = function (_elm) {
    _elm.Gui = _elm.Gui || {};
    if (_elm.Gui.values) return _elm.Gui.values;
    var _U = Elm.Native.Utils.make(_elm),
+   $Array = Elm.Array.make(_elm),
    $Basics = Elm.Basics.make(_elm),
    $ColorExtra = Elm.ColorExtra.make(_elm),
    $ColorScheme = Elm.ColorScheme.make(_elm),
@@ -15911,10 +15940,19 @@ Elm.Gui.make = function (_elm) {
          default: var _p1 = A2($ColourLoversAPI.update,
            _p0._0,
            model.palettes);
-           var newPalettes = _p1._0;
+           var newCLModel = _p1._0;
            var fx = _p1._1;
+           var palettes = A2($Maybe.withDefault,
+           $Array.empty,
+           newCLModel.palettes);
+           var palette = A2($Maybe.withDefault,
+           {title: "",userName: "",colors: $Array.empty},
+           A2($Array.get,0,palettes));
+           var newModel = _U.update(model,
+           {palettes: newCLModel
+           ,colorScheme: $ColorScheme.fromColourLovers(palette)});
            return {ctor: "_Tuple2"
-                  ,_0: _U.update(model,{palettes: newPalettes})
+                  ,_0: newModel
                   ,_1: A2($Effects.map,ColourLoversAction,fx)};}
    });
    var ChangeFrequency = function (a) {

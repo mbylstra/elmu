@@ -16,6 +16,8 @@ import Piano exposing (piano, pianoSignal, pianoGuiFrequency)
 import KeyboardNoteInput exposing (keyboardGuiFrequency)
 -- import Slider exposing (slider)
 import Signal exposing (Address)
+import Array
+import Maybe exposing (withDefault)
 
 import ColorExtra exposing (toCssRgb)
 
@@ -31,7 +33,7 @@ import MouseExtra
 import KnobRegistry exposing (Action(GlobalMouseUp, MousePosition))
 import HtmlAttributesExtra exposing (..)
 
-import ColorScheme exposing (defaultColorScheme, ColorScheme)
+import ColorScheme exposing (defaultColorScheme, ColorScheme, fromColourLovers)
 
 
 --------------------------------------------------------------------------------
@@ -123,9 +125,16 @@ update action model =
       )
     ColourLoversAction clAction ->
       let
-        (newPalettes, fx) = ColourLoversAPI.update clAction model.palettes
+        (newCLModel, fx) = ColourLoversAPI.update clAction model.palettes
+        palettes = withDefault Array.empty newCLModel.palettes
+        palette = withDefault {title = "", userName = "", colors = Array.empty} (Array.get 0 palettes)
+        newModel =
+          { model |
+              palettes = newCLModel
+            , colorScheme = fromColourLovers palette
+          }
       in
-        ( { model | palettes = newPalettes }
+        ( newModel
         , Effects.map ColourLoversAction fx
         )
 

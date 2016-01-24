@@ -1,6 +1,9 @@
 module ColorScheme where
 
 import Color exposing (Color)
+import ColourLoversAPI exposing (Palette)
+import Array
+import Maybe exposing (withDefault)
 
 type alias ColorScheme =
   { windowBackground: Color
@@ -14,14 +17,28 @@ type alias ColorScheme =
 
 defaultColorScheme : ColorScheme
 defaultColorScheme =
-  -- { windowBackground= Color.white
-  { windowBackground= Color.red
-  -- , pianoWhites= Color.white
-  , pianoWhites= Color.green
-  -- , pianoBlacks= Color.black
-  , pianoBlacks= Color.blue
+  { windowBackground= Color.white
+  -- { windowBackground= Color.red
+  , pianoWhites= Color.white
+  -- , pianoWhites= Color.green
+  , pianoBlacks= Color.black
+  -- , pianoBlacks= Color.blue
   , knobBackground= Color.black
   , knobForeground= Color.lightRed
   , controlPanelBackground= Color.white
   , controlPanelBorders= Color.black
   }
+
+fromColourLovers : Palette -> ColorScheme
+fromColourLovers palette =
+  let
+    colors = palette.colors
+  in
+    { windowBackground = withDefault defaultColorScheme.windowBackground (Array.get 0 colors)
+    , pianoWhites = withDefault defaultColorScheme.pianoWhites (Array.get 1 colors)
+    , pianoBlacks = withDefault defaultColorScheme.pianoBlacks (Array.get 2 colors)
+    , knobBackground = withDefault defaultColorScheme.knobBackground (Array.get 3 colors)
+    , knobForeground = withDefault defaultColorScheme.knobForeground (Array.get 4 colors)
+    , controlPanelBackground = withDefault defaultColorScheme.controlPanelBackground (Array.get 5 colors)
+    , controlPanelBorders = withDefault defaultColorScheme.controlPanelBorders (Array.get 6 colors)
+    }
