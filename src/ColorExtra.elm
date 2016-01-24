@@ -2,6 +2,7 @@ module ColorExtra where
 
 import Color exposing (Color, toHsl)
 import List
+import String
 
 compareLightness : Color -> Color -> Order
 compareLightness colorA colorB =
@@ -27,6 +28,19 @@ sortByLightness colors =
   List.sortWith compareLightness colors
 
 
+toCssRgb : Color -> String
+toCssRgb color =
+  let
+    color' = Color.toRgb color
+    colors =
+      [ color'.red
+      , color'.green
+      , color'.blue
+      ]
+    inner =
+      colors
+      |> List.map toString
+      |> String.join ","
 
-  -- =
-  --   List.sort
+  in
+    "rgb(" ++ inner ++ ")"

@@ -13,6 +13,7 @@ import StartApp exposing (App)
 import String
 
 import Color exposing(Color, rgb)
+import ColorExtra exposing(toCssRgb)
 
 import StringExtra exposing (hexToInt)
 
@@ -67,28 +68,28 @@ view address model =
   div []
     [ palettesView model.palettes ]
 
-colorToCss : Color -> String
-colorToCss color =
-  let
-    color' = Color.toRgb color
-    colors =
-      [ color'.red
-      , color'.green
-      , color'.blue
-      ]
-    inner =
-      colors
-      |> List.map toString
-      |> String.join ","
-
-  in
-    "rgb(" ++ inner ++ ")"
+-- colorToCss : Color -> String
+-- colorToCss color =
+--   let
+--     color' = Color.toRgb color
+--     colors =
+--       [ color'.red
+--       , color'.green
+--       , color'.blue
+--       ]
+--     inner =
+--       colors
+--       |> List.map toString
+--       |> String.join ","
+--
+--   in
+--     "rgb(" ++ inner ++ ")"
 
 colorView : Color -> Html
 colorView color =
   div
     [ style
-      [ "background-color" => colorToCss(color)
+      [ "background-color" => toCssRgb color
       , "width" => "100px"
       , "height" => "100px"
       ]

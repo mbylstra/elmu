@@ -11,7 +11,8 @@ $black-key-height: $HEIGHT * 0.6;
 
   .white-key {
     background-color: white;
-    border: 1px solid black;
+    // border: 1px solid black;
+    margin: 1px;
     width: 50px;
     height: $HEIGHT;
     border-radius: 0px 0px 4px 4px;
@@ -34,12 +35,10 @@ $black-key-height: $HEIGHT * 0.6;
     position: absolute;
     border-radius: 0px 0px 4px 4px;
     left: -10px;
-    // &:active, &:hover {
-    //   background-color: #444;
-    //   height: $black-key-height - 1;
-    // }
+    &:active, &:hover {
+      background-color: #444;
+      height: $black-key-height - 1;
+    }
   }
-
-
 
 }

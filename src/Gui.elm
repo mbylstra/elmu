@@ -11,6 +11,9 @@ import Html.Events exposing (on, targetChecked, onMouseUp)
 import Piano exposing (piano, pianoSignal)
 -- import Slider exposing (slider)
 import Signal exposing (Address)
+import Color exposing (Color)
+
+import ColorExtra exposing (toCssRgb)
 
 import Maybe exposing (withDefault)
 
@@ -20,6 +23,8 @@ import Effects
 
 import MouseExtra
 import KnobRegistry exposing (Action(GlobalMouseUp, MousePosition))
+import HtmlAttributesExtra exposing (..)
+
 
 
 type alias UserInput =
@@ -32,10 +37,36 @@ type alias UserInput =
   , slider1 : Float
   }
 
+
+type alias ColorScheme =
+  { windowBackground: Color
+  , pianoWhites: Color
+  , pianoBlacks: Color
+  , knobBackground: Color
+  , knobForeground: Color
+  , controlPanelBackground: Color
+  , controlPanelBorders: Color
+  }
+
+defaultColorScheme : ColorScheme
+defaultColorScheme =
+  -- { windowBackground= Color.white
+  { windowBackground= Color.red
+  -- , pianoWhites= Color.white
+  , pianoWhites= Color.green
+  -- , pianoBlacks= Color.black
+  , pianoBlacks= Color.blue
+  , knobBackground= Color.black
+  , knobForeground= Color.lightRed
+  , controlPanelBackground= Color.white
+  , controlPanelBorders= Color.black
+  }
+
 type alias GuiModel =
   { audioOn : Bool
   , slider1: Float
   , knobRegistry : KnobRegistry.Model
+  , colorScheme: ColorScheme
   }
 
 initialUserInput : UserInput
@@ -104,6 +135,7 @@ initialModel =
   { audioOn = True
   , slider1 = 0.0
   , knobRegistry = KnobRegistry.init ["attack", "decay", "sustain", "release"]
+  , colorScheme = defaultColorScheme
   }
 
 guiModelSignal : Signal GuiModel
@@ -200,6 +232,8 @@ view address model =  -- hwere is address??
             address
             (\position -> KnobRegistryAction (MousePosition position))
         , onMouseUp address (KnobRegistryAction GlobalMouseUp)
+        , class "elm-audio"
+        , style ["background-color" => toCssRgb model.colorScheme.windowBackground]
         ]
         -- [ h1 [] [text "Elm Reactive Audio"]
         [ div [class "synth"]
@@ -213,7 +247,12 @@ view address model =  -- hwere is address??
               , knobView "release"
               ]
             ]
-          , piano 4 12.0
+          , piano
+              { whiteKey = model.colorScheme.pianoWhites
+              , blackKey = model.colorScheme.pianoBlacks
+              }
+              4
+              12.0
           ]
         ]
 

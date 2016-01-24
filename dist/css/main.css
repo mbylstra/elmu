@@ -1,11 +1,17 @@
+/* apply a natural box layout model to all elements, but allowing components to change */
 body {
   background-color: white;
   color: black;
   font-family: sans-serif;
-  padding: 20px; }
+  padding: 0px;
+  margin: 0px; }
+
+.elm-audio {
+  height: 100%; }
 
 .synth {
-  position: relative; }
+  position: relative;
+  padding: 20px; }
 
 .knobs {
   display: flex; }
@@ -15,14 +21,14 @@ body {
   border-bottom: 0px; }
 
 .highlighted {
-  background-color: #F2F2F2;
+  background-color: rgba(0, 0, 0, 0.05);
   border-radius: 15px;
   cursor: ns-resize; }
 
 .power-toggle {
   margin: 10px;
   position: absolute;
-  right: 10px; }
+  right: 26px; }
 
 .cmn-toggle {
   position: absolute;

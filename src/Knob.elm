@@ -12,9 +12,9 @@ import Arc exposing (arc, getArcInfo)
 import Svg exposing (svg, path, rect, line)
 import Svg.Attributes exposing (d, stroke, fill, strokeWidth, x, y, x1, y1, x2, y2, width, height, viewBox)
 
+import HtmlAttributesExtra exposing (..)
 
-(=>) : a -> b -> ( a, b )
-(=>) = (,)
+
 
 
 -- MODEL

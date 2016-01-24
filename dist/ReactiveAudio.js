@@ -14546,6 +14546,59 @@ Elm.AudioNodes.make = function (_elm) {
                                    ,destinationNode: destinationNode
                                    ,commaHelper: commaHelper};
 };
+Elm.ColorExtra = Elm.ColorExtra || {};
+Elm.ColorExtra.make = function (_elm) {
+   "use strict";
+   _elm.ColorExtra = _elm.ColorExtra || {};
+   if (_elm.ColorExtra.values) return _elm.ColorExtra.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Color = Elm.Color.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $String = Elm.String.make(_elm);
+   var _op = {};
+   var toCssRgb = function (color) {
+      var color$ = $Color.toRgb(color);
+      var colors = _U.list([color$.red,color$.green,color$.blue]);
+      var inner = A2($String.join,
+      ",",
+      A2($List.map,$Basics.toString,colors));
+      return A2($Basics._op["++"],
+      "rgb(",
+      A2($Basics._op["++"],inner,")"));
+   };
+   var compareLightness = F2(function (colorA,colorB) {
+      var lightnessB = function (_) {
+         return _.lightness;
+      }($Color.toHsl(colorB));
+      var lightnessA = function (_) {
+         return _.lightness;
+      }($Color.toHsl(colorA));
+      return _U.cmp(lightnessA,
+      lightnessB) > 0 ? $Basics.GT : _U.eq(lightnessA,
+      lightnessB) ? $Basics.EQ : $Basics.LT;
+   });
+   var isLighter = F2(function (colorA,colorB) {
+      var _p0 = A2(compareLightness,colorA,colorB);
+      if (_p0.ctor === "GT") {
+            return true;
+         } else {
+            return false;
+         }
+   });
+   var sortByLightness = function (colors) {
+      return A2($List.sortWith,compareLightness,colors);
+   };
+   return _elm.ColorExtra.values = {_op: _op
+                                   ,compareLightness: compareLightness
+                                   ,isLighter: isLighter
+                                   ,sortByLightness: sortByLightness
+                                   ,toCssRgb: toCssRgb};
+};
 Elm.Components = Elm.Components || {};
 Elm.Components.make = function (_elm) {
    "use strict";
@@ -14619,6 +14672,25 @@ Elm.Components.make = function (_elm) {
                                    ,FMSynthSpec: FMSynthSpec
                                    ,fmSynth: fmSynth};
 };
+Elm.HtmlAttributesExtra = Elm.HtmlAttributesExtra || {};
+Elm.HtmlAttributesExtra.make = function (_elm) {
+   "use strict";
+   _elm.HtmlAttributesExtra = _elm.HtmlAttributesExtra || {};
+   if (_elm.HtmlAttributesExtra.values)
+   return _elm.HtmlAttributesExtra.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var _op = {};
+   _op["=>"] = F2(function (v0,v1) {
+      return {ctor: "_Tuple2",_0: v0,_1: v1};
+   });
+   return _elm.HtmlAttributesExtra.values = {_op: _op};
+};
 Elm.Piano = Elm.Piano || {};
 Elm.Piano.make = function (_elm) {
    "use strict";
@@ -14626,50 +14698,62 @@ Elm.Piano.make = function (_elm) {
    if (_elm.Piano.values) return _elm.Piano.values;
    var _U = Elm.Native.Utils.make(_elm),
    $Basics = Elm.Basics.make(_elm),
+   $Color = Elm.Color.make(_elm),
+   $ColorExtra = Elm.ColorExtra.make(_elm),
    $Debug = Elm.Debug.make(_elm),
    $Html = Elm.Html.make(_elm),
    $Html$Attributes = Elm.Html.Attributes.make(_elm),
    $Html$Events = Elm.Html.Events.make(_elm),
+   $HtmlAttributesExtra = Elm.HtmlAttributesExtra.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm);
    var _op = {};
+   var ColorScheme = F2(function (a,b) {
+      return {whiteKey: a,blackKey: b};
+   });
    var White = {ctor: "White"};
    var Black = {ctor: "Black"};
    var pianoMailbox = $Signal.mailbox(60.0);
    var pianoSignal = pianoMailbox.signal;
-   var pianoKey = F2(function (keyType,pitch) {
-      var _p0 = keyType;
-      if (_p0.ctor === "Black") {
-            return A2($Html.div,
-            _U.list([$Html$Attributes.$class("black-key-wrapper")]),
-            _U.list([A2($Html.div,
-            _U.list([$Html$Attributes.$class("black-key")
-                    ,A2($Html$Events.onMouseDown,pianoMailbox.address,pitch)]),
-            _U.list([]))]));
-         } else {
-            return A2($Html.div,
-            _U.list([$Html$Attributes.$class("white-key")
-                    ,A2($Html$Events.onMouseDown,pianoMailbox.address,pitch)]),
-            _U.list([]));
-         }
-   });
-   var pianoOctave = function (cPitch) {
-      return _U.list([A2(pianoKey,White,cPitch)
-                     ,A2(pianoKey,Black,cPitch + 1.0)
-                     ,A2(pianoKey,White,cPitch + 2.0)
-                     ,A2(pianoKey,Black,cPitch + 3.0)
-                     ,A2(pianoKey,White,cPitch + 4.0)
-                     ,A2(pianoKey,White,cPitch + 5.0)
-                     ,A2(pianoKey,Black,cPitch + 6.0)
-                     ,A2(pianoKey,White,cPitch + 7.0)
-                     ,A2(pianoKey,Black,cPitch + 8.0)
-                     ,A2(pianoKey,White,cPitch + 9.0)
-                     ,A2(pianoKey,Black,cPitch + 10.0)
-                     ,A2(pianoKey,White,cPitch + 11.0)]);
-   };
-   var piano = F2(function (numOctaves,bottomPitch) {
+   var piano = F3(function (colorScheme,numOctaves,bottomPitch) {
+      var pianoKey = F2(function (keyType,pitch) {
+         var _p0 = keyType;
+         if (_p0.ctor === "Black") {
+               return A2($Html.div,
+               _U.list([$Html$Attributes.$class("black-key-wrapper")]),
+               _U.list([A2($Html.div,
+               _U.list([$Html$Attributes.$class("black-key")
+                       ,A2($Html$Events.onMouseDown,pianoMailbox.address,pitch)
+                       ,$Html$Attributes.style(_U.list([A2($HtmlAttributesExtra._op["=>"],
+                       "background-color",
+                       $ColorExtra.toCssRgb(colorScheme.blackKey))]))]),
+               _U.list([]))]));
+            } else {
+               return A2($Html.div,
+               _U.list([$Html$Attributes.$class("white-key")
+                       ,A2($Html$Events.onMouseDown,pianoMailbox.address,pitch)
+                       ,$Html$Attributes.style(_U.list([A2($HtmlAttributesExtra._op["=>"],
+                       "background-color",
+                       $ColorExtra.toCssRgb(colorScheme.whiteKey))]))]),
+               _U.list([]));
+            }
+      });
+      var pianoOctave = function (cPitch) {
+         return _U.list([A2(pianoKey,White,cPitch)
+                        ,A2(pianoKey,Black,cPitch + 1.0)
+                        ,A2(pianoKey,White,cPitch + 2.0)
+                        ,A2(pianoKey,Black,cPitch + 3.0)
+                        ,A2(pianoKey,White,cPitch + 4.0)
+                        ,A2(pianoKey,White,cPitch + 5.0)
+                        ,A2(pianoKey,Black,cPitch + 6.0)
+                        ,A2(pianoKey,White,cPitch + 7.0)
+                        ,A2(pianoKey,Black,cPitch + 8.0)
+                        ,A2(pianoKey,White,cPitch + 9.0)
+                        ,A2(pianoKey,Black,cPitch + 10.0)
+                        ,A2(pianoKey,White,cPitch + 11.0)]);
+      };
       var bottomPitches = A2($List.map,
       function (n) {
          return bottomPitch + $Basics.toFloat(n) * 12.0;
@@ -14799,6 +14883,7 @@ Elm.Knob.make = function (_elm) {
    $Html = Elm.Html.make(_elm),
    $Html$Attributes = Elm.Html.Attributes.make(_elm),
    $Html$Events = Elm.Html.Events.make(_elm),
+   $HtmlAttributesExtra = Elm.HtmlAttributesExtra.make(_elm),
    $HtmlEventsExtra = Elm.HtmlEventsExtra.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
@@ -14892,6 +14977,30 @@ Elm.Knob.make = function (_elm) {
       return {ctor: "MouseMove",_0: a};
    };
    var MouseDown = {ctor: "MouseDown"};
+   var view = F2(function (address,model) {
+      return A2($Html.div,
+      _U.list([]),
+      _U.list([A2($Html.div,
+      _U.list([$Html$Attributes.style(_U.list([A2($HtmlAttributesExtra._op["=>"],
+                                              "width",
+                                              $Basics.toString(model.width))
+                                              ,A2($HtmlAttributesExtra._op["=>"],
+                                              "height",
+                                              $Basics.toString(model.width))
+                                              ,A2($HtmlAttributesExtra._op["=>"],"padding","10px")
+                                              ,A2($HtmlAttributesExtra._op["=>"],"position","relative")
+                                              ,A2($HtmlAttributesExtra._op["=>"],"margin","10px")]))
+              ,$Html$Attributes.classList(_U.list([{ctor: "_Tuple2"
+                                                   ,_0: "highlighted"
+                                                   ,_1: model.mouseInside || model.mouseDown}]))
+              ,A3($HtmlEventsExtra.onMouseDownWithOptions,
+              $HtmlEventsExtra.preventDefault,
+              address,
+              MouseDown)
+              ,A2($Html$Events.onMouseEnter,address,MouseEnter)
+              ,A2($Html$Events.onMouseLeave,address,MouseLeave)]),
+      _U.list([knobDisplay(model)]))]));
+   });
    var GlobalMouseUp = {ctor: "GlobalMouseUp"};
    var init = {mouseDown: false
               ,mouseInside: false
@@ -14904,31 +15013,6 @@ Elm.Knob.make = function (_elm) {
              ,value: c
              ,width: d
              ,height: e};
-   });
-   _op["=>"] = F2(function (v0,v1) {
-      return {ctor: "_Tuple2",_0: v0,_1: v1};
-   });
-   var view = F2(function (address,model) {
-      return A2($Html.div,
-      _U.list([]),
-      _U.list([A2($Html.div,
-      _U.list([$Html$Attributes.style(_U.list([A2(_op["=>"],
-                                              "width",
-                                              $Basics.toString(model.width))
-                                              ,A2(_op["=>"],"height",$Basics.toString(model.width))
-                                              ,A2(_op["=>"],"padding","10px")
-                                              ,A2(_op["=>"],"position","relative")
-                                              ,A2(_op["=>"],"margin","10px")]))
-              ,$Html$Attributes.classList(_U.list([{ctor: "_Tuple2"
-                                                   ,_0: "highlighted"
-                                                   ,_1: model.mouseInside || model.mouseDown}]))
-              ,A3($HtmlEventsExtra.onMouseDownWithOptions,
-              $HtmlEventsExtra.preventDefault,
-              address,
-              MouseDown)
-              ,A2($Html$Events.onMouseEnter,address,MouseEnter)
-              ,A2($Html$Events.onMouseLeave,address,MouseLeave)]),
-      _U.list([knobDisplay(model)]))]));
    });
    return _elm.Knob.values = {_op: _op
                              ,Model: Model
@@ -15053,11 +15137,14 @@ Elm.Gui.make = function (_elm) {
    var _U = Elm.Native.Utils.make(_elm),
    $Basics = Elm.Basics.make(_elm),
    $Char = Elm.Char.make(_elm),
+   $Color = Elm.Color.make(_elm),
+   $ColorExtra = Elm.ColorExtra.make(_elm),
    $Debug = Elm.Debug.make(_elm),
    $Effects = Elm.Effects.make(_elm),
    $Html = Elm.Html.make(_elm),
    $Html$Attributes = Elm.Html.Attributes.make(_elm),
    $Html$Events = Elm.Html.Events.make(_elm),
+   $HtmlAttributesExtra = Elm.HtmlAttributesExtra.make(_elm),
    $Keyboard = Elm.Keyboard.make(_elm),
    $KnobRegistry = Elm.KnobRegistry.make(_elm),
    $List = Elm.List.make(_elm),
@@ -15088,12 +15175,6 @@ Elm.Gui.make = function (_elm) {
       return {x: $Basics.toFloat(_p3._0) / $Basics.toFloat(_p4._0)
              ,y: $Basics.toFloat(_p5 - _p3._1) / $Basics.toFloat(_p5)};
    });
-   var initialModel = {audioOn: true
-                      ,slider1: 0.0
-                      ,knobRegistry: $KnobRegistry.init(_U.list(["attack"
-                                                                ,"decay"
-                                                                ,"sustain"
-                                                                ,"release"]))};
    var updateGuiModel = F2(function (action,model) {
       var _p6 = action;
       switch (_p6.ctor)
@@ -15147,10 +15228,100 @@ Elm.Gui.make = function (_elm) {
       return {ctor: "AudioOn",_0: a};
    };
    var guiMailbox = $Signal.mailbox(AudioOn(true));
+   var audioOnCheckbox = F2(function (address,isChecked) {
+      return A2($Html.div,
+      _U.list([$Html$Attributes.$class("power-toggle")]),
+      _U.list([A2($Html.input,
+              _U.list([$Html$Attributes.type$("checkbox")
+                      ,$Html$Attributes.id("power-toggle")
+                      ,$Html$Attributes.$class("cmn-toggle cmn-toggle-round-flat")
+                      ,$Html$Attributes.checked(isChecked)
+                      ,A3($Html$Events.on,
+                      "change",
+                      $Html$Events.targetChecked,
+                      function (isChecked) {
+                         return A2($Signal.message,address,AudioOn(isChecked));
+                      })]),
+              _U.list([]))
+              ,A2($Html.label,
+              _U.list([$Html$Attributes.$for("power-toggle")]),
+              _U.list([]))]));
+   });
+   var view = F2(function (address,model) {
+      var krAddress = A2($Signal.forwardTo,
+      address,
+      KnobRegistryAction);
+      var knobView = function (id) {
+         return A3($KnobRegistry.view,
+         krAddress,
+         model.knobRegistry,
+         id);
+      };
+      return A2($Html.div,
+      _U.list([A2($MouseExtra.onMouseMove,
+              address,
+              function (position) {
+                 return KnobRegistryAction($KnobRegistry.MousePosition(position));
+              })
+              ,A2($Html$Events.onMouseUp,
+              address,
+              KnobRegistryAction($KnobRegistry.GlobalMouseUp))
+              ,$Html$Attributes.$class("elm-audio")
+              ,$Html$Attributes.style(_U.list([A2($HtmlAttributesExtra._op["=>"],
+              "background-color",
+              $ColorExtra.toCssRgb(model.colorScheme.windowBackground))]))]),
+      _U.list([A2($Html.div,
+      _U.list([$Html$Attributes.$class("synth")]),
+      _U.list([A2($Html.div,
+              _U.list([$Html$Attributes.$class("control-panel")]),
+              _U.list([A2(audioOnCheckbox,guiMailbox.address,model.audioOn)
+                      ,A2($Html.div,
+                      _U.list([$Html$Attributes.$class("knobs")]),
+                      _U.list([knobView("attack")
+                              ,knobView("decay")
+                              ,knobView("sustain")
+                              ,knobView("release")]))]))
+              ,A3($Piano.piano,
+              {whiteKey: model.colorScheme.pianoWhites
+              ,blackKey: model.colorScheme.pianoBlacks},
+              4,
+              12.0)]))]));
+   });
+   var initialUserInput = {mousePosition: {x: 0,y: 0}
+                          ,mouseWindowFraction: {x: 0.0,y: 0.0}
+                          ,windowDimensions: {width: 0,height: 0}
+                          ,guiFrequency: 400.0
+                          ,windowMouseXPitch: 200
+                          ,audioOn: false
+                          ,slider1: 0.0};
+   var GuiModel = F4(function (a,b,c,d) {
+      return {audioOn: a
+             ,slider1: b
+             ,knobRegistry: c
+             ,colorScheme: d};
+   });
+   var defaultColorScheme = {windowBackground: $Color.red
+                            ,pianoWhites: $Color.green
+                            ,pianoBlacks: $Color.blue
+                            ,knobBackground: $Color.black
+                            ,knobForeground: $Color.lightRed
+                            ,controlPanelBackground: $Color.white
+                            ,controlPanelBorders: $Color.black};
+   var initialModel = {audioOn: true
+                      ,slider1: 0.0
+                      ,knobRegistry: $KnobRegistry.init(_U.list(["attack"
+                                                                ,"decay"
+                                                                ,"sustain"
+                                                                ,"release"]))
+                      ,colorScheme: defaultColorScheme};
    var guiModelSignal = A3($Signal.foldp,
    updateGuiModel,
    initialModel,
    guiMailbox.signal);
+   var guiSignal = A2($Signal.map,
+   view(guiMailbox.address),
+   guiModelSignal);
+   var main = guiSignal;
    var userInputSignal = A6($Signal.map5,
    F5(function (_p9,_p8,guiFrequency,guiModel,mouseVelocity) {
       var _p10 = _p9;
@@ -15189,70 +15360,14 @@ Elm.Gui.make = function (_elm) {
              ,slider1: v.slider1};
    },
    userInputSignal);
-   var audioOnCheckbox = F2(function (address,isChecked) {
-      return A2($Html.div,
-      _U.list([$Html$Attributes.$class("power-toggle")]),
-      _U.list([A2($Html.input,
-              _U.list([$Html$Attributes.type$("checkbox")
-                      ,$Html$Attributes.id("power-toggle")
-                      ,$Html$Attributes.$class("cmn-toggle cmn-toggle-round-flat")
-                      ,$Html$Attributes.checked(isChecked)
-                      ,A3($Html$Events.on,
-                      "change",
-                      $Html$Events.targetChecked,
-                      function (isChecked) {
-                         return A2($Signal.message,address,AudioOn(isChecked));
-                      })]),
-              _U.list([]))
-              ,A2($Html.label,
-              _U.list([$Html$Attributes.$for("power-toggle")]),
-              _U.list([]))]));
-   });
-   var view = F2(function (address,model) {
-      var krAddress = A2($Signal.forwardTo,
-      address,
-      KnobRegistryAction);
-      var knobView = function (id) {
-         return A3($KnobRegistry.view,
-         krAddress,
-         model.knobRegistry,
-         id);
-      };
-      return A2($Html.div,
-      _U.list([A2($MouseExtra.onMouseMove,
-              address,
-              function (position) {
-                 return KnobRegistryAction($KnobRegistry.MousePosition(position));
-              })
-              ,A2($Html$Events.onMouseUp,
-              address,
-              KnobRegistryAction($KnobRegistry.GlobalMouseUp))]),
-      _U.list([A2($Html.div,
-      _U.list([$Html$Attributes.$class("synth")]),
-      _U.list([A2($Html.div,
-              _U.list([$Html$Attributes.$class("control-panel")]),
-              _U.list([A2(audioOnCheckbox,guiMailbox.address,model.audioOn)
-                      ,A2($Html.div,
-                      _U.list([$Html$Attributes.$class("knobs")]),
-                      _U.list([knobView("attack")
-                              ,knobView("decay")
-                              ,knobView("sustain")
-                              ,knobView("release")]))]))
-              ,A2($Piano.piano,4,12.0)]))]));
-   });
-   var guiSignal = A2($Signal.map,
-   view(guiMailbox.address),
-   guiModelSignal);
-   var main = guiSignal;
-   var initialUserInput = {mousePosition: {x: 0,y: 0}
-                          ,mouseWindowFraction: {x: 0.0,y: 0.0}
-                          ,windowDimensions: {width: 0,height: 0}
-                          ,guiFrequency: 400.0
-                          ,windowMouseXPitch: 200
-                          ,audioOn: false
-                          ,slider1: 0.0};
-   var GuiModel = F3(function (a,b,c) {
-      return {audioOn: a,slider1: b,knobRegistry: c};
+   var ColorScheme = F7(function (a,b,c,d,e,f,g) {
+      return {windowBackground: a
+             ,pianoWhites: b
+             ,pianoBlacks: c
+             ,knobBackground: d
+             ,knobForeground: e
+             ,controlPanelBackground: f
+             ,controlPanelBorders: g};
    });
    var UserInput = F7(function (a,b,c,d,e,f,g) {
       return {mousePosition: a
@@ -15265,6 +15380,8 @@ Elm.Gui.make = function (_elm) {
    });
    return _elm.Gui.values = {_op: _op
                             ,UserInput: UserInput
+                            ,ColorScheme: ColorScheme
+                            ,defaultColorScheme: defaultColorScheme
                             ,GuiModel: GuiModel
                             ,initialUserInput: initialUserInput
                             ,AudioOn: AudioOn
