@@ -10,6 +10,9 @@
     width: 50px;
     height: 100px;
     border-radius: 0px 0px 4px 4px; }
+    .piano .white-key:active, .piano .white-key:hover {
+      background-color: #eee;
+      height: 99px; }
   .piano .black-key-wrapper {
     position: relative;
     height: 0px;

@@ -117,15 +117,17 @@ guiModelSignal =
 
 audioOnCheckbox : Signal.Address Action -> Bool -> Html
 audioOnCheckbox address isChecked =
-  div []
+  div [ class "power-toggle"]
       [ input
           [ type' "checkbox"
+          , id "power-toggle"
+          , class "cmn-toggle cmn-toggle-round-flat"
           , checked isChecked
           , on "change" targetChecked (\isChecked -> Signal.message address (AudioOn isChecked))
           ]
           []
-      , text "AUDIO ON"
-      , text (if isChecked then " (ON)" else " (OFF)")
+      , label [ for "power-toggle"] []
+      -- , text (if isChecked then " (ON)" else " (OFF)")
       ]
 
 

@@ -15191,9 +15191,11 @@ Elm.Gui.make = function (_elm) {
    userInputSignal);
    var audioOnCheckbox = F2(function (address,isChecked) {
       return A2($Html.div,
-      _U.list([]),
+      _U.list([$Html$Attributes.$class("power-toggle")]),
       _U.list([A2($Html.input,
               _U.list([$Html$Attributes.type$("checkbox")
+                      ,$Html$Attributes.id("power-toggle")
+                      ,$Html$Attributes.$class("cmn-toggle cmn-toggle-round-flat")
                       ,$Html$Attributes.checked(isChecked)
                       ,A3($Html$Events.on,
                       "change",
@@ -15202,8 +15204,9 @@ Elm.Gui.make = function (_elm) {
                          return A2($Signal.message,address,AudioOn(isChecked));
                       })]),
               _U.list([]))
-              ,$Html.text("AUDIO ON")
-              ,$Html.text(isChecked ? " (ON)" : " (OFF)")]));
+              ,A2($Html.label,
+              _U.list([$Html$Attributes.$for("power-toggle")]),
+              _U.list([]))]));
    });
    var view = F2(function (address,model) {
       var krAddress = A2($Signal.forwardTo,

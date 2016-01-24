@@ -16,10 +16,10 @@ $black-key-height: $HEIGHT * 0.6;
     height: $HEIGHT;
     border-radius: 0px 0px 4px 4px;
 
-    // &:active, &:hover {
-    //   background-color: #eee;
-    //   height: $HEIGHT - 1;
-    // }
+    &:active, &:hover {
+      background-color: #eee;
+      height: $HEIGHT - 1;
+    }
   }
   .black-key-wrapper {
     position: relative;
