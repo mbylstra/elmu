@@ -10691,92 +10691,6 @@ Elm.Mouse.make = function (_elm) {
                               ,isDown: isDown
                               ,clicks: clicks};
 };
-Elm.Native = Elm.Native || {};
-Elm.Native.Window = {};
-Elm.Native.Window.make = function make(localRuntime) {
-	localRuntime.Native = localRuntime.Native || {};
-	localRuntime.Native.Window = localRuntime.Native.Window || {};
-	if (localRuntime.Native.Window.values)
-	{
-		return localRuntime.Native.Window.values;
-	}
-
-	var NS = Elm.Native.Signal.make(localRuntime);
-	var Tuple2 = Elm.Native.Utils.make(localRuntime).Tuple2;
-
-
-	function getWidth()
-	{
-		return localRuntime.node.clientWidth;
-	}
-
-
-	function getHeight()
-	{
-		if (localRuntime.isFullscreen())
-		{
-			return window.innerHeight;
-		}
-		return localRuntime.node.clientHeight;
-	}
-
-
-	var dimensions = NS.input('Window.dimensions', Tuple2(getWidth(), getHeight()));
-
-
-	function resizeIfNeeded()
-	{
-		// Do not trigger event if the dimensions have not changed.
-		// This should be most of the time.
-		var w = getWidth();
-		var h = getHeight();
-		if (dimensions.value._0 === w && dimensions.value._1 === h)
-		{
-			return;
-		}
-
-		setTimeout(function() {
-			// Check again to see if the dimensions have changed.
-			// It is conceivable that the dimensions have changed
-			// again while some other event was being processed.
-			w = getWidth();
-			h = getHeight();
-			if (dimensions.value._0 === w && dimensions.value._1 === h)
-			{
-				return;
-			}
-			localRuntime.notify(dimensions.id, Tuple2(w, h));
-		}, 0);
-	}
-
-
-	localRuntime.addListener([dimensions.id], window, 'resize', resizeIfNeeded);
-
-
-	return localRuntime.Native.Window.values = {
-		dimensions: dimensions,
-		resizeIfNeeded: resizeIfNeeded
-	};
-};
-
-Elm.Window = Elm.Window || {};
-Elm.Window.make = function (_elm) {
-   "use strict";
-   _elm.Window = _elm.Window || {};
-   if (_elm.Window.values) return _elm.Window.values;
-   var _U = Elm.Native.Utils.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $Native$Window = Elm.Native.Window.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
-   var _op = {};
-   var dimensions = $Native$Window.dimensions;
-   var width = A2($Signal.map,$Basics.fst,dimensions);
-   var height = A2($Signal.map,$Basics.snd,dimensions);
-   return _elm.Window.values = {_op: _op
-                               ,dimensions: dimensions
-                               ,width: width
-                               ,height: height};
-};
 Elm.Native.Effects = {};
 Elm.Native.Effects.make = function(localRuntime) {
 
@@ -14131,6 +14045,71 @@ Elm.Svg.Attributes.make = function (_elm) {
                                        ,wordSpacing: wordSpacing
                                        ,writingMode: writingMode};
 };
+Elm.StartApp = Elm.StartApp || {};
+Elm.StartApp.make = function (_elm) {
+   "use strict";
+   _elm.StartApp = _elm.StartApp || {};
+   if (_elm.StartApp.values) return _elm.StartApp.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Effects = Elm.Effects.make(_elm),
+   $Html = Elm.Html.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $Task = Elm.Task.make(_elm);
+   var _op = {};
+   var start = function (config) {
+      var updateStep = F2(function (action,_p0) {
+         var _p1 = _p0;
+         var _p2 = A2(config.update,action,_p1._0);
+         var newModel = _p2._0;
+         var additionalEffects = _p2._1;
+         return {ctor: "_Tuple2"
+                ,_0: newModel
+                ,_1: $Effects.batch(_U.list([_p1._1,additionalEffects]))};
+      });
+      var update = F2(function (actions,_p3) {
+         var _p4 = _p3;
+         return A3($List.foldl,
+         updateStep,
+         {ctor: "_Tuple2",_0: _p4._0,_1: $Effects.none},
+         actions);
+      });
+      var messages = $Signal.mailbox(_U.list([]));
+      var singleton = function (action) {
+         return _U.list([action]);
+      };
+      var address = A2($Signal.forwardTo,messages.address,singleton);
+      var inputs = $Signal.mergeMany(A2($List._op["::"],
+      messages.signal,
+      A2($List.map,$Signal.map(singleton),config.inputs)));
+      var effectsAndModel = A3($Signal.foldp,
+      update,
+      config.init,
+      inputs);
+      var model = A2($Signal.map,$Basics.fst,effectsAndModel);
+      return {html: A2($Signal.map,config.view(address),model)
+             ,model: model
+             ,tasks: A2($Signal.map,
+             function (_p5) {
+                return A2($Effects.toTask,messages.address,$Basics.snd(_p5));
+             },
+             effectsAndModel)};
+   };
+   var App = F3(function (a,b,c) {
+      return {html: a,model: b,tasks: c};
+   });
+   var Config = F4(function (a,b,c,d) {
+      return {init: a,update: b,view: c,inputs: d};
+   });
+   return _elm.StartApp.values = {_op: _op
+                                 ,start: start
+                                 ,Config: Config
+                                 ,App: App};
+};
 Elm.Arc = Elm.Arc || {};
 Elm.Arc.make = function (_elm) {
    "use strict";
@@ -14546,6 +14525,25 @@ Elm.AudioNodes.make = function (_elm) {
                                    ,destinationNode: destinationNode
                                    ,commaHelper: commaHelper};
 };
+Elm.AudioUtil = Elm.AudioUtil || {};
+Elm.AudioUtil.make = function (_elm) {
+   "use strict";
+   _elm.AudioUtil = _elm.AudioUtil || {};
+   if (_elm.AudioUtil.values) return _elm.AudioUtil.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var _op = {};
+   var pitchToFrequency = function (pitch) {
+      return Math.pow(2,(pitch - 49.0) / 12.0) * 440.0;
+   };
+   return _elm.AudioUtil.values = {_op: _op
+                                  ,pitchToFrequency: pitchToFrequency};
+};
 Elm.ColorExtra = Elm.ColorExtra || {};
 Elm.ColorExtra.make = function (_elm) {
    "use strict";
@@ -14598,6 +14596,40 @@ Elm.ColorExtra.make = function (_elm) {
                                    ,isLighter: isLighter
                                    ,sortByLightness: sortByLightness
                                    ,toCssRgb: toCssRgb};
+};
+Elm.ColorScheme = Elm.ColorScheme || {};
+Elm.ColorScheme.make = function (_elm) {
+   "use strict";
+   _elm.ColorScheme = _elm.ColorScheme || {};
+   if (_elm.ColorScheme.values) return _elm.ColorScheme.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Color = Elm.Color.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var _op = {};
+   var defaultColorScheme = {windowBackground: $Color.red
+                            ,pianoWhites: $Color.green
+                            ,pianoBlacks: $Color.blue
+                            ,knobBackground: $Color.black
+                            ,knobForeground: $Color.lightRed
+                            ,controlPanelBackground: $Color.white
+                            ,controlPanelBorders: $Color.black};
+   var ColorScheme = F7(function (a,b,c,d,e,f,g) {
+      return {windowBackground: a
+             ,pianoWhites: b
+             ,pianoBlacks: c
+             ,knobBackground: d
+             ,knobForeground: e
+             ,controlPanelBackground: f
+             ,controlPanelBorders: g};
+   });
+   return _elm.ColorScheme.values = {_op: _op
+                                    ,ColorScheme: ColorScheme
+                                    ,defaultColorScheme: defaultColorScheme};
 };
 Elm.Components = Elm.Components || {};
 Elm.Components.make = function (_elm) {
@@ -14697,6 +14729,7 @@ Elm.Piano.make = function (_elm) {
    _elm.Piano = _elm.Piano || {};
    if (_elm.Piano.values) return _elm.Piano.values;
    var _U = Elm.Native.Utils.make(_elm),
+   $AudioUtil = Elm.AudioUtil.make(_elm),
    $Basics = Elm.Basics.make(_elm),
    $Color = Elm.Color.make(_elm),
    $ColorExtra = Elm.ColorExtra.make(_elm),
@@ -14717,6 +14750,9 @@ Elm.Piano.make = function (_elm) {
    var Black = {ctor: "Black"};
    var pianoMailbox = $Signal.mailbox(60.0);
    var pianoSignal = pianoMailbox.signal;
+   var pianoGuiFrequency = A2($Signal.map,
+   $AudioUtil.pitchToFrequency,
+   pianoSignal);
    var piano = F3(function (colorScheme,numOctaves,bottomPitch) {
       var pianoKey = F2(function (keyType,pitch) {
          var _p0 = keyType;
@@ -14770,7 +14806,53 @@ Elm.Piano.make = function (_elm) {
    });
    return _elm.Piano.values = {_op: _op
                               ,piano: piano
-                              ,pianoSignal: pianoSignal};
+                              ,pianoSignal: pianoSignal
+                              ,pianoGuiFrequency: pianoGuiFrequency};
+};
+Elm.KeyboardNoteInput = Elm.KeyboardNoteInput || {};
+Elm.KeyboardNoteInput.make = function (_elm) {
+   "use strict";
+   _elm.KeyboardNoteInput = _elm.KeyboardNoteInput || {};
+   if (_elm.KeyboardNoteInput.values)
+   return _elm.KeyboardNoteInput.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $AudioUtil = Elm.AudioUtil.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Char = Elm.Char.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Keyboard = Elm.Keyboard.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var _op = {};
+   var charToPitch = function (c) {
+      var _p0 = c;
+      switch (_p0.valueOf())
+      {case "s": return $Maybe.Just(60.0);
+         case "d": return $Maybe.Just(62.0);
+         case "f": return $Maybe.Just(64.0);
+         case "g": return $Maybe.Just(65.0);
+         case "h": return $Maybe.Just(67.0);
+         case "j": return $Maybe.Just(69.0);
+         case "k": return $Maybe.Just(71.0);
+         case "l": return $Maybe.Just(72.0);
+         default: return $Maybe.Nothing;}
+   };
+   var keyboardGuiPitch = A2($Signal.map,
+   function (keyCode) {
+      return A2($Maybe.withDefault,
+      0.0,
+      charToPitch($Char.fromCode(keyCode)));
+   },
+   $Keyboard.presses);
+   var keyboardGuiFrequency = A2($Signal.map,
+   $AudioUtil.pitchToFrequency,
+   keyboardGuiPitch);
+   return _elm.KeyboardNoteInput.values = {_op: _op
+                                          ,charToPitch: charToPitch
+                                          ,keyboardGuiPitch: keyboardGuiPitch
+                                          ,keyboardGuiFrequency: keyboardGuiFrequency};
 };
 Elm.MouseExtra = Elm.MouseExtra || {};
 Elm.MouseExtra.make = function (_elm) {
@@ -15002,6 +15084,7 @@ Elm.Knob.make = function (_elm) {
       _U.list([knobDisplay(model)]))]));
    });
    var GlobalMouseUp = {ctor: "GlobalMouseUp"};
+   var encode = function (model) {    return model.value;};
    var init = {mouseDown: false
               ,mouseInside: false
               ,value: 0.0
@@ -15017,6 +15100,7 @@ Elm.Knob.make = function (_elm) {
    return _elm.Knob.values = {_op: _op
                              ,Model: Model
                              ,init: init
+                             ,encode: encode
                              ,GlobalMouseUp: GlobalMouseUp
                              ,MouseDown: MouseDown
                              ,MouseMove: MouseMove
@@ -15086,15 +15170,36 @@ Elm.KnobRegistry.make = function (_elm) {
                  return model;
               }}
    });
+   var MousePosition = function (a) {
+      return {ctor: "MousePosition",_0: a};
+   };
+   var GlobalMouseUp = {ctor: "GlobalMouseUp"};
+   var KnobAction = F2(function (a,b) {
+      return {ctor: "KnobAction",_0: a,_1: b};
+   });
+   var encode = function (model) {
+      return A2($List.map,
+      function (_p6) {
+         var _p7 = _p6;
+         return {ctor: "_Tuple2",_0: _p7._0,_1: $Knob.encode(_p7._1)};
+      },
+      $Dict.toList(model.knobs));
+   };
    var getKnob = F2(function (knobs,id) {
-      var _p6 = A2($Dict.get,id,knobs);
-      if (_p6.ctor === "Just") {
-            return _p6._0;
+      var _p8 = A2($Dict.get,id,knobs);
+      if (_p8.ctor === "Just") {
+            return _p8._0;
          } else {
             return _U.crashCase("KnobRegistry",
-            {start: {line: 37,column: 3},end: {line: 39,column: 61}},
-            _p6)(A2($Basics._op["++"],"No knob exists with id: ",id));
+            {start: {line: 42,column: 3},end: {line: 44,column: 61}},
+            _p8)(A2($Basics._op["++"],"No knob exists with id: ",id));
          }
+   });
+   var view = F3(function (address,model,id) {
+      var knob = A2(getKnob,model.knobs,id);
+      return A2($Knob.view,
+      A2($Signal.forwardTo,address,KnobAction(id)),
+      knob);
    });
    var init = function (names) {
       return {knobs: $Dict.fromList(A2($List.map,
@@ -15108,23 +15213,11 @@ Elm.KnobRegistry.make = function (_elm) {
    var Model = F3(function (a,b,c) {
       return {knobs: a,currentKnob: b,mouse: c};
    });
-   var MousePosition = function (a) {
-      return {ctor: "MousePosition",_0: a};
-   };
-   var GlobalMouseUp = {ctor: "GlobalMouseUp"};
-   var KnobAction = F2(function (a,b) {
-      return {ctor: "KnobAction",_0: a,_1: b};
-   });
-   var view = F3(function (address,model,id) {
-      var knob = A2(getKnob,model.knobs,id);
-      return A2($Knob.view,
-      A2($Signal.forwardTo,address,KnobAction(id)),
-      knob);
-   });
    return _elm.KnobRegistry.values = {_op: _op
                                      ,init: init
                                      ,update: update
                                      ,view: view
+                                     ,encode: encode
                                      ,Model: Model
                                      ,GlobalMouseUp: GlobalMouseUp
                                      ,MousePosition: MousePosition};
@@ -15136,98 +15229,56 @@ Elm.Gui.make = function (_elm) {
    if (_elm.Gui.values) return _elm.Gui.values;
    var _U = Elm.Native.Utils.make(_elm),
    $Basics = Elm.Basics.make(_elm),
-   $Char = Elm.Char.make(_elm),
-   $Color = Elm.Color.make(_elm),
    $ColorExtra = Elm.ColorExtra.make(_elm),
+   $ColorScheme = Elm.ColorScheme.make(_elm),
    $Debug = Elm.Debug.make(_elm),
    $Effects = Elm.Effects.make(_elm),
    $Html = Elm.Html.make(_elm),
    $Html$Attributes = Elm.Html.Attributes.make(_elm),
    $Html$Events = Elm.Html.Events.make(_elm),
    $HtmlAttributesExtra = Elm.HtmlAttributesExtra.make(_elm),
-   $Keyboard = Elm.Keyboard.make(_elm),
+   $KeyboardNoteInput = Elm.KeyboardNoteInput.make(_elm),
    $KnobRegistry = Elm.KnobRegistry.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
-   $Mouse = Elm.Mouse.make(_elm),
    $MouseExtra = Elm.MouseExtra.make(_elm),
    $Piano = Elm.Piano.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm),
-   $Window = Elm.Window.make(_elm);
+   $StartApp = Elm.StartApp.make(_elm),
+   $Task = Elm.Task.make(_elm);
    var _op = {};
-   var DragEnd = {ctor: "DragEnd"};
-   var DragAt = function (a) {    return {ctor: "DragAt",_0: a};};
-   var trackDrags = function (address) {
-      return $Effects.task(A2($Native$Drag.track,
-      function (_p0) {
-         return A2($Signal.send,address,DragAt(_p0));
-      },
-      DragEnd));
-   };
-   var DragStart = F2(function (a,b) {
-      return {ctor: "DragStart",_0: a,_1: b};
-   });
-   var mouseWindowFraction$ = F2(function (_p2,_p1) {
-      var _p3 = _p2;
-      var _p4 = _p1;
-      var _p5 = _p4._1;
-      return {x: $Basics.toFloat(_p3._0) / $Basics.toFloat(_p4._0)
-             ,y: $Basics.toFloat(_p5 - _p3._1) / $Basics.toFloat(_p5)};
-   });
-   var updateGuiModel = F2(function (action,model) {
-      var _p6 = action;
-      switch (_p6.ctor)
-      {case "AudioOn": return _U.update(model,{audioOn: _p6._0});
-         case "Slider1": return _U.update(model,{slider1: _p6._0});
-         default: return _U.update(model,
-           {knobRegistry: A2($KnobRegistry.update,
-           _p6._0,
-           model.knobRegistry)});}
-   });
-   var pitchToFrequency = function (pitch) {
-      return Math.pow(2,(pitch - 49.0) / 12.0) * 440.0;
-   };
-   var pianoGuiFrequency = A2($Signal.map,
-   pitchToFrequency,
-   $Piano.pianoSignal);
-   var charToPitch = function (c) {
-      var _p7 = c;
-      switch (_p7.valueOf())
-      {case "s": return $Maybe.Just(60.0);
-         case "d": return $Maybe.Just(62.0);
-         case "f": return $Maybe.Just(64.0);
-         case "g": return $Maybe.Just(65.0);
-         case "h": return $Maybe.Just(67.0);
-         case "j": return $Maybe.Just(69.0);
-         case "k": return $Maybe.Just(71.0);
-         case "l": return $Maybe.Just(72.0);
-         default: return $Maybe.Nothing;}
-   };
-   var keyboardGuiPitch = A2($Signal.map,
-   function (keyCode) {
-      return A2($Maybe.withDefault,
-      0.0,
-      charToPitch($Char.fromCode(keyCode)));
-   },
-   $Keyboard.presses);
-   var keyboardGuiFrequency = A2($Signal.map,
-   pitchToFrequency,
-   keyboardGuiPitch);
-   var guiFrequency = A2($Signal.merge,
-   keyboardGuiFrequency,
-   pianoGuiFrequency);
    var dummy = "dummy!";
+   var guiFrequency = A2($Signal.merge,
+   $KeyboardNoteInput.keyboardGuiFrequency,
+   $Piano.pianoGuiFrequency);
+   var update = F2(function (action,model) {
+      var newModel = function () {
+         var _p0 = action;
+         switch (_p0.ctor)
+         {case "AudioOn": return _U.update(model,{audioOn: _p0._0});
+            case "KnobRegistryAction": return _U.update(model,
+              {knobRegistry: A2($KnobRegistry.update,
+              _p0._0,
+              model.knobRegistry)});
+            default: return _U.update(model,{frequency: _p0._0});}
+      }();
+      return {ctor: "_Tuple2",_0: newModel,_1: $Effects.none};
+   });
+   var ChangeFrequency = function (a) {
+      return {ctor: "ChangeFrequency",_0: a};
+   };
+   var guiFrequencyActionSignal = A2($Signal.map,
+   function (f) {
+      return ChangeFrequency(f);
+   },
+   guiFrequency);
    var KnobRegistryAction = function (a) {
       return {ctor: "KnobRegistryAction",_0: a};
-   };
-   var Slider1 = function (a) {
-      return {ctor: "Slider1",_0: a};
    };
    var AudioOn = function (a) {
       return {ctor: "AudioOn",_0: a};
    };
-   var guiMailbox = $Signal.mailbox(AudioOn(true));
    var audioOnCheckbox = F2(function (address,isChecked) {
       return A2($Html.div,
       _U.list([$Html$Attributes.$class("power-toggle")]),
@@ -15274,7 +15325,7 @@ Elm.Gui.make = function (_elm) {
       _U.list([$Html$Attributes.$class("synth")]),
       _U.list([A2($Html.div,
               _U.list([$Html$Attributes.$class("control-panel")]),
-              _U.list([A2(audioOnCheckbox,guiMailbox.address,model.audioOn)
+              _U.list([A2(audioOnCheckbox,address,model.audioOn)
                       ,A2($Html.div,
                       _U.list([$Html$Attributes.$class("knobs")]),
                       _U.list([knobView("attack")
@@ -15287,127 +15338,61 @@ Elm.Gui.make = function (_elm) {
               4,
               12.0)]))]));
    });
-   var initialUserInput = {mousePosition: {x: 0,y: 0}
-                          ,mouseWindowFraction: {x: 0.0,y: 0.0}
-                          ,windowDimensions: {width: 0,height: 0}
-                          ,guiFrequency: 400.0
-                          ,windowMouseXPitch: 200
-                          ,audioOn: false
-                          ,slider1: 0.0};
-   var GuiModel = F4(function (a,b,c,d) {
+   var encode = function (model) {
+      return {audioOn: model.audioOn
+             ,frequency: model.frequency
+             ,knobs: $KnobRegistry.encode(model.knobRegistry)};
+   };
+   var EncodedModel = F3(function (a,b,c) {
+      return {audioOn: a,frequency: b,knobs: c};
+   });
+   var init = {ctor: "_Tuple2"
+              ,_0: {audioOn: true
+                   ,frequency: 400.0
+                   ,knobRegistry: $KnobRegistry.init(_U.list(["attack"
+                                                             ,"decay"
+                                                             ,"sustain"
+                                                             ,"release"]))
+                   ,colorScheme: $ColorScheme.defaultColorScheme}
+              ,_1: $Effects.none};
+   var app = $StartApp.start({init: init
+                             ,update: update
+                             ,view: view
+                             ,inputs: _U.list([guiFrequencyActionSignal])});
+   var main = app.html;
+   var tasks = Elm.Native.Task.make(_elm).performSignal("tasks",
+   app.tasks);
+   var outgoingUiModel = Elm.Native.Port.make(_elm).outboundSignal("outgoingUiModel",
+   function (v) {
+      return {audioOn: v.audioOn
+             ,frequency: v.frequency
+             ,knobs: Elm.Native.List.make(_elm).toArray(v.knobs).map(function (v) {
+                return [v._0,v._1];
+             })};
+   },
+   A2($Signal.map,encode,app.model));
+   var Model = F4(function (a,b,c,d) {
       return {audioOn: a
-             ,slider1: b
+             ,frequency: b
              ,knobRegistry: c
              ,colorScheme: d};
    });
-   var defaultColorScheme = {windowBackground: $Color.red
-                            ,pianoWhites: $Color.green
-                            ,pianoBlacks: $Color.blue
-                            ,knobBackground: $Color.black
-                            ,knobForeground: $Color.lightRed
-                            ,controlPanelBackground: $Color.white
-                            ,controlPanelBorders: $Color.black};
-   var initialModel = {audioOn: true
-                      ,slider1: 0.0
-                      ,knobRegistry: $KnobRegistry.init(_U.list(["attack"
-                                                                ,"decay"
-                                                                ,"sustain"
-                                                                ,"release"]))
-                      ,colorScheme: defaultColorScheme};
-   var guiModelSignal = A3($Signal.foldp,
-   updateGuiModel,
-   initialModel,
-   guiMailbox.signal);
-   var guiSignal = A2($Signal.map,
-   view(guiMailbox.address),
-   guiModelSignal);
-   var main = guiSignal;
-   var userInputSignal = A6($Signal.map5,
-   F5(function (_p9,_p8,guiFrequency,guiModel,mouseVelocity) {
-      var _p10 = _p9;
-      var _p15 = _p10._1;
-      var _p14 = _p10._0;
-      var _p11 = _p8;
-      var _p13 = _p11._0;
-      var _p12 = _p11._1;
-      var mouseWindowFraction$$ = A2(mouseWindowFraction$,
-      {ctor: "_Tuple2",_0: _p14,_1: _p15},
-      {ctor: "_Tuple2",_0: _p13,_1: _p12});
-      return {mousePosition: {x: _p14,y: _p15}
-             ,windowDimensions: {width: _p13,height: _p12}
-             ,mouseWindowFraction: mouseWindowFraction$$
-             ,audioOn: guiModel.audioOn
-             ,slider1: guiModel.slider1
-             ,windowMouseXPitch: mouseWindowFraction$$.x * 400.0 + 50.0
-             ,guiFrequency: guiFrequency};
-   }),
-   $Mouse.position,
-   $Window.dimensions,
-   guiFrequency,
-   guiModelSignal,
-   $MouseExtra.velocity);
-   var outgoingUserInput = Elm.Native.Port.make(_elm).outboundSignal("outgoingUserInput",
-   function (v) {
-      return {mousePosition: {x: v.mousePosition.x
-                             ,y: v.mousePosition.y}
-             ,mouseWindowFraction: {x: v.mouseWindowFraction.x
-                                   ,y: v.mouseWindowFraction.y}
-             ,windowDimensions: {width: v.windowDimensions.width
-                                ,height: v.windowDimensions.height}
-             ,guiFrequency: v.guiFrequency
-             ,windowMouseXPitch: v.windowMouseXPitch
-             ,audioOn: v.audioOn
-             ,slider1: v.slider1};
-   },
-   userInputSignal);
-   var ColorScheme = F7(function (a,b,c,d,e,f,g) {
-      return {windowBackground: a
-             ,pianoWhites: b
-             ,pianoBlacks: c
-             ,knobBackground: d
-             ,knobForeground: e
-             ,controlPanelBackground: f
-             ,controlPanelBorders: g};
-   });
-   var UserInput = F7(function (a,b,c,d,e,f,g) {
-      return {mousePosition: a
-             ,mouseWindowFraction: b
-             ,windowDimensions: c
-             ,guiFrequency: d
-             ,windowMouseXPitch: e
-             ,audioOn: f
-             ,slider1: g};
-   });
    return _elm.Gui.values = {_op: _op
-                            ,UserInput: UserInput
-                            ,ColorScheme: ColorScheme
-                            ,defaultColorScheme: defaultColorScheme
-                            ,GuiModel: GuiModel
-                            ,initialUserInput: initialUserInput
+                            ,Model: Model
+                            ,init: init
+                            ,EncodedModel: EncodedModel
+                            ,encode: encode
                             ,AudioOn: AudioOn
-                            ,Slider1: Slider1
                             ,KnobRegistryAction: KnobRegistryAction
-                            ,dummy: dummy
-                            ,charToPitch: charToPitch
-                            ,pitchToFrequency: pitchToFrequency
-                            ,updateGuiModel: updateGuiModel
-                            ,guiMailbox: guiMailbox
-                            ,initialModel: initialModel
-                            ,guiModelSignal: guiModelSignal
+                            ,ChangeFrequency: ChangeFrequency
+                            ,update: update
                             ,audioOnCheckbox: audioOnCheckbox
                             ,view: view
-                            ,guiSignal: guiSignal
-                            ,mouseWindowFraction$: mouseWindowFraction$
-                            ,keyboardGuiPitch: keyboardGuiPitch
-                            ,keyboardGuiFrequency: keyboardGuiFrequency
-                            ,pianoGuiFrequency: pianoGuiFrequency
                             ,guiFrequency: guiFrequency
-                            ,userInputSignal: userInputSignal
-                            ,DragStart: DragStart
-                            ,DragAt: DragAt
-                            ,DragEnd: DragEnd
-                            ,trackDrags: trackDrags
-                            ,main: main};
+                            ,guiFrequencyActionSignal: guiFrequencyActionSignal
+                            ,app: app
+                            ,main: main
+                            ,dummy: dummy};
 };
 Elm.ReactiveAudio = Elm.ReactiveAudio || {};
 Elm.ReactiveAudio.make = function (_elm) {
@@ -15428,7 +15413,7 @@ Elm.ReactiveAudio.make = function (_elm) {
    var _op = {};
    var theremin = _U.list([A2($AudioNodes.sinNode,
                           "t",
-                          {frequency: $MainTypes.GUI("guiFrequency")
+                          {frequency: $MainTypes.GUI("frequency")
                           ,frequencyOffset: $MainTypes.Default
                           ,phaseOffset: $MainTypes.Default})
                           ,$AudioNodes.destinationNode({signal: $MainTypes.ID("t")})]);

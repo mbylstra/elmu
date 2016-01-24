@@ -58,27 +58,13 @@ var _List = exposeElmModule(Elm.Native.List);
 var initialAudioGraph = _List.toArray(ReactiveAudio.audioGraph);
 console.log(initialAudioGraph);
 
-// type alias UserInput =
-//     { mousePosition : { x : Int, y : Int}
-//     , mouseWindowFraction : { x : Float, y : Float}
-//     , windowDimensions : { width: Int, height: Int}
-//     , keyboardFrequency : Float
-//     , pianoGuiFrequency : Float
-//     , windowMouseXPitch : Float
-//     , audioOn : Bool
-//     }
-
 // TODO: get this from elm! So it's properly type checked. Should map fine.
 var externalState = {
   time: 0.0,
   externalInputState: {
-    xWindowFraction: 0.0,
-    yWindowFraction: 0.0,
-    // keyboardFrequency: 200.0,
-    // pianoGuiFrequency: 200.0,
-    guiFrequency: 0.0,
+    frequency: 400.0,
     audioOn : true,
-    slider1 : 0.0
+    knobs : {}
   }
 }
 
@@ -169,7 +155,9 @@ var getInputValue = function(audioGraph, input) {
     // console.log('GUI?');
     // console.log('externalState', externalState);
     if (externalState.externalInputState.hasOwnProperty(guiId)) {
+      // console.log('guiId', guiId);
       var value = externalState.externalInputState[guiId];
+      // console.log('guiId', guiId);
       // console.log('value', value);
       return value;
     } else {
@@ -217,7 +205,8 @@ if (PROFILING) {
     console.log('max allowed duration: ', MAX_ALLOWED_DURATION);
     console.log('CPU percent:', (secondsElapsed / MAX_ALLOWED_DURATION) * 100.0);
 } else {
-    elmGui.ports.outgoingUserInput.subscribe(function(userInput) {
+    elmGui.ports.outgoingUiModel.subscribe(function(userInput) {
+      // console.log('userInput', userInput);
       externalState.externalInputState = userInput;
       // console.log('userInput', userInput);
       // console.log('userInput', userInput.slider1);

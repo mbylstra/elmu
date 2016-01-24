@@ -37,6 +37,11 @@ init =
   , height = 100
   }
 
+type alias EncodedModel = Float
+
+encode : Model -> EncodedModel
+encode model =
+  model.value
 
 -- UPDATE
 

@@ -1,4 +1,4 @@
-module Piano (piano, pianoSignal) where
+module Piano (piano, pianoSignal, pianoGuiFrequency) where
 
 import Html exposing (..)
 import Html.Attributes exposing(..)
@@ -7,7 +7,11 @@ import Color exposing (Color)
 import HtmlAttributesExtra exposing (..)
 import ColorExtra exposing (toCssRgb)
 
+import AudioUtil exposing (pitchToFrequency)
 
+
+-- it's acceptable to have a mailbox, as it's unlikely you'd ever need
+-- more than one piano component simultaneously
 
 pianoMailbox : Signal.Mailbox Float
 pianoMailbox =  Signal.mailbox 60.0
@@ -70,3 +74,7 @@ piano colorScheme numOctaves bottomPitch =
   in
     div [class "piano"]
         pianoOctaves
+
+pianoGuiFrequency : Signal Float
+pianoGuiFrequency =
+  Signal.map pitchToFrequency pianoSignal
