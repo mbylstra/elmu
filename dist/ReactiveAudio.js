@@ -13309,6 +13309,376 @@ Elm.Html.Events.make = function (_elm) {
                                     ,keyCode: keyCode
                                     ,Options: Options};
 };
+Elm.Native.Http = {};
+Elm.Native.Http.make = function(localRuntime) {
+
+	localRuntime.Native = localRuntime.Native || {};
+	localRuntime.Native.Http = localRuntime.Native.Http || {};
+	if (localRuntime.Native.Http.values)
+	{
+		return localRuntime.Native.Http.values;
+	}
+
+	var Dict = Elm.Dict.make(localRuntime);
+	var List = Elm.List.make(localRuntime);
+	var Maybe = Elm.Maybe.make(localRuntime);
+	var Task = Elm.Native.Task.make(localRuntime);
+
+
+	function send(settings, request)
+	{
+		return Task.asyncFunction(function(callback) {
+			var req = new XMLHttpRequest();
+
+			// start
+			if (settings.onStart.ctor === 'Just')
+			{
+				req.addEventListener('loadStart', function() {
+					var task = settings.onStart._0;
+					Task.spawn(task);
+				});
+			}
+
+			// progress
+			if (settings.onProgress.ctor === 'Just')
+			{
+				req.addEventListener('progress', function(event) {
+					var progress = !event.lengthComputable
+						? Maybe.Nothing
+						: Maybe.Just({
+							_: {},
+							loaded: event.loaded,
+							total: event.total
+						});
+					var task = settings.onProgress._0(progress);
+					Task.spawn(task);
+				});
+			}
+
+			// end
+			req.addEventListener('error', function() {
+				return callback(Task.fail({ ctor: 'RawNetworkError' }));
+			});
+
+			req.addEventListener('timeout', function() {
+				return callback(Task.fail({ ctor: 'RawTimeout' }));
+			});
+
+			req.addEventListener('load', function() {
+				return callback(Task.succeed(toResponse(req)));
+			});
+
+			req.open(request.verb, request.url, true);
+
+			// set all the headers
+			function setHeader(pair) {
+				req.setRequestHeader(pair._0, pair._1);
+			}
+			A2(List.map, setHeader, request.headers);
+
+			// set the timeout
+			req.timeout = settings.timeout;
+
+			// enable this withCredentials thing
+			req.withCredentials = settings.withCredentials;
+
+			// ask for a specific MIME type for the response
+			if (settings.desiredResponseType.ctor === 'Just')
+			{
+				req.overrideMimeType(settings.desiredResponseType._0);
+			}
+
+			// actuall send the request
+			if(request.body.ctor === "BodyFormData")
+			{
+				req.send(request.body.formData)
+			}
+			else
+			{
+				req.send(request.body._0);
+			}
+		});
+	}
+
+
+	// deal with responses
+
+	function toResponse(req)
+	{
+		var tag = req.responseType === 'blob' ? 'Blob' : 'Text'
+		var response = tag === 'Blob' ? req.response : req.responseText;
+		return {
+			_: {},
+			status: req.status,
+			statusText: req.statusText,
+			headers: parseHeaders(req.getAllResponseHeaders()),
+			url: req.responseURL,
+			value: { ctor: tag, _0: response }
+		};
+	}
+
+
+	function parseHeaders(rawHeaders)
+	{
+		var headers = Dict.empty;
+
+		if (!rawHeaders)
+		{
+			return headers;
+		}
+
+		var headerPairs = rawHeaders.split('\u000d\u000a');
+		for (var i = headerPairs.length; i--; )
+		{
+			var headerPair = headerPairs[i];
+			var index = headerPair.indexOf('\u003a\u0020');
+			if (index > 0)
+			{
+				var key = headerPair.substring(0, index);
+				var value = headerPair.substring(index + 2);
+
+				headers = A3(Dict.update, key, function(oldValue) {
+					if (oldValue.ctor === 'Just')
+					{
+						return Maybe.Just(value + ', ' + oldValue._0);
+					}
+					return Maybe.Just(value);
+				}, headers);
+			}
+		}
+
+		return headers;
+	}
+
+
+	function multipart(dataList)
+	{
+		var formData = new FormData();
+
+		while (dataList.ctor !== '[]')
+		{
+			var data = dataList._0;
+			if (data.ctor === 'StringData')
+			{
+				formData.append(data._0, data._1);
+			}
+			else
+			{
+				var fileName = data._1.ctor === 'Nothing'
+					? undefined
+					: data._1._0;
+				formData.append(data._0, data._2, fileName);
+			}
+			dataList = dataList._1;
+		}
+
+		return { ctor: 'BodyFormData', formData: formData };
+	}
+
+
+	function uriEncode(string)
+	{
+		return encodeURIComponent(string);
+	}
+
+	function uriDecode(string)
+	{
+		return decodeURIComponent(string);
+	}
+
+	return localRuntime.Native.Http.values = {
+		send: F2(send),
+		multipart: multipart,
+		uriEncode: uriEncode,
+		uriDecode: uriDecode
+	};
+};
+
+Elm.Http = Elm.Http || {};
+Elm.Http.make = function (_elm) {
+   "use strict";
+   _elm.Http = _elm.Http || {};
+   if (_elm.Http.values) return _elm.Http.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Dict = Elm.Dict.make(_elm),
+   $Json$Decode = Elm.Json.Decode.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Native$Http = Elm.Native.Http.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $String = Elm.String.make(_elm),
+   $Task = Elm.Task.make(_elm),
+   $Time = Elm.Time.make(_elm);
+   var _op = {};
+   var send = $Native$Http.send;
+   var BadResponse = F2(function (a,b) {
+      return {ctor: "BadResponse",_0: a,_1: b};
+   });
+   var UnexpectedPayload = function (a) {
+      return {ctor: "UnexpectedPayload",_0: a};
+   };
+   var handleResponse = F2(function (handle,response) {
+      if (_U.cmp(200,
+      response.status) < 1 && _U.cmp(response.status,300) < 0) {
+            var _p0 = response.value;
+            if (_p0.ctor === "Text") {
+                  return handle(_p0._0);
+               } else {
+                  return $Task.fail(UnexpectedPayload("Response body is a blob, expecting a string."));
+               }
+         } else return $Task.fail(A2(BadResponse,
+         response.status,
+         response.statusText));
+   });
+   var NetworkError = {ctor: "NetworkError"};
+   var Timeout = {ctor: "Timeout"};
+   var promoteError = function (rawError) {
+      var _p1 = rawError;
+      if (_p1.ctor === "RawTimeout") {
+            return Timeout;
+         } else {
+            return NetworkError;
+         }
+   };
+   var fromJson = F2(function (decoder,response) {
+      var decode = function (str) {
+         var _p2 = A2($Json$Decode.decodeString,decoder,str);
+         if (_p2.ctor === "Ok") {
+               return $Task.succeed(_p2._0);
+            } else {
+               return $Task.fail(UnexpectedPayload(_p2._0));
+            }
+      };
+      return A2($Task.andThen,
+      A2($Task.mapError,promoteError,response),
+      handleResponse(decode));
+   });
+   var RawNetworkError = {ctor: "RawNetworkError"};
+   var RawTimeout = {ctor: "RawTimeout"};
+   var Blob = function (a) {    return {ctor: "Blob",_0: a};};
+   var Text = function (a) {    return {ctor: "Text",_0: a};};
+   var Response = F5(function (a,b,c,d,e) {
+      return {status: a,statusText: b,headers: c,url: d,value: e};
+   });
+   var defaultSettings = {timeout: 0
+                         ,onStart: $Maybe.Nothing
+                         ,onProgress: $Maybe.Nothing
+                         ,desiredResponseType: $Maybe.Nothing
+                         ,withCredentials: false};
+   var post = F3(function (decoder,url,body) {
+      var request = {verb: "POST"
+                    ,headers: _U.list([])
+                    ,url: url
+                    ,body: body};
+      return A2(fromJson,decoder,A2(send,defaultSettings,request));
+   });
+   var Settings = F5(function (a,b,c,d,e) {
+      return {timeout: a
+             ,onStart: b
+             ,onProgress: c
+             ,desiredResponseType: d
+             ,withCredentials: e};
+   });
+   var multipart = $Native$Http.multipart;
+   var FileData = F3(function (a,b,c) {
+      return {ctor: "FileData",_0: a,_1: b,_2: c};
+   });
+   var BlobData = F3(function (a,b,c) {
+      return {ctor: "BlobData",_0: a,_1: b,_2: c};
+   });
+   var blobData = BlobData;
+   var StringData = F2(function (a,b) {
+      return {ctor: "StringData",_0: a,_1: b};
+   });
+   var stringData = StringData;
+   var BodyBlob = function (a) {
+      return {ctor: "BodyBlob",_0: a};
+   };
+   var BodyFormData = {ctor: "BodyFormData"};
+   var ArrayBuffer = {ctor: "ArrayBuffer"};
+   var BodyString = function (a) {
+      return {ctor: "BodyString",_0: a};
+   };
+   var string = BodyString;
+   var Empty = {ctor: "Empty"};
+   var empty = Empty;
+   var getString = function (url) {
+      var request = {verb: "GET"
+                    ,headers: _U.list([])
+                    ,url: url
+                    ,body: empty};
+      return A2($Task.andThen,
+      A2($Task.mapError,
+      promoteError,
+      A2(send,defaultSettings,request)),
+      handleResponse($Task.succeed));
+   };
+   var get = F2(function (decoder,url) {
+      var request = {verb: "GET"
+                    ,headers: _U.list([])
+                    ,url: url
+                    ,body: empty};
+      return A2(fromJson,decoder,A2(send,defaultSettings,request));
+   });
+   var Request = F4(function (a,b,c,d) {
+      return {verb: a,headers: b,url: c,body: d};
+   });
+   var uriDecode = $Native$Http.uriDecode;
+   var uriEncode = $Native$Http.uriEncode;
+   var queryEscape = function (string) {
+      return A2($String.join,
+      "+",
+      A2($String.split,"%20",uriEncode(string)));
+   };
+   var queryPair = function (_p3) {
+      var _p4 = _p3;
+      return A2($Basics._op["++"],
+      queryEscape(_p4._0),
+      A2($Basics._op["++"],"=",queryEscape(_p4._1)));
+   };
+   var url = F2(function (baseUrl,args) {
+      var _p5 = args;
+      if (_p5.ctor === "[]") {
+            return baseUrl;
+         } else {
+            return A2($Basics._op["++"],
+            baseUrl,
+            A2($Basics._op["++"],
+            "?",
+            A2($String.join,"&",A2($List.map,queryPair,args))));
+         }
+   });
+   var TODO_implement_file_in_another_library = {ctor: "TODO_implement_file_in_another_library"};
+   var TODO_implement_blob_in_another_library = {ctor: "TODO_implement_blob_in_another_library"};
+   return _elm.Http.values = {_op: _op
+                             ,getString: getString
+                             ,get: get
+                             ,post: post
+                             ,send: send
+                             ,url: url
+                             ,uriEncode: uriEncode
+                             ,uriDecode: uriDecode
+                             ,empty: empty
+                             ,string: string
+                             ,multipart: multipart
+                             ,stringData: stringData
+                             ,defaultSettings: defaultSettings
+                             ,fromJson: fromJson
+                             ,Request: Request
+                             ,Settings: Settings
+                             ,Response: Response
+                             ,Text: Text
+                             ,Blob: Blob
+                             ,Timeout: Timeout
+                             ,NetworkError: NetworkError
+                             ,UnexpectedPayload: UnexpectedPayload
+                             ,BadResponse: BadResponse
+                             ,RawTimeout: RawTimeout
+                             ,RawNetworkError: RawNetworkError};
+};
 Elm.Svg = Elm.Svg || {};
 Elm.Svg.make = function (_elm) {
    "use strict";
@@ -14631,6 +15001,273 @@ Elm.ColorScheme.make = function (_elm) {
                                     ,ColorScheme: ColorScheme
                                     ,defaultColorScheme: defaultColorScheme};
 };
+Elm.Native.StringExtra = {};
+
+Elm.Native.StringExtra.make = function(localRuntime) {
+	localRuntime.Native = localRuntime.Native || {};
+	localRuntime.Native.StringExtra = localRuntime.Native.StringExtra || {};
+	if (localRuntime.Native.StringExtra.values)
+	{
+		return localRuntime.Native.StringExtra.values;
+	}
+	if ('values' in Elm.Native.StringExtra)
+	{
+		return localRuntime.Native.StringExtra.values = Elm.Native.StringExtra.values;
+	}
+
+	var Char = Elm.Char.make(localRuntime);
+	var Result = Elm.Result.make(localRuntime);
+
+	function toIntFromBase(base, s)
+	{
+    var result = parseInt(s, base);
+    if (isNaN(result)) {
+      return Result.Err("could not convert string '" + s + "' to an Int" );
+    }
+		return Result.Ok(parseInt(s, base));
+	}
+
+	return Elm.Native.StringExtra.values = {
+    toIntFromBase: F2(toIntFromBase)
+	};
+};
+
+Elm.StringExtra = Elm.StringExtra || {};
+Elm.StringExtra.make = function (_elm) {
+   "use strict";
+   _elm.StringExtra = _elm.StringExtra || {};
+   if (_elm.StringExtra.values) return _elm.StringExtra.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $ElmTest = Elm.ElmTest.make(_elm),
+   $Graphics$Element = Elm.Graphics.Element.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Native$StringExtra = Elm.Native.StringExtra.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var _op = {};
+   var toIntFromBase = $Native$StringExtra.toIntFromBase;
+   var hexToInt = toIntFromBase(16);
+   var tests = A2($ElmTest.suite,
+   "",
+   _U.list([A2($ElmTest.test,
+           "",
+           A2($ElmTest.assertEqual,
+           $Result.Ok(15),
+           A2(toIntFromBase,16,"F")))
+           ,A2($ElmTest.test,
+           "",
+           A2($ElmTest.assertEqual,
+           $Result.Ok(15),
+           A2(toIntFromBase,16,"0F")))
+           ,A2($ElmTest.test,
+           "",
+           A2($ElmTest.assertEqual,
+           $Result.Ok(12245589),
+           A2(toIntFromBase,16,"BADA55")))
+           ,A2($ElmTest.test,
+           "",
+           A2($ElmTest.assertEqual,
+           $Result.Ok(12245589),
+           A2(toIntFromBase,16,"BadA55")))
+           ,A2($ElmTest.test,
+           "",
+           A2($ElmTest.assertEqual,
+           $Result.Ok(12245589),
+           A2(toIntFromBase,16,"BadA55")))
+           ,A2($ElmTest.test,
+           "",
+           A2($ElmTest.assertEqual,
+           $Result.Ok(12245589),
+           hexToInt("BADA55")))
+           ,A2($ElmTest.test,
+           "",
+           A2($ElmTest.assertEqual,
+           $Result.Err("could not convert string \'GAG\' to an Int"),
+           hexToInt("GAG")))]));
+   var main = $ElmTest.elementRunner(tests);
+   return _elm.StringExtra.values = {_op: _op
+                                    ,toIntFromBase: toIntFromBase
+                                    ,hexToInt: hexToInt};
+};
+Elm.ColourLoversAPI = Elm.ColourLoversAPI || {};
+Elm.ColourLoversAPI.make = function (_elm) {
+   "use strict";
+   _elm.ColourLoversAPI = _elm.ColourLoversAPI || {};
+   if (_elm.ColourLoversAPI.values)
+   return _elm.ColourLoversAPI.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Color = Elm.Color.make(_elm),
+   $ColorExtra = Elm.ColorExtra.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Effects = Elm.Effects.make(_elm),
+   $ElmTest = Elm.ElmTest.make(_elm),
+   $Html = Elm.Html.make(_elm),
+   $Html$Attributes = Elm.Html.Attributes.make(_elm),
+   $Http = Elm.Http.make(_elm),
+   $Json$Decode = Elm.Json.Decode.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $StartApp = Elm.StartApp.make(_elm),
+   $String = Elm.String.make(_elm),
+   $StringExtra = Elm.StringExtra.make(_elm),
+   $Task = Elm.Task.make(_elm);
+   var _op = {};
+   var parseColor = function (str) {
+      var hexToInt$ = function (_p0) {
+         return A2($Maybe.withDefault,
+         0,
+         $Result.toMaybe($StringExtra.hexToInt(_p0)));
+      };
+      return A3($Color.rgb,
+      hexToInt$(A3($String.slice,0,2,str)),
+      hexToInt$(A3($String.slice,2,4,str)),
+      hexToInt$(A3($String.slice,4,6,str)));
+   };
+   var decodeColor = A2($Json$Decode.customDecoder,
+   $Json$Decode.string,
+   function (s) {
+      return $Result.Ok(parseColor(s));
+   });
+   var decodePalette = A4($Json$Decode.object3,
+   F3(function (title,userName,colors) {
+      return {title: title,userName: userName,colors: colors};
+   }),
+   A2($Json$Decode._op[":="],"title",$Json$Decode.string),
+   A2($Json$Decode._op[":="],"userName",$Json$Decode.string),
+   A2($Json$Decode._op[":="],
+   "colors",
+   $Json$Decode.list(decodeColor)));
+   var decodePalettes = $Json$Decode.list(decodePalette);
+   var tests = A2($ElmTest.suite,
+   "",
+   _U.list([A2($ElmTest.test,
+           "",
+           A2($ElmTest.assertEqual,
+           A2($Json$Decode.decodeString,
+           decodePalettes,
+           "\n            [\n              {\n                \"title\": \"goldfish\",\n                \"userName\": \"kineko\",\n                \"colors\": [\"AAA\", \"BBB\"]\n              },\n              {\n                \"title\": \"title2\",\n                \"userName\": \"user2\",\n                \"colors\": [CCC\", \"DDD\"]\n              }\n            ]\n          "),
+           $Result.Ok(_U.list([]))))
+           ,A2($ElmTest.test,
+           "",
+           A2($ElmTest.assertEqual,
+           A3($Color.rgb,255,0,0),
+           parseColor("#FF0000")))
+           ,A2($ElmTest.test,
+           "",
+           A2($ElmTest.assertEqual,
+           A3($Color.rgb,0,255,0),
+           parseColor("#00FF00")))
+           ,A2($ElmTest.test,
+           "",
+           A2($ElmTest.assertEqual,
+           A3($Color.rgb,0,0,0),
+           parseColor("YOLO")))]));
+   var crossOriginMeUrl = "https://crossorigin.me/";
+   var topPalettesUrl = "http://www.colourlovers.com/api/palettes/top?format=json";
+   var coTopPalettesUrl = A2($Basics._op["++"],
+   crossOriginMeUrl,
+   topPalettesUrl);
+   _op["=>"] = F2(function (v0,v1) {
+      return {ctor: "_Tuple2",_0: v0,_1: v1};
+   });
+   var colorView = function (color) {
+      return A2($Html.div,
+      _U.list([$Html$Attributes.style(_U.list([A2(_op["=>"],
+                                              "background-color",
+                                              $ColorExtra.toCssRgb(color))
+                                              ,A2(_op["=>"],"width","100px")
+                                              ,A2(_op["=>"],"height","100px")]))]),
+      _U.list([]));
+   };
+   var paletteView = function (palette) {
+      return A2($Html.div,
+      _U.list([]),
+      _U.list([A2($Html.h2,
+              _U.list([]),
+              _U.list([$Html.text(palette.title)]))
+              ,A2($Html.h4,
+              _U.list([]),
+              _U.list([$Html.text(palette.userName)]))
+              ,A2($Html.div,
+              _U.list([]),
+              A2($List.map,colorView,palette.colors))]));
+   };
+   var palettesView = function (maybePalettes) {
+      var _p1 = maybePalettes;
+      if (_p1.ctor === "Just") {
+            return A2($Html.div,
+            _U.list([]),
+            A2($List.map,paletteView,A2($List.take,1,_p1._0)));
+         } else {
+            return A2($Html.p,
+            _U.list([]),
+            _U.list([$Html.text("error fetching palettes")]));
+         }
+   };
+   var view = F2(function (address,model) {
+      return A2($Html.div,
+      _U.list([]),
+      _U.list([palettesView(model.palettes)]));
+   });
+   var update = F2(function (action,model) {
+      var _p2 = action;
+      return {ctor: "_Tuple2"
+             ,_0: {palettes: _p2._0,fetching: false}
+             ,_1: $Effects.none};
+   });
+   var PalettesFetched = function (a) {
+      return {ctor: "PalettesFetched",_0: a};
+   };
+   var getTopPalettes = $Effects.task(A2($Task.map,
+   PalettesFetched,
+   $Task.toMaybe(A2($Http.get,decodePalettes,coTopPalettesUrl))));
+   var initEffects = getTopPalettes;
+   var initModel = {palettes: $Maybe.Just(_U.list([]))
+                   ,fetching: true};
+   var init = {ctor: "_Tuple2",_0: initModel,_1: initEffects};
+   var app = $StartApp.start({init: init
+                             ,update: update
+                             ,view: view
+                             ,inputs: _U.list([])});
+   var main = app.html;
+   var tasks = Elm.Native.Task.make(_elm).performSignal("tasks",
+   app.tasks);
+   var Model = F2(function (a,b) {
+      return {palettes: a,fetching: b};
+   });
+   var Palette = F3(function (a,b,c) {
+      return {title: a,userName: b,colors: c};
+   });
+   return _elm.ColourLoversAPI.values = {_op: _op
+                                        ,Palette: Palette
+                                        ,Model: Model
+                                        ,initModel: initModel
+                                        ,initEffects: initEffects
+                                        ,init: init
+                                        ,PalettesFetched: PalettesFetched
+                                        ,update: update
+                                        ,view: view
+                                        ,colorView: colorView
+                                        ,palettesView: palettesView
+                                        ,paletteView: paletteView
+                                        ,topPalettesUrl: topPalettesUrl
+                                        ,crossOriginMeUrl: crossOriginMeUrl
+                                        ,coTopPalettesUrl: coTopPalettesUrl
+                                        ,decodePalette: decodePalette
+                                        ,decodeColor: decodeColor
+                                        ,decodePalettes: decodePalettes
+                                        ,getTopPalettes: getTopPalettes
+                                        ,parseColor: parseColor
+                                        ,tests: tests
+                                        ,app: app
+                                        ,main: main};
+};
 Elm.Components = Elm.Components || {};
 Elm.Components.make = function (_elm) {
    "use strict";
@@ -15231,6 +15868,7 @@ Elm.Gui.make = function (_elm) {
    $Basics = Elm.Basics.make(_elm),
    $ColorExtra = Elm.ColorExtra.make(_elm),
    $ColorScheme = Elm.ColorScheme.make(_elm),
+   $ColourLoversAPI = Elm.ColourLoversAPI.make(_elm),
    $Debug = Elm.Debug.make(_elm),
    $Effects = Elm.Effects.make(_elm),
    $Html = Elm.Html.make(_elm),
@@ -15252,18 +15890,32 @@ Elm.Gui.make = function (_elm) {
    var guiFrequency = A2($Signal.merge,
    $KeyboardNoteInput.keyboardGuiFrequency,
    $Piano.pianoGuiFrequency);
+   var ColourLoversAction = function (a) {
+      return {ctor: "ColourLoversAction",_0: a};
+   };
    var update = F2(function (action,model) {
-      var newModel = function () {
-         var _p0 = action;
-         switch (_p0.ctor)
-         {case "AudioOn": return _U.update(model,{audioOn: _p0._0});
-            case "KnobRegistryAction": return _U.update(model,
-              {knobRegistry: A2($KnobRegistry.update,
-              _p0._0,
-              model.knobRegistry)});
-            default: return _U.update(model,{frequency: _p0._0});}
-      }();
-      return {ctor: "_Tuple2",_0: newModel,_1: $Effects.none};
+      var _p0 = action;
+      switch (_p0.ctor)
+      {case "AudioOn": return {ctor: "_Tuple2"
+                              ,_0: _U.update(model,{audioOn: _p0._0})
+                              ,_1: $Effects.none};
+         case "KnobRegistryAction": return {ctor: "_Tuple2"
+                                           ,_0: _U.update(model,
+                                           {knobRegistry: A2($KnobRegistry.update,
+                                           _p0._0,
+                                           model.knobRegistry)})
+                                           ,_1: $Effects.none};
+         case "ChangeFrequency": return {ctor: "_Tuple2"
+                                        ,_0: _U.update(model,{frequency: _p0._0})
+                                        ,_1: $Effects.none};
+         default: var _p1 = A2($ColourLoversAPI.update,
+           _p0._0,
+           model.palettes);
+           var newPalettes = _p1._0;
+           var fx = _p1._1;
+           return {ctor: "_Tuple2"
+                  ,_0: _U.update(model,{palettes: newPalettes})
+                  ,_1: A2($Effects.map,ColourLoversAction,fx)};}
    });
    var ChangeFrequency = function (a) {
       return {ctor: "ChangeFrequency",_0: a};
@@ -15346,15 +15998,23 @@ Elm.Gui.make = function (_elm) {
    var EncodedModel = F3(function (a,b,c) {
       return {audioOn: a,frequency: b,knobs: c};
    });
-   var init = {ctor: "_Tuple2"
-              ,_0: {audioOn: true
-                   ,frequency: 400.0
-                   ,knobRegistry: $KnobRegistry.init(_U.list(["attack"
-                                                             ,"decay"
-                                                             ,"sustain"
-                                                             ,"release"]))
-                   ,colorScheme: $ColorScheme.defaultColorScheme}
-              ,_1: $Effects.none};
+   var init = function () {
+      var _p2 = $ColourLoversAPI.init;
+      var palettes = _p2._0;
+      var palettesFx = _p2._1;
+      return {ctor: "_Tuple2"
+             ,_0: {audioOn: true
+                  ,frequency: 400.0
+                  ,knobRegistry: $KnobRegistry.init(_U.list(["attack"
+                                                            ,"decay"
+                                                            ,"sustain"
+                                                            ,"release"]))
+                  ,colorScheme: $ColorScheme.defaultColorScheme
+                  ,palettes: palettes}
+             ,_1: $Effects.batch(_U.list([A2($Effects.map,
+             ColourLoversAction,
+             palettesFx)]))};
+   }();
    var app = $StartApp.start({init: init
                              ,update: update
                              ,view: view
@@ -15371,11 +16031,12 @@ Elm.Gui.make = function (_elm) {
              })};
    },
    A2($Signal.map,encode,app.model));
-   var Model = F4(function (a,b,c,d) {
+   var Model = F5(function (a,b,c,d,e) {
       return {audioOn: a
              ,frequency: b
              ,knobRegistry: c
-             ,colorScheme: d};
+             ,colorScheme: d
+             ,palettes: e};
    });
    return _elm.Gui.values = {_op: _op
                             ,Model: Model
@@ -15385,6 +16046,7 @@ Elm.Gui.make = function (_elm) {
                             ,AudioOn: AudioOn
                             ,KnobRegistryAction: KnobRegistryAction
                             ,ChangeFrequency: ChangeFrequency
+                            ,ColourLoversAction: ColourLoversAction
                             ,update: update
                             ,audioOnCheckbox: audioOnCheckbox
                             ,view: view

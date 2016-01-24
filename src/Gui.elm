@@ -19,6 +19,8 @@ import Signal exposing (Address)
 
 import ColorExtra exposing (toCssRgb)
 
+import ColourLoversAPI
+
 
 import MouseExtra
 
@@ -41,18 +43,41 @@ type alias Model =
   , frequency : Float
   , knobRegistry : KnobRegistry.Model
   , colorScheme : ColorScheme
+  , palettes : ColourLoversAPI.Model
   }
 
 init : (Model, Effects Action)
 init =
+
+  let
+    (palettes, palettesFx) = ColourLoversAPI.init
+  in
   (
     { audioOn = True
     , frequency = 400.0
     , knobRegistry = KnobRegistry.init ["attack", "decay", "sustain", "release"]
     , colorScheme = defaultColorScheme
+    , palettes = palettes
     }
-  , Effects.none
+  -- , ColourLoversAPI.initEffects
+  , Effects.batch
+    [ Effects.map ColourLoversAction palettesFx
+    ]
   )
+
+-- init : String -> String -> (Model, Effects Action)
+-- init leftTopic rightTopic =
+--   let
+--     (left, leftFx) = RandomGif.init leftTopic
+--     (right, rightFx) = RandomGif.init rightTopic
+--   in
+--     ( Model left right
+--     , Effects.batch
+--         [ Effects.map Left leftFx
+--         , Effects.map Right rightFx
+--         ]
+--     )
+
 
 type alias EncodedModel =
   { audioOn : Bool
@@ -74,23 +99,35 @@ encode model =
 
 type Action
   = AudioOn Bool
- | KnobRegistryAction KnobRegistry.Action
- | ChangeFrequency Float
+  | KnobRegistryAction KnobRegistry.Action
+  | ChangeFrequency Float
+  | ColourLoversAction ColourLoversAPI.Action
+
 
 update : Action -> Model -> (Model, Effects Action)
 update action model =
-  let newModel =
-    case action of
-      AudioOn value ->
-          { model | audioOn = value }
-      KnobRegistryAction subAction ->
-        { model |
+  case action of
+    AudioOn value ->
+      ( { model | audioOn = value }
+      , Effects.none
+      )
+    KnobRegistryAction subAction ->
+      ( { model |
             knobRegistry = KnobRegistry.update subAction model.knobRegistry
         }
-      ChangeFrequency f ->
-        { model | frequency = f }
-  in
-    (newModel, Effects.none)
+      , Effects.none
+      )
+    ChangeFrequency f ->
+      ( { model | frequency = f }
+      , Effects.none
+      )
+    ColourLoversAction clAction ->
+      let
+        (newPalettes, fx) = ColourLoversAPI.update clAction model.palettes
+      in
+        ( { model | palettes = newPalettes }
+        , Effects.map ColourLoversAction fx
+        )
 
 
 -- TODO: this should be moved into separate module. forwardTo is required

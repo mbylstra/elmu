@@ -33,11 +33,18 @@ type alias Model =
   , fetching : Bool
   }
 
+initModel : Model
+initModel =
+  { palettes = Just [], fetching = True}
+
+
+initEffects : Effects Action
+initEffects =
+  getTopPalettes
+
 init : (Model, Effects Action)
 init  =
-  ( { palettes = Just [], fetching = True}
-  , getTopPalettes
-  )
+  (initModel, initEffects)
 
 --------------------------------------------------------------------------------
 -- UPDATE

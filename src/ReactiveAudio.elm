@@ -63,6 +63,7 @@ fmSynthGraph =
   fmSynth1
     ++ [ destinationNode {signal = ID "fm"} ]
 
+theremin : ListGraph
 theremin =
   -- [ sinNode "t" {frequency = GUI "pitch", frequencyOffset = Default, phaseOffset = Default}
   -- [ sinNode "t" {frequency = GUI "keyboardFrequency", frequencyOffset = Default, phaseOffset = Default}
