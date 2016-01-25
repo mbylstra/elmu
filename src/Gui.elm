@@ -7,6 +7,7 @@ module Gui where
 import Effects exposing (Never, Effects)
 import StartApp exposing (App)
 import Task
+import Random exposing (Seed)
 
 
 import Html exposing (..)
@@ -21,7 +22,7 @@ import Maybe exposing (withDefault)
 
 import ColorExtra exposing (toCssRgb)
 
-import ColourLoversAPI
+import ColourLovers
 
 
 import MouseExtra
@@ -34,6 +35,21 @@ import KnobRegistry exposing (Action(GlobalMouseUp, MousePosition))
 import HtmlAttributesExtra exposing (..)
 
 import ColorScheme exposing (defaultColorScheme, ColorScheme, fromColourLovers)
+import ColorSchemeChooser
+
+--------------------------------------------------------------------------------
+-- RANDOMNESS
+--------------------------------------------------------------------------------
+
+
+-- this stuff should all belong in ColourSchemeChooser! (what a hassle!)
+
+randomPrimer : Float
+randomPrimer = 0.0
+
+randomSeed : Seed
+randomSeed =
+  Random.initialSeed <| round randomPrimer  -- see PORTS section
 
 
 --------------------------------------------------------------------------------
@@ -44,24 +60,26 @@ type alias Model =
   { audioOn : Bool
   , frequency : Float
   , knobRegistry : KnobRegistry.Model
-  , colorScheme : ColorScheme
-  , palettes : ColourLoversAPI.Model
+  , colorScheme : ColorScheme -- consider just using the value inside colorSchemeChooser (or not?)
+  , colourLovers : ColourLovers.Model
+  , colorSchemeChooser : ColorSchemeChooser.Model
   }
 
 init : (Model, Effects Action)
 init =
 
   let
-    (palettes, palettesFx) = ColourLoversAPI.init
+    (colourLovers, palettesFx) = ColourLovers.init
   in
   (
     { audioOn = True
     , frequency = 400.0
     , knobRegistry = KnobRegistry.init ["attack", "decay", "sustain", "release"]
     , colorScheme = defaultColorScheme
-    , palettes = palettes
+    , colourLovers = colourLovers
+    , colorSchemeChooser = ColorSchemeChooser.init randomSeed defaultColorScheme
     }
-  -- , ColourLoversAPI.initEffects
+  -- , ColourLovers.initEffects
   , Effects.batch
     [ Effects.map ColourLoversAction palettesFx
     ]
@@ -103,7 +121,8 @@ type Action
   = AudioOn Bool
   | KnobRegistryAction KnobRegistry.Action
   | ChangeFrequency Float
-  | ColourLoversAction ColourLoversAPI.Action
+  | ColourLoversAction ColourLovers.Action
+  | ColorSchemeAction ColorSchemeChooser.Action
 
 
 update : Action -> Model -> (Model, Effects Action)
@@ -113,9 +132,9 @@ update action model =
       ( { model | audioOn = value }
       , Effects.none
       )
-    KnobRegistryAction subAction ->
+    KnobRegistryAction childAction ->
       ( { model |
-            knobRegistry = KnobRegistry.update subAction model.knobRegistry
+            knobRegistry = KnobRegistry.update childAction model.knobRegistry
         }
       , Effects.none
       )
@@ -123,19 +142,35 @@ update action model =
       ( { model | frequency = f }
       , Effects.none
       )
-    ColourLoversAction clAction ->
+    ColourLoversAction childAction ->
       let
-        (newCLModel, fx) = ColourLoversAPI.update clAction model.palettes
-        palettes = withDefault Array.empty newCLModel.palettes
-        palette = withDefault {title = "", userName = "", colors = Array.empty} (Array.get 0 palettes)
+        (colourLovers2, clFx) = ColourLovers.update childAction model.colourLovers
+        maybePalettes = ColourLovers.getPalettes colourLovers2
+        colorSchemes =
+          case maybePalettes of
+            Just palettes -> ColorScheme.fromColourLoversArray palettes
+            Nothing -> Array.empty
+        _ = Debug.log "colorSchemes" colorSchemes
+        colorSchemeChooser = ColorSchemeChooser.setColorSchemes model.colorSchemeChooser colorSchemes
         newModel =
           { model |
-              palettes = newCLModel
-            , colorScheme = fromColourLovers palette
+              colourLovers = colourLovers2
+            , colorSchemeChooser = colorSchemeChooser
           }
+        _ = Debug.log "newModel" newModel.colorSchemeChooser
       in
         ( newModel
-        , Effects.map ColourLoversAction fx
+        , Effects.map ColourLoversAction clFx
+        )
+    ColorSchemeAction childAction ->
+      let
+        colorSchemeChooser2 = ColorSchemeChooser.update childAction model.colorSchemeChooser
+      in
+        ( { model |
+              colorSchemeChooser = colorSchemeChooser2
+            , colorScheme = ColorSchemeChooser.getCurrent colorSchemeChooser2
+          }
+        , Effects.none
         )
 
 
@@ -192,6 +227,7 @@ view address model =  -- hwere is address??
               4
               12.0
           ]
+        , ColorSchemeChooser.view (Signal.forwardTo address ColorSchemeAction) model.colorSchemeChooser
         ]
 
 
@@ -235,6 +271,9 @@ port tasks =
 port outgoingUiModel : Signal EncodedModel
 port outgoingUiModel =
   Signal.map encode app.model
+
+-- port randomPrimer : Float
+
 
 
 --------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-module ColourLoversAPI where
+module ColourLovers where
 
 import ElmTest exposing (..)
 import Effects exposing (Effects, Never)
@@ -47,6 +47,10 @@ init : (Model, Effects Action)
 init  =
   (initModel, initEffects)
 
+getPalettes : Model -> Maybe (Array Palette)
+getPalettes model =
+  model.palettes
+
 --------------------------------------------------------------------------------
 -- UPDATE
 --------------------------------------------------------------------------------
@@ -57,13 +61,18 @@ type Action
 
 update : Action -> Model -> (Model, Effects Action)
 update action model =
-  case action of
-    PalettesFetched palettes ->
-      ( { palettes = palettes
-        , fetching = False
-        }
-      , Effects.none
-      )
+  let
+    _ = Debug.log "ColorLovers action" action
+    _ = Debug.log "ColorLovers model" model
+
+  in
+    case action of
+      PalettesFetched palettes ->
+        ( { palettes = palettes
+          , fetching = False
+          }
+        , Effects.none
+        )
 
 --------------------------------------------------------------------------------
 -- VIEW

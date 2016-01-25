@@ -1,8 +1,8 @@
 module ColorScheme where
 
 import Color exposing (Color)
-import ColourLoversAPI exposing (Palette)
-import Array
+import ColourLovers exposing (Palette)
+import Array exposing (Array)
 import Maybe exposing (withDefault)
 
 type alias ColorScheme =
@@ -34,11 +34,16 @@ fromColourLovers palette =
   let
     colors = palette.colors
   in
-    { windowBackground = withDefault defaultColorScheme.windowBackground (Array.get 0 colors)
-    , pianoWhites = withDefault defaultColorScheme.pianoWhites (Array.get 1 colors)
-    , pianoBlacks = withDefault defaultColorScheme.pianoBlacks (Array.get 2 colors)
-    , knobBackground = withDefault defaultColorScheme.knobBackground (Array.get 3 colors)
-    , knobForeground = withDefault defaultColorScheme.knobForeground (Array.get 4 colors)
-    , controlPanelBackground = withDefault defaultColorScheme.controlPanelBackground (Array.get 5 colors)
-    , controlPanelBorders = withDefault defaultColorScheme.controlPanelBorders (Array.get 6 colors)
+    { defaultColorScheme |
+        windowBackground = withDefault defaultColorScheme.windowBackground (Array.get 0 colors)
+      -- , pianoWhites = withDefault defaultColorScheme.pianoWhites (Array.get 1 colors)
+      -- , pianoBlacks = withDefault defaultColorScheme.pianoBlacks (Array.get 2 colors)
+      , knobBackground = withDefault defaultColorScheme.knobBackground (Array.get 3 colors)
+      , knobForeground = withDefault defaultColorScheme.knobForeground (Array.get 4 colors)
+      , controlPanelBackground = withDefault defaultColorScheme.controlPanelBackground (Array.get 5 colors)
+      , controlPanelBorders = withDefault defaultColorScheme.controlPanelBorders (Array.get 6 colors)
     }
+
+fromColourLoversArray : Array Palette -> Array ColorScheme
+fromColourLoversArray palettes =
+  Array.map fromColourLovers palettes

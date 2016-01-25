@@ -48,6 +48,7 @@ if (DEBUG) {
     var MAX_ALLOWED_DURATION = ITERATIONS * BUFFER_DURATION;
 }
 
+// var elmGui = Elm.fullscreen(Elm.Gui, {randomPrimer: Date.now()});
 var elmGui = Elm.fullscreen(Elm.Gui);
 
 //expose Elm modules

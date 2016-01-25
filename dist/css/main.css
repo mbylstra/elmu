@@ -30,6 +30,20 @@ body {
   position: absolute;
   right: 26px; }
 
+.color-scheme-colors {
+  position: absolute;
+  right: 0px;
+  bottom: 0px;
+  display: flex;
+  padding: 2px;
+  border: 2px solid black;
+  margin: 10px;
+  cursor: pointer; }
+  .color-scheme-colors div {
+    width: 20px;
+    height: 20px;
+    margin-right: 2px; }
+
 .cmn-toggle {
   position: absolute;
   margin-left: -9999px;
