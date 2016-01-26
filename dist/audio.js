@@ -137,6 +137,27 @@ var getNodeValue = function(audioGraph, node) {
   }
 }
 
+var getInputStateFromDottedPath = function(dottedPath, inputState) {
+  var path = dottedPath.split(".");
+  // this is hurting my brain, so let's cheat and assume only one level of depth :p
+
+  var getNode = function (propertyName, node) {
+    if (node.hasOwnProperty(propertyName)) {
+      return node[propertyName];
+    } else {
+      throw "GUI id " + propertyName + " does not exist"
+    }
+  }
+
+  if (path.length == 1) {
+    // console.log('path length 1');
+    return getNode(path[0], inputState)
+  } else {
+    var parent = getNode(path[0], inputState);
+    return getNode(path[1], parent);
+  }
+}
+
 var getInputValue = function(audioGraph, input) {
   var type = input.ctor;
   if (type == "Value") {
@@ -148,21 +169,14 @@ var getInputValue = function(audioGraph, input) {
     // console.log('input', input);
     return getNodeValue(audioGraph, audioGraph[input._0]);
   } else if (type == "GUI") {
-    // console.log("audioGraph", audioGraph);
-    // console.log('input', input);
+
     var guiId = input._0;
-    // console.log('guiId', guiId);
-    // console.log('input', input);
-    // console.log('GUI?');
-    // console.log('externalState', externalState);
-    if (externalState.externalInputState.hasOwnProperty(guiId)) {
-      // console.log('guiId', guiId);
-      var value = externalState.externalInputState[guiId];
-      // console.log('guiId', guiId);
-      // console.log('value', value);
-      return value;
-    } else {
-      throw "GUI id " + guiId + " does not exist"
+    var inputState = externalState.externalInputState
+    // console.log('inputState', inputState);
+    try {
+      return getInputStateFromDottedPath(guiId, inputState);
+    } catch(e) {
+      throw "GUI id `" + guiId + "` does not exist"
     }
   }
 }
