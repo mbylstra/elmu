@@ -61,18 +61,13 @@ type Action
 
 update : Action -> Model -> (Model, Effects Action)
 update action model =
-  let
-    _ = Debug.log "ColorLovers action" action
-    _ = Debug.log "ColorLovers model" model
-
-  in
-    case action of
-      PalettesFetched palettes ->
-        ( { palettes = palettes
-          , fetching = False
-          }
-        , Effects.none
-        )
+  case action of
+    PalettesFetched palettes ->
+      ( { palettes = palettes
+        , fetching = False
+        }
+      , Effects.none
+      )
 
 --------------------------------------------------------------------------------
 -- VIEW

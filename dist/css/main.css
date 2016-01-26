@@ -1,4 +1,19 @@
 /* apply a natural box layout model to all elements, but allowing components to change */
+.no-select {
+  -webkit-touch-callout: none;
+  /* iOS Safari */
+  -webkit-user-select: none;
+  /* Chrome/Safari/Opera */
+  -khtml-user-select: none;
+  /* Konqueror */
+  -moz-user-select: none;
+  /* Firefox */
+  -ms-user-select: none;
+  /* IE/Edge */
+  user-select: none;
+  /* non-prefixed version, currently
+                                  not supported by any browser */ }
+
 body {
   background-color: white;
   color: black;
@@ -30,19 +45,44 @@ body {
   position: absolute;
   right: 26px; }
 
-.color-scheme-colors {
+.color-scheme-chooser {
   position: absolute;
   right: 0px;
   bottom: 0px;
   display: flex;
+  flex-direction: column-reverse;
+  background-color: white;
+  margin: 10px; }
+
+.color-scheme-colors {
   padding: 2px;
-  border: 2px solid black;
-  margin: 10px;
-  cursor: pointer; }
+  cursor: pointer;
+  display: flex; }
   .color-scheme-colors div {
     width: 20px;
     height: 20px;
     margin-right: 2px; }
+
+.random-color-button {
+  border-top: 1px solid black;
+  font-size: 18px;
+  text-align: center;
+  cursor: pointer;
+  line-height: 30px;
+  height: 30px; }
+
+.color-scheme-popup {
+  border: 1px solid black;
+  border-bottom: none; }
+
+.current-color-scheme .color-scheme-colors {
+  border: 1px solid black; }
+
+@keyframes fadein {
+  from {
+    opacity: 0; }
+  to {
+    opacity: 1; } }
 
 .cmn-toggle {
   position: absolute;

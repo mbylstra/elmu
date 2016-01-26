@@ -4,6 +4,8 @@ import Html exposing (div)
 import Html.Events exposing(onMouseDown, onMouseEnter, onMouseLeave, Options)
 import HtmlEventsExtra exposing (onMouseDownWithOptions, preventDefault)
 import Html.Attributes exposing (style, classList)
+import Color exposing (Color)
+
 
 import Signal exposing (Address)
 
@@ -13,6 +15,7 @@ import Svg exposing (svg, path, rect, line)
 import Svg.Attributes exposing (d, stroke, fill, strokeWidth, x, y, x1, y1, x2, y2, width, height, viewBox)
 
 import HtmlAttributesExtra exposing (..)
+import ColorExtra exposing (toCssRgb)
 
 
 
@@ -20,21 +23,33 @@ import HtmlAttributesExtra exposing (..)
 -- MODEL
 
 type alias Model =
-  { mouseDown: Bool
+  { params: Params
+  , mouseDown: Bool
   , mouseInside: Bool
   , value: Float -- A value from 0.0 to 1.0. The main thing the parent might care about
-  , width: Int
-  , height: Int
   }
 
+type alias Params =
+  { foregroundColor : Color
+  , backgroundColor : Color
+  , width : Int
+  , height : Int
+  }
 
-init : Model
-init =
-  { mouseDown = False
-  , mouseInside = False
-  , value = 0.0
+defaultParams : Params
+defaultParams =
+  { foregroundColor = Color.green
+  , backgroundColor = Color.black
   , width = 100
   , height = 100
+  }
+
+init : Params -> Model
+init params =
+  { params = params
+  , value = 0.0
+  , mouseDown = False
+  , mouseInside = False
   }
 
 type alias EncodedModel = Float
@@ -51,6 +66,7 @@ type Action
   | MouseMove Int  -- the number of pixels moved since the last one of these events
   | MouseEnter
   | MouseLeave
+  | UpdateParams Params
 
 
 clamp : Float -> Float
@@ -85,6 +101,8 @@ update action model =
           { model | value = clamp (model.value + valueAdjust) }
       else
         model
+    UpdateParams params ->
+      { model | params = params }
 
 knobDisplay : Model -> Html.Html
 knobDisplay model =
@@ -94,11 +112,11 @@ knobDisplay model =
     -- emptyAngle = 359.0
     -- fullAngle = 0.0
     valueAngle = (emptyAngle + 90.0) * model.value - 90.0
-    widthFloat = toFloat model.width
+    widthFloat = toFloat model.params.width
     radius = (widthFloat / 2.0) - 20.0
     centerPoint = (widthFloat / 2.0, widthFloat / 2.0)
-    widthStr = toString model.width
-    heightStr = toString model.height
+    widthStr = toString model.params.width
+    heightStr = toString model.params.height
     strokeWidth' = widthFloat / 10.0
     strokeWidthStr = toString strokeWidth'
     activeArcArgs =
@@ -130,14 +148,14 @@ knobDisplay model =
       ]
       [ path
           [ d (arc inactiveArcArgs)
-          , stroke "black"
+          , stroke <| toCssRgb model.params.backgroundColor
           , fill "none"
           , strokeWidth strokeWidthStr
           ]
           []
       , path
           [ d (arc activeArcArgs)
-          , stroke "pink"
+          , stroke <| toCssRgb model.params.foregroundColor
           , fill "none"
           , strokeWidth strokeWidthStr
           ]
@@ -147,7 +165,7 @@ knobDisplay model =
           , y1 (toString needleY1)
           , x2 (toString needleX2)
           , y2 (toString needleY2)
-          , stroke "black"
+          , stroke <| toCssRgb model.params.foregroundColor
           , fill "none"
           , strokeWidth (toString 2.0)
           ]
@@ -160,8 +178,8 @@ view address model =
   div []
     [ div
       [ style
-          [ "width" => toString model.width
-          , "height" => toString model.width
+          [ "width" => toString model.params.width
+          , "height" => toString model.params.width
           , "padding" => "10px"
           , "position" => "relative"
           , "margin" => "10px"

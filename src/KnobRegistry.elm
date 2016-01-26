@@ -2,7 +2,7 @@ module KnobRegistry
   ( init
   , Model
   , EncodedModel
-  , Action(GlobalMouseUp, MousePosition)
+  , Action(GlobalMouseUp, MousePosition, UpdateParamsForAll)
   , update
   , view
   , encode
@@ -30,12 +30,14 @@ type alias Model =
   , mouse : { y : Int, yVelocity : Int}
   }
 
-init : List String -> Model
-init names =
-  { knobs = Dict.fromList <| List.map (\name -> (name, Knob.init)) names
+init : List (String, Knob.Params) -> Model
+init knobSpecs =
+  { knobs = List.map (\(name, params) -> (name, Knob.init params)) knobSpecs
+      |> Dict.fromList
   , currentKnob = Nothing
   , mouse = { y = 0, yVelocity = 0}
   }
+
 
 getKnob : Knobs -> ID -> Knob.Model
 getKnob knobs id =
@@ -61,6 +63,7 @@ type Action
   = KnobAction ID Knob.Action
   | GlobalMouseUp
   | MousePosition (Int, Int)
+  | UpdateParamsForAll Knob.Params
 
 
 update : Action -> Model -> Model
@@ -102,6 +105,19 @@ update action model =
         Nothing ->
           model
 
+    UpdateParamsForAll params ->
+      updateAllKnobs (Knob.UpdateParams params) model
+
+updateAllKnobs : Knob.Action -> Model -> Model
+updateAllKnobs knobAction model =
+  let
+    knobs =
+      Dict.map
+        (\id model -> Knob.update knobAction model)
+        model.knobs
+  in
+    { model | knobs = knobs }
+
 updateKnob : Knob.Action -> Maybe Knob.Model -> Maybe Knob.Model
 updateKnob action =
   let
@@ -114,6 +130,7 @@ updateKnob action =
           Nothing
   in
     updateKnob'
+
 
 --------------------------------------------------------------------------------
 -- VIEW

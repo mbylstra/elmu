@@ -15459,11 +15459,9 @@ Elm.ColourLovers.make = function (_elm) {
       _U.list([palettesView(model.palettes)]));
    });
    var update = F2(function (action,model) {
-      var _p2 = A2($Debug.log,"ColorLovers model",model);
-      var _p3 = A2($Debug.log,"ColorLovers action",action);
-      var _p4 = action;
+      var _p2 = action;
       return {ctor: "_Tuple2"
-             ,_0: {palettes: _p4._0,fetching: false}
+             ,_0: {palettes: _p2._0,fetching: false}
              ,_1: $Effects.none};
    });
    var PalettesFetched = function (a) {
@@ -15596,12 +15594,20 @@ Elm.ColorSchemeChooser.make = function (_elm) {
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm);
    var _op = {};
-   var currentColorSchemeView = function (colorScheme) {
+   var StopPreviewingColorScheme = {ctor: "StopPreviewingColorScheme"};
+   var PreviewColorScheme = function (a) {
+      return {ctor: "PreviewColorScheme",_0: a};
+   };
+   var colorSchemeView = F3(function (address,index,colorScheme) {
       var colorView = function (color) {
          return A2($Html.div,
          _U.list([$Html$Attributes.style(_U.list([{ctor: "_Tuple2"
                                                   ,_0: "background-color"
-                                                  ,_1: $ColorExtra.toCssRgb(color)}]))]),
+                                                  ,_1: $ColorExtra.toCssRgb(color)}]))
+                 ,A2($Html$Events.onMouseEnter,address,PreviewColorScheme(index))
+                 ,A2($Html$Events.onMouseLeave,
+                 address,
+                 StopPreviewingColorScheme)]),
          _U.list([]));
       };
       var fields = _U.list([function (_) {
@@ -15633,57 +15639,101 @@ Elm.ColorSchemeChooser.make = function (_elm) {
       return A2($Html.div,
       _U.list([$Html$Attributes.$class("color-scheme-colors")]),
       A2($List.map,colorView,colors));
-   };
+   });
+   var ClosePopup = {ctor: "ClosePopup"};
+   var OpenPopup = {ctor: "OpenPopup"};
    var SelectRandom = {ctor: "SelectRandom"};
+   var popupView = F2(function (address,model) {
+      var colorSchemes = $Array.toList(A2($Array.indexedMap,
+      colorSchemeView(address),
+      model.colorSchemes));
+      return A2($Html.div,
+      _U.list([$Html$Attributes.$class("color-scheme-popup")
+              ,A2($Html$Events.onMouseLeave,address,ClosePopup)]),
+      A2($Basics._op["++"],
+      colorSchemes,
+      _U.list([A2($Html.div,
+      _U.list([$Html$Attributes.$class("random-color-button no-select")
+              ,A2($Html$Events.onClick,address,SelectRandom)]),
+      _U.list([$Html.text("⚀ ⚁ ⚂ ⚃ ⚄ ⚅")]))])));
+   });
    var view = F2(function (address,model) {
+      var popup = model.popupOpen ? _U.list([A2(popupView,
+      address,
+      model)]) : _U.list([]);
       return A2($Html.div,
       _U.list([$Html$Attributes.$class("color-scheme-chooser")]),
+      A2($Basics._op["++"],
       _U.list([A2($Html.div,
-      _U.list([$Html$Attributes.$class("current-color-scheme")]),
-      _U.list([A2($Html.button,
-              _U.list([A2($Html$Events.onClick,address,SelectRandom)]),
-              _U.list([$Html.text("random")]))
-              ,currentColorSchemeView(model.current)]))]));
+      _U.list([$Html$Attributes.$class("current-color-scheme")
+              ,A2($Html$Events.onClick,address,OpenPopup)]),
+      _U.list([A3(colorSchemeView,address,0,model.current)]))]),
+      popup));
    });
-   var getCurrent = function (model) {    return model.current;};
+   var getColorScheme = function (model) {
+      var _p0 = model.previewing;
+      if (_p0.ctor === "Just") {
+            return _p0._0;
+         } else {
+            return model.current;
+         }
+   };
    var setColorSchemes = F2(function (model,colorSchemes) {
       return _U.update(model,{colorSchemes: colorSchemes});
    });
    var init = F2(function (seed,colorScheme) {
       return {colorSchemes: $Array.fromList(_U.list([colorScheme]))
              ,current: colorScheme
-             ,seed: seed};
+             ,previewing: $Maybe.Nothing
+             ,seed: seed
+             ,popupOpen: false};
    });
-   var Model = F3(function (a,b,c) {
-      return {colorSchemes: a,current: b,seed: c};
+   var Model = F5(function (a,b,c,d,e) {
+      return {colorSchemes: a
+             ,current: b
+             ,previewing: c
+             ,seed: d
+             ,popupOpen: e};
    });
    var randomInt = F2(function (n,seed) {
       return A2($Random.generate,A2($Random.$int,0,n),seed);
    });
    var update = F2(function (action,model) {
-      var _p0 = action;
-      var _p1 = A2($Debug.log,"SelectRandom",model);
-      var _p2 = A2(randomInt,
-      $Array.length(model.colorSchemes),
-      model.seed);
-      var index = _p2._0;
-      var seed = _p2._1;
-      return _U.update(model,
-      {current: A2($Maybe.withDefault,
-      model.current,
-      A2($Array.get,index,model.colorSchemes))
-      ,seed: seed});
+      var _p1 = A2($Debug.log,"action",action);
+      switch (_p1.ctor)
+      {case "SelectRandom": var _p2 = A2(randomInt,
+           $Array.length(model.colorSchemes),
+           model.seed);
+           var index = _p2._0;
+           var seed = _p2._1;
+           return _U.update(model,
+           {current: A2($Maybe.withDefault,
+           model.current,
+           A2($Array.get,index,model.colorSchemes))
+           ,previewing: $Maybe.Nothing
+           ,seed: seed});
+         case "OpenPopup": return _U.update(model,{popupOpen: true});
+         case "ClosePopup": var _p3 = A2($Debug.log,"ClosePopup",true);
+           return _U.update(model,{popupOpen: false});
+         case "PreviewColorScheme": return _U.update(model,
+           {previewing: A2($Array.get,_p1._0,model.colorSchemes)});
+         default: return _U.update(model,{previewing: $Maybe.Nothing});}
    });
    return _elm.ColorSchemeChooser.values = {_op: _op
                                            ,randomInt: randomInt
                                            ,Model: Model
                                            ,init: init
                                            ,setColorSchemes: setColorSchemes
-                                           ,getCurrent: getCurrent
+                                           ,getColorScheme: getColorScheme
                                            ,SelectRandom: SelectRandom
+                                           ,OpenPopup: OpenPopup
+                                           ,ClosePopup: ClosePopup
+                                           ,PreviewColorScheme: PreviewColorScheme
+                                           ,StopPreviewingColorScheme: StopPreviewingColorScheme
                                            ,update: update
-                                           ,currentColorSchemeView: currentColorSchemeView
-                                           ,view: view};
+                                           ,colorSchemeView: colorSchemeView
+                                           ,view: view
+                                           ,popupView: popupView};
 };
 Elm.Components = Elm.Components || {};
 Elm.Components.make = function (_elm) {
@@ -15908,6 +15958,216 @@ Elm.KeyboardNoteInput.make = function (_elm) {
                                           ,keyboardGuiPitch: keyboardGuiPitch
                                           ,keyboardGuiFrequency: keyboardGuiFrequency};
 };
+Elm.HtmlEventsExtra = Elm.HtmlEventsExtra || {};
+Elm.HtmlEventsExtra.make = function (_elm) {
+   "use strict";
+   _elm.HtmlEventsExtra = _elm.HtmlEventsExtra || {};
+   if (_elm.HtmlEventsExtra.values)
+   return _elm.HtmlEventsExtra.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Html = Elm.Html.make(_elm),
+   $Html$Events = Elm.Html.Events.make(_elm),
+   $Json$Decode = Elm.Json.Decode.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var _op = {};
+   var preventDefault = {stopPropagation: false
+                        ,preventDefault: true};
+   var messageOnWithOptions = F4(function (name,options,addr,msg) {
+      return A4($Html$Events.onWithOptions,
+      name,
+      options,
+      $Json$Decode.value,
+      function (_p0) {
+         return A2($Signal.message,addr,msg);
+      });
+   });
+   var onMouseDownWithOptions = function (options) {
+      return A2(messageOnWithOptions,"mousedown",options);
+   };
+   return _elm.HtmlEventsExtra.values = {_op: _op
+                                        ,messageOnWithOptions: messageOnWithOptions
+                                        ,onMouseDownWithOptions: onMouseDownWithOptions
+                                        ,preventDefault: preventDefault};
+};
+Elm.Knob = Elm.Knob || {};
+Elm.Knob.make = function (_elm) {
+   "use strict";
+   _elm.Knob = _elm.Knob || {};
+   if (_elm.Knob.values) return _elm.Knob.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Arc = Elm.Arc.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Color = Elm.Color.make(_elm),
+   $ColorExtra = Elm.ColorExtra.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Html = Elm.Html.make(_elm),
+   $Html$Attributes = Elm.Html.Attributes.make(_elm),
+   $Html$Events = Elm.Html.Events.make(_elm),
+   $HtmlAttributesExtra = Elm.HtmlAttributesExtra.make(_elm),
+   $HtmlEventsExtra = Elm.HtmlEventsExtra.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $Svg = Elm.Svg.make(_elm),
+   $Svg$Attributes = Elm.Svg.Attributes.make(_elm);
+   var _op = {};
+   var knobDisplay = function (model) {
+      var heightStr = $Basics.toString(model.params.height);
+      var widthStr = $Basics.toString(model.params.width);
+      var widthFloat = $Basics.toFloat(model.params.width);
+      var radius = widthFloat / 2.0 - 20.0;
+      var centerPoint = {ctor: "_Tuple2"
+                        ,_0: widthFloat / 2.0
+                        ,_1: widthFloat / 2.0};
+      var strokeWidth$ = widthFloat / 10.0;
+      var strokeWidthStr = $Basics.toString(strokeWidth$);
+      var fullAngle = -90.0;
+      var emptyAngle = 180.0 + 89.0;
+      var valueAngle = (emptyAngle + 90.0) * model.value - 90.0;
+      var inactiveArcArgs = {radius: radius
+                            ,centerPoint: centerPoint
+                            ,startAngle: fullAngle
+                            ,endAngle: valueAngle};
+      var activeArcArgs = {radius: radius
+                          ,centerPoint: centerPoint
+                          ,startAngle: valueAngle
+                          ,endAngle: emptyAngle};
+      var needleArcArgs = {radius: radius + strokeWidth$ / 2.0
+                          ,centerPoint: centerPoint
+                          ,startAngle: valueAngle
+                          ,endAngle: emptyAngle};
+      var activeArcInfo = $Arc.getArcInfo(needleArcArgs);
+      var _p0 = activeArcInfo.centerPoint;
+      var needleX1 = _p0._0;
+      var needleY1 = _p0._1;
+      var _p1 = activeArcInfo.startPoint;
+      var needleX2 = _p1._0;
+      var needleY2 = _p1._1;
+      return A2($Svg.svg,
+      _U.list([$Svg$Attributes.width(widthStr)
+              ,$Svg$Attributes.height(heightStr)
+              ,$Svg$Attributes.viewBox(A2($Basics._op["++"],
+              "0 0 ",
+              A2($Basics._op["++"],
+              widthStr,
+              A2($Basics._op["++"]," ",heightStr))))]),
+      _U.list([A2($Svg.path,
+              _U.list([$Svg$Attributes.d($Arc.arc(inactiveArcArgs))
+                      ,$Svg$Attributes.stroke($ColorExtra.toCssRgb(model.params.backgroundColor))
+                      ,$Svg$Attributes.fill("none")
+                      ,$Svg$Attributes.strokeWidth(strokeWidthStr)]),
+              _U.list([]))
+              ,A2($Svg.path,
+              _U.list([$Svg$Attributes.d($Arc.arc(activeArcArgs))
+                      ,$Svg$Attributes.stroke($ColorExtra.toCssRgb(model.params.foregroundColor))
+                      ,$Svg$Attributes.fill("none")
+                      ,$Svg$Attributes.strokeWidth(strokeWidthStr)]),
+              _U.list([]))
+              ,A2($Svg.line,
+              _U.list([$Svg$Attributes.x1($Basics.toString(needleX1))
+                      ,$Svg$Attributes.y1($Basics.toString(needleY1))
+                      ,$Svg$Attributes.x2($Basics.toString(needleX2))
+                      ,$Svg$Attributes.y2($Basics.toString(needleY2))
+                      ,$Svg$Attributes.stroke($ColorExtra.toCssRgb(model.params.foregroundColor))
+                      ,$Svg$Attributes.fill("none")
+                      ,$Svg$Attributes.strokeWidth($Basics.toString(2.0))]),
+              _U.list([]))]));
+   };
+   var clamp = function (x) {
+      return _U.cmp(x,1.0) > 0 ? 1.0 : _U.cmp(x,0.0) < 0 ? 0.0 : x;
+   };
+   var update = F2(function (action,model) {
+      var _p2 = action;
+      switch (_p2.ctor)
+      {case "MouseDown": return _U.update(model,{mouseDown: true});
+         case "MouseEnter": return _U.update(model,{mouseInside: true});
+         case "MouseLeave": return _U.update(model,{mouseInside: false});
+         case "GlobalMouseUp": return _U.update(model,
+           {mouseDown: false});
+         case "MouseMove": if (model.mouseDown) {
+                 var valueAdjust = $Basics.toFloat(_p2._0) * 1.0e-2;
+                 return _U.update(model,
+                 {value: clamp(model.value + valueAdjust)});
+              } else return model;
+         default: return _U.update(model,{params: _p2._0});}
+   });
+   var UpdateParams = function (a) {
+      return {ctor: "UpdateParams",_0: a};
+   };
+   var MouseLeave = {ctor: "MouseLeave"};
+   var MouseEnter = {ctor: "MouseEnter"};
+   var MouseMove = function (a) {
+      return {ctor: "MouseMove",_0: a};
+   };
+   var MouseDown = {ctor: "MouseDown"};
+   var view = F2(function (address,model) {
+      return A2($Html.div,
+      _U.list([]),
+      _U.list([A2($Html.div,
+      _U.list([$Html$Attributes.style(_U.list([A2($HtmlAttributesExtra._op["=>"],
+                                              "width",
+                                              $Basics.toString(model.params.width))
+                                              ,A2($HtmlAttributesExtra._op["=>"],
+                                              "height",
+                                              $Basics.toString(model.params.width))
+                                              ,A2($HtmlAttributesExtra._op["=>"],"padding","10px")
+                                              ,A2($HtmlAttributesExtra._op["=>"],"position","relative")
+                                              ,A2($HtmlAttributesExtra._op["=>"],"margin","10px")]))
+              ,$Html$Attributes.classList(_U.list([{ctor: "_Tuple2"
+                                                   ,_0: "highlighted"
+                                                   ,_1: model.mouseInside || model.mouseDown}]))
+              ,A3($HtmlEventsExtra.onMouseDownWithOptions,
+              $HtmlEventsExtra.preventDefault,
+              address,
+              MouseDown)
+              ,A2($Html$Events.onMouseEnter,address,MouseEnter)
+              ,A2($Html$Events.onMouseLeave,address,MouseLeave)]),
+      _U.list([knobDisplay(model)]))]));
+   });
+   var GlobalMouseUp = {ctor: "GlobalMouseUp"};
+   var encode = function (model) {    return model.value;};
+   var init = function (params) {
+      return {params: params
+             ,value: 0.0
+             ,mouseDown: false
+             ,mouseInside: false};
+   };
+   var defaultParams = {foregroundColor: $Color.green
+                       ,backgroundColor: $Color.black
+                       ,width: 100
+                       ,height: 100};
+   var Params = F4(function (a,b,c,d) {
+      return {foregroundColor: a
+             ,backgroundColor: b
+             ,width: c
+             ,height: d};
+   });
+   var Model = F4(function (a,b,c,d) {
+      return {params: a,mouseDown: b,mouseInside: c,value: d};
+   });
+   return _elm.Knob.values = {_op: _op
+                             ,Model: Model
+                             ,Params: Params
+                             ,defaultParams: defaultParams
+                             ,init: init
+                             ,encode: encode
+                             ,GlobalMouseUp: GlobalMouseUp
+                             ,MouseDown: MouseDown
+                             ,MouseMove: MouseMove
+                             ,MouseEnter: MouseEnter
+                             ,MouseLeave: MouseLeave
+                             ,UpdateParams: UpdateParams
+                             ,clamp: clamp
+                             ,update: update
+                             ,knobDisplay: knobDisplay
+                             ,view: view};
+};
 Elm.MouseExtra = Elm.MouseExtra || {};
 Elm.MouseExtra.make = function (_elm) {
    "use strict";
@@ -15971,200 +16231,6 @@ Elm.MouseExtra.make = function (_elm) {
                                    ,yVelocity: yVelocity
                                    ,onMouseMove: onMouseMove};
 };
-Elm.HtmlEventsExtra = Elm.HtmlEventsExtra || {};
-Elm.HtmlEventsExtra.make = function (_elm) {
-   "use strict";
-   _elm.HtmlEventsExtra = _elm.HtmlEventsExtra || {};
-   if (_elm.HtmlEventsExtra.values)
-   return _elm.HtmlEventsExtra.values;
-   var _U = Elm.Native.Utils.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $Debug = Elm.Debug.make(_elm),
-   $Html = Elm.Html.make(_elm),
-   $Html$Events = Elm.Html.Events.make(_elm),
-   $Json$Decode = Elm.Json.Decode.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
-   var _op = {};
-   var preventDefault = {stopPropagation: false
-                        ,preventDefault: true};
-   var messageOnWithOptions = F4(function (name,options,addr,msg) {
-      return A4($Html$Events.onWithOptions,
-      name,
-      options,
-      $Json$Decode.value,
-      function (_p0) {
-         return A2($Signal.message,addr,msg);
-      });
-   });
-   var onMouseDownWithOptions = function (options) {
-      return A2(messageOnWithOptions,"mousedown",options);
-   };
-   return _elm.HtmlEventsExtra.values = {_op: _op
-                                        ,messageOnWithOptions: messageOnWithOptions
-                                        ,onMouseDownWithOptions: onMouseDownWithOptions
-                                        ,preventDefault: preventDefault};
-};
-Elm.Knob = Elm.Knob || {};
-Elm.Knob.make = function (_elm) {
-   "use strict";
-   _elm.Knob = _elm.Knob || {};
-   if (_elm.Knob.values) return _elm.Knob.values;
-   var _U = Elm.Native.Utils.make(_elm),
-   $Arc = Elm.Arc.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $Debug = Elm.Debug.make(_elm),
-   $Html = Elm.Html.make(_elm),
-   $Html$Attributes = Elm.Html.Attributes.make(_elm),
-   $Html$Events = Elm.Html.Events.make(_elm),
-   $HtmlAttributesExtra = Elm.HtmlAttributesExtra.make(_elm),
-   $HtmlEventsExtra = Elm.HtmlEventsExtra.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm),
-   $Svg = Elm.Svg.make(_elm),
-   $Svg$Attributes = Elm.Svg.Attributes.make(_elm);
-   var _op = {};
-   var knobDisplay = function (model) {
-      var heightStr = $Basics.toString(model.height);
-      var widthStr = $Basics.toString(model.width);
-      var widthFloat = $Basics.toFloat(model.width);
-      var radius = widthFloat / 2.0 - 20.0;
-      var centerPoint = {ctor: "_Tuple2"
-                        ,_0: widthFloat / 2.0
-                        ,_1: widthFloat / 2.0};
-      var strokeWidth$ = widthFloat / 10.0;
-      var strokeWidthStr = $Basics.toString(strokeWidth$);
-      var fullAngle = -90.0;
-      var emptyAngle = 180.0 + 89.0;
-      var valueAngle = (emptyAngle + 90.0) * model.value - 90.0;
-      var inactiveArcArgs = {radius: radius
-                            ,centerPoint: centerPoint
-                            ,startAngle: fullAngle
-                            ,endAngle: valueAngle};
-      var activeArcArgs = {radius: radius
-                          ,centerPoint: centerPoint
-                          ,startAngle: valueAngle
-                          ,endAngle: emptyAngle};
-      var needleArcArgs = {radius: radius + strokeWidth$ / 2.0
-                          ,centerPoint: centerPoint
-                          ,startAngle: valueAngle
-                          ,endAngle: emptyAngle};
-      var activeArcInfo = $Arc.getArcInfo(needleArcArgs);
-      var _p0 = activeArcInfo.centerPoint;
-      var needleX1 = _p0._0;
-      var needleY1 = _p0._1;
-      var _p1 = activeArcInfo.startPoint;
-      var needleX2 = _p1._0;
-      var needleY2 = _p1._1;
-      return A2($Svg.svg,
-      _U.list([$Svg$Attributes.width(widthStr)
-              ,$Svg$Attributes.height(heightStr)
-              ,$Svg$Attributes.viewBox(A2($Basics._op["++"],
-              "0 0 ",
-              A2($Basics._op["++"],
-              widthStr,
-              A2($Basics._op["++"]," ",heightStr))))]),
-      _U.list([A2($Svg.path,
-              _U.list([$Svg$Attributes.d($Arc.arc(inactiveArcArgs))
-                      ,$Svg$Attributes.stroke("black")
-                      ,$Svg$Attributes.fill("none")
-                      ,$Svg$Attributes.strokeWidth(strokeWidthStr)]),
-              _U.list([]))
-              ,A2($Svg.path,
-              _U.list([$Svg$Attributes.d($Arc.arc(activeArcArgs))
-                      ,$Svg$Attributes.stroke("pink")
-                      ,$Svg$Attributes.fill("none")
-                      ,$Svg$Attributes.strokeWidth(strokeWidthStr)]),
-              _U.list([]))
-              ,A2($Svg.line,
-              _U.list([$Svg$Attributes.x1($Basics.toString(needleX1))
-                      ,$Svg$Attributes.y1($Basics.toString(needleY1))
-                      ,$Svg$Attributes.x2($Basics.toString(needleX2))
-                      ,$Svg$Attributes.y2($Basics.toString(needleY2))
-                      ,$Svg$Attributes.stroke("black")
-                      ,$Svg$Attributes.fill("none")
-                      ,$Svg$Attributes.strokeWidth($Basics.toString(2.0))]),
-              _U.list([]))]));
-   };
-   var clamp = function (x) {
-      return _U.cmp(x,1.0) > 0 ? 1.0 : _U.cmp(x,0.0) < 0 ? 0.0 : x;
-   };
-   var update = F2(function (action,model) {
-      var _p2 = action;
-      switch (_p2.ctor)
-      {case "MouseDown": return _U.update(model,{mouseDown: true});
-         case "MouseEnter": return _U.update(model,{mouseInside: true});
-         case "MouseLeave": return _U.update(model,{mouseInside: false});
-         case "GlobalMouseUp": return _U.update(model,
-           {mouseDown: false});
-         default: if (model.mouseDown) {
-                 var valueAdjust = $Basics.toFloat(_p2._0) * 1.0e-2;
-                 return _U.update(model,
-                 {value: clamp(model.value + valueAdjust)});
-              } else return model;}
-   });
-   var MouseLeave = {ctor: "MouseLeave"};
-   var MouseEnter = {ctor: "MouseEnter"};
-   var MouseMove = function (a) {
-      return {ctor: "MouseMove",_0: a};
-   };
-   var MouseDown = {ctor: "MouseDown"};
-   var view = F2(function (address,model) {
-      return A2($Html.div,
-      _U.list([]),
-      _U.list([A2($Html.div,
-      _U.list([$Html$Attributes.style(_U.list([A2($HtmlAttributesExtra._op["=>"],
-                                              "width",
-                                              $Basics.toString(model.width))
-                                              ,A2($HtmlAttributesExtra._op["=>"],
-                                              "height",
-                                              $Basics.toString(model.width))
-                                              ,A2($HtmlAttributesExtra._op["=>"],"padding","10px")
-                                              ,A2($HtmlAttributesExtra._op["=>"],"position","relative")
-                                              ,A2($HtmlAttributesExtra._op["=>"],"margin","10px")]))
-              ,$Html$Attributes.classList(_U.list([{ctor: "_Tuple2"
-                                                   ,_0: "highlighted"
-                                                   ,_1: model.mouseInside || model.mouseDown}]))
-              ,A3($HtmlEventsExtra.onMouseDownWithOptions,
-              $HtmlEventsExtra.preventDefault,
-              address,
-              MouseDown)
-              ,A2($Html$Events.onMouseEnter,address,MouseEnter)
-              ,A2($Html$Events.onMouseLeave,address,MouseLeave)]),
-      _U.list([knobDisplay(model)]))]));
-   });
-   var GlobalMouseUp = {ctor: "GlobalMouseUp"};
-   var encode = function (model) {    return model.value;};
-   var init = {mouseDown: false
-              ,mouseInside: false
-              ,value: 0.0
-              ,width: 100
-              ,height: 100};
-   var Model = F5(function (a,b,c,d,e) {
-      return {mouseDown: a
-             ,mouseInside: b
-             ,value: c
-             ,width: d
-             ,height: e};
-   });
-   return _elm.Knob.values = {_op: _op
-                             ,Model: Model
-                             ,init: init
-                             ,encode: encode
-                             ,GlobalMouseUp: GlobalMouseUp
-                             ,MouseDown: MouseDown
-                             ,MouseMove: MouseMove
-                             ,MouseEnter: MouseEnter
-                             ,MouseLeave: MouseLeave
-                             ,clamp: clamp
-                             ,update: update
-                             ,knobDisplay: knobDisplay
-                             ,view: view};
-};
 Elm.KnobRegistry = Elm.KnobRegistry || {};
 Elm.KnobRegistry.make = function (_elm) {
    "use strict";
@@ -16192,6 +16258,14 @@ Elm.KnobRegistry.make = function (_elm) {
       };
       return updateKnob$;
    };
+   var updateAllKnobs = F2(function (knobAction,model) {
+      var knobs = A2($Dict.map,
+      F2(function (id,model) {
+         return A2($Knob.update,knobAction,model);
+      }),
+      model.knobs);
+      return _U.update(model,{knobs: knobs});
+   });
    var update = F2(function (action,model) {
       var _p1 = action;
       switch (_p1.ctor)
@@ -16212,7 +16286,7 @@ Elm.KnobRegistry.make = function (_elm) {
               } else {
                  return _U.update(model,{mouse: newMouse});
               }
-         default: var _p5 = model.currentKnob;
+         case "GlobalMouseUp": var _p5 = model.currentKnob;
            if (_p5.ctor === "Just") {
                  return _U.update(model,
                  {knobs: A3($Dict.update,
@@ -16222,8 +16296,14 @@ Elm.KnobRegistry.make = function (_elm) {
                  ,currentKnob: $Maybe.Nothing});
               } else {
                  return model;
-              }}
+              }
+         default: return A2(updateAllKnobs,
+           $Knob.UpdateParams(_p1._0),
+           model);}
    });
+   var UpdateParamsForAll = function (a) {
+      return {ctor: "UpdateParamsForAll",_0: a};
+   };
    var MousePosition = function (a) {
       return {ctor: "MousePosition",_0: a};
    };
@@ -16245,7 +16325,7 @@ Elm.KnobRegistry.make = function (_elm) {
             return _p8._0;
          } else {
             return _U.crashCase("KnobRegistry",
-            {start: {line: 42,column: 3},end: {line: 44,column: 61}},
+            {start: {line: 44,column: 3},end: {line: 46,column: 61}},
             _p8)(A2($Basics._op["++"],"No knob exists with id: ",id));
          }
    });
@@ -16255,12 +16335,13 @@ Elm.KnobRegistry.make = function (_elm) {
       A2($Signal.forwardTo,address,KnobAction(id)),
       knob);
    });
-   var init = function (names) {
+   var init = function (knobSpecs) {
       return {knobs: $Dict.fromList(A2($List.map,
-             function (name) {
-                return {ctor: "_Tuple2",_0: name,_1: $Knob.init};
+             function (_p10) {
+                var _p11 = _p10;
+                return {ctor: "_Tuple2",_0: _p11._0,_1: $Knob.init(_p11._1)};
              },
-             names))
+             knobSpecs))
              ,currentKnob: $Maybe.Nothing
              ,mouse: {y: 0,yVelocity: 0}};
    };
@@ -16274,7 +16355,8 @@ Elm.KnobRegistry.make = function (_elm) {
                                      ,encode: encode
                                      ,Model: Model
                                      ,GlobalMouseUp: GlobalMouseUp
-                                     ,MousePosition: MousePosition};
+                                     ,MousePosition: MousePosition
+                                     ,UpdateParamsForAll: UpdateParamsForAll};
 };
 Elm.Gui = Elm.Gui || {};
 Elm.Gui.make = function (_elm) {
@@ -16295,6 +16377,7 @@ Elm.Gui.make = function (_elm) {
    $Html$Events = Elm.Html.Events.make(_elm),
    $HtmlAttributesExtra = Elm.HtmlAttributesExtra.make(_elm),
    $KeyboardNoteInput = Elm.KeyboardNoteInput.make(_elm),
+   $Knob = Elm.Knob.make(_elm),
    $KnobRegistry = Elm.KnobRegistry.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
@@ -16310,8 +16393,8 @@ Elm.Gui.make = function (_elm) {
    var guiFrequency = A2($Signal.merge,
    $KeyboardNoteInput.keyboardGuiFrequency,
    $Piano.pianoGuiFrequency);
-   var ColorSchemeAction = function (a) {
-      return {ctor: "ColorSchemeAction",_0: a};
+   var ColorSchemeChooserAction = function (a) {
+      return {ctor: "ColorSchemeChooserAction",_0: a};
    };
    var ColourLoversAction = function (a) {
       return {ctor: "ColourLoversAction",_0: a};
@@ -16345,25 +16428,30 @@ Elm.Gui.make = function (_elm) {
                     return $Array.empty;
                  }
            }();
-           var _p3 = A2($Debug.log,"colorSchemes",colorSchemes);
            var colorSchemeChooser = A2($ColorSchemeChooser.setColorSchemes,
            model.colorSchemeChooser,
            colorSchemes);
            var newModel = _U.update(model,
            {colourLovers: colourLovers2
            ,colorSchemeChooser: colorSchemeChooser});
-           var _p4 = A2($Debug.log,"newModel",newModel.colorSchemeChooser);
            return {ctor: "_Tuple2"
                   ,_0: newModel
                   ,_1: A2($Effects.map,ColourLoversAction,clFx)};
-         default:
-         var colorSchemeChooser2 = A2($ColorSchemeChooser.update,
+         default: var knobDefaultParams = $Knob.defaultParams;
+           var colorSchemeChooser2 = A2($ColorSchemeChooser.update,
            _p0._0,
            model.colorSchemeChooser);
+           var colorScheme = $ColorSchemeChooser.getColorScheme(colorSchemeChooser2);
+           var params = _U.update(knobDefaultParams,
+           {foregroundColor: colorScheme.knobForeground
+           ,backgroundColor: colorScheme.knobBackground});
+           var knobRegistry2 = A2($KnobRegistry.update,
+           $KnobRegistry.UpdateParamsForAll(params),
+           model.knobRegistry);
            return {ctor: "_Tuple2"
                   ,_0: _U.update(model,
                   {colorSchemeChooser: colorSchemeChooser2
-                  ,colorScheme: $ColorSchemeChooser.getCurrent(colorSchemeChooser2)})
+                  ,knobRegistry: knobRegistry2})
                   ,_1: $Effects.none};}
    });
    var ChangeFrequency = function (a) {
@@ -16400,6 +16488,7 @@ Elm.Gui.make = function (_elm) {
               _U.list([]))]));
    });
    var view = F2(function (address,model) {
+      var colorScheme = $ColorSchemeChooser.getColorScheme(model.colorSchemeChooser);
       var krAddress = A2($Signal.forwardTo,
       address,
       KnobRegistryAction);
@@ -16421,7 +16510,7 @@ Elm.Gui.make = function (_elm) {
               ,$Html$Attributes.$class("elm-audio")
               ,$Html$Attributes.style(_U.list([A2($HtmlAttributesExtra._op["=>"],
               "background-color",
-              $ColorExtra.toCssRgb(model.colorScheme.windowBackground))]))]),
+              $ColorExtra.toCssRgb(colorScheme.windowBackground))]))]),
       _U.list([A2($Html.div,
               _U.list([$Html$Attributes.$class("synth")]),
               _U.list([A2($Html.div,
@@ -16434,12 +16523,12 @@ Elm.Gui.make = function (_elm) {
                                       ,knobView("sustain")
                                       ,knobView("release")]))]))
                       ,A3($Piano.piano,
-                      {whiteKey: model.colorScheme.pianoWhites
-                      ,blackKey: model.colorScheme.pianoBlacks},
+                      {whiteKey: colorScheme.pianoWhites
+                      ,blackKey: colorScheme.pianoBlacks},
                       4,
                       12.0)]))
               ,A2($ColorSchemeChooser.view,
-              A2($Signal.forwardTo,address,ColorSchemeAction),
+              A2($Signal.forwardTo,address,ColorSchemeChooserAction),
               model.colorSchemeChooser)]));
    });
    var encode = function (model) {
@@ -16450,28 +16539,29 @@ Elm.Gui.make = function (_elm) {
    var EncodedModel = F3(function (a,b,c) {
       return {audioOn: a,frequency: b,knobs: c};
    });
-   var Model = F6(function (a,b,c,d,e,f) {
+   var Model = F5(function (a,b,c,d,e) {
       return {audioOn: a
              ,frequency: b
              ,knobRegistry: c
-             ,colorScheme: d
-             ,colourLovers: e
-             ,colorSchemeChooser: f};
+             ,colourLovers: d
+             ,colorSchemeChooser: e};
    });
    var randomPrimer = 0.0;
    var randomSeed = $Random.initialSeed($Basics.round(randomPrimer));
    var init = function () {
-      var _p5 = $ColourLovers.init;
-      var colourLovers = _p5._0;
-      var palettesFx = _p5._1;
+      var defaultParams = $Knob.defaultParams;
+      var _p3 = $ColourLovers.init;
+      var colourLovers = _p3._0;
+      var palettesFx = _p3._1;
       return {ctor: "_Tuple2"
              ,_0: {audioOn: true
                   ,frequency: 400.0
-                  ,knobRegistry: $KnobRegistry.init(_U.list(["attack"
-                                                            ,"decay"
-                                                            ,"sustain"
-                                                            ,"release"]))
-                  ,colorScheme: $ColorScheme.defaultColorScheme
+                  ,knobRegistry: $KnobRegistry.init(_U.list([{ctor: "_Tuple2"
+                                                             ,_0: "attack"
+                                                             ,_1: $Knob.defaultParams}
+                                                            ,{ctor: "_Tuple2",_0: "decay",_1: $Knob.defaultParams}
+                                                            ,{ctor: "_Tuple2",_0: "sustain",_1: $Knob.defaultParams}
+                                                            ,{ctor: "_Tuple2",_0: "release",_1: $Knob.defaultParams}]))
                   ,colourLovers: colourLovers
                   ,colorSchemeChooser: A2($ColorSchemeChooser.init,
                   randomSeed,
@@ -16507,7 +16597,7 @@ Elm.Gui.make = function (_elm) {
                             ,KnobRegistryAction: KnobRegistryAction
                             ,ChangeFrequency: ChangeFrequency
                             ,ColourLoversAction: ColourLoversAction
-                            ,ColorSchemeAction: ColorSchemeAction
+                            ,ColorSchemeChooserAction: ColorSchemeChooserAction
                             ,update: update
                             ,audioOnCheckbox: audioOnCheckbox
                             ,view: view

@@ -22,7 +22,10 @@ import Maybe exposing (withDefault)
 
 import ColorExtra exposing (toCssRgb)
 
+-- import Color
 import ColourLovers
+
+import Knob
 
 
 import MouseExtra
@@ -60,7 +63,6 @@ type alias Model =
   { audioOn : Bool
   , frequency : Float
   , knobRegistry : KnobRegistry.Model
-  , colorScheme : ColorScheme -- consider just using the value inside colorSchemeChooser (or not?)
   , colourLovers : ColourLovers.Model
   , colorSchemeChooser : ColorSchemeChooser.Model
   }
@@ -70,16 +72,20 @@ init =
 
   let
     (colourLovers, palettesFx) = ColourLovers.init
+    defaultParams = Knob.defaultParams
   in
   (
     { audioOn = True
     , frequency = 400.0
-    , knobRegistry = KnobRegistry.init ["attack", "decay", "sustain", "release"]
-    , colorScheme = defaultColorScheme
+    , knobRegistry = KnobRegistry.init
+      [ ("attack", Knob.defaultParams)
+      , ("decay", Knob.defaultParams)
+      , ("sustain", Knob.defaultParams)
+      , ("release", Knob.defaultParams)
+      ]
     , colourLovers = colourLovers
     , colorSchemeChooser = ColorSchemeChooser.init randomSeed defaultColorScheme
     }
-  -- , ColourLovers.initEffects
   , Effects.batch
     [ Effects.map ColourLoversAction palettesFx
     ]
@@ -122,7 +128,7 @@ type Action
   | KnobRegistryAction KnobRegistry.Action
   | ChangeFrequency Float
   | ColourLoversAction ColourLovers.Action
-  | ColorSchemeAction ColorSchemeChooser.Action
+  | ColorSchemeChooserAction ColorSchemeChooser.Action
 
 
 update : Action -> Model -> (Model, Effects Action)
@@ -150,25 +156,40 @@ update action model =
           case maybePalettes of
             Just palettes -> ColorScheme.fromColourLoversArray palettes
             Nothing -> Array.empty
-        _ = Debug.log "colorSchemes" colorSchemes
         colorSchemeChooser = ColorSchemeChooser.setColorSchemes model.colorSchemeChooser colorSchemes
         newModel =
           { model |
               colourLovers = colourLovers2
             , colorSchemeChooser = colorSchemeChooser
           }
-        _ = Debug.log "newModel" newModel.colorSchemeChooser
       in
         ( newModel
         , Effects.map ColourLoversAction clFx
         )
-    ColorSchemeAction childAction ->
+    ColorSchemeChooserAction childAction ->
       let
         colorSchemeChooser2 = ColorSchemeChooser.update childAction model.colorSchemeChooser
+
+        -- This is likely an anti pattern, but if ColorSchemeChooser model has changed,
+        -- there's a chance that the color scheme has changed, so we should update
+        -- the knobs' models. It's unclear whether the knob color is *derived* data,
+        -- or whether it should live in the state of the knob. If it's derived
+        -- data, then should this data be passed down through the view function?
+        -- Pretty big question marks. What comes next does not feel right...
+        colorScheme = ColorSchemeChooser.getColorScheme colorSchemeChooser2
+        knobDefaultParams = Knob.defaultParams -- this is ugly becuase you can't have dots in record update syntax
+        params =
+          { knobDefaultParams |
+              foregroundColor = colorScheme.knobForeground
+            , backgroundColor = colorScheme.knobBackground
+          }
+        knobRegistry2 = KnobRegistry.update
+          (KnobRegistry.UpdateParamsForAll params)
+          model.knobRegistry
       in
         ( { model |
               colorSchemeChooser = colorSchemeChooser2
-            , colorScheme = ColorSchemeChooser.getCurrent colorSchemeChooser2
+            , knobRegistry = knobRegistry2
           }
         , Effects.none
         )
@@ -199,6 +220,7 @@ view address model =  -- hwere is address??
     krAddress = (Signal.forwardTo address KnobRegistryAction)
     knobView id =
       KnobRegistry.view krAddress model.knobRegistry id
+    colorScheme = ColorSchemeChooser.getColorScheme model.colorSchemeChooser
   in
     div
         [ MouseExtra.onMouseMove
@@ -206,7 +228,7 @@ view address model =  -- hwere is address??
             (\position -> KnobRegistryAction (MousePosition position))
         , onMouseUp address (KnobRegistryAction GlobalMouseUp)
         , class "elm-audio"
-        , style ["background-color" => toCssRgb model.colorScheme.windowBackground]
+        , style ["background-color" => toCssRgb colorScheme.windowBackground]
         ]
         -- [ h1 [] [text "Elm Reactive Audio"]
         [ div [class "synth"]
@@ -221,13 +243,13 @@ view address model =  -- hwere is address??
               ]
             ]
           , piano
-              { whiteKey = model.colorScheme.pianoWhites
-              , blackKey = model.colorScheme.pianoBlacks
+              { whiteKey = colorScheme.pianoWhites
+              , blackKey = colorScheme.pianoBlacks
               }
               4
               12.0
           ]
-        , ColorSchemeChooser.view (Signal.forwardTo address ColorSchemeAction) model.colorSchemeChooser
+        , ColorSchemeChooser.view (Signal.forwardTo address ColorSchemeChooserAction) model.colorSchemeChooser
         ]
 
 
