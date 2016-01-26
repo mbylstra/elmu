@@ -1,4 +1,4 @@
-module MouseExtra
+module Lib.MouseExtra
     ( velocity
     , xVelocity
     , yVelocity

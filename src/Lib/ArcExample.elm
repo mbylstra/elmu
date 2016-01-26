@@ -5,7 +5,7 @@ import Html.Attributes exposing (style)
 import Svg exposing (svg, path, rect)
 import Svg.Attributes exposing (d, stroke, fill, strokeWidth, x, y, width, height, viewBox)
 
-import Arc exposing (arc)
+import Lib.Arc as Arc exposing (arc)
 
 example : Html.Html
 example =

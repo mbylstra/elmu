@@ -8,38 +8,27 @@ import Effects exposing (Never, Effects)
 import StartApp exposing (App)
 import Task
 import Random exposing (Seed)
-
-
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (on, targetChecked, onMouseUp)
-import Piano exposing (piano, pianoSignal, pianoGuiFrequency)
-import KeyboardNoteInput exposing (keyboardGuiFrequency)
--- import Slider exposing (slider)
 import Signal exposing (Address)
-import Array
 import Maybe exposing (withDefault)
-
-import ColorExtra exposing (toCssRgb)
-
--- import Color
-import ColourLovers
-
-import Knob
-
-
-import MouseExtra
-
+import Array
 import Effects
 
+import Lib.ColorExtra as ColorExtra exposing (toCssRgb)
+import Lib.MouseExtra as MouseExtra
+import Lib.HtmlAttributesExtra exposing (..)
 
-import MouseExtra
-import KnobRegistry exposing (Action(GlobalMouseUp, MousePosition))
-import HtmlAttributesExtra exposing (..)
+import Gui.Piano as Piano exposing (piano, pianoSignal, pianoGuiFrequency)
+import Gui.KeyboardNoteInput as KeyboardNoteInput exposing (keyboardGuiFrequency)
+import Gui.ColorScheme as ColorScheme exposing (defaultColorScheme, ColorScheme, fromColourLovers)
+import Gui.ColorSchemeChooser as ColorSchemeChooser
+import Gui.Knob as Knob
+import Gui.KnobRegistry as KnobRegistry exposing (Action(GlobalMouseUp, MousePosition))
 
-import ColorScheme exposing (defaultColorScheme, ColorScheme, fromColourLovers)
-import ColorSchemeChooser
 
+import Apis.ColourLovers as ColourLovers
 --------------------------------------------------------------------------------
 -- RANDOMNESS
 --------------------------------------------------------------------------------
@@ -113,10 +102,17 @@ type alias EncodedModel =
 
 encode : Model -> EncodedModel
 encode model =
-  { audioOn = model.audioOn
-  , frequency = model.frequency
-  , knobs = KnobRegistry.encode model.knobRegistry
-  }
+  let
+    knobs = KnobRegistry.encode model.knobRegistry
+    -- _ = Debug.log "knobs encoded" knobs
+    encoded =
+      { audioOn = model.audioOn
+      , frequency = model.frequency
+      , knobs = knobs
+      }
+    _ = Debug.log "encoded:" encoded
+  in
+    encoded
 
 
 --------------------------------------------------------------------------------
@@ -230,9 +226,9 @@ view address model =  -- hwere is address??
         , class "elm-audio"
         , style ["background-color" => toCssRgb colorScheme.windowBackground]
         ]
-        -- [ h1 [] [text "Elm Reactive Audio"]
         [ div [class "synth"]
-          [ div [class "control-panel"]
+          [ h1 [] [text "elmu"]
+          , div [class "control-panel"]
             [ audioOnCheckbox address model.audioOn
             -- , slider (Signal.forwardTo guiMailbox.address Slider1)
             , div [class "knobs"]

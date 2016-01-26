@@ -1,7 +1,7 @@
-module Components where
+module Audio.Components where
 
-import MainTypes exposing (..)
-import AudioNodes exposing (..)
+import Audio.MainTypes exposing (..)
+import Audio.AudioNodes exposing (..)
 
 
 additiveSynthAudioGraph : Float -> Float -> ListGraph
@@ -26,13 +26,12 @@ additiveSynthAudioGraph fundamentalFrequency numOscillators =
 
 
 
--- type ModulatorInput = Carrier | MID String | Nothing | ExternalID String
-
 type alias ModulatorNodeSpec =
   { id : String
   , multiple : Float
   , detune : Input
   , modulator : Input
+  , level : Input
   }
 
 type alias FMSynthSpec =
@@ -40,6 +39,9 @@ type alias FMSynthSpec =
   , modulator: Input
   , modulatorNodes: List ModulatorNodeSpec
   }
+
+-- NOTE: I think this is currently really dumb and doesn't respond
+-- to pitch
 
 fmSynth : String -> FMSynthSpec -> List AudioNode
 fmSynth id {frequency, modulator, modulatorNodes} =
@@ -50,22 +52,14 @@ fmSynth id {frequency, modulator, modulatorNodes} =
             , phaseOffset = modulator
             }
 
-        createModulatorNode : Float -> ModulatorNodeSpec -> AudioNode
-        createModulatorNode fundamentalFrequency spec =
-            sinNode spec.id
+        createModulatorNodes : Float -> ModulatorNodeSpec -> List AudioNode
+        createModulatorNodes fundamentalFrequency spec =
+          [ sinNode spec.id
                 { frequency = Value (frequency * spec.multiple)
                 , frequencyOffset = Default
                 , phaseOffset = spec.modulator
                 }
+          , gainNode (spec.id ++ ".gain") {signal = ID spec.id, gain = spec.level} --to do hook up to actual gain input
+          ]
     in
-        [carrierNode] ++ List.map (createModulatorNode frequency) modulatorNodes
-    -- let
-    --     getId n =
-    --         "harmonic" ++ toString n
-    --     getSinNode n =
-    --         let
-    --             frequency = n * fundamentalFrequency
-    --             id = getId n
-    --         in
-    --             sinNode id {frequency = Value frequency, frequencyOffset = Default, phaseOffset = Default}
-                -- dummyNode id {frequency = Value frequency, frequencyOffset = Default, phaseOffset = Default}
+        [carrierNode] ++ List.concatMap (createModulatorNodes frequency) modulatorNodes

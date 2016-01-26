@@ -1,4 +1,4 @@
-module HtmlAttributesExtra where
+module Lib.HtmlAttributesExtra where
 
 (=>) : a -> b -> ( a, b )
 (=>) = (,)

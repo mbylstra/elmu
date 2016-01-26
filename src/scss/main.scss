@@ -6,6 +6,9 @@
 //   box-sizing: inherit;
 // }
 
+
+@import url(https://fonts.googleapis.com/css?family=Rubik:500,400,300,700);
+
 .no-select {
   -webkit-touch-callout: none; /* iOS Safari */
   -webkit-user-select: none;   /* Chrome/Safari/Opera */
@@ -25,6 +28,11 @@ body {
   margin: 0px;
   // width: 100%;
   // height: 100%;
+}
+
+h1 {
+  font-family: 'Rubik', Helvetica, Arial, sans-serif; font-weight: 500;
+  font-size: 40px;
 }
 
 .elm-audio {

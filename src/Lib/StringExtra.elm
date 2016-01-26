@@ -1,4 +1,4 @@
-module StringExtra
+module Lib.StringExtra
     ( toIntFromBase
     , hexToInt
     ) where

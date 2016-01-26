@@ -1,4 +1,4 @@
-module Slider where
+module Gui.Slider where
 
 
 import Html exposing (..)

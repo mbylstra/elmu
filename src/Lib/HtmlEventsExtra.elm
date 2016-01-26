@@ -1,4 +1,4 @@
-module HtmlEventsExtra where
+module Lib.HtmlEventsExtra where
 
 import Html.Events exposing (on, onWithOptions, Options)
 import Html exposing (Attribute)

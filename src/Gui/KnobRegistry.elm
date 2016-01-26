@@ -1,4 +1,4 @@
-module KnobRegistry
+module Gui.KnobRegistry
   ( init
   , Model
   , EncodedModel
@@ -14,9 +14,9 @@ module KnobRegistry
 --------------------------------------------------------------------------------
 
 import Dict exposing (Dict)
-import Knob
 import Html exposing (div)
 
+import Gui.Knob as Knob
 
 --------------------------------------------------------------------------------
 -- MODEL

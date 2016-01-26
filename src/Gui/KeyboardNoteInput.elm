@@ -1,9 +1,10 @@
-module KeyboardNoteInput where
+module Gui.KeyboardNoteInput where
 
 import Keyboard
 import Maybe exposing (withDefault)
 import Char exposing (KeyCode, fromCode)
-import AudioUtil exposing (pitchToFrequency)
+
+import Audio.AudioUtil exposing (pitchToFrequency)
 
 type alias Pitch = Float
 

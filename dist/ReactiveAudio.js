@@ -14757,13 +14757,17 @@ Elm.StartApp.make = function (_elm) {
                                  ,Config: Config
                                  ,App: App};
 };
-Elm.Arc = Elm.Arc || {};
-Elm.Arc.make = function (_elm) {
+Elm.Lib = Elm.Lib || {};
+Elm.Lib.ColorExtra = Elm.Lib.ColorExtra || {};
+Elm.Lib.ColorExtra.make = function (_elm) {
    "use strict";
-   _elm.Arc = _elm.Arc || {};
-   if (_elm.Arc.values) return _elm.Arc.values;
+   _elm.Lib = _elm.Lib || {};
+   _elm.Lib.ColorExtra = _elm.Lib.ColorExtra || {};
+   if (_elm.Lib.ColorExtra.values)
+   return _elm.Lib.ColorExtra.values;
    var _U = Elm.Native.Utils.make(_elm),
    $Basics = Elm.Basics.make(_elm),
+   $Color = Elm.Color.make(_elm),
    $Debug = Elm.Debug.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
@@ -14771,113 +14775,327 @@ Elm.Arc.make = function (_elm) {
    $Signal = Elm.Signal.make(_elm),
    $String = Elm.String.make(_elm);
    var _op = {};
-   var fromRadians = $Basics.radians;
-   var fromDegrees = $Basics.degrees;
-   var getArcInfo = function (args) {
-      var _p0 = args.centerPoint;
-      var centerX = _p0._0;
-      var centerY = _p0._1;
-      var radius = args.radius;
-      var toAbsoluteCoords = function (angleDegrees) {
-         var _p1 = $Basics.fromPolar({ctor: "_Tuple2"
-                                     ,_0: 1.0
-                                     ,_1: fromDegrees(angleDegrees)});
-         var normPointX = _p1._0;
-         var normPointY = _p1._1;
-         var pointX = centerX + normPointX * radius;
-         var pointY = centerY - normPointY * radius;
-         return {ctor: "_Tuple2",_0: pointX,_1: pointY};
-      };
-      var startPoint = toAbsoluteCoords(args.startAngle);
-      var endPoint = toAbsoluteCoords(args.endAngle);
-      var startAngleRadians = 0.0;
-      return {centerPoint: args.centerPoint
-             ,radius: args.radius
-             ,startPoint: startPoint
-             ,endPoint: endPoint};
+   var toCssRgb = function (color) {
+      var color$ = $Color.toRgb(color);
+      var colors = _U.list([color$.red,color$.green,color$.blue]);
+      var inner = A2($String.join,
+      ",",
+      A2($List.map,$Basics.toString,colors));
+      return A2($Basics._op["++"],
+      "rgb(",
+      A2($Basics._op["++"],inner,")"));
    };
-   var ArcInfo = F4(function (a,b,c,d) {
-      return {radius: a,centerPoint: b,startPoint: c,endPoint: d};
+   var compareLightness = F2(function (colorA,colorB) {
+      var lightnessB = function (_) {
+         return _.lightness;
+      }($Color.toHsl(colorB));
+      var lightnessA = function (_) {
+         return _.lightness;
+      }($Color.toHsl(colorA));
+      return _U.cmp(lightnessA,
+      lightnessB) > 0 ? $Basics.GT : _U.eq(lightnessA,
+      lightnessB) ? $Basics.EQ : $Basics.LT;
    });
-   var ArcArgs = F4(function (a,b,c,d) {
-      return {radius: a,centerPoint: b,startAngle: c,endAngle: d};
-   });
-   var ArcSegmentArcs = F6(function (a,b,c,d,e,f) {
-      return {absolute: a
-             ,radius: b
-             ,xAxisRotation: c
-             ,largeArc: d
-             ,sweep: e
-             ,endPoint: f};
-   });
-   var boolToIntString = function (b) {
-      var _p2 = b;
-      if (_p2 === true) {
-            return "1";
+   var isLighter = F2(function (colorA,colorB) {
+      var _p0 = A2(compareLightness,colorA,colorB);
+      if (_p0.ctor === "GT") {
+            return true;
          } else {
-            return "0";
+            return false;
+         }
+   });
+   var sortByLightness = function (colors) {
+      return A2($List.sortWith,compareLightness,colors);
+   };
+   return _elm.Lib.ColorExtra.values = {_op: _op
+                                       ,compareLightness: compareLightness
+                                       ,isLighter: isLighter
+                                       ,sortByLightness: sortByLightness
+                                       ,toCssRgb: toCssRgb};
+};
+Elm.Native.StringExtra = {};
+
+Elm.Native.StringExtra.make = function(localRuntime) {
+	localRuntime.Native = localRuntime.Native || {};
+	localRuntime.Native.StringExtra = localRuntime.Native.StringExtra || {};
+	if (localRuntime.Native.StringExtra.values)
+	{
+		return localRuntime.Native.StringExtra.values;
+	}
+	if ('values' in Elm.Native.StringExtra)
+	{
+		return localRuntime.Native.StringExtra.values = Elm.Native.StringExtra.values;
+	}
+
+	var Char = Elm.Char.make(localRuntime);
+	var Result = Elm.Result.make(localRuntime);
+
+	function toIntFromBase(base, s)
+	{
+    var result = parseInt(s, base);
+    if (isNaN(result)) {
+      return Result.Err("could not convert string '" + s + "' to an Int" );
+    }
+		return Result.Ok(parseInt(s, base));
+	}
+
+	return Elm.Native.StringExtra.values = {
+    toIntFromBase: F2(toIntFromBase)
+	};
+};
+
+Elm.Lib = Elm.Lib || {};
+Elm.Lib.StringExtra = Elm.Lib.StringExtra || {};
+Elm.Lib.StringExtra.make = function (_elm) {
+   "use strict";
+   _elm.Lib = _elm.Lib || {};
+   _elm.Lib.StringExtra = _elm.Lib.StringExtra || {};
+   if (_elm.Lib.StringExtra.values)
+   return _elm.Lib.StringExtra.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $ElmTest = Elm.ElmTest.make(_elm),
+   $Graphics$Element = Elm.Graphics.Element.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Native$StringExtra = Elm.Native.StringExtra.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var _op = {};
+   var toIntFromBase = $Native$StringExtra.toIntFromBase;
+   var hexToInt = toIntFromBase(16);
+   var tests = A2($ElmTest.suite,
+   "",
+   _U.list([A2($ElmTest.test,
+           "",
+           A2($ElmTest.assertEqual,
+           $Result.Ok(15),
+           A2(toIntFromBase,16,"F")))
+           ,A2($ElmTest.test,
+           "",
+           A2($ElmTest.assertEqual,
+           $Result.Ok(15),
+           A2(toIntFromBase,16,"0F")))
+           ,A2($ElmTest.test,
+           "",
+           A2($ElmTest.assertEqual,
+           $Result.Ok(12245589),
+           A2(toIntFromBase,16,"BADA55")))
+           ,A2($ElmTest.test,
+           "",
+           A2($ElmTest.assertEqual,
+           $Result.Ok(12245589),
+           A2(toIntFromBase,16,"BadA55")))
+           ,A2($ElmTest.test,
+           "",
+           A2($ElmTest.assertEqual,
+           $Result.Ok(12245589),
+           A2(toIntFromBase,16,"BadA55")))
+           ,A2($ElmTest.test,
+           "",
+           A2($ElmTest.assertEqual,
+           $Result.Ok(12245589),
+           hexToInt("BADA55")))
+           ,A2($ElmTest.test,
+           "",
+           A2($ElmTest.assertEqual,
+           $Result.Err("could not convert string \'GAG\' to an Int"),
+           hexToInt("GAG")))]));
+   var main = $ElmTest.elementRunner(tests);
+   return _elm.Lib.StringExtra.values = {_op: _op
+                                        ,toIntFromBase: toIntFromBase
+                                        ,hexToInt: hexToInt};
+};
+Elm.Apis = Elm.Apis || {};
+Elm.Apis.ColourLovers = Elm.Apis.ColourLovers || {};
+Elm.Apis.ColourLovers.make = function (_elm) {
+   "use strict";
+   _elm.Apis = _elm.Apis || {};
+   _elm.Apis.ColourLovers = _elm.Apis.ColourLovers || {};
+   if (_elm.Apis.ColourLovers.values)
+   return _elm.Apis.ColourLovers.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Array = Elm.Array.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Color = Elm.Color.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Effects = Elm.Effects.make(_elm),
+   $ElmTest = Elm.ElmTest.make(_elm),
+   $Html = Elm.Html.make(_elm),
+   $Html$Attributes = Elm.Html.Attributes.make(_elm),
+   $Http = Elm.Http.make(_elm),
+   $Json$Decode = Elm.Json.Decode.make(_elm),
+   $Lib$ColorExtra = Elm.Lib.ColorExtra.make(_elm),
+   $Lib$StringExtra = Elm.Lib.StringExtra.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $StartApp = Elm.StartApp.make(_elm),
+   $String = Elm.String.make(_elm),
+   $Task = Elm.Task.make(_elm);
+   var _op = {};
+   var parseColor = function (str) {
+      var hexToInt$ = function (_p0) {
+         return A2($Maybe.withDefault,
+         0,
+         $Result.toMaybe($Lib$StringExtra.hexToInt(_p0)));
+      };
+      return A3($Color.rgb,
+      hexToInt$(A3($String.slice,0,2,str)),
+      hexToInt$(A3($String.slice,2,4,str)),
+      hexToInt$(A3($String.slice,4,6,str)));
+   };
+   var decodeColor = A2($Json$Decode.customDecoder,
+   $Json$Decode.string,
+   function (s) {
+      return $Result.Ok(parseColor(s));
+   });
+   var decodePalette = A4($Json$Decode.object3,
+   F3(function (title,userName,colors) {
+      return {title: title,userName: userName,colors: colors};
+   }),
+   A2($Json$Decode._op[":="],"title",$Json$Decode.string),
+   A2($Json$Decode._op[":="],"userName",$Json$Decode.string),
+   A2($Json$Decode._op[":="],
+   "colors",
+   $Json$Decode.array(decodeColor)));
+   var decodePalettes = $Json$Decode.array(decodePalette);
+   var tests = A2($ElmTest.suite,
+   "",
+   _U.list([A2($ElmTest.test,
+           "",
+           A2($ElmTest.assertEqual,
+           A2($Json$Decode.decodeString,
+           decodePalettes,
+           "\n            [\n              {\n                \"title\": \"goldfish\",\n                \"userName\": \"kineko\",\n                \"colors\": [\"AAA\", \"BBB\"]\n              },\n              {\n                \"title\": \"title2\",\n                \"userName\": \"user2\",\n                \"colors\": [CCC\", \"DDD\"]\n              }\n            ]\n          "),
+           $Result.Ok($Array.empty)))
+           ,A2($ElmTest.test,
+           "",
+           A2($ElmTest.assertEqual,
+           A3($Color.rgb,255,0,0),
+           parseColor("#FF0000")))
+           ,A2($ElmTest.test,
+           "",
+           A2($ElmTest.assertEqual,
+           A3($Color.rgb,0,255,0),
+           parseColor("#00FF00")))
+           ,A2($ElmTest.test,
+           "",
+           A2($ElmTest.assertEqual,
+           A3($Color.rgb,0,0,0),
+           parseColor("YOLO")))]));
+   var crossOriginMeUrl = "https://crossorigin.me/";
+   var topPalettesUrl = "http://www.colourlovers.com/api/palettes/top?format=json";
+   var coTopPalettesUrl = A2($Basics._op["++"],
+   crossOriginMeUrl,
+   topPalettesUrl);
+   _op["=>"] = F2(function (v0,v1) {
+      return {ctor: "_Tuple2",_0: v0,_1: v1};
+   });
+   var colorView = function (color) {
+      return A2($Html.div,
+      _U.list([$Html$Attributes.style(_U.list([A2(_op["=>"],
+                                              "background-color",
+                                              $Lib$ColorExtra.toCssRgb(color))
+                                              ,A2(_op["=>"],"width","100px")
+                                              ,A2(_op["=>"],"height","100px")]))]),
+      _U.list([]));
+   };
+   var paletteView = function (palette) {
+      return A2($Html.div,
+      _U.list([]),
+      _U.list([A2($Html.h2,
+              _U.list([]),
+              _U.list([$Html.text(palette.title)]))
+              ,A2($Html.h4,
+              _U.list([]),
+              _U.list([$Html.text(palette.userName)]))
+              ,A2($Html.div,
+              _U.list([]),
+              $Array.toList(A2($Array.map,colorView,palette.colors)))]));
+   };
+   var palettesView = function (maybePalettes) {
+      var _p1 = maybePalettes;
+      if (_p1.ctor === "Just") {
+            return A2($Html.div,
+            _U.list([]),
+            $Array.toList(A2($Array.map,paletteView,_p1._0)));
+         } else {
+            return A2($Html.p,
+            _U.list([]),
+            _U.list([$Html.text("error fetching palettes")]));
          }
    };
-   var arcSegment = function (args) {
-      var _p3 = args.endPoint;
-      var endX = _p3._0;
-      var endY = _p3._1;
-      var _p4 = args.radius;
-      var radiusX = _p4._0;
-      var radiusY = _p4._1;
-      return A2($String.join,
-      " ",
-      _U.list([args.absolute ? "A" : "a"
-              ,$Basics.toString(radiusX)
-              ,$Basics.toString(radiusY)
-              ,$Basics.toString(args.xAxisRotation)
-              ,boolToIntString(args.largeArc)
-              ,boolToIntString(args.sweep)
-              ,$Basics.toString(endX)
-              ,$Basics.toString(endY)]));
+   var view = F2(function (address,model) {
+      return A2($Html.div,
+      _U.list([]),
+      _U.list([palettesView(model.palettes)]));
+   });
+   var update = F2(function (action,model) {
+      var _p2 = action;
+      return {ctor: "_Tuple2"
+             ,_0: {palettes: _p2._0,fetching: false}
+             ,_1: $Effects.none};
+   });
+   var PalettesFetched = function (a) {
+      return {ctor: "PalettesFetched",_0: a};
    };
-   var arc = function (args) {
-      var largeArc = _U.cmp(args.endAngle - args.startAngle,
-      180.0) > -1 ? true : false;
-      var _p5 = args.centerPoint;
-      var centerX = _p5._0;
-      var centerY = _p5._1;
-      var radius = args.radius;
-      var startAngleRadians = 0.0;
-      var arcInfo = getArcInfo(args);
-      var _p6 = arcInfo.startPoint;
-      var startPointX = _p6._0;
-      var startPointY = _p6._1;
-      var _p7 = arcInfo.endPoint;
-      var endPointX = _p7._0;
-      var endPointY = _p7._1;
-      return A2($Basics._op["++"],
-      "M ",
-      A2($Basics._op["++"],
-      $Basics.toString(startPointX),
-      A2($Basics._op["++"],
-      " ",
-      A2($Basics._op["++"],
-      $Basics.toString(startPointY),
-      A2($Basics._op["++"],
-      " ",
-      arcSegment({absolute: true
-                 ,endPoint: arcInfo.endPoint
-                 ,radius: {ctor: "_Tuple2",_0: args.radius,_1: args.radius}
-                 ,sweep: false
-                 ,largeArc: largeArc
-                 ,xAxisRotation: 0.0}))))));
-   };
-   return _elm.Arc.values = {_op: _op
-                            ,arc: arc
-                            ,arcSegment: arcSegment
-                            ,getArcInfo: getArcInfo};
+   var getTopPalettes = $Effects.task(A2($Task.map,
+   PalettesFetched,
+   $Task.toMaybe(A2($Http.get,decodePalettes,coTopPalettesUrl))));
+   var getPalettes = function (model) {    return model.palettes;};
+   var initEffects = getTopPalettes;
+   var initModel = {palettes: $Maybe.Just($Array.empty)
+                   ,fetching: true};
+   var init = {ctor: "_Tuple2",_0: initModel,_1: initEffects};
+   var app = $StartApp.start({init: init
+                             ,update: update
+                             ,view: view
+                             ,inputs: _U.list([])});
+   var main = app.html;
+   var tasks = Elm.Native.Task.make(_elm).performSignal("tasks",
+   app.tasks);
+   var Model = F2(function (a,b) {
+      return {palettes: a,fetching: b};
+   });
+   var Palette = F3(function (a,b,c) {
+      return {title: a,userName: b,colors: c};
+   });
+   return _elm.Apis.ColourLovers.values = {_op: _op
+                                          ,Palette: Palette
+                                          ,Model: Model
+                                          ,initModel: initModel
+                                          ,initEffects: initEffects
+                                          ,init: init
+                                          ,getPalettes: getPalettes
+                                          ,PalettesFetched: PalettesFetched
+                                          ,update: update
+                                          ,view: view
+                                          ,colorView: colorView
+                                          ,palettesView: palettesView
+                                          ,paletteView: paletteView
+                                          ,topPalettesUrl: topPalettesUrl
+                                          ,crossOriginMeUrl: crossOriginMeUrl
+                                          ,coTopPalettesUrl: coTopPalettesUrl
+                                          ,decodePalette: decodePalette
+                                          ,decodeColor: decodeColor
+                                          ,decodePalettes: decodePalettes
+                                          ,getTopPalettes: getTopPalettes
+                                          ,parseColor: parseColor
+                                          ,tests: tests
+                                          ,app: app
+                                          ,main: main};
 };
-Elm.MainTypes = Elm.MainTypes || {};
-Elm.MainTypes.make = function (_elm) {
+Elm.Audio = Elm.Audio || {};
+Elm.Audio.MainTypes = Elm.Audio.MainTypes || {};
+Elm.Audio.MainTypes.make = function (_elm) {
    "use strict";
-   _elm.MainTypes = _elm.MainTypes || {};
-   if (_elm.MainTypes.values) return _elm.MainTypes.values;
+   _elm.Audio = _elm.Audio || {};
+   _elm.Audio.MainTypes = _elm.Audio.MainTypes || {};
+   if (_elm.Audio.MainTypes.values)
+   return _elm.Audio.MainTypes.values;
    var _U = Elm.Native.Utils.make(_elm),
    $Basics = Elm.Basics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
@@ -14911,33 +15129,35 @@ Elm.MainTypes.make = function (_elm) {
    var Default = {ctor: "Default"};
    var Value = function (a) {    return {ctor: "Value",_0: a};};
    var ID = function (a) {    return {ctor: "ID",_0: a};};
-   return _elm.MainTypes.values = {_op: _op
-                                  ,ID: ID
-                                  ,Value: Value
-                                  ,Default: Default
-                                  ,GUI: GUI
-                                  ,Oscillator: Oscillator
-                                  ,Gain: Gain
-                                  ,FeedforwardProcessor: FeedforwardProcessor
-                                  ,Add: Add
-                                  ,Destination: Destination
-                                  ,OscillatorInputs: OscillatorInputs
-                                  ,ExternalInputState: ExternalInputState
-                                  ,ExternalState: ExternalState};
+   return _elm.Audio.MainTypes.values = {_op: _op
+                                        ,ID: ID
+                                        ,Value: Value
+                                        ,Default: Default
+                                        ,GUI: GUI
+                                        ,Oscillator: Oscillator
+                                        ,Gain: Gain
+                                        ,FeedforwardProcessor: FeedforwardProcessor
+                                        ,Add: Add
+                                        ,Destination: Destination
+                                        ,OscillatorInputs: OscillatorInputs
+                                        ,ExternalInputState: ExternalInputState
+                                        ,ExternalState: ExternalState};
 };
-Elm.AudioNodeFunctions = Elm.AudioNodeFunctions || {};
-Elm.AudioNodeFunctions.make = function (_elm) {
+Elm.Audio = Elm.Audio || {};
+Elm.Audio.AudioNodeFunctions = Elm.Audio.AudioNodeFunctions || {};
+Elm.Audio.AudioNodeFunctions.make = function (_elm) {
    "use strict";
-   _elm.AudioNodeFunctions = _elm.AudioNodeFunctions || {};
-   if (_elm.AudioNodeFunctions.values)
-   return _elm.AudioNodeFunctions.values;
+   _elm.Audio = _elm.Audio || {};
+   _elm.Audio.AudioNodeFunctions = _elm.Audio.AudioNodeFunctions || {};
+   if (_elm.Audio.AudioNodeFunctions.values)
+   return _elm.Audio.AudioNodeFunctions.values;
    var _U = Elm.Native.Utils.make(_elm),
    $Array = Elm.Array.make(_elm),
+   $Audio$MainTypes = Elm.Audio.MainTypes.make(_elm),
    $Basics = Elm.Basics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
    $ElmTest = Elm.ElmTest.make(_elm),
    $List = Elm.List.make(_elm),
-   $MainTypes = Elm.MainTypes.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm);
@@ -15030,7 +15250,7 @@ Elm.AudioNodeFunctions.make = function (_elm) {
          if (_p1.ctor === "Just") {
                return _p1._0;
             } else {
-               return _U.crashCase("AudioNodeFunctions",
+               return _U.crashCase("Audio.AudioNodeFunctions",
                {start: {line: 155,column: 13},end: {line: 157,column: 67}},
                _p1)("arraylookup out of index");
             }
@@ -15049,7 +15269,6 @@ Elm.AudioNodeFunctions.make = function (_elm) {
            A2($ElmTest.assertEqual,
            $Array.fromList(_U.list([0.0])),
            sinLookup))]));
-   var main = $ElmTest.elementRunner(tests);
    var squareWave = F4(function (frequency,
    frequencyOffset,
    phaseOffset,
@@ -15067,116 +15286,121 @@ Elm.AudioNodeFunctions.make = function (_elm) {
    var Triangle = {ctor: "Triangle"};
    var Square = {ctor: "Square"};
    var Saw = {ctor: "Saw"};
-   return _elm.AudioNodeFunctions.values = {_op: _op
-                                           ,Saw: Saw
-                                           ,Square: Square
-                                           ,Triangle: Triangle
-                                           ,Sin: Sin
-                                           ,sampleRate: sampleRate
-                                           ,sampleDuration: sampleDuration
-                                           ,fmod: fmod
-                                           ,sampleLength: sampleLength
-                                           ,timeSeconds: timeSeconds
-                                           ,getPeriodSeconds: getPeriodSeconds
-                                           ,getPhaseFraction: getPhaseFraction
-                                           ,bias: bias
-                                           ,sawWave: sawWave
-                                           ,squareWave$: squareWave$
-                                           ,triangleWave: triangleWave
-                                           ,sinWave$: sinWave$
-                                           ,oscillator: oscillator
-                                           ,average: average
-                                           ,simpleLowPassFilter: simpleLowPassFilter
-                                           ,sinLookupFrequency: sinLookupFrequency
-                                           ,sinLookupDuration: sinLookupDuration
-                                           ,sinLookupArrayLength: sinLookupArrayLength
-                                           ,sinLookup: sinLookup
-                                           ,sinWave: sinWave
-                                           ,squareWave: squareWave
-                                           ,zeroWave: zeroWave
-                                           ,gain: gain
-                                           ,tests: tests
-                                           ,main: main};
+   return _elm.Audio.AudioNodeFunctions.values = {_op: _op
+                                                 ,Saw: Saw
+                                                 ,Square: Square
+                                                 ,Triangle: Triangle
+                                                 ,Sin: Sin
+                                                 ,sampleRate: sampleRate
+                                                 ,sampleDuration: sampleDuration
+                                                 ,fmod: fmod
+                                                 ,sampleLength: sampleLength
+                                                 ,timeSeconds: timeSeconds
+                                                 ,getPeriodSeconds: getPeriodSeconds
+                                                 ,getPhaseFraction: getPhaseFraction
+                                                 ,bias: bias
+                                                 ,sawWave: sawWave
+                                                 ,squareWave$: squareWave$
+                                                 ,triangleWave: triangleWave
+                                                 ,sinWave$: sinWave$
+                                                 ,oscillator: oscillator
+                                                 ,average: average
+                                                 ,simpleLowPassFilter: simpleLowPassFilter
+                                                 ,sinLookupFrequency: sinLookupFrequency
+                                                 ,sinLookupDuration: sinLookupDuration
+                                                 ,sinLookupArrayLength: sinLookupArrayLength
+                                                 ,sinLookup: sinLookup
+                                                 ,sinWave: sinWave
+                                                 ,squareWave: squareWave
+                                                 ,zeroWave: zeroWave
+                                                 ,gain: gain
+                                                 ,tests: tests};
 };
-Elm.AudioNodes = Elm.AudioNodes || {};
-Elm.AudioNodes.make = function (_elm) {
+Elm.Audio = Elm.Audio || {};
+Elm.Audio.AudioNodes = Elm.Audio.AudioNodes || {};
+Elm.Audio.AudioNodes.make = function (_elm) {
    "use strict";
-   _elm.AudioNodes = _elm.AudioNodes || {};
-   if (_elm.AudioNodes.values) return _elm.AudioNodes.values;
+   _elm.Audio = _elm.Audio || {};
+   _elm.Audio.AudioNodes = _elm.Audio.AudioNodes || {};
+   if (_elm.Audio.AudioNodes.values)
+   return _elm.Audio.AudioNodes.values;
    var _U = Elm.Native.Utils.make(_elm),
-   $AudioNodeFunctions = Elm.AudioNodeFunctions.make(_elm),
+   $Audio$AudioNodeFunctions = Elm.Audio.AudioNodeFunctions.make(_elm),
+   $Audio$MainTypes = Elm.Audio.MainTypes.make(_elm),
    $Basics = Elm.Basics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
    $List = Elm.List.make(_elm),
-   $MainTypes = Elm.MainTypes.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm);
    var _op = {};
    var destinationNode = function (_p0) {
       var _p1 = _p0;
-      return $MainTypes.Destination({id: "destination"
-                                    ,input: _p1.signal
-                                    ,state: {outputValue: 0.0}});
+      return $Audio$MainTypes.Destination({id: "destination"
+                                          ,input: _p1.signal
+                                          ,state: {outputValue: 0.0}});
    };
    var adderNode = F2(function (id,inputs) {
-      return $MainTypes.Add({id: id
-                            ,inputs: inputs
-                            ,state: {outputValue: 0.0}});
+      return $Audio$MainTypes.Add({id: id
+                                  ,inputs: inputs
+                                  ,state: {outputValue: 0.0}});
    });
    var gainNode = F2(function (id,_p2) {
       var _p3 = _p2;
-      return $MainTypes.Gain({id: id
-                             ,func: $AudioNodeFunctions.gain
-                             ,inputs: {signal: _p3.signal,gain: _p3.gain}
-                             ,state: {outputValue: 0.0}});
+      return $Audio$MainTypes.Gain({id: id
+                                   ,func: $Audio$AudioNodeFunctions.gain
+                                   ,inputs: {signal: _p3.signal,gain: _p3.gain}
+                                   ,state: {outputValue: 0.0}});
    });
    var dummyNode = F2(function (id,_p4) {
       var _p5 = _p4;
-      return $MainTypes.Oscillator({id: id
-                                   ,func: $AudioNodeFunctions.zeroWave
-                                   ,inputs: {frequency: _p5.frequency
-                                            ,frequencyOffset: _p5.frequencyOffset
-                                            ,phaseOffset: _p5.phaseOffset}
-                                   ,state: {outputValue: 0.0,phase: 0.0}});
+      return $Audio$MainTypes.Oscillator({id: id
+                                         ,func: $Audio$AudioNodeFunctions.zeroWave
+                                         ,inputs: {frequency: _p5.frequency
+                                                  ,frequencyOffset: _p5.frequencyOffset
+                                                  ,phaseOffset: _p5.phaseOffset}
+                                         ,state: {outputValue: 0.0,phase: 0.0}});
    });
    var squareNode = F2(function (id,_p6) {
       var _p7 = _p6;
-      return $MainTypes.Oscillator({id: id
-                                   ,func: $AudioNodeFunctions.squareWave
-                                   ,inputs: {frequency: _p7.frequency
-                                            ,frequencyOffset: _p7.frequencyOffset
-                                            ,phaseOffset: _p7.phaseOffset}
-                                   ,state: {outputValue: 0.0,phase: 0.0}});
+      return $Audio$MainTypes.Oscillator({id: id
+                                         ,func: $Audio$AudioNodeFunctions.squareWave
+                                         ,inputs: {frequency: _p7.frequency
+                                                  ,frequencyOffset: _p7.frequencyOffset
+                                                  ,phaseOffset: _p7.phaseOffset}
+                                         ,state: {outputValue: 0.0,phase: 0.0}});
    });
    var sinNode = F2(function (id,_p8) {
       var _p9 = _p8;
-      return $MainTypes.Oscillator({id: id
-                                   ,func: $AudioNodeFunctions.sinWave
-                                   ,inputs: {frequency: _p9.frequency
-                                            ,frequencyOffset: _p9.frequencyOffset
-                                            ,phaseOffset: _p9.phaseOffset}
-                                   ,state: {outputValue: 0.0,phase: 0.0}});
+      return $Audio$MainTypes.Oscillator({id: id
+                                         ,func: $Audio$AudioNodeFunctions.sinWave
+                                         ,inputs: {frequency: _p9.frequency
+                                                  ,frequencyOffset: _p9.frequencyOffset
+                                                  ,phaseOffset: _p9.phaseOffset}
+                                         ,state: {outputValue: 0.0,phase: 0.0}});
    });
    var commaHelper = A2(sinNode,
    "dummy123456789",
-   {frequency: $MainTypes.Default
-   ,frequencyOffset: $MainTypes.Default
-   ,phaseOffset: $MainTypes.Default});
-   return _elm.AudioNodes.values = {_op: _op
-                                   ,sinNode: sinNode
-                                   ,squareNode: squareNode
-                                   ,dummyNode: dummyNode
-                                   ,gainNode: gainNode
-                                   ,adderNode: adderNode
-                                   ,destinationNode: destinationNode
-                                   ,commaHelper: commaHelper};
+   {frequency: $Audio$MainTypes.Default
+   ,frequencyOffset: $Audio$MainTypes.Default
+   ,phaseOffset: $Audio$MainTypes.Default});
+   return _elm.Audio.AudioNodes.values = {_op: _op
+                                         ,sinNode: sinNode
+                                         ,squareNode: squareNode
+                                         ,dummyNode: dummyNode
+                                         ,gainNode: gainNode
+                                         ,adderNode: adderNode
+                                         ,destinationNode: destinationNode
+                                         ,commaHelper: commaHelper};
 };
-Elm.AudioUtil = Elm.AudioUtil || {};
-Elm.AudioUtil.make = function (_elm) {
+Elm.Audio = Elm.Audio || {};
+Elm.Audio.AudioUtil = Elm.Audio.AudioUtil || {};
+Elm.Audio.AudioUtil.make = function (_elm) {
    "use strict";
-   _elm.AudioUtil = _elm.AudioUtil || {};
-   if (_elm.AudioUtil.values) return _elm.AudioUtil.values;
+   _elm.Audio = _elm.Audio || {};
+   _elm.Audio.AudioUtil = _elm.Audio.AudioUtil || {};
+   if (_elm.Audio.AudioUtil.values)
+   return _elm.Audio.AudioUtil.values;
    var _U = Elm.Native.Utils.make(_elm),
    $Basics = Elm.Basics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
@@ -15188,341 +15412,325 @@ Elm.AudioUtil.make = function (_elm) {
    var pitchToFrequency = function (pitch) {
       return Math.pow(2,(pitch - 49.0) / 12.0) * 440.0;
    };
-   return _elm.AudioUtil.values = {_op: _op
-                                  ,pitchToFrequency: pitchToFrequency};
+   return _elm.Audio.AudioUtil.values = {_op: _op
+                                        ,pitchToFrequency: pitchToFrequency};
 };
-Elm.ColorExtra = Elm.ColorExtra || {};
-Elm.ColorExtra.make = function (_elm) {
+Elm.Audio = Elm.Audio || {};
+Elm.Audio.Components = Elm.Audio.Components || {};
+Elm.Audio.Components.make = function (_elm) {
    "use strict";
-   _elm.ColorExtra = _elm.ColorExtra || {};
-   if (_elm.ColorExtra.values) return _elm.ColorExtra.values;
+   _elm.Audio = _elm.Audio || {};
+   _elm.Audio.Components = _elm.Audio.Components || {};
+   if (_elm.Audio.Components.values)
+   return _elm.Audio.Components.values;
    var _U = Elm.Native.Utils.make(_elm),
+   $Audio$AudioNodes = Elm.Audio.AudioNodes.make(_elm),
+   $Audio$MainTypes = Elm.Audio.MainTypes.make(_elm),
    $Basics = Elm.Basics.make(_elm),
-   $Color = Elm.Color.make(_elm),
    $Debug = Elm.Debug.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
-   $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm),
-   $String = Elm.String.make(_elm);
-   var _op = {};
-   var toCssRgb = function (color) {
-      var color$ = $Color.toRgb(color);
-      var colors = _U.list([color$.red,color$.green,color$.blue]);
-      var inner = A2($String.join,
-      ",",
-      A2($List.map,$Basics.toString,colors));
-      return A2($Basics._op["++"],
-      "rgb(",
-      A2($Basics._op["++"],inner,")"));
-   };
-   var compareLightness = F2(function (colorA,colorB) {
-      var lightnessB = function (_) {
-         return _.lightness;
-      }($Color.toHsl(colorB));
-      var lightnessA = function (_) {
-         return _.lightness;
-      }($Color.toHsl(colorA));
-      return _U.cmp(lightnessA,
-      lightnessB) > 0 ? $Basics.GT : _U.eq(lightnessA,
-      lightnessB) ? $Basics.EQ : $Basics.LT;
-   });
-   var isLighter = F2(function (colorA,colorB) {
-      var _p0 = A2(compareLightness,colorA,colorB);
-      if (_p0.ctor === "GT") {
-            return true;
-         } else {
-            return false;
-         }
-   });
-   var sortByLightness = function (colors) {
-      return A2($List.sortWith,compareLightness,colors);
-   };
-   return _elm.ColorExtra.values = {_op: _op
-                                   ,compareLightness: compareLightness
-                                   ,isLighter: isLighter
-                                   ,sortByLightness: sortByLightness
-                                   ,toCssRgb: toCssRgb};
-};
-Elm.Native.StringExtra = {};
-
-Elm.Native.StringExtra.make = function(localRuntime) {
-	localRuntime.Native = localRuntime.Native || {};
-	localRuntime.Native.StringExtra = localRuntime.Native.StringExtra || {};
-	if (localRuntime.Native.StringExtra.values)
-	{
-		return localRuntime.Native.StringExtra.values;
-	}
-	if ('values' in Elm.Native.StringExtra)
-	{
-		return localRuntime.Native.StringExtra.values = Elm.Native.StringExtra.values;
-	}
-
-	var Char = Elm.Char.make(localRuntime);
-	var Result = Elm.Result.make(localRuntime);
-
-	function toIntFromBase(base, s)
-	{
-    var result = parseInt(s, base);
-    if (isNaN(result)) {
-      return Result.Err("could not convert string '" + s + "' to an Int" );
-    }
-		return Result.Ok(parseInt(s, base));
-	}
-
-	return Elm.Native.StringExtra.values = {
-    toIntFromBase: F2(toIntFromBase)
-	};
-};
-
-Elm.StringExtra = Elm.StringExtra || {};
-Elm.StringExtra.make = function (_elm) {
-   "use strict";
-   _elm.StringExtra = _elm.StringExtra || {};
-   if (_elm.StringExtra.values) return _elm.StringExtra.values;
-   var _U = Elm.Native.Utils.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $Debug = Elm.Debug.make(_elm),
-   $ElmTest = Elm.ElmTest.make(_elm),
-   $Graphics$Element = Elm.Graphics.Element.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Native$StringExtra = Elm.Native.StringExtra.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm);
    var _op = {};
-   var toIntFromBase = $Native$StringExtra.toIntFromBase;
-   var hexToInt = toIntFromBase(16);
-   var tests = A2($ElmTest.suite,
-   "",
-   _U.list([A2($ElmTest.test,
-           "",
-           A2($ElmTest.assertEqual,
-           $Result.Ok(15),
-           A2(toIntFromBase,16,"F")))
-           ,A2($ElmTest.test,
-           "",
-           A2($ElmTest.assertEqual,
-           $Result.Ok(15),
-           A2(toIntFromBase,16,"0F")))
-           ,A2($ElmTest.test,
-           "",
-           A2($ElmTest.assertEqual,
-           $Result.Ok(12245589),
-           A2(toIntFromBase,16,"BADA55")))
-           ,A2($ElmTest.test,
-           "",
-           A2($ElmTest.assertEqual,
-           $Result.Ok(12245589),
-           A2(toIntFromBase,16,"BadA55")))
-           ,A2($ElmTest.test,
-           "",
-           A2($ElmTest.assertEqual,
-           $Result.Ok(12245589),
-           A2(toIntFromBase,16,"BadA55")))
-           ,A2($ElmTest.test,
-           "",
-           A2($ElmTest.assertEqual,
-           $Result.Ok(12245589),
-           hexToInt("BADA55")))
-           ,A2($ElmTest.test,
-           "",
-           A2($ElmTest.assertEqual,
-           $Result.Err("could not convert string \'GAG\' to an Int"),
-           hexToInt("GAG")))]));
-   var main = $ElmTest.elementRunner(tests);
-   return _elm.StringExtra.values = {_op: _op
-                                    ,toIntFromBase: toIntFromBase
-                                    ,hexToInt: hexToInt};
+   var fmSynth = F2(function (id,_p0) {
+      var _p1 = _p0;
+      var _p2 = _p1.frequency;
+      var createModulatorNodes = F2(function (fundamentalFrequency,
+      spec) {
+         return _U.list([A2($Audio$AudioNodes.sinNode,
+                        spec.id,
+                        {frequency: $Audio$MainTypes.Value(_p2 * spec.multiple)
+                        ,frequencyOffset: $Audio$MainTypes.Default
+                        ,phaseOffset: spec.modulator})
+                        ,A2($Audio$AudioNodes.gainNode,
+                        A2($Basics._op["++"],spec.id,".gain"),
+                        {signal: $Audio$MainTypes.ID(spec.id),gain: spec.level})]);
+      });
+      var carrierNode = A2($Audio$AudioNodes.sinNode,
+      id,
+      {frequency: $Audio$MainTypes.Value(_p2)
+      ,frequencyOffset: $Audio$MainTypes.Default
+      ,phaseOffset: _p1.modulator});
+      return A2($Basics._op["++"],
+      _U.list([carrierNode]),
+      A2($List.concatMap,
+      createModulatorNodes(_p2),
+      _p1.modulatorNodes));
+   });
+   var FMSynthSpec = F3(function (a,b,c) {
+      return {frequency: a,modulator: b,modulatorNodes: c};
+   });
+   var ModulatorNodeSpec = F5(function (a,b,c,d,e) {
+      return {id: a,multiple: b,detune: c,modulator: d,level: e};
+   });
+   var additiveSynthAudioGraph = F2(function (fundamentalFrequency,
+   numOscillators) {
+      var getId = function (n) {
+         return A2($Basics._op["++"],"harmonic",$Basics.toString(n));
+      };
+      var getSinNode = function (n) {
+         var id = getId(n);
+         var frequency = n * fundamentalFrequency;
+         return A2($Audio$AudioNodes.sinNode,
+         id,
+         {frequency: $Audio$MainTypes.Value(frequency)
+         ,frequencyOffset: $Audio$MainTypes.Default
+         ,phaseOffset: $Audio$MainTypes.Default});
+      };
+      var oscs = A2($List.map,getSinNode,_U.range(1,numOscillators));
+      var mixerInputs = A2($List.map,
+      function (n) {
+         return $Audio$MainTypes.ID(getId(n));
+      },
+      _U.range(1,numOscillators));
+      return A2($Basics._op["++"],
+      oscs,
+      _U.list([A2($Audio$AudioNodes.adderNode,
+      "additiveSynth",
+      mixerInputs)]));
+   });
+   return _elm.Audio.Components.values = {_op: _op
+                                         ,additiveSynthAudioGraph: additiveSynthAudioGraph
+                                         ,ModulatorNodeSpec: ModulatorNodeSpec
+                                         ,FMSynthSpec: FMSynthSpec
+                                         ,fmSynth: fmSynth};
 };
-Elm.ColourLovers = Elm.ColourLovers || {};
-Elm.ColourLovers.make = function (_elm) {
+Elm.Lib = Elm.Lib || {};
+Elm.Lib.MouseExtra = Elm.Lib.MouseExtra || {};
+Elm.Lib.MouseExtra.make = function (_elm) {
    "use strict";
-   _elm.ColourLovers = _elm.ColourLovers || {};
-   if (_elm.ColourLovers.values) return _elm.ColourLovers.values;
+   _elm.Lib = _elm.Lib || {};
+   _elm.Lib.MouseExtra = _elm.Lib.MouseExtra || {};
+   if (_elm.Lib.MouseExtra.values)
+   return _elm.Lib.MouseExtra.values;
    var _U = Elm.Native.Utils.make(_elm),
-   $Array = Elm.Array.make(_elm),
    $Basics = Elm.Basics.make(_elm),
-   $Color = Elm.Color.make(_elm),
-   $ColorExtra = Elm.ColorExtra.make(_elm),
    $Debug = Elm.Debug.make(_elm),
-   $Effects = Elm.Effects.make(_elm),
-   $ElmTest = Elm.ElmTest.make(_elm),
    $Html = Elm.Html.make(_elm),
-   $Html$Attributes = Elm.Html.Attributes.make(_elm),
-   $Http = Elm.Http.make(_elm),
+   $Html$Events = Elm.Html.Events.make(_elm),
    $Json$Decode = Elm.Json.Decode.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
+   $Mouse = Elm.Mouse.make(_elm),
    $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm),
-   $StartApp = Elm.StartApp.make(_elm),
-   $String = Elm.String.make(_elm),
-   $StringExtra = Elm.StringExtra.make(_elm),
-   $Task = Elm.Task.make(_elm);
+   $Signal = Elm.Signal.make(_elm);
    var _op = {};
-   var parseColor = function (str) {
-      var hexToInt$ = function (_p0) {
-         return A2($Maybe.withDefault,
-         0,
-         $Result.toMaybe($StringExtra.hexToInt(_p0)));
-      };
-      return A3($Color.rgb,
-      hexToInt$(A3($String.slice,0,2,str)),
-      hexToInt$(A3($String.slice,2,4,str)),
-      hexToInt$(A3($String.slice,4,6,str)));
+   var createVelocitySignal = function (positionSignal) {
+      var update = F2(function (x,state) {
+         return {x: x,velocity: x - state.x};
+      });
+      var initialState = {x: 0,velocity: 0};
+      var rawSignal = A3($Signal.foldp,
+      update,
+      initialState,
+      positionSignal);
+      var signal = A2($Signal.map,
+      function (_) {
+         return _.velocity;
+      },
+      rawSignal);
+      return signal;
    };
-   var decodeColor = A2($Json$Decode.customDecoder,
-   $Json$Decode.string,
-   function (s) {
-      return $Result.Ok(parseColor(s));
+   var xVelocity = createVelocitySignal($Mouse.x);
+   var yVelocity = createVelocitySignal($Mouse.y);
+   var velocity = A3($Signal.map2,
+   F2(function (x,y) {    return {ctor: "_Tuple2",_0: x,_1: y};}),
+   xVelocity,
+   yVelocity);
+   var VelocityState = F2(function (a,b) {
+      return {x: a,velocity: b};
    });
-   var decodePalette = A4($Json$Decode.object3,
-   F3(function (title,userName,colors) {
-      return {title: title,userName: userName,colors: colors};
-   }),
-   A2($Json$Decode._op[":="],"title",$Json$Decode.string),
-   A2($Json$Decode._op[":="],"userName",$Json$Decode.string),
-   A2($Json$Decode._op[":="],
-   "colors",
-   $Json$Decode.array(decodeColor)));
-   var decodePalettes = $Json$Decode.array(decodePalette);
-   var tests = A2($ElmTest.suite,
-   "",
-   _U.list([A2($ElmTest.test,
-           "",
-           A2($ElmTest.assertEqual,
-           A2($Json$Decode.decodeString,
-           decodePalettes,
-           "\n            [\n              {\n                \"title\": \"goldfish\",\n                \"userName\": \"kineko\",\n                \"colors\": [\"AAA\", \"BBB\"]\n              },\n              {\n                \"title\": \"title2\",\n                \"userName\": \"user2\",\n                \"colors\": [CCC\", \"DDD\"]\n              }\n            ]\n          "),
-           $Result.Ok($Array.empty)))
-           ,A2($ElmTest.test,
-           "",
-           A2($ElmTest.assertEqual,
-           A3($Color.rgb,255,0,0),
-           parseColor("#FF0000")))
-           ,A2($ElmTest.test,
-           "",
-           A2($ElmTest.assertEqual,
-           A3($Color.rgb,0,255,0),
-           parseColor("#00FF00")))
-           ,A2($ElmTest.test,
-           "",
-           A2($ElmTest.assertEqual,
-           A3($Color.rgb,0,0,0),
-           parseColor("YOLO")))]));
-   var crossOriginMeUrl = "https://crossorigin.me/";
-   var topPalettesUrl = "http://www.colourlovers.com/api/palettes/top?format=json";
-   var coTopPalettesUrl = A2($Basics._op["++"],
-   crossOriginMeUrl,
-   topPalettesUrl);
+   var onMouseMove = F2(function (mousePositionAddress,handler) {
+      var sendPosition = function (position) {
+         return A2($Signal.message,
+         mousePositionAddress,
+         handler(position));
+      };
+      var mousePositionDecoder = A3($Json$Decode.object2,
+      F2(function (x,y) {    return {ctor: "_Tuple2",_0: x,_1: y};}),
+      A2($Json$Decode._op[":="],"pageX",$Json$Decode.$int),
+      A2($Json$Decode._op[":="],"pageY",$Json$Decode.$int));
+      return A3($Html$Events.on,
+      "mousemove",
+      mousePositionDecoder,
+      sendPosition);
+   });
+   return _elm.Lib.MouseExtra.values = {_op: _op
+                                       ,velocity: velocity
+                                       ,xVelocity: xVelocity
+                                       ,yVelocity: yVelocity
+                                       ,onMouseMove: onMouseMove};
+};
+Elm.Lib = Elm.Lib || {};
+Elm.Lib.HtmlAttributesExtra = Elm.Lib.HtmlAttributesExtra || {};
+Elm.Lib.HtmlAttributesExtra.make = function (_elm) {
+   "use strict";
+   _elm.Lib = _elm.Lib || {};
+   _elm.Lib.HtmlAttributesExtra = _elm.Lib.HtmlAttributesExtra || {};
+   if (_elm.Lib.HtmlAttributesExtra.values)
+   return _elm.Lib.HtmlAttributesExtra.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var _op = {};
    _op["=>"] = F2(function (v0,v1) {
       return {ctor: "_Tuple2",_0: v0,_1: v1};
    });
-   var colorView = function (color) {
-      return A2($Html.div,
-      _U.list([$Html$Attributes.style(_U.list([A2(_op["=>"],
-                                              "background-color",
-                                              $ColorExtra.toCssRgb(color))
-                                              ,A2(_op["=>"],"width","100px")
-                                              ,A2(_op["=>"],"height","100px")]))]),
-      _U.list([]));
-   };
-   var paletteView = function (palette) {
-      return A2($Html.div,
-      _U.list([]),
-      _U.list([A2($Html.h2,
-              _U.list([]),
-              _U.list([$Html.text(palette.title)]))
-              ,A2($Html.h4,
-              _U.list([]),
-              _U.list([$Html.text(palette.userName)]))
-              ,A2($Html.div,
-              _U.list([]),
-              $Array.toList(A2($Array.map,colorView,palette.colors)))]));
-   };
-   var palettesView = function (maybePalettes) {
-      var _p1 = maybePalettes;
-      if (_p1.ctor === "Just") {
-            return A2($Html.div,
-            _U.list([]),
-            $Array.toList(A2($Array.map,paletteView,_p1._0)));
-         } else {
-            return A2($Html.p,
-            _U.list([]),
-            _U.list([$Html.text("error fetching palettes")]));
-         }
-   };
-   var view = F2(function (address,model) {
-      return A2($Html.div,
-      _U.list([]),
-      _U.list([palettesView(model.palettes)]));
-   });
-   var update = F2(function (action,model) {
-      var _p2 = action;
-      return {ctor: "_Tuple2"
-             ,_0: {palettes: _p2._0,fetching: false}
-             ,_1: $Effects.none};
-   });
-   var PalettesFetched = function (a) {
-      return {ctor: "PalettesFetched",_0: a};
-   };
-   var getTopPalettes = $Effects.task(A2($Task.map,
-   PalettesFetched,
-   $Task.toMaybe(A2($Http.get,decodePalettes,coTopPalettesUrl))));
-   var getPalettes = function (model) {    return model.palettes;};
-   var initEffects = getTopPalettes;
-   var initModel = {palettes: $Maybe.Just($Array.empty)
-                   ,fetching: true};
-   var init = {ctor: "_Tuple2",_0: initModel,_1: initEffects};
-   var app = $StartApp.start({init: init
-                             ,update: update
-                             ,view: view
-                             ,inputs: _U.list([])});
-   var main = app.html;
-   var tasks = Elm.Native.Task.make(_elm).performSignal("tasks",
-   app.tasks);
-   var Model = F2(function (a,b) {
-      return {palettes: a,fetching: b};
-   });
-   var Palette = F3(function (a,b,c) {
-      return {title: a,userName: b,colors: c};
-   });
-   return _elm.ColourLovers.values = {_op: _op
-                                     ,Palette: Palette
-                                     ,Model: Model
-                                     ,initModel: initModel
-                                     ,initEffects: initEffects
-                                     ,init: init
-                                     ,getPalettes: getPalettes
-                                     ,PalettesFetched: PalettesFetched
-                                     ,update: update
-                                     ,view: view
-                                     ,colorView: colorView
-                                     ,palettesView: palettesView
-                                     ,paletteView: paletteView
-                                     ,topPalettesUrl: topPalettesUrl
-                                     ,crossOriginMeUrl: crossOriginMeUrl
-                                     ,coTopPalettesUrl: coTopPalettesUrl
-                                     ,decodePalette: decodePalette
-                                     ,decodeColor: decodeColor
-                                     ,decodePalettes: decodePalettes
-                                     ,getTopPalettes: getTopPalettes
-                                     ,parseColor: parseColor
-                                     ,tests: tests
-                                     ,app: app
-                                     ,main: main};
+   return _elm.Lib.HtmlAttributesExtra.values = {_op: _op};
 };
-Elm.ColorScheme = Elm.ColorScheme || {};
-Elm.ColorScheme.make = function (_elm) {
+Elm.Gui = Elm.Gui || {};
+Elm.Gui.Piano = Elm.Gui.Piano || {};
+Elm.Gui.Piano.make = function (_elm) {
    "use strict";
-   _elm.ColorScheme = _elm.ColorScheme || {};
-   if (_elm.ColorScheme.values) return _elm.ColorScheme.values;
+   _elm.Gui = _elm.Gui || {};
+   _elm.Gui.Piano = _elm.Gui.Piano || {};
+   if (_elm.Gui.Piano.values) return _elm.Gui.Piano.values;
    var _U = Elm.Native.Utils.make(_elm),
+   $Audio$AudioUtil = Elm.Audio.AudioUtil.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Color = Elm.Color.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Html = Elm.Html.make(_elm),
+   $Html$Attributes = Elm.Html.Attributes.make(_elm),
+   $Html$Events = Elm.Html.Events.make(_elm),
+   $Lib$ColorExtra = Elm.Lib.ColorExtra.make(_elm),
+   $Lib$HtmlAttributesExtra = Elm.Lib.HtmlAttributesExtra.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var _op = {};
+   var ColorScheme = F2(function (a,b) {
+      return {whiteKey: a,blackKey: b};
+   });
+   var White = {ctor: "White"};
+   var Black = {ctor: "Black"};
+   var pianoMailbox = $Signal.mailbox(60.0);
+   var pianoSignal = pianoMailbox.signal;
+   var pianoGuiFrequency = A2($Signal.map,
+   $Audio$AudioUtil.pitchToFrequency,
+   pianoSignal);
+   var piano = F3(function (colorScheme,numOctaves,bottomPitch) {
+      var pianoKey = F2(function (keyType,pitch) {
+         var _p0 = keyType;
+         if (_p0.ctor === "Black") {
+               return A2($Html.div,
+               _U.list([$Html$Attributes.$class("black-key-wrapper")]),
+               _U.list([A2($Html.div,
+               _U.list([$Html$Attributes.$class("black-key")
+                       ,A2($Html$Events.onMouseDown,pianoMailbox.address,pitch)
+                       ,$Html$Attributes.style(_U.list([A2($Lib$HtmlAttributesExtra._op["=>"],
+                       "background-color",
+                       $Lib$ColorExtra.toCssRgb(colorScheme.blackKey))]))]),
+               _U.list([]))]));
+            } else {
+               return A2($Html.div,
+               _U.list([$Html$Attributes.$class("white-key")
+                       ,A2($Html$Events.onMouseDown,pianoMailbox.address,pitch)
+                       ,$Html$Attributes.style(_U.list([A2($Lib$HtmlAttributesExtra._op["=>"],
+                       "background-color",
+                       $Lib$ColorExtra.toCssRgb(colorScheme.whiteKey))]))]),
+               _U.list([]));
+            }
+      });
+      var pianoOctave = function (cPitch) {
+         return _U.list([A2(pianoKey,White,cPitch)
+                        ,A2(pianoKey,Black,cPitch + 1.0)
+                        ,A2(pianoKey,White,cPitch + 2.0)
+                        ,A2(pianoKey,Black,cPitch + 3.0)
+                        ,A2(pianoKey,White,cPitch + 4.0)
+                        ,A2(pianoKey,White,cPitch + 5.0)
+                        ,A2(pianoKey,Black,cPitch + 6.0)
+                        ,A2(pianoKey,White,cPitch + 7.0)
+                        ,A2(pianoKey,Black,cPitch + 8.0)
+                        ,A2(pianoKey,White,cPitch + 9.0)
+                        ,A2(pianoKey,Black,cPitch + 10.0)
+                        ,A2(pianoKey,White,cPitch + 11.0)]);
+      };
+      var bottomPitches = A2($List.map,
+      function (n) {
+         return bottomPitch + $Basics.toFloat(n) * 12.0;
+      },
+      _U.range(1,numOctaves));
+      var pianoOctaves = A2($List.concatMap,
+      function (octaveBottomPitch) {
+         return pianoOctave(octaveBottomPitch);
+      },
+      bottomPitches);
+      return A2($Html.div,
+      _U.list([$Html$Attributes.$class("piano")]),
+      pianoOctaves);
+   });
+   return _elm.Gui.Piano.values = {_op: _op
+                                  ,piano: piano
+                                  ,pianoSignal: pianoSignal
+                                  ,pianoGuiFrequency: pianoGuiFrequency};
+};
+Elm.Gui = Elm.Gui || {};
+Elm.Gui.KeyboardNoteInput = Elm.Gui.KeyboardNoteInput || {};
+Elm.Gui.KeyboardNoteInput.make = function (_elm) {
+   "use strict";
+   _elm.Gui = _elm.Gui || {};
+   _elm.Gui.KeyboardNoteInput = _elm.Gui.KeyboardNoteInput || {};
+   if (_elm.Gui.KeyboardNoteInput.values)
+   return _elm.Gui.KeyboardNoteInput.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Audio$AudioUtil = Elm.Audio.AudioUtil.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Char = Elm.Char.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Keyboard = Elm.Keyboard.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var _op = {};
+   var charToPitch = function (c) {
+      var _p0 = c;
+      switch (_p0.valueOf())
+      {case "s": return $Maybe.Just(60.0);
+         case "d": return $Maybe.Just(62.0);
+         case "f": return $Maybe.Just(64.0);
+         case "g": return $Maybe.Just(65.0);
+         case "h": return $Maybe.Just(67.0);
+         case "j": return $Maybe.Just(69.0);
+         case "k": return $Maybe.Just(71.0);
+         case "l": return $Maybe.Just(72.0);
+         default: return $Maybe.Nothing;}
+   };
+   var keyboardGuiPitch = A2($Signal.map,
+   function (keyCode) {
+      return A2($Maybe.withDefault,
+      0.0,
+      charToPitch($Char.fromCode(keyCode)));
+   },
+   $Keyboard.presses);
+   var keyboardGuiFrequency = A2($Signal.map,
+   $Audio$AudioUtil.pitchToFrequency,
+   keyboardGuiPitch);
+   return _elm.Gui.KeyboardNoteInput.values = {_op: _op
+                                              ,charToPitch: charToPitch
+                                              ,keyboardGuiPitch: keyboardGuiPitch
+                                              ,keyboardGuiFrequency: keyboardGuiFrequency};
+};
+Elm.Gui = Elm.Gui || {};
+Elm.Gui.ColorScheme = Elm.Gui.ColorScheme || {};
+Elm.Gui.ColorScheme.make = function (_elm) {
+   "use strict";
+   _elm.Gui = _elm.Gui || {};
+   _elm.Gui.ColorScheme = _elm.Gui.ColorScheme || {};
+   if (_elm.Gui.ColorScheme.values)
+   return _elm.Gui.ColorScheme.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Apis$ColourLovers = Elm.Apis.ColourLovers.make(_elm),
    $Array = Elm.Array.make(_elm),
    $Basics = Elm.Basics.make(_elm),
    $Color = Elm.Color.make(_elm),
-   $ColourLovers = Elm.ColourLovers.make(_elm),
    $Debug = Elm.Debug.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
@@ -15567,27 +15775,29 @@ Elm.ColorScheme.make = function (_elm) {
              ,controlPanelBackground: f
              ,controlPanelBorders: g};
    });
-   return _elm.ColorScheme.values = {_op: _op
-                                    ,ColorScheme: ColorScheme
-                                    ,defaultColorScheme: defaultColorScheme
-                                    ,fromColourLovers: fromColourLovers
-                                    ,fromColourLoversArray: fromColourLoversArray};
+   return _elm.Gui.ColorScheme.values = {_op: _op
+                                        ,ColorScheme: ColorScheme
+                                        ,defaultColorScheme: defaultColorScheme
+                                        ,fromColourLovers: fromColourLovers
+                                        ,fromColourLoversArray: fromColourLoversArray};
 };
-Elm.ColorSchemeChooser = Elm.ColorSchemeChooser || {};
-Elm.ColorSchemeChooser.make = function (_elm) {
+Elm.Gui = Elm.Gui || {};
+Elm.Gui.ColorSchemeChooser = Elm.Gui.ColorSchemeChooser || {};
+Elm.Gui.ColorSchemeChooser.make = function (_elm) {
    "use strict";
-   _elm.ColorSchemeChooser = _elm.ColorSchemeChooser || {};
-   if (_elm.ColorSchemeChooser.values)
-   return _elm.ColorSchemeChooser.values;
+   _elm.Gui = _elm.Gui || {};
+   _elm.Gui.ColorSchemeChooser = _elm.Gui.ColorSchemeChooser || {};
+   if (_elm.Gui.ColorSchemeChooser.values)
+   return _elm.Gui.ColorSchemeChooser.values;
    var _U = Elm.Native.Utils.make(_elm),
    $Array = Elm.Array.make(_elm),
    $Basics = Elm.Basics.make(_elm),
-   $ColorExtra = Elm.ColorExtra.make(_elm),
-   $ColorScheme = Elm.ColorScheme.make(_elm),
    $Debug = Elm.Debug.make(_elm),
+   $Gui$ColorScheme = Elm.Gui.ColorScheme.make(_elm),
    $Html = Elm.Html.make(_elm),
    $Html$Attributes = Elm.Html.Attributes.make(_elm),
    $Html$Events = Elm.Html.Events.make(_elm),
+   $Lib$ColorExtra = Elm.Lib.ColorExtra.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Random = Elm.Random.make(_elm),
@@ -15603,7 +15813,7 @@ Elm.ColorSchemeChooser.make = function (_elm) {
          return A2($Html.div,
          _U.list([$Html$Attributes.style(_U.list([{ctor: "_Tuple2"
                                                   ,_0: "background-color"
-                                                  ,_1: $ColorExtra.toCssRgb(color)}]))
+                                                  ,_1: $Lib$ColorExtra.toCssRgb(color)}]))
                  ,A2($Html$Events.onMouseEnter,address,PreviewColorScheme(index))
                  ,A2($Html$Events.onMouseLeave,
                  address,
@@ -15719,251 +15929,30 @@ Elm.ColorSchemeChooser.make = function (_elm) {
            {previewing: A2($Array.get,_p1._0,model.colorSchemes)});
          default: return _U.update(model,{previewing: $Maybe.Nothing});}
    });
-   return _elm.ColorSchemeChooser.values = {_op: _op
-                                           ,randomInt: randomInt
-                                           ,Model: Model
-                                           ,init: init
-                                           ,setColorSchemes: setColorSchemes
-                                           ,getColorScheme: getColorScheme
-                                           ,SelectRandom: SelectRandom
-                                           ,OpenPopup: OpenPopup
-                                           ,ClosePopup: ClosePopup
-                                           ,PreviewColorScheme: PreviewColorScheme
-                                           ,StopPreviewingColorScheme: StopPreviewingColorScheme
-                                           ,update: update
-                                           ,colorSchemeView: colorSchemeView
-                                           ,view: view
-                                           ,popupView: popupView};
+   return _elm.Gui.ColorSchemeChooser.values = {_op: _op
+                                               ,randomInt: randomInt
+                                               ,Model: Model
+                                               ,init: init
+                                               ,setColorSchemes: setColorSchemes
+                                               ,getColorScheme: getColorScheme
+                                               ,SelectRandom: SelectRandom
+                                               ,OpenPopup: OpenPopup
+                                               ,ClosePopup: ClosePopup
+                                               ,PreviewColorScheme: PreviewColorScheme
+                                               ,StopPreviewingColorScheme: StopPreviewingColorScheme
+                                               ,update: update
+                                               ,colorSchemeView: colorSchemeView
+                                               ,view: view
+                                               ,popupView: popupView};
 };
-Elm.Components = Elm.Components || {};
-Elm.Components.make = function (_elm) {
+Elm.Lib = Elm.Lib || {};
+Elm.Lib.HtmlEventsExtra = Elm.Lib.HtmlEventsExtra || {};
+Elm.Lib.HtmlEventsExtra.make = function (_elm) {
    "use strict";
-   _elm.Components = _elm.Components || {};
-   if (_elm.Components.values) return _elm.Components.values;
-   var _U = Elm.Native.Utils.make(_elm),
-   $AudioNodes = Elm.AudioNodes.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $Debug = Elm.Debug.make(_elm),
-   $List = Elm.List.make(_elm),
-   $MainTypes = Elm.MainTypes.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
-   var _op = {};
-   var fmSynth = F2(function (id,_p0) {
-      var _p1 = _p0;
-      var _p2 = _p1.frequency;
-      var createModulatorNode = F2(function (fundamentalFrequency,
-      spec) {
-         return A2($AudioNodes.sinNode,
-         spec.id,
-         {frequency: $MainTypes.Value(_p2 * spec.multiple)
-         ,frequencyOffset: $MainTypes.Default
-         ,phaseOffset: spec.modulator});
-      });
-      var carrierNode = A2($AudioNodes.sinNode,
-      id,
-      {frequency: $MainTypes.Value(_p2)
-      ,frequencyOffset: $MainTypes.Default
-      ,phaseOffset: _p1.modulator});
-      return A2($Basics._op["++"],
-      _U.list([carrierNode]),
-      A2($List.map,createModulatorNode(_p2),_p1.modulatorNodes));
-   });
-   var FMSynthSpec = F3(function (a,b,c) {
-      return {frequency: a,modulator: b,modulatorNodes: c};
-   });
-   var ModulatorNodeSpec = F4(function (a,b,c,d) {
-      return {id: a,multiple: b,detune: c,modulator: d};
-   });
-   var additiveSynthAudioGraph = F2(function (fundamentalFrequency,
-   numOscillators) {
-      var getId = function (n) {
-         return A2($Basics._op["++"],"harmonic",$Basics.toString(n));
-      };
-      var getSinNode = function (n) {
-         var id = getId(n);
-         var frequency = n * fundamentalFrequency;
-         return A2($AudioNodes.sinNode,
-         id,
-         {frequency: $MainTypes.Value(frequency)
-         ,frequencyOffset: $MainTypes.Default
-         ,phaseOffset: $MainTypes.Default});
-      };
-      var oscs = A2($List.map,getSinNode,_U.range(1,numOscillators));
-      var mixerInputs = A2($List.map,
-      function (n) {
-         return $MainTypes.ID(getId(n));
-      },
-      _U.range(1,numOscillators));
-      return A2($Basics._op["++"],
-      oscs,
-      _U.list([A2($AudioNodes.adderNode,
-      "additiveSynth",
-      mixerInputs)]));
-   });
-   return _elm.Components.values = {_op: _op
-                                   ,additiveSynthAudioGraph: additiveSynthAudioGraph
-                                   ,ModulatorNodeSpec: ModulatorNodeSpec
-                                   ,FMSynthSpec: FMSynthSpec
-                                   ,fmSynth: fmSynth};
-};
-Elm.HtmlAttributesExtra = Elm.HtmlAttributesExtra || {};
-Elm.HtmlAttributesExtra.make = function (_elm) {
-   "use strict";
-   _elm.HtmlAttributesExtra = _elm.HtmlAttributesExtra || {};
-   if (_elm.HtmlAttributesExtra.values)
-   return _elm.HtmlAttributesExtra.values;
-   var _U = Elm.Native.Utils.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $Debug = Elm.Debug.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
-   var _op = {};
-   _op["=>"] = F2(function (v0,v1) {
-      return {ctor: "_Tuple2",_0: v0,_1: v1};
-   });
-   return _elm.HtmlAttributesExtra.values = {_op: _op};
-};
-Elm.Piano = Elm.Piano || {};
-Elm.Piano.make = function (_elm) {
-   "use strict";
-   _elm.Piano = _elm.Piano || {};
-   if (_elm.Piano.values) return _elm.Piano.values;
-   var _U = Elm.Native.Utils.make(_elm),
-   $AudioUtil = Elm.AudioUtil.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $Color = Elm.Color.make(_elm),
-   $ColorExtra = Elm.ColorExtra.make(_elm),
-   $Debug = Elm.Debug.make(_elm),
-   $Html = Elm.Html.make(_elm),
-   $Html$Attributes = Elm.Html.Attributes.make(_elm),
-   $Html$Events = Elm.Html.Events.make(_elm),
-   $HtmlAttributesExtra = Elm.HtmlAttributesExtra.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
-   var _op = {};
-   var ColorScheme = F2(function (a,b) {
-      return {whiteKey: a,blackKey: b};
-   });
-   var White = {ctor: "White"};
-   var Black = {ctor: "Black"};
-   var pianoMailbox = $Signal.mailbox(60.0);
-   var pianoSignal = pianoMailbox.signal;
-   var pianoGuiFrequency = A2($Signal.map,
-   $AudioUtil.pitchToFrequency,
-   pianoSignal);
-   var piano = F3(function (colorScheme,numOctaves,bottomPitch) {
-      var pianoKey = F2(function (keyType,pitch) {
-         var _p0 = keyType;
-         if (_p0.ctor === "Black") {
-               return A2($Html.div,
-               _U.list([$Html$Attributes.$class("black-key-wrapper")]),
-               _U.list([A2($Html.div,
-               _U.list([$Html$Attributes.$class("black-key")
-                       ,A2($Html$Events.onMouseDown,pianoMailbox.address,pitch)
-                       ,$Html$Attributes.style(_U.list([A2($HtmlAttributesExtra._op["=>"],
-                       "background-color",
-                       $ColorExtra.toCssRgb(colorScheme.blackKey))]))]),
-               _U.list([]))]));
-            } else {
-               return A2($Html.div,
-               _U.list([$Html$Attributes.$class("white-key")
-                       ,A2($Html$Events.onMouseDown,pianoMailbox.address,pitch)
-                       ,$Html$Attributes.style(_U.list([A2($HtmlAttributesExtra._op["=>"],
-                       "background-color",
-                       $ColorExtra.toCssRgb(colorScheme.whiteKey))]))]),
-               _U.list([]));
-            }
-      });
-      var pianoOctave = function (cPitch) {
-         return _U.list([A2(pianoKey,White,cPitch)
-                        ,A2(pianoKey,Black,cPitch + 1.0)
-                        ,A2(pianoKey,White,cPitch + 2.0)
-                        ,A2(pianoKey,Black,cPitch + 3.0)
-                        ,A2(pianoKey,White,cPitch + 4.0)
-                        ,A2(pianoKey,White,cPitch + 5.0)
-                        ,A2(pianoKey,Black,cPitch + 6.0)
-                        ,A2(pianoKey,White,cPitch + 7.0)
-                        ,A2(pianoKey,Black,cPitch + 8.0)
-                        ,A2(pianoKey,White,cPitch + 9.0)
-                        ,A2(pianoKey,Black,cPitch + 10.0)
-                        ,A2(pianoKey,White,cPitch + 11.0)]);
-      };
-      var bottomPitches = A2($List.map,
-      function (n) {
-         return bottomPitch + $Basics.toFloat(n) * 12.0;
-      },
-      _U.range(1,numOctaves));
-      var pianoOctaves = A2($List.concatMap,
-      function (octaveBottomPitch) {
-         return pianoOctave(octaveBottomPitch);
-      },
-      bottomPitches);
-      return A2($Html.div,
-      _U.list([$Html$Attributes.$class("piano")]),
-      pianoOctaves);
-   });
-   return _elm.Piano.values = {_op: _op
-                              ,piano: piano
-                              ,pianoSignal: pianoSignal
-                              ,pianoGuiFrequency: pianoGuiFrequency};
-};
-Elm.KeyboardNoteInput = Elm.KeyboardNoteInput || {};
-Elm.KeyboardNoteInput.make = function (_elm) {
-   "use strict";
-   _elm.KeyboardNoteInput = _elm.KeyboardNoteInput || {};
-   if (_elm.KeyboardNoteInput.values)
-   return _elm.KeyboardNoteInput.values;
-   var _U = Elm.Native.Utils.make(_elm),
-   $AudioUtil = Elm.AudioUtil.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $Char = Elm.Char.make(_elm),
-   $Debug = Elm.Debug.make(_elm),
-   $Keyboard = Elm.Keyboard.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
-   var _op = {};
-   var charToPitch = function (c) {
-      var _p0 = c;
-      switch (_p0.valueOf())
-      {case "s": return $Maybe.Just(60.0);
-         case "d": return $Maybe.Just(62.0);
-         case "f": return $Maybe.Just(64.0);
-         case "g": return $Maybe.Just(65.0);
-         case "h": return $Maybe.Just(67.0);
-         case "j": return $Maybe.Just(69.0);
-         case "k": return $Maybe.Just(71.0);
-         case "l": return $Maybe.Just(72.0);
-         default: return $Maybe.Nothing;}
-   };
-   var keyboardGuiPitch = A2($Signal.map,
-   function (keyCode) {
-      return A2($Maybe.withDefault,
-      0.0,
-      charToPitch($Char.fromCode(keyCode)));
-   },
-   $Keyboard.presses);
-   var keyboardGuiFrequency = A2($Signal.map,
-   $AudioUtil.pitchToFrequency,
-   keyboardGuiPitch);
-   return _elm.KeyboardNoteInput.values = {_op: _op
-                                          ,charToPitch: charToPitch
-                                          ,keyboardGuiPitch: keyboardGuiPitch
-                                          ,keyboardGuiFrequency: keyboardGuiFrequency};
-};
-Elm.HtmlEventsExtra = Elm.HtmlEventsExtra || {};
-Elm.HtmlEventsExtra.make = function (_elm) {
-   "use strict";
-   _elm.HtmlEventsExtra = _elm.HtmlEventsExtra || {};
-   if (_elm.HtmlEventsExtra.values)
-   return _elm.HtmlEventsExtra.values;
+   _elm.Lib = _elm.Lib || {};
+   _elm.Lib.HtmlEventsExtra = _elm.Lib.HtmlEventsExtra || {};
+   if (_elm.Lib.HtmlEventsExtra.values)
+   return _elm.Lib.HtmlEventsExtra.values;
    var _U = Elm.Native.Utils.make(_elm),
    $Basics = Elm.Basics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
@@ -15989,27 +15978,147 @@ Elm.HtmlEventsExtra.make = function (_elm) {
    var onMouseDownWithOptions = function (options) {
       return A2(messageOnWithOptions,"mousedown",options);
    };
-   return _elm.HtmlEventsExtra.values = {_op: _op
-                                        ,messageOnWithOptions: messageOnWithOptions
-                                        ,onMouseDownWithOptions: onMouseDownWithOptions
-                                        ,preventDefault: preventDefault};
+   return _elm.Lib.HtmlEventsExtra.values = {_op: _op
+                                            ,messageOnWithOptions: messageOnWithOptions
+                                            ,onMouseDownWithOptions: onMouseDownWithOptions
+                                            ,preventDefault: preventDefault};
 };
-Elm.Knob = Elm.Knob || {};
-Elm.Knob.make = function (_elm) {
+Elm.Lib = Elm.Lib || {};
+Elm.Lib.Arc = Elm.Lib.Arc || {};
+Elm.Lib.Arc.make = function (_elm) {
    "use strict";
-   _elm.Knob = _elm.Knob || {};
-   if (_elm.Knob.values) return _elm.Knob.values;
+   _elm.Lib = _elm.Lib || {};
+   _elm.Lib.Arc = _elm.Lib.Arc || {};
+   if (_elm.Lib.Arc.values) return _elm.Lib.Arc.values;
    var _U = Elm.Native.Utils.make(_elm),
-   $Arc = Elm.Arc.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $String = Elm.String.make(_elm);
+   var _op = {};
+   var fromRadians = $Basics.radians;
+   var fromDegrees = $Basics.degrees;
+   var getArcInfo = function (args) {
+      var _p0 = args.centerPoint;
+      var centerX = _p0._0;
+      var centerY = _p0._1;
+      var radius = args.radius;
+      var toAbsoluteCoords = function (angleDegrees) {
+         var _p1 = $Basics.fromPolar({ctor: "_Tuple2"
+                                     ,_0: 1.0
+                                     ,_1: fromDegrees(angleDegrees)});
+         var normPointX = _p1._0;
+         var normPointY = _p1._1;
+         var pointX = centerX + normPointX * radius;
+         var pointY = centerY - normPointY * radius;
+         return {ctor: "_Tuple2",_0: pointX,_1: pointY};
+      };
+      var startPoint = toAbsoluteCoords(args.startAngle);
+      var endPoint = toAbsoluteCoords(args.endAngle);
+      var startAngleRadians = 0.0;
+      return {centerPoint: args.centerPoint
+             ,radius: args.radius
+             ,startPoint: startPoint
+             ,endPoint: endPoint};
+   };
+   var ArcInfo = F4(function (a,b,c,d) {
+      return {radius: a,centerPoint: b,startPoint: c,endPoint: d};
+   });
+   var ArcArgs = F4(function (a,b,c,d) {
+      return {radius: a,centerPoint: b,startAngle: c,endAngle: d};
+   });
+   var ArcSegmentArcs = F6(function (a,b,c,d,e,f) {
+      return {absolute: a
+             ,radius: b
+             ,xAxisRotation: c
+             ,largeArc: d
+             ,sweep: e
+             ,endPoint: f};
+   });
+   var boolToIntString = function (b) {
+      var _p2 = b;
+      if (_p2 === true) {
+            return "1";
+         } else {
+            return "0";
+         }
+   };
+   var arcSegment = function (args) {
+      var _p3 = args.endPoint;
+      var endX = _p3._0;
+      var endY = _p3._1;
+      var _p4 = args.radius;
+      var radiusX = _p4._0;
+      var radiusY = _p4._1;
+      return A2($String.join,
+      " ",
+      _U.list([args.absolute ? "A" : "a"
+              ,$Basics.toString(radiusX)
+              ,$Basics.toString(radiusY)
+              ,$Basics.toString(args.xAxisRotation)
+              ,boolToIntString(args.largeArc)
+              ,boolToIntString(args.sweep)
+              ,$Basics.toString(endX)
+              ,$Basics.toString(endY)]));
+   };
+   var arc = function (args) {
+      var largeArc = _U.cmp(args.endAngle - args.startAngle,
+      180.0) > -1 ? true : false;
+      var _p5 = args.centerPoint;
+      var centerX = _p5._0;
+      var centerY = _p5._1;
+      var radius = args.radius;
+      var startAngleRadians = 0.0;
+      var arcInfo = getArcInfo(args);
+      var _p6 = arcInfo.startPoint;
+      var startPointX = _p6._0;
+      var startPointY = _p6._1;
+      var _p7 = arcInfo.endPoint;
+      var endPointX = _p7._0;
+      var endPointY = _p7._1;
+      return A2($Basics._op["++"],
+      "M ",
+      A2($Basics._op["++"],
+      $Basics.toString(startPointX),
+      A2($Basics._op["++"],
+      " ",
+      A2($Basics._op["++"],
+      $Basics.toString(startPointY),
+      A2($Basics._op["++"],
+      " ",
+      arcSegment({absolute: true
+                 ,endPoint: arcInfo.endPoint
+                 ,radius: {ctor: "_Tuple2",_0: args.radius,_1: args.radius}
+                 ,sweep: false
+                 ,largeArc: largeArc
+                 ,xAxisRotation: 0.0}))))));
+   };
+   return _elm.Lib.Arc.values = {_op: _op
+                                ,arc: arc
+                                ,arcSegment: arcSegment
+                                ,getArcInfo: getArcInfo};
+};
+Elm.Gui = Elm.Gui || {};
+Elm.Gui.Knob = Elm.Gui.Knob || {};
+Elm.Gui.Knob.make = function (_elm) {
+   "use strict";
+   _elm.Gui = _elm.Gui || {};
+   _elm.Gui.Knob = _elm.Gui.Knob || {};
+   if (_elm.Gui.Knob.values) return _elm.Gui.Knob.values;
+   var _U = Elm.Native.Utils.make(_elm),
    $Basics = Elm.Basics.make(_elm),
    $Color = Elm.Color.make(_elm),
-   $ColorExtra = Elm.ColorExtra.make(_elm),
    $Debug = Elm.Debug.make(_elm),
    $Html = Elm.Html.make(_elm),
    $Html$Attributes = Elm.Html.Attributes.make(_elm),
    $Html$Events = Elm.Html.Events.make(_elm),
-   $HtmlAttributesExtra = Elm.HtmlAttributesExtra.make(_elm),
-   $HtmlEventsExtra = Elm.HtmlEventsExtra.make(_elm),
+   $Lib$Arc = Elm.Lib.Arc.make(_elm),
+   $Lib$ColorExtra = Elm.Lib.ColorExtra.make(_elm),
+   $Lib$HtmlAttributesExtra = Elm.Lib.HtmlAttributesExtra.make(_elm),
+   $Lib$HtmlEventsExtra = Elm.Lib.HtmlEventsExtra.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
@@ -16042,7 +16151,7 @@ Elm.Knob.make = function (_elm) {
                           ,centerPoint: centerPoint
                           ,startAngle: valueAngle
                           ,endAngle: emptyAngle};
-      var activeArcInfo = $Arc.getArcInfo(needleArcArgs);
+      var activeArcInfo = $Lib$Arc.getArcInfo(needleArcArgs);
       var _p0 = activeArcInfo.centerPoint;
       var needleX1 = _p0._0;
       var needleY1 = _p0._1;
@@ -16058,14 +16167,14 @@ Elm.Knob.make = function (_elm) {
               widthStr,
               A2($Basics._op["++"]," ",heightStr))))]),
       _U.list([A2($Svg.path,
-              _U.list([$Svg$Attributes.d($Arc.arc(inactiveArcArgs))
-                      ,$Svg$Attributes.stroke($ColorExtra.toCssRgb(model.params.backgroundColor))
+              _U.list([$Svg$Attributes.d($Lib$Arc.arc(inactiveArcArgs))
+                      ,$Svg$Attributes.stroke($Lib$ColorExtra.toCssRgb(model.params.backgroundColor))
                       ,$Svg$Attributes.fill("none")
                       ,$Svg$Attributes.strokeWidth(strokeWidthStr)]),
               _U.list([]))
               ,A2($Svg.path,
-              _U.list([$Svg$Attributes.d($Arc.arc(activeArcArgs))
-                      ,$Svg$Attributes.stroke($ColorExtra.toCssRgb(model.params.foregroundColor))
+              _U.list([$Svg$Attributes.d($Lib$Arc.arc(activeArcArgs))
+                      ,$Svg$Attributes.stroke($Lib$ColorExtra.toCssRgb(model.params.foregroundColor))
                       ,$Svg$Attributes.fill("none")
                       ,$Svg$Attributes.strokeWidth(strokeWidthStr)]),
               _U.list([]))
@@ -16074,7 +16183,7 @@ Elm.Knob.make = function (_elm) {
                       ,$Svg$Attributes.y1($Basics.toString(needleY1))
                       ,$Svg$Attributes.x2($Basics.toString(needleX2))
                       ,$Svg$Attributes.y2($Basics.toString(needleY2))
-                      ,$Svg$Attributes.stroke($ColorExtra.toCssRgb(model.params.foregroundColor))
+                      ,$Svg$Attributes.stroke($Lib$ColorExtra.toCssRgb(model.params.foregroundColor))
                       ,$Svg$Attributes.fill("none")
                       ,$Svg$Attributes.strokeWidth($Basics.toString(2.0))]),
               _U.list([]))]));
@@ -16110,20 +16219,20 @@ Elm.Knob.make = function (_elm) {
       return A2($Html.div,
       _U.list([]),
       _U.list([A2($Html.div,
-      _U.list([$Html$Attributes.style(_U.list([A2($HtmlAttributesExtra._op["=>"],
+      _U.list([$Html$Attributes.style(_U.list([A2($Lib$HtmlAttributesExtra._op["=>"],
                                               "width",
                                               $Basics.toString(model.params.width))
-                                              ,A2($HtmlAttributesExtra._op["=>"],
+                                              ,A2($Lib$HtmlAttributesExtra._op["=>"],
                                               "height",
                                               $Basics.toString(model.params.width))
-                                              ,A2($HtmlAttributesExtra._op["=>"],"padding","10px")
-                                              ,A2($HtmlAttributesExtra._op["=>"],"position","relative")
-                                              ,A2($HtmlAttributesExtra._op["=>"],"margin","10px")]))
+                                              ,A2($Lib$HtmlAttributesExtra._op["=>"],"padding","10px")
+                                              ,A2($Lib$HtmlAttributesExtra._op["=>"],"position","relative")
+                                              ,A2($Lib$HtmlAttributesExtra._op["=>"],"margin","10px")]))
               ,$Html$Attributes.classList(_U.list([{ctor: "_Tuple2"
                                                    ,_0: "highlighted"
                                                    ,_1: model.mouseInside || model.mouseDown}]))
-              ,A3($HtmlEventsExtra.onMouseDownWithOptions,
-              $HtmlEventsExtra.preventDefault,
+              ,A3($Lib$HtmlEventsExtra.onMouseDownWithOptions,
+              $Lib$HtmlEventsExtra.preventDefault,
               address,
               MouseDown)
               ,A2($Html$Events.onMouseEnter,address,MouseEnter)
@@ -16151,97 +16260,37 @@ Elm.Knob.make = function (_elm) {
    var Model = F4(function (a,b,c,d) {
       return {params: a,mouseDown: b,mouseInside: c,value: d};
    });
-   return _elm.Knob.values = {_op: _op
-                             ,Model: Model
-                             ,Params: Params
-                             ,defaultParams: defaultParams
-                             ,init: init
-                             ,encode: encode
-                             ,GlobalMouseUp: GlobalMouseUp
-                             ,MouseDown: MouseDown
-                             ,MouseMove: MouseMove
-                             ,MouseEnter: MouseEnter
-                             ,MouseLeave: MouseLeave
-                             ,UpdateParams: UpdateParams
-                             ,clamp: clamp
-                             ,update: update
-                             ,knobDisplay: knobDisplay
-                             ,view: view};
+   return _elm.Gui.Knob.values = {_op: _op
+                                 ,Model: Model
+                                 ,Params: Params
+                                 ,defaultParams: defaultParams
+                                 ,init: init
+                                 ,encode: encode
+                                 ,GlobalMouseUp: GlobalMouseUp
+                                 ,MouseDown: MouseDown
+                                 ,MouseMove: MouseMove
+                                 ,MouseEnter: MouseEnter
+                                 ,MouseLeave: MouseLeave
+                                 ,UpdateParams: UpdateParams
+                                 ,clamp: clamp
+                                 ,update: update
+                                 ,knobDisplay: knobDisplay
+                                 ,view: view};
 };
-Elm.MouseExtra = Elm.MouseExtra || {};
-Elm.MouseExtra.make = function (_elm) {
+Elm.Gui = Elm.Gui || {};
+Elm.Gui.KnobRegistry = Elm.Gui.KnobRegistry || {};
+Elm.Gui.KnobRegistry.make = function (_elm) {
    "use strict";
-   _elm.MouseExtra = _elm.MouseExtra || {};
-   if (_elm.MouseExtra.values) return _elm.MouseExtra.values;
-   var _U = Elm.Native.Utils.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $Debug = Elm.Debug.make(_elm),
-   $Html = Elm.Html.make(_elm),
-   $Html$Events = Elm.Html.Events.make(_elm),
-   $Json$Decode = Elm.Json.Decode.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Mouse = Elm.Mouse.make(_elm),
-   $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
-   var _op = {};
-   var createVelocitySignal = function (positionSignal) {
-      var update = F2(function (x,state) {
-         return {x: x,velocity: x - state.x};
-      });
-      var initialState = {x: 0,velocity: 0};
-      var rawSignal = A3($Signal.foldp,
-      update,
-      initialState,
-      positionSignal);
-      var signal = A2($Signal.map,
-      function (_) {
-         return _.velocity;
-      },
-      rawSignal);
-      return signal;
-   };
-   var xVelocity = createVelocitySignal($Mouse.x);
-   var yVelocity = createVelocitySignal($Mouse.y);
-   var velocity = A3($Signal.map2,
-   F2(function (x,y) {    return {ctor: "_Tuple2",_0: x,_1: y};}),
-   xVelocity,
-   yVelocity);
-   var VelocityState = F2(function (a,b) {
-      return {x: a,velocity: b};
-   });
-   var onMouseMove = F2(function (mousePositionAddress,handler) {
-      var sendPosition = function (position) {
-         return A2($Signal.message,
-         mousePositionAddress,
-         handler(position));
-      };
-      var mousePositionDecoder = A3($Json$Decode.object2,
-      F2(function (x,y) {    return {ctor: "_Tuple2",_0: x,_1: y};}),
-      A2($Json$Decode._op[":="],"pageX",$Json$Decode.$int),
-      A2($Json$Decode._op[":="],"pageY",$Json$Decode.$int));
-      return A3($Html$Events.on,
-      "mousemove",
-      mousePositionDecoder,
-      sendPosition);
-   });
-   return _elm.MouseExtra.values = {_op: _op
-                                   ,velocity: velocity
-                                   ,xVelocity: xVelocity
-                                   ,yVelocity: yVelocity
-                                   ,onMouseMove: onMouseMove};
-};
-Elm.KnobRegistry = Elm.KnobRegistry || {};
-Elm.KnobRegistry.make = function (_elm) {
-   "use strict";
-   _elm.KnobRegistry = _elm.KnobRegistry || {};
-   if (_elm.KnobRegistry.values) return _elm.KnobRegistry.values;
+   _elm.Gui = _elm.Gui || {};
+   _elm.Gui.KnobRegistry = _elm.Gui.KnobRegistry || {};
+   if (_elm.Gui.KnobRegistry.values)
+   return _elm.Gui.KnobRegistry.values;
    var _U = Elm.Native.Utils.make(_elm),
    $Basics = Elm.Basics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
    $Dict = Elm.Dict.make(_elm),
+   $Gui$Knob = Elm.Gui.Knob.make(_elm),
    $Html = Elm.Html.make(_elm),
-   $Knob = Elm.Knob.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
@@ -16251,7 +16300,7 @@ Elm.KnobRegistry.make = function (_elm) {
       var updateKnob$ = function (knob) {
          var _p0 = knob;
          if (_p0.ctor === "Just") {
-               return $Maybe.Just(A2($Knob.update,action,_p0._0));
+               return $Maybe.Just(A2($Gui$Knob.update,action,_p0._0));
             } else {
                return $Maybe.Nothing;
             }
@@ -16261,7 +16310,7 @@ Elm.KnobRegistry.make = function (_elm) {
    var updateAllKnobs = F2(function (knobAction,model) {
       var knobs = A2($Dict.map,
       F2(function (id,model) {
-         return A2($Knob.update,knobAction,model);
+         return A2($Gui$Knob.update,knobAction,model);
       }),
       model.knobs);
       return _U.update(model,{knobs: knobs});
@@ -16280,7 +16329,7 @@ Elm.KnobRegistry.make = function (_elm) {
                  return _U.update(model,
                  {knobs: A3($Dict.update,
                  _p3._0,
-                 updateKnob($Knob.MouseMove(newMouse.yVelocity)),
+                 updateKnob($Gui$Knob.MouseMove(newMouse.yVelocity)),
                  model.knobs)
                  ,mouse: newMouse});
               } else {
@@ -16291,14 +16340,14 @@ Elm.KnobRegistry.make = function (_elm) {
                  return _U.update(model,
                  {knobs: A3($Dict.update,
                  _p5._0,
-                 updateKnob($Knob.GlobalMouseUp),
+                 updateKnob($Gui$Knob.GlobalMouseUp),
                  model.knobs)
                  ,currentKnob: $Maybe.Nothing});
               } else {
                  return model;
               }
          default: return A2(updateAllKnobs,
-           $Knob.UpdateParams(_p1._0),
+           $Gui$Knob.UpdateParams(_p1._0),
            model);}
    });
    var UpdateParamsForAll = function (a) {
@@ -16315,7 +16364,9 @@ Elm.KnobRegistry.make = function (_elm) {
       return A2($List.map,
       function (_p6) {
          var _p7 = _p6;
-         return {ctor: "_Tuple2",_0: _p7._0,_1: $Knob.encode(_p7._1)};
+         return {ctor: "_Tuple2"
+                ,_0: _p7._0
+                ,_1: $Gui$Knob.encode(_p7._1)};
       },
       $Dict.toList(model.knobs));
    };
@@ -16324,14 +16375,14 @@ Elm.KnobRegistry.make = function (_elm) {
       if (_p8.ctor === "Just") {
             return _p8._0;
          } else {
-            return _U.crashCase("KnobRegistry",
+            return _U.crashCase("Gui.KnobRegistry",
             {start: {line: 44,column: 3},end: {line: 46,column: 61}},
             _p8)(A2($Basics._op["++"],"No knob exists with id: ",id));
          }
    });
    var view = F3(function (address,model,id) {
       var knob = A2(getKnob,model.knobs,id);
-      return A2($Knob.view,
+      return A2($Gui$Knob.view,
       A2($Signal.forwardTo,address,KnobAction(id)),
       knob);
    });
@@ -16339,7 +16390,9 @@ Elm.KnobRegistry.make = function (_elm) {
       return {knobs: $Dict.fromList(A2($List.map,
              function (_p10) {
                 var _p11 = _p10;
-                return {ctor: "_Tuple2",_0: _p11._0,_1: $Knob.init(_p11._1)};
+                return {ctor: "_Tuple2"
+                       ,_0: _p11._0
+                       ,_1: $Gui$Knob.init(_p11._1)};
              },
              knobSpecs))
              ,currentKnob: $Maybe.Nothing
@@ -16348,15 +16401,15 @@ Elm.KnobRegistry.make = function (_elm) {
    var Model = F3(function (a,b,c) {
       return {knobs: a,currentKnob: b,mouse: c};
    });
-   return _elm.KnobRegistry.values = {_op: _op
-                                     ,init: init
-                                     ,update: update
-                                     ,view: view
-                                     ,encode: encode
-                                     ,Model: Model
-                                     ,GlobalMouseUp: GlobalMouseUp
-                                     ,MousePosition: MousePosition
-                                     ,UpdateParamsForAll: UpdateParamsForAll};
+   return _elm.Gui.KnobRegistry.values = {_op: _op
+                                         ,init: init
+                                         ,update: update
+                                         ,view: view
+                                         ,encode: encode
+                                         ,Model: Model
+                                         ,GlobalMouseUp: GlobalMouseUp
+                                         ,MousePosition: MousePosition
+                                         ,UpdateParamsForAll: UpdateParamsForAll};
 };
 Elm.Gui = Elm.Gui || {};
 Elm.Gui.make = function (_elm) {
@@ -16364,25 +16417,25 @@ Elm.Gui.make = function (_elm) {
    _elm.Gui = _elm.Gui || {};
    if (_elm.Gui.values) return _elm.Gui.values;
    var _U = Elm.Native.Utils.make(_elm),
+   $Apis$ColourLovers = Elm.Apis.ColourLovers.make(_elm),
    $Array = Elm.Array.make(_elm),
    $Basics = Elm.Basics.make(_elm),
-   $ColorExtra = Elm.ColorExtra.make(_elm),
-   $ColorScheme = Elm.ColorScheme.make(_elm),
-   $ColorSchemeChooser = Elm.ColorSchemeChooser.make(_elm),
-   $ColourLovers = Elm.ColourLovers.make(_elm),
    $Debug = Elm.Debug.make(_elm),
    $Effects = Elm.Effects.make(_elm),
+   $Gui$ColorScheme = Elm.Gui.ColorScheme.make(_elm),
+   $Gui$ColorSchemeChooser = Elm.Gui.ColorSchemeChooser.make(_elm),
+   $Gui$KeyboardNoteInput = Elm.Gui.KeyboardNoteInput.make(_elm),
+   $Gui$Knob = Elm.Gui.Knob.make(_elm),
+   $Gui$KnobRegistry = Elm.Gui.KnobRegistry.make(_elm),
+   $Gui$Piano = Elm.Gui.Piano.make(_elm),
    $Html = Elm.Html.make(_elm),
    $Html$Attributes = Elm.Html.Attributes.make(_elm),
    $Html$Events = Elm.Html.Events.make(_elm),
-   $HtmlAttributesExtra = Elm.HtmlAttributesExtra.make(_elm),
-   $KeyboardNoteInput = Elm.KeyboardNoteInput.make(_elm),
-   $Knob = Elm.Knob.make(_elm),
-   $KnobRegistry = Elm.KnobRegistry.make(_elm),
+   $Lib$ColorExtra = Elm.Lib.ColorExtra.make(_elm),
+   $Lib$HtmlAttributesExtra = Elm.Lib.HtmlAttributesExtra.make(_elm),
+   $Lib$MouseExtra = Elm.Lib.MouseExtra.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
-   $MouseExtra = Elm.MouseExtra.make(_elm),
-   $Piano = Elm.Piano.make(_elm),
    $Random = Elm.Random.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm),
@@ -16391,8 +16444,8 @@ Elm.Gui.make = function (_elm) {
    var _op = {};
    var dummy = "dummy!";
    var guiFrequency = A2($Signal.merge,
-   $KeyboardNoteInput.keyboardGuiFrequency,
-   $Piano.pianoGuiFrequency);
+   $Gui$KeyboardNoteInput.keyboardGuiFrequency,
+   $Gui$Piano.pianoGuiFrequency);
    var ColorSchemeChooserAction = function (a) {
       return {ctor: "ColorSchemeChooserAction",_0: a};
    };
@@ -16407,28 +16460,29 @@ Elm.Gui.make = function (_elm) {
                               ,_1: $Effects.none};
          case "KnobRegistryAction": return {ctor: "_Tuple2"
                                            ,_0: _U.update(model,
-                                           {knobRegistry: A2($KnobRegistry.update,
+                                           {knobRegistry: A2($Gui$KnobRegistry.update,
                                            _p0._0,
                                            model.knobRegistry)})
                                            ,_1: $Effects.none};
          case "ChangeFrequency": return {ctor: "_Tuple2"
                                         ,_0: _U.update(model,{frequency: _p0._0})
                                         ,_1: $Effects.none};
-         case "ColourLoversAction": var _p1 = A2($ColourLovers.update,
+         case "ColourLoversAction":
+         var _p1 = A2($Apis$ColourLovers.update,
            _p0._0,
            model.colourLovers);
            var colourLovers2 = _p1._0;
            var clFx = _p1._1;
-           var maybePalettes = $ColourLovers.getPalettes(colourLovers2);
+           var maybePalettes = $Apis$ColourLovers.getPalettes(colourLovers2);
            var colorSchemes = function () {
               var _p2 = maybePalettes;
               if (_p2.ctor === "Just") {
-                    return $ColorScheme.fromColourLoversArray(_p2._0);
+                    return $Gui$ColorScheme.fromColourLoversArray(_p2._0);
                  } else {
                     return $Array.empty;
                  }
            }();
-           var colorSchemeChooser = A2($ColorSchemeChooser.setColorSchemes,
+           var colorSchemeChooser = A2($Gui$ColorSchemeChooser.setColorSchemes,
            model.colorSchemeChooser,
            colorSchemes);
            var newModel = _U.update(model,
@@ -16437,16 +16491,16 @@ Elm.Gui.make = function (_elm) {
            return {ctor: "_Tuple2"
                   ,_0: newModel
                   ,_1: A2($Effects.map,ColourLoversAction,clFx)};
-         default: var knobDefaultParams = $Knob.defaultParams;
-           var colorSchemeChooser2 = A2($ColorSchemeChooser.update,
+         default: var knobDefaultParams = $Gui$Knob.defaultParams;
+           var colorSchemeChooser2 = A2($Gui$ColorSchemeChooser.update,
            _p0._0,
            model.colorSchemeChooser);
-           var colorScheme = $ColorSchemeChooser.getColorScheme(colorSchemeChooser2);
+           var colorScheme = $Gui$ColorSchemeChooser.getColorScheme(colorSchemeChooser2);
            var params = _U.update(knobDefaultParams,
            {foregroundColor: colorScheme.knobForeground
            ,backgroundColor: colorScheme.knobBackground});
-           var knobRegistry2 = A2($KnobRegistry.update,
-           $KnobRegistry.UpdateParamsForAll(params),
+           var knobRegistry2 = A2($Gui$KnobRegistry.update,
+           $Gui$KnobRegistry.UpdateParamsForAll(params),
            model.knobRegistry);
            return {ctor: "_Tuple2"
                   ,_0: _U.update(model,
@@ -16488,32 +16542,33 @@ Elm.Gui.make = function (_elm) {
               _U.list([]))]));
    });
    var view = F2(function (address,model) {
-      var colorScheme = $ColorSchemeChooser.getColorScheme(model.colorSchemeChooser);
+      var colorScheme = $Gui$ColorSchemeChooser.getColorScheme(model.colorSchemeChooser);
       var krAddress = A2($Signal.forwardTo,
       address,
       KnobRegistryAction);
       var knobView = function (id) {
-         return A3($KnobRegistry.view,
+         return A3($Gui$KnobRegistry.view,
          krAddress,
          model.knobRegistry,
          id);
       };
       return A2($Html.div,
-      _U.list([A2($MouseExtra.onMouseMove,
+      _U.list([A2($Lib$MouseExtra.onMouseMove,
               address,
               function (position) {
-                 return KnobRegistryAction($KnobRegistry.MousePosition(position));
+                 return KnobRegistryAction($Gui$KnobRegistry.MousePosition(position));
               })
               ,A2($Html$Events.onMouseUp,
               address,
-              KnobRegistryAction($KnobRegistry.GlobalMouseUp))
+              KnobRegistryAction($Gui$KnobRegistry.GlobalMouseUp))
               ,$Html$Attributes.$class("elm-audio")
-              ,$Html$Attributes.style(_U.list([A2($HtmlAttributesExtra._op["=>"],
+              ,$Html$Attributes.style(_U.list([A2($Lib$HtmlAttributesExtra._op["=>"],
               "background-color",
-              $ColorExtra.toCssRgb(colorScheme.windowBackground))]))]),
+              $Lib$ColorExtra.toCssRgb(colorScheme.windowBackground))]))]),
       _U.list([A2($Html.div,
               _U.list([$Html$Attributes.$class("synth")]),
-              _U.list([A2($Html.div,
+              _U.list([A2($Html.h1,_U.list([]),_U.list([$Html.text("elmu")]))
+                      ,A2($Html.div,
                       _U.list([$Html$Attributes.$class("control-panel")]),
                       _U.list([A2(audioOnCheckbox,address,model.audioOn)
                               ,A2($Html.div,
@@ -16522,19 +16577,22 @@ Elm.Gui.make = function (_elm) {
                                       ,knobView("decay")
                                       ,knobView("sustain")
                                       ,knobView("release")]))]))
-                      ,A3($Piano.piano,
+                      ,A3($Gui$Piano.piano,
                       {whiteKey: colorScheme.pianoWhites
                       ,blackKey: colorScheme.pianoBlacks},
                       4,
                       12.0)]))
-              ,A2($ColorSchemeChooser.view,
+              ,A2($Gui$ColorSchemeChooser.view,
               A2($Signal.forwardTo,address,ColorSchemeChooserAction),
               model.colorSchemeChooser)]));
    });
    var encode = function (model) {
-      return {audioOn: model.audioOn
-             ,frequency: model.frequency
-             ,knobs: $KnobRegistry.encode(model.knobRegistry)};
+      var knobs = $Gui$KnobRegistry.encode(model.knobRegistry);
+      var encoded = {audioOn: model.audioOn
+                    ,frequency: model.frequency
+                    ,knobs: knobs};
+      var _p3 = A2($Debug.log,"encoded:",encoded);
+      return encoded;
    };
    var EncodedModel = F3(function (a,b,c) {
       return {audioOn: a,frequency: b,knobs: c};
@@ -16549,23 +16607,23 @@ Elm.Gui.make = function (_elm) {
    var randomPrimer = 0.0;
    var randomSeed = $Random.initialSeed($Basics.round(randomPrimer));
    var init = function () {
-      var defaultParams = $Knob.defaultParams;
-      var _p3 = $ColourLovers.init;
-      var colourLovers = _p3._0;
-      var palettesFx = _p3._1;
+      var defaultParams = $Gui$Knob.defaultParams;
+      var _p4 = $Apis$ColourLovers.init;
+      var colourLovers = _p4._0;
+      var palettesFx = _p4._1;
       return {ctor: "_Tuple2"
              ,_0: {audioOn: true
                   ,frequency: 400.0
-                  ,knobRegistry: $KnobRegistry.init(_U.list([{ctor: "_Tuple2"
-                                                             ,_0: "attack"
-                                                             ,_1: $Knob.defaultParams}
-                                                            ,{ctor: "_Tuple2",_0: "decay",_1: $Knob.defaultParams}
-                                                            ,{ctor: "_Tuple2",_0: "sustain",_1: $Knob.defaultParams}
-                                                            ,{ctor: "_Tuple2",_0: "release",_1: $Knob.defaultParams}]))
+                  ,knobRegistry: $Gui$KnobRegistry.init(_U.list([{ctor: "_Tuple2"
+                                                                 ,_0: "attack"
+                                                                 ,_1: $Gui$Knob.defaultParams}
+                                                                ,{ctor: "_Tuple2",_0: "decay",_1: $Gui$Knob.defaultParams}
+                                                                ,{ctor: "_Tuple2",_0: "sustain",_1: $Gui$Knob.defaultParams}
+                                                                ,{ctor: "_Tuple2",_0: "release",_1: $Gui$Knob.defaultParams}]))
                   ,colourLovers: colourLovers
-                  ,colorSchemeChooser: A2($ColorSchemeChooser.init,
+                  ,colorSchemeChooser: A2($Gui$ColorSchemeChooser.init,
                   randomSeed,
-                  $ColorScheme.defaultColorScheme)}
+                  $Gui$ColorScheme.defaultColorScheme)}
              ,_1: $Effects.batch(_U.list([A2($Effects.map,
              ColourLoversAction,
              palettesFx)]))};
@@ -16613,68 +16671,71 @@ Elm.ReactiveAudio.make = function (_elm) {
    _elm.ReactiveAudio = _elm.ReactiveAudio || {};
    if (_elm.ReactiveAudio.values) return _elm.ReactiveAudio.values;
    var _U = Elm.Native.Utils.make(_elm),
-   $AudioNodes = Elm.AudioNodes.make(_elm),
+   $Audio$AudioNodes = Elm.Audio.AudioNodes.make(_elm),
+   $Audio$Components = Elm.Audio.Components.make(_elm),
+   $Audio$MainTypes = Elm.Audio.MainTypes.make(_elm),
    $Basics = Elm.Basics.make(_elm),
-   $Components = Elm.Components.make(_elm),
    $Debug = Elm.Debug.make(_elm),
    $Gui = Elm.Gui.make(_elm),
    $List = Elm.List.make(_elm),
-   $MainTypes = Elm.MainTypes.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm);
    var _op = {};
-   var theremin = _U.list([A2($AudioNodes.sinNode,
+   var theremin = _U.list([A2($Audio$AudioNodes.sinNode,
                           "t",
-                          {frequency: $MainTypes.GUI("frequency")
-                          ,frequencyOffset: $MainTypes.Default
-                          ,phaseOffset: $MainTypes.Default})
-                          ,$AudioNodes.destinationNode({signal: $MainTypes.ID("t")})]);
-   var audioGraph = theremin;
+                          {frequency: $Audio$MainTypes.GUI("frequency")
+                          ,frequencyOffset: $Audio$MainTypes.Default
+                          ,phaseOffset: $Audio$MainTypes.Default})
+                          ,$Audio$AudioNodes.destinationNode({signal: $Audio$MainTypes.ID("t")})]);
    var audioGraph3 = A2($Basics._op["++"],
-   A2($Components.additiveSynthAudioGraph,100.0,30),
-   _U.list([$AudioNodes.destinationNode({signal: $MainTypes.ID("additiveSynth")})]));
-   var fmSynth1 = A2($Components.fmSynth,
+   A2($Audio$Components.additiveSynthAudioGraph,100.0,30),
+   _U.list([$Audio$AudioNodes.destinationNode({signal: $Audio$MainTypes.ID("additiveSynth")})]));
+   var fmSynth1 = A2($Audio$Components.fmSynth,
    "fm",
    {frequency: 200.0
-   ,modulator: $MainTypes.ID("fm.1")
+   ,modulator: $Audio$MainTypes.ID("fm.1")
    ,modulatorNodes: _U.list([{id: "fm.1"
                              ,multiple: 1.0
-                             ,detune: $MainTypes.Default
-                             ,modulator: $MainTypes.ID("fm.2")}
+                             ,detune: $Audio$MainTypes.Default
+                             ,modulator: $Audio$MainTypes.ID("fm.2.gain")
+                             ,level: $Audio$MainTypes.GUI("knobs.attack")}
                             ,{id: "fm.2"
                              ,multiple: 1.0
-                             ,detune: $MainTypes.Default
-                             ,modulator: $MainTypes.ID("fm.3")}
+                             ,detune: $Audio$MainTypes.Default
+                             ,modulator: $Audio$MainTypes.ID("fm.3.gain")
+                             ,level: $Audio$MainTypes.GUI("knobs.decay")}
                             ,{id: "fm.3"
                              ,multiple: 4.0
-                             ,detune: $MainTypes.Default
-                             ,modulator: $MainTypes.Default}])});
+                             ,detune: $Audio$MainTypes.Default
+                             ,modulator: $Audio$MainTypes.Default
+                             ,level: $Audio$MainTypes.GUI("knobs.sustain")}])});
    var fmSynthGraph = A2($Basics._op["++"],
    fmSynth1,
-   _U.list([$AudioNodes.destinationNode({signal: $MainTypes.ID("fm")})]));
-   var audioGraph2 = _U.list([$AudioNodes.commaHelper
-                             ,A2($AudioNodes.sinNode,
+   _U.list([$Audio$AudioNodes.destinationNode({signal: $Audio$MainTypes.ID("fm")})]));
+   var audioGraph = fmSynthGraph;
+   var audioGraph2 = _U.list([$Audio$AudioNodes.commaHelper
+                             ,A2($Audio$AudioNodes.sinNode,
                              "mod3",
-                             {frequency: $MainTypes.Value(800.0)
-                             ,frequencyOffset: $MainTypes.Default
-                             ,phaseOffset: $MainTypes.Default})
-                             ,A2($AudioNodes.sinNode,
+                             {frequency: $Audio$MainTypes.Value(800.0)
+                             ,frequencyOffset: $Audio$MainTypes.Default
+                             ,phaseOffset: $Audio$MainTypes.Default})
+                             ,A2($Audio$AudioNodes.sinNode,
                              "mod2",
-                             {frequency: $MainTypes.Value(600.0)
-                             ,frequencyOffset: $MainTypes.Default
-                             ,phaseOffset: $MainTypes.ID("mod3")})
-                             ,A2($AudioNodes.sinNode,
+                             {frequency: $Audio$MainTypes.Value(600.0)
+                             ,frequencyOffset: $Audio$MainTypes.Default
+                             ,phaseOffset: $Audio$MainTypes.ID("mod3")})
+                             ,A2($Audio$AudioNodes.sinNode,
                              "mod1",
-                             {frequency: $MainTypes.Value(400.0)
-                             ,frequencyOffset: $MainTypes.Default
-                             ,phaseOffset: $MainTypes.ID("mod2")})
-                             ,A2($AudioNodes.sinNode,
+                             {frequency: $Audio$MainTypes.Value(400.0)
+                             ,frequencyOffset: $Audio$MainTypes.Default
+                             ,phaseOffset: $Audio$MainTypes.ID("mod2")})
+                             ,A2($Audio$AudioNodes.sinNode,
                              "root1",
-                             {frequency: $MainTypes.Value(200.0)
-                             ,frequencyOffset: $MainTypes.Default
-                             ,phaseOffset: $MainTypes.ID("mod1")})
-                             ,$AudioNodes.destinationNode({signal: $MainTypes.ID("root1")})]);
+                             {frequency: $Audio$MainTypes.Value(200.0)
+                             ,frequencyOffset: $Audio$MainTypes.Default
+                             ,phaseOffset: $Audio$MainTypes.ID("mod1")})
+                             ,$Audio$AudioNodes.destinationNode({signal: $Audio$MainTypes.ID("root1")})]);
    var reallyDumb = $Gui.dummy;
    return _elm.ReactiveAudio.values = {_op: _op
                                       ,reallyDumb: reallyDumb

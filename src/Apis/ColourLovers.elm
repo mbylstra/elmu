@@ -1,8 +1,7 @@
-module ColourLovers where
+module Apis.ColourLovers where
 
 import ElmTest exposing (..)
 import Effects exposing (Effects, Never)
--- import Graphics.Element
 import Html exposing (..)
 import Html.Attributes exposing (style)
 import Http
@@ -12,11 +11,10 @@ import Task
 import StartApp exposing (App)
 import String
 import Array exposing (Array)
-
 import Color exposing(Color, rgb)
-import ColorExtra exposing(toCssRgb)
 
-import StringExtra exposing (hexToInt)
+import Lib.ColorExtra exposing(toCssRgb)
+import Lib.StringExtra exposing (hexToInt)
 
 
 --------------------------------------------------------------------------------

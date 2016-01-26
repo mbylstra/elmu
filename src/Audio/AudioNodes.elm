@@ -1,15 +1,16 @@
-module AudioNodes where
+module Audio.AudioNodes where
 
-import MainTypes exposing(..)
+import Audio.MainTypes exposing(..)
 
 
-import AudioNodeFunctions exposing
+import Audio.AudioNodeFunctions exposing
     ( squareWave
     , OscillatorType(Square, Saw, Sin)
     , oscillator
     , simpleLowPassFilter
     , sinWave
     , zeroWave
+    , gain
     )
 
 sinNode : String -> {frequency: Input, frequencyOffset: Input, phaseOffset: Input} -> AudioNode
@@ -47,7 +48,7 @@ gainNode : String -> {signal: Input, gain: Input} -> AudioNode
 gainNode id {signal, gain} =
     Gain
         { id = id
-        , func = AudioNodeFunctions.gain
+        , func = Audio.AudioNodeFunctions.gain
         , inputs = { signal = signal, gain = gain }
         , state =
             { outputValue = 0.0 }

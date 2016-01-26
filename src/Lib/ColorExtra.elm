@@ -1,4 +1,4 @@
-module ColorExtra where
+module Lib.ColorExtra where
 
 import Color exposing (Color, toHsl)
 import List

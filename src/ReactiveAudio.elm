@@ -1,10 +1,11 @@
 module ReactiveAudio where
-import Gui exposing(dummy)
+
+import Gui exposing(dummy) -- this is pretty wierd, but the native stuff doesn't work unless you import at least something from the main module
 
 
-import AudioNodes exposing(..)
-import MainTypes exposing(..)
-import Components exposing(..)
+import Audio.AudioNodes exposing(..)
+import Audio.MainTypes exposing(..)
+import Audio.Components exposing(..)
 
 -- This is necessary so that The Gui code is linked so we can expose it. I have no idea why.
 reallyDumb : String
@@ -25,23 +26,27 @@ audioGraph2 =
 
 fmSynth1 : ListGraph
 fmSynth1 = fmSynth "fm"
-  { frequency = 200.0
+  { frequency = 200.0   -- stlil unable to respond to frequency
   , modulator = ID "fm.1"
   , modulatorNodes =
     [ { id = "fm.1"
       , multiple = 1.0
+      -- , detune = Default
       , detune = Default
-      , modulator = ID "fm.2"
+      , modulator = ID "fm.2.gain" -- we must put .gain in until we can chain nodes into one
+      , level = GUI "knobs.attack"
       }
     , { id = "fm.2"
       , multiple = 1.0
       , detune = Default
-      , modulator = ID "fm.3"  -- we need a better type than Defaualt for "No input connected"
+      , modulator = ID "fm.3.gain"  -- we need a better type than Defaualt for "No input connected"
+      , level = GUI "knobs.decay"
       }
     , { id = "fm.3"
       , multiple = 4.0
       , detune = Default
       , modulator = Default  -- we need a better type than Defaualt for "No input connected"
+      , level = GUI "knobs.sustain"
       }
     -- this is what feedback would look like
     -- , { mid = "2"
@@ -72,4 +77,5 @@ theremin =
   ]
 
 audioGraph : ListGraph
-audioGraph = theremin
+-- audioGraph = theremin
+audioGraph = fmSynthGraph

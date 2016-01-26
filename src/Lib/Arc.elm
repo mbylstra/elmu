@@ -1,4 +1,4 @@
-module Arc
+module Lib.Arc
   ( arc
   , arcSegment
   , getArcInfo

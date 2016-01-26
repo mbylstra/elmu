@@ -1,4 +1,4 @@
-module ColorSchemeChooser where
+module Gui.ColorSchemeChooser where
 
 import Html exposing (..)
 import Html.Attributes exposing (style, class)
@@ -7,13 +7,8 @@ import Random exposing (Seed)
 import Array exposing (Array)
 import Maybe exposing (withDefault)
 
-import ColorScheme exposing (ColorScheme)
-import ColorExtra exposing (toCssRgb)
-
-
--- clicking more schemes should fetch more schemes
--- clicking randomise should choose a different scheme from
--- the list of schemas
+import Gui.ColorScheme as ColorScheme exposing (ColorScheme)
+import Lib.ColorExtra exposing (toCssRgb)
 
 
 -- MODEL

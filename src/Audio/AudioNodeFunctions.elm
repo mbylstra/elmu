@@ -1,4 +1,4 @@
-module AudioNodeFunctions where
+module Audio.AudioNodeFunctions where
 
 --------------------------------------------------------------------------------
 -- EXTERNAL DEPENDENCIES
@@ -11,7 +11,7 @@ import ElmTest exposing (..)
 -- INTERNAL DEPENDENCIES
 --------------------------------------------------------------------------------
 
-import MainTypes exposing(..)
+import Audio.MainTypes exposing(..)
 
 --------------------------------------------------------------------------------
 -- Types
@@ -214,5 +214,5 @@ tests =
             )
         ]
 
-main =
-    elementRunner tests
+-- main =
+--     elementRunner tests

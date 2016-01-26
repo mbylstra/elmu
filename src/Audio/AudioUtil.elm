@@ -1,4 +1,4 @@
-module AudioUtil where
+module Audio.AudioUtil where
 
 pitchToFrequency : Float -> Float
 pitchToFrequency pitch =

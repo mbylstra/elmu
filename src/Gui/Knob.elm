@@ -1,21 +1,17 @@
-module Knob where
+module Gui.Knob where
 
 import Html exposing (div)
 import Html.Events exposing(onMouseDown, onMouseEnter, onMouseLeave, Options)
-import HtmlEventsExtra exposing (onMouseDownWithOptions, preventDefault)
 import Html.Attributes exposing (style, classList)
 import Color exposing (Color)
-
-
 import Signal exposing (Address)
-
-import Arc exposing (arc, getArcInfo)
-
 import Svg exposing (svg, path, rect, line)
 import Svg.Attributes exposing (d, stroke, fill, strokeWidth, x, y, x1, y1, x2, y2, width, height, viewBox)
 
-import HtmlAttributesExtra exposing (..)
-import ColorExtra exposing (toCssRgb)
+import Lib.HtmlEventsExtra exposing (onMouseDownWithOptions, preventDefault)
+import Lib.Arc exposing (arc, getArcInfo)
+import Lib.HtmlAttributesExtra exposing (..)
+import Lib.ColorExtra exposing (toCssRgb)
 
 
 

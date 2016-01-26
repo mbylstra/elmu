@@ -1,9 +1,10 @@
-module ColorScheme where
+module Gui.ColorScheme where
 
 import Color exposing (Color)
-import ColourLovers exposing (Palette)
 import Array exposing (Array)
 import Maybe exposing (withDefault)
+
+import Apis.ColourLovers as ColourLovers exposing (Palette)
 
 type alias ColorScheme =
   { windowBackground: Color

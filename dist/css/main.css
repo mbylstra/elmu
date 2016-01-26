@@ -1,4 +1,5 @@
 /* apply a natural box layout model to all elements, but allowing components to change */
+@import url(https://fonts.googleapis.com/css?family=Rubik:500,400,300,700);
 .no-select {
   -webkit-touch-callout: none;
   /* iOS Safari */
@@ -20,6 +21,11 @@ body {
   font-family: sans-serif;
   padding: 0px;
   margin: 0px; }
+
+h1 {
+  font-family: 'Rubik', Helvetica, Arial, sans-serif;
+  font-weight: 500;
+  font-size: 40px; }
 
 .elm-audio {
   height: 100%; }

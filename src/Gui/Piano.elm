@@ -1,13 +1,13 @@
-module Piano (piano, pianoSignal, pianoGuiFrequency) where
+module Gui.Piano (piano, pianoSignal, pianoGuiFrequency) where
 
 import Html exposing (..)
 import Html.Attributes exposing(..)
 import Html.Events exposing(onMouseDown, Options)
 import Color exposing (Color)
-import HtmlAttributesExtra exposing (..)
-import ColorExtra exposing (toCssRgb)
 
-import AudioUtil exposing (pitchToFrequency)
+import Lib.HtmlAttributesExtra exposing (..)
+import Lib.ColorExtra exposing (toCssRgb)
+import Audio.AudioUtil exposing (pitchToFrequency)
 
 
 -- it's acceptable to have a mailbox, as it's unlikely you'd ever need

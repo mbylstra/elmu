@@ -1,4 +1,4 @@
-module MainTypes where
+module Audio.MainTypes where
 
 import Dict exposing(Dict)
 

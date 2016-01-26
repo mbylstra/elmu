@@ -21,12 +21,6 @@ var MAX_ALLOWED_DURATION = ITERATIONS * BUFFER_DURATION;
 
 buffersElapsed = 0;
 
-var latestUserInput = {
-    mousePosition: {x: 0, y: 0},
-    windowDimensions: {x: 0, y: 0},
-    audioOn: false
-}
-
 var startTime = window.performance.now();
 var endTime = null;
 
@@ -60,13 +54,26 @@ var initialAudioGraph = _List.toArray(ReactiveAudio.audioGraph);
 console.log(initialAudioGraph);
 
 // TODO: get this from elm! So it's properly type checked. Should map fine.
+// THIS IS GETTING REALLY UNSUSTAINABLE!
+// but maybe a bit difficult as we have no way of easily getting the initial value?
+// at least without doing some native hacks?
 var externalState = {
   time: 0.0,
   externalInputState: {
     frequency: 400.0,
     audioOn : true,
-    knobs : {}
+    knobs : {attack:0, decay:0, release:0, sustain:0}
   }
+}
+
+
+var tupleArrayToObject = function(tuples) {
+  var o = {}
+  for (var i = 0; i < tuples.length; i++) {
+    var tuple = tuples[i];
+    o[tuple[0]] = tuple[1];
+  }
+  return o;
 }
 
 var graphListToObject = function(graphList) {
@@ -124,16 +131,26 @@ var getNodeValue = function(audioGraph, node) {
     return result._0;
   } else if (node.type == "Add") {
     // console.log('add');
-    var value = 0;
+    var result = 0;
     var inputs = _List.toArray(node.inputs);
     // console.log('inputs', inputs);
     for (var i = 0; i < inputs.length; i++) {
       var input = inputs[i];
       // console.log('input', input);
-      value += getInputValue(audioGraph, inputs[i]);
+      result += getInputValue(audioGraph, inputs[i]);
     }
     // console.log('value', value);
     return value;
+  } else if (node.type == "Gain") {
+    var signal = getInputValue(audioGraph, node.inputs.signal)
+    // console.log('signal', signal);
+    var gain = getInputValue(audioGraph, node.inputs.gain)
+    // console.log('gain', gain);
+    var result = node.func(signal)(gain)
+    // console.log('result', result);
+    return result;
+  } else {
+    throw (node.type + " not implemented in JS land yet :(");
   }
 }
 
@@ -145,7 +162,7 @@ var getInputStateFromDottedPath = function(dottedPath, inputState) {
     if (node.hasOwnProperty(propertyName)) {
       return node[propertyName];
     } else {
-      throw "GUI id " + propertyName + " does not exist"
+      throw ""
     }
   }
 
@@ -176,7 +193,7 @@ var getInputValue = function(audioGraph, input) {
     try {
       return getInputStateFromDottedPath(guiId, inputState);
     } catch(e) {
-      throw "GUI id `" + guiId + "` does not exist"
+      throw "GUI id `" + guiId + "` does not exist. These do: " + JSON.stringify(inputState)
     }
   }
 }
@@ -221,7 +238,8 @@ if (PROFILING) {
     console.log('CPU percent:', (secondsElapsed / MAX_ALLOWED_DURATION) * 100.0);
 } else {
     elmGui.ports.outgoingUiModel.subscribe(function(userInput) {
-      // console.log('userInput', userInput);
+      console.log('userInput', userInput);
+      userInput.knobs = tupleArrayToObject(userInput.knobs);
       externalState.externalInputState = userInput;
       // console.log('userInput', userInput);
       // console.log('userInput', userInput.slider1);
