@@ -5,28 +5,18 @@ import Gui exposing(dummy) -- this is pretty wierd, but the native stuff doesn't
 
 import Audio.AudioNodes exposing(..)
 import Audio.MainTypes exposing(..)
-import Audio.Components exposing(..)
+import Audio.Components.FmSynth exposing(..)
+import Audio.Components.AdditiveSynth exposing(..)
+import Audio.Atoms.Sine exposing (sine, sineDefaults)
+import Audio.Atoms.Add exposing (add)
 
 -- This is necessary so that The Gui code is linked so we can expose it. I have no idea why.
 reallyDumb : String
 reallyDumb = dummy
 
-audioGraph2: ListGraph
-audioGraph2 =
-    [ commaHelper
-    , sinNode "mod3" {frequency = Value 800.0, frequencyOffset = Default, phaseOffset = Default}
-    , sinNode "mod2" {frequency = Value 600.0, frequencyOffset = Default, phaseOffset = ID "mod3"}
-    -- , gainNode "mod1Frequency" {signal = ID "pitch", gain = Value 3.0}
-    , sinNode "mod1" {frequency = Value 400.0, frequencyOffset = Default, phaseOffset = ID "mod2"}
-    , sinNode "root1" {frequency = Value 200.0, frequencyOffset = Default, phaseOffset = ID "mod1"}
-    , destinationNode {signal = ID "root1"}
-    ]
-
-
-
 fmSynth1 : ListGraph
 fmSynth1 = fmSynth "fm"
-  { frequency = 200.0   -- stlil unable to respond to frequency
+  { frequency = GUI "frequency"   -- stlil unable to respond to frequency GUI "frequency"
   , modulator = ID "fm.1"
   , modulatorNodes =
     [ { id = "fm.1"
@@ -61,21 +51,37 @@ fmSynth1 = fmSynth "fm"
 audioGraph3 : ListGraph
 audioGraph3 =
     (additiveSynthAudioGraph 100.0 30)
-    ++ [ destinationNode {signal = ID "additiveSynth"} ]
+    ++ [ destinationNode <| ID "additiveSynth" ]
 
 fmSynthGraph : ListGraph
 fmSynthGraph =
   fmSynth1
-    ++ [ destinationNode {signal = ID "fm"} ]
+    ++ [ destinationNode <| ID "fm" ]
 
 theremin : ListGraph
 theremin =
-  -- [ sinNode "t" {frequency = GUI "pitch", frequencyOffset = Default, phaseOffset = Default}
-  -- [ sinNode "t" {frequency = GUI "keyboardFrequency", frequencyOffset = Default, phaseOffset = Default}
-  [ sinNode "t" {frequency = GUI "frequency", frequencyOffset = Default, phaseOffset = Default}
-  , destinationNode {signal = ID "t"}
+  -- [ sinNode "a" {frequency = GUI "frequency", frequencyOffset = Default, phaseOffset = Default}
+  -- , sinNode "b" {frequency = GUI "frequency", frequencyOffset = Default, phaseOffset = Default}
+  -- [ sinNode "a" { Sin.d | frequency = GUI "frequency"}
+  -- , sinNode "b" { Sin.d | frequency = GUI "frequency"}
+  [ destinationNode <| Node <|
+      add
+        [ Node <| sine
+            { sineDefaults
+            | frequency = GUI "frequency"
+            }
+        , Node <| sine
+            { sineDefaults
+            | frequency = Node <| add [GUI "frequency", Value 81.0]
+            }
+        ]
   ]
 
+-- inlineNodesExample : ListGraph
+
+-- this is the equivalent to the main function
+-- should we perhaps combine the two into one module?? (you can always split them in two yourself)
+-- the biggest annoyance is having to name this ReactiveAudio.elm by convention.
 audioGraph : ListGraph
--- audioGraph = theremin
-audioGraph = fmSynthGraph
+audioGraph = theremin
+-- audioGraph = fmSynthGraph

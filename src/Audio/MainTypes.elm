@@ -6,7 +6,7 @@ import Dict exposing(Dict)
 -- TYPE DEFINITIONS
 --------------------------------------------------------------------------------
 
-type Input = ID String | Value Float | Default | GUI String  -- or it could be an AudioNode! Maybe?
+type Input = ID String | Value Float | Default | GUI String | Node AudioNode -- or it could be an AudioNode! Maybe?
     -- We could also consider conveniences like whether the unit is in hz, dbs, amps, or a "note" like C3
     -- eg: type NoteValue = A0 | B0 | C0 | D0 | E0 | F0 | G0 | A1 | A2 | etc
     -- eg : type Input = Note NoteValue | MidiNote Int |

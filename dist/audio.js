@@ -1,6 +1,6 @@
 var PROFILING = 0;
 var DEBUG = 0;
-var ITERATIONS = 100;
+var ITERATIONS = 1;
 
 
 
@@ -76,15 +76,20 @@ var tupleArrayToObject = function(tuples) {
   return o;
 }
 
+var elmAudioNodeToJS = function(elmAudioNode) {
+  var type = elmAudioNode.ctor;
+  var node = elmAudioNode._0;
+  node.type = type;
+  return node;
+}
+
 var graphListToObject = function(graphList) {
   var graph = {}
   for (var i = 0; i < graphList.length; i++) {
-    var item = graphList[i];
-    var type = item.ctor;
-    var data = item._0;
-    data.type = type;
-    var id = data.id;
-    graph[id] = data;
+    var elmAudioNode = graphList[i];
+    var node = elmAudioNodeToJS(elmAudioNode);
+    var id = node.id;
+    graph[id] = node;
   }
   return graph;
 }
@@ -117,40 +122,48 @@ for (var i = 0; i < ids.length; i++) {
 
 
 var getNodeValue = function(audioGraph, node) {
-  // console.log('node', node);
-  if (node.type == "Destination") {
-    return getInputValue(audioGraph, node.input);
-  } else if (node.type == "Oscillator") {
-    var frequency = getInputValue(audioGraph, node.inputs.frequency);
-    var frequencyOffset = getInputValue(audioGraph, node.inputs.frequencyOffset);
-    var phaseOffset = getInputValue(audioGraph, node.inputs.phaseOffset);
-    var result = node.func(frequency)(frequencyOffset)(phaseOffset)(node.state.phase);
-    // console.log('result', result)
-    node.state.phase = result._1;
-    // console.log('node.state.phase', node.state.phase);
-    return result._0;
-  } else if (node.type == "Add") {
-    // console.log('add');
-    var result = 0;
-    var inputs = _List.toArray(node.inputs);
-    // console.log('inputs', inputs);
-    for (var i = 0; i < inputs.length; i++) {
-      var input = inputs[i];
-      // console.log('input', input);
-      result += getInputValue(audioGraph, inputs[i]);
-    }
-    // console.log('value', value);
-    return value;
-  } else if (node.type == "Gain") {
-    var signal = getInputValue(audioGraph, node.inputs.signal)
-    // console.log('signal', signal);
-    var gain = getInputValue(audioGraph, node.inputs.gain)
-    // console.log('gain', gain);
-    var result = node.func(signal)(gain)
-    // console.log('result', result);
-    return result;
-  } else {
-    throw (node.type + " not implemented in JS land yet :(");
+  // console.log('getNodeValue', node);
+
+  /* This is really dodgy. Pointlessly happens on every sample, and is really brittle!
+    It should happen on initialisation or if the audio graph has changed (which is rare)
+  */
+  if (node.hasOwnProperty('ctor')) {
+    node = elmAudioNodeToJS(node);
+  }
+  switch (node.type) {
+    case "Destination":
+      return getInputValue(audioGraph, node.input);
+    case "Oscillator":
+      var frequency = getInputValue(audioGraph, node.inputs.frequency);
+      var frequencyOffset = getInputValue(audioGraph, node.inputs.frequencyOffset);
+      var phaseOffset = getInputValue(audioGraph, node.inputs.phaseOffset);
+      var result = node.func(frequency)(frequencyOffset)(phaseOffset)(node.state.phase);
+      // console.log('result', result)
+      node.state.phase = result._1;
+      // console.log('node.state.phase', node.state.phase);
+      return result._0;
+    case "Add":
+      // console.log('add');
+      var result = 0;
+      var inputs = _List.toArray(node.inputs);
+      // console.log('inputs', inputs);
+      for (var i = 0; i < inputs.length; i++) {
+        var input = inputs[i];
+        // console.log('input', input);
+        result += getInputValue(audioGraph, inputs[i]);
+      }
+      // console.log('Add value', result);
+      return result;
+    case "Gain":
+      var signal = getInputValue(audioGraph, node.inputs.signal)
+      // console.log('signal', signal);
+      var gain = getInputValue(audioGraph, node.inputs.gain)
+      // console.log('gain', gain);
+      var result = node.func(signal)(gain)
+      // console.log('result', result);
+      return result;
+    default:
+      throw ("node type `" + node.type + "` not implemented in JS land yet :(");
   }
 }
 
@@ -177,24 +190,35 @@ var getInputStateFromDottedPath = function(dottedPath, inputState) {
 
 var getInputValue = function(audioGraph, input) {
   var type = input.ctor;
-  if (type == "Value") {
-    return input._0
-  } else if (type == "Default") {
-    return 0.0;
-  } else if (type == "ID") {
-    // console.log("audioGraph", audioGraph);
-    // console.log('input', input);
-    return getNodeValue(audioGraph, audioGraph[input._0]);
-  } else if (type == "GUI") {
+  // console.log('input', input);
+  // console.log('type', type);
 
-    var guiId = input._0;
-    var inputState = externalState.externalInputState
-    // console.log('inputState', inputState);
-    try {
-      return getInputStateFromDottedPath(guiId, inputState);
-    } catch(e) {
-      throw "GUI id `" + guiId + "` does not exist. These do: " + JSON.stringify(inputState)
-    }
+  switch (type) {
+    case "Value":
+      return input._0;
+      break;
+    case "Default":
+      return 0.0;
+      break;
+    case "ID":
+      return getNodeValue(audioGraph, audioGraph[input._0]);
+      break;
+    case "GUI":
+      var guiId = input._0;
+      var inputState = externalState.externalInputState
+      // console.log('inputState', inputState);
+      try {
+        return getInputStateFromDottedPath(guiId, inputState);
+      } catch(e) {
+        throw "GUI id `" + guiId + "` does not exist. These do: " + JSON.stringify(inputState)
+      }
+      break;
+    case "Node":
+      var node = input._0;
+      // console.log("node:", node);
+      return getNodeValue(audioGraph, node);
+    default:
+      throw (" input type `" + type + "` not implemented in JS land yet :(");
   }
 }
 
@@ -238,7 +262,7 @@ if (PROFILING) {
     console.log('CPU percent:', (secondsElapsed / MAX_ALLOWED_DURATION) * 100.0);
 } else {
     elmGui.ports.outgoingUiModel.subscribe(function(userInput) {
-      console.log('userInput', userInput);
+      // console.log('userInput', userInput);
       userInput.knobs = tupleArrayToObject(userInput.knobs);
       externalState.externalInputState = userInput;
       // console.log('userInput', userInput);

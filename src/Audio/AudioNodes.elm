@@ -13,15 +13,8 @@ import Audio.AudioNodeFunctions exposing
     , gain
     )
 
-sinNode : String -> {frequency: Input, frequencyOffset: Input, phaseOffset: Input} -> AudioNode
-sinNode id {frequency, frequencyOffset, phaseOffset} =
-  Oscillator
-    { id = id
-    , func = sinWave
-    , inputs = { frequency = frequency, frequencyOffset = frequencyOffset, phaseOffset = phaseOffset }
-    , state =
-        { outputValue = 0.0, phase = 0.0  }
-    }
+import Audio.Atoms.Sine exposing (sine, sineDefaults)
+
 
 squareNode : String -> {frequency: Input, frequencyOffset: Input, phaseOffset: Input} -> AudioNode
 squareNode id {frequency, frequencyOffset, phaseOffset} =
@@ -53,24 +46,15 @@ gainNode id {signal, gain} =
         , state =
             { outputValue = 0.0 }
         }
-adderNode : String -> List Input -> AudioNode
-adderNode id inputs =
-    Add
-        { id = id
-        , inputs = inputs
-        , state =
-            { outputValue = 0.0 }
-        }
 
-destinationNode : {signal: Input} -> AudioNode
-destinationNode {signal} =
+destinationNode : Input -> AudioNode
+destinationNode input =
     Destination
         { id = "destination"
-        , input = signal
+        , input = input
         , state =
             { outputValue = 0.0 }
         }
 
 commaHelper : AudioNode
-commaHelper =
-  sinNode "dummy123456789" {frequency = Default, frequencyOffset = Default, phaseOffset = Default }
+commaHelper = sine sineDefaults

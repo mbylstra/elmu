@@ -110,7 +110,7 @@ encode model =
       , frequency = model.frequency
       , knobs = knobs
       }
-    _ = Debug.log "encoded:" encoded
+    -- _ = Debug.log "encoded:" encoded
   in
     encoded
 
@@ -298,5 +298,6 @@ port outgoingUiModel =
 -- ???
 --------------------------------------------------------------------------------
 
+-- I guess we could use main instead?
 dummy : String
 dummy = "dummy!"
