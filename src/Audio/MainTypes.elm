@@ -51,6 +51,13 @@ type AudioNode =
             { outputValue : Float
             }
         }
+    | Multiply 
+        { id : String
+        , inputs : List Input
+        , state :
+            { outputValue : Float
+            }
+        }
     -- | ExternalInput
     --     { id : String
     --     , input : String -- A dict key. Yeah, this needs a big rethink!

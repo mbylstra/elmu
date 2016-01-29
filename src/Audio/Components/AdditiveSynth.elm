@@ -5,14 +5,16 @@ import Audio.Atoms.Add exposing (namedAdd)
 import Audio.Atoms.Sine exposing (sine, sineDefaults)
 
 
-additiveSynthAudioGraph : Float -> Float -> ListGraph
-additiveSynthAudioGraph fundamentalFrequency numOscillators =
+type alias Args = {fundamentalFrequency : Input, numOscillators : Int}
+
+additiveSynthAudioGraph : Args -> ListGraph
+additiveSynthAudioGraph {fundamentalFrequency, numOscillators} =
     let
         getId n =
             "harmonic" ++ toString n
         getSinNode n =
             let
-                frequency = n * fundamentalFrequency
+                frequency = multiply [Value (toFloat n),  fundamentalFrequency]
                 id = getId n
             in
                 sine  { sineDefaults | id = id, frequency = Value frequency}

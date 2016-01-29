@@ -2,6 +2,7 @@ module Audio.Atoms.Sine where
 
 import Array exposing (Array)
 import Basics
+import ElmTest exposing (..)
 
 import Audio.MainTypes exposing (..)
 import Audio.AudioNodeFunctions exposing (getPeriodSeconds, sampleDuration, fmod)
@@ -71,3 +72,19 @@ sineDefaults =
   , frequencyOffset = Value 0.0
   , phaseOffset = Value 0.0
   }
+
+tests : Test
+tests =
+    suite "sineWave"
+        [
+          test "sineWave"
+            (assertEqual
+                (0.0, 0.0)
+                (sinWave 11025.0 0.0 0.0 0.0)
+            )
+        , test "sinLookup"
+            (assertEqual
+                (Array.fromList([0.0]))
+                (sinLookup)
+            )
+        ]
