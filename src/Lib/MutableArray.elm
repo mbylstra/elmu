@@ -1,10 +1,10 @@
--- module MutableArray
---     ( MutableArray
---     , initialize
---     , length
---     , get, set
---     , map
---     ) where
+module MutableArray
+    ( MutableArray
+    , initialize
+    , length
+    , get, set
+    , map
+    ) where
 
 import Native.MutableArray
 import Basics exposing (..)
@@ -14,10 +14,6 @@ import Maybe exposing (..)
 import ElmTest exposing (..)
 
 
-{-| Representation of fast immutable arrays. You can create arrays of integers
-(`MutableArray Int`) or strings (`MutableArray String`) or any other type of value you can
-dream up.
--}
 type MutableArray a = MutableArray
 
 
@@ -78,5 +74,5 @@ tests =
         ]
 
 -- main : Graphics.Element.Element
-main =
-    elementRunner tests
+-- main =
+--     elementRunner tests
