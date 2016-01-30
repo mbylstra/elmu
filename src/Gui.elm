@@ -6,7 +6,7 @@ module Gui where
 
 import Effects exposing (Never, Effects)
 import StartApp exposing (App)
-import Task
+-- import Task
 import Random exposing (Seed)
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -282,13 +282,13 @@ main = app.html
 -- PORTS
 --------------------------------------------------------------------------------
 
-port tasks : Signal (Task.Task Never ())
-port tasks =
-  app.tasks
+-- port tasks : Signal (Task.Task Never ())
+-- port tasks =
+--   app.tasks
 
-port outgoingUiModel : Signal EncodedModel
-port outgoingUiModel =
-  Signal.map encode app.model
+-- port outgoingUiModel : Signal EncodedModel
+-- port outgoingUiModel =
+--   Signal.map encode app.model
 
 -- port randomPrimer : Float
 

@@ -8,7 +8,6 @@ import Audio.AudioNodeFunctions exposing
     , OscillatorType(Square, Saw, Sin)
     , oscillator
     , simpleLowPassFilter
-    , sinWave
     , zeroWave
     , gain
     )

@@ -1,4 +1,4 @@
-module Audio.Atoms.Add where
+module Audio.Atoms.Multiply where
 
 import Audio.MainTypes exposing (..)
 

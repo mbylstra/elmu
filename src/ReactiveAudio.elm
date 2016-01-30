@@ -50,7 +50,7 @@ fmSynth1 = fmSynth "fm"
 
 audioGraph3 : ListGraph
 audioGraph3 =
-    (additiveSynthAudioGraph {fundamentalFrequency=100.0, numOscillators=30}) -- this is where we pass input, not value
+    (additiveSynthAudioGraph {fundamentalFrequency= Value 100.0, numOscillators=30}) -- this is where we pass input, not value
     ++ [ destinationNode <| ID "additiveSynth" ]
 
 fmSynthGraph : ListGraph

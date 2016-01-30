@@ -8,7 +8,7 @@ import Http
 import Json.Decode as Decode exposing (Decoder, (:=))
 import Result exposing (Result(Ok))
 import Task
-import StartApp exposing (App)
+-- import StartApp exposing (App)
 import String
 import Array exposing (Array)
 import Color exposing(Color, rgb)
@@ -226,19 +226,19 @@ tests =
 -- MAIN
 --------------------------------------------------------------------------------
 
-app : App Model
-app =
-  StartApp.start
-    { init = init
-    , update = update
-    , view = view
-    , inputs = []
-    }
-
-main : Signal Html.Html
-main =
-  app.html
-
-port tasks : Signal (Task.Task Never ())
-port tasks =
-  app.tasks
+-- app : App Model
+-- app =
+--   StartApp.start
+--     { init = init
+--     , update = update
+--     , view = view
+--     , inputs = []
+--     }
+--
+-- main : Signal Html.Html
+-- main =
+--   app.html
+--
+-- port tasks : Signal (Task.Task Never ())
+-- port tasks =
+--   app.tasks
