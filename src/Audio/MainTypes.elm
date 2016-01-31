@@ -10,7 +10,8 @@ type Input
   = ID String
   | Value Float
   | Default
-  | GUI String
+  -- | GUI (guiModel -> Float)
+  | GUI Float
   | Node AudioNode
 
 
