@@ -2,6 +2,7 @@ module Gui.KnobRegistry
   ( init
   , Model
   , EncodedModel
+  , getKnobValue
   , Action(GlobalMouseUp, MousePosition, UpdateParamsForAll)
   , update
   , view
@@ -45,14 +46,20 @@ getKnob knobs id =
     Just knob -> knob
     Nothing -> Debug.crash("No knob exists with id: " ++ id)
 
+getKnobValue : Model -> ID -> Float
+getKnobValue model id =
+  let
+    knob = getKnob model.knobs id
+  in
+    knob.value
+
 type alias EncodedModel =
-  List (ID, Knob.EncodedModel)
+  Dict ID Knob.EncodedModel
 
 encode : Model -> EncodedModel
 encode model =
-  List.map
-    (\(k, v) -> (k, Knob.encode v))
-    (Dict.toList model.knobs)
+  model.knobs
+  |> Dict.map (\k v -> Knob.encode v)
 
 
 --------------------------------------------------------------------------------

@@ -48,38 +48,20 @@ type alias ExternalState =
 -- updateGraph : DictGraph -> ExternalState -> (DictGraph, OutputFloat)
 updateGraph : DictGraph -> ExternalState -> (DictGraph, OutputFloat)
 updateGraph graph externalState =
-{-     let
-        _ = Debug.log "externalState" externalState
-    in -}
-    updateGraphNode graph externalState (getDestinationNode graph)
-
-{- updateGraph graph externalState =
-    (graph, externalState) -}
-
-
-{- this naming is pretty gross! Difference is it takes an Input rather than an AudioNode -}
--- updateGraphNode' : DictGraph -> TimeFloat -> Input -> (DictGraph, Float)
-
-updateGraphNode' : DictGraph -> ExternalState -> Input -> (DictGraph, OutputFloat)
-updateGraphNode' graph externalState input =
-    case input of
-        ID id ->
-            updateGraphNode graph externalState (getInputNode graph id)
-        Value v ->
-            (graph, v)
-        Default ->
-            (graph, 0.0) -- need to work out how to send defaults around
-        Node x ->
-            Debug.crash "Node not supported yet"
-        GUI x ->
-            Debug.crash "GUI not supported yet"
-        -- Multiply _ ->
-        --     Debug.crash "Multiply not supported yet"
+   let
+      _ = Debug.log "updateGraph" externalState
+      _ = Debug.log "updateGraphNode" updateGraphNode
+      destinationNode = getDestinationNode graph
+      -- _ = Debug.log "destinationNode" destinationNode
+    in
+      updateGraphNode graph externalState destinationNode
 
 
 updateGraphNode : DictGraph -> ExternalState -> AudioNode -> (DictGraph, OutputFloat)
 updateGraphNode graph externalState node =
-
+  let
+    _ = Debug.log "updateGraphNode" graph
+  in
     case node of
 
         -- this requires a lot of rework to support inputs!
@@ -125,9 +107,13 @@ updateGraphNode graph externalState node =
                     Debug.crash("no input nodes!")
 
         Destination props ->
+          let
+            _ = Debug.log "Destination" props
+          in
             case getInputNodes node graph of
                 Just [inputNode] ->
                     let
+                        _ = Debug.log "inputNode" inputNode
                         (newGraph, inputValue) = updateGraphNode graph externalState inputNode
                         newState = { outputValue = inputValue }
                         newNode =  Destination { props | state = newState }
@@ -195,14 +181,47 @@ updateGraphNode graph externalState node =
 --                 (replacegraphnode newnode graph3, newvalue)
         Multiply _ -> Debug.crash("Multiply not supported yet")
 
+{- updateGraph graph externalState =
+    (graph, externalState) -}
+
+
+{- this naming is pretty gross! Difference is it takes an Input rather than an AudioNode -}
+-- updateGraphNode' : DictGraph -> TimeFloat -> Input -> (DictGraph, Float)
+
+updateGraphNode' : DictGraph -> ExternalState -> Input -> (DictGraph, OutputFloat)
+updateGraphNode' graph externalState input =
+  let
+    _ = Debug.log "updateGraphNode'" graph
+
+  in
+    case input of
+        ID id ->
+            updateGraphNode graph externalState (getInputNode graph id)
+        Value v ->
+            (graph, v)
+        Default ->
+            (graph, 0.0) -- need to work out how to send defaults around
+        Node node ->
+            updateGraphNode graph externalState node
+        GUI x ->
+            Debug.crash "GUI not supported yet"
+        -- Multiply _ ->
+        --     Debug.crash "Multiply not supported yet"
+
+
+
 getInputNode : DictGraph -> String -> AudioNode
 getInputNode graph id =
     case (Dict.get id graph) of
         Just node -> node
         Nothing -> Debug.crash("Can't find node: " ++ (toString id))
 
+-- given an Input, get the node that this refers to
 getInputNode' : DictGraph -> Input -> AudioNode
 getInputNode' graph input =
+  let
+    _ = Debug.log "getInputNode'" input
+  in
     case input of
         ID id ->
             getInputNode graph id
@@ -212,8 +231,11 @@ getInputNode' graph input =
             Debug.crash("see getInputNodes")
         GUI _ ->
             Debug.crash("see getInputNodes")
-        Node _ ->
-            Debug.crash("see getInputNodes")
+        Node node ->
+          let
+            _ = Debug.log "found Node" node
+          in
+            node
 
 
 
@@ -221,9 +243,10 @@ getInputNode' graph input =
 getInputNodes : AudioNode -> DictGraph -> Maybe (List AudioNode)
 getInputNodes node graph =
     let
-        getInputNodes' : List Input -> List AudioNode
-        getInputNodes' inputs =
-            List.map (getInputNode' graph)  inputs
+    --     getInputNodes' : List Input -> List AudioNode
+    --     getInputNodes' inputs =
+    --         List.map (getInputNode' graph)  inputs
+      _ = Debug.log "getInputNodes" node
     in
         case node of
             FeedforwardProcessor props ->
@@ -275,26 +298,6 @@ updateNodeState node newValue =
                 Destination { props | state = newState } -}
 
 
-toDict : ListGraph -> DictGraph
-toDict listGraph =
-    let
-        createTuple node =
-            case node of
-                Destination props ->
-                    (props.id, node)
-                Oscillator props ->
-                    (props.id, node)
-                FeedforwardProcessor props ->
-                    (props.id, node)
-                Add props ->
-                    (props.id, node)
-                Gain props ->
-                    (props.id, node)
-                Multiply _ ->
-                    Debug.crash "Multiply not supported"
-        tuples = List.map createTuple listGraph
-    in
-        Dict.fromList tuples
 
 
 getDestinationNode : DictGraph -> AudioNode
@@ -385,8 +388,8 @@ testGraph =
     , destinationA
     ]
 
-testDictGraph : DictGraph
-testDictGraph = toDict testGraph
+-- testDictGraph : DictGraph
+-- testDictGraph = toDict testGraph
 
 -- B
 

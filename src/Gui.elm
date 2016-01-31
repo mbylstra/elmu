@@ -16,6 +16,8 @@ import Maybe exposing (withDefault)
 import Array
 import Effects
 
+import Helpers exposing (prefixDict)
+
 import Lib.ColorExtra as ColorExtra exposing (toCssRgb)
 import Lib.MouseExtra as MouseExtra
 import Lib.HtmlAttributesExtra exposing (..)
@@ -25,7 +27,7 @@ import Gui.KeyboardNoteInput as KeyboardNoteInput exposing (keyboardGuiFrequency
 import Gui.ColorScheme as ColorScheme exposing (defaultColorScheme, ColorScheme, fromColourLovers)
 import Gui.ColorSchemeChooser as ColorSchemeChooser
 import Gui.Knob as Knob
-import Gui.KnobRegistry as KnobRegistry exposing (Action(GlobalMouseUp, MousePosition))
+import Gui.KnobRegistry as KnobRegistry exposing (Action(GlobalMouseUp, MousePosition), getKnobValue)
 
 
 import Apis.ColourLovers as ColourLovers
@@ -93,6 +95,13 @@ init =
 --         ]
 --     )
 
+getFrequency :Model -> Float
+getFrequency model =
+  model.frequency
+
+getAttack : Model -> Float
+getAttack model =
+  KnobRegistry.getKnobValue model.knobRegistry "attack"
 
 type alias EncodedModel =
   { audioOn : Bool
@@ -104,16 +113,25 @@ encode : Model -> EncodedModel
 encode model =
   let
     knobs = KnobRegistry.encode model.knobRegistry
+    knobs' = prefixDict ".knobs" knobs
     -- _ = Debug.log "knobs encoded" knobs
     encoded =
       { audioOn = model.audioOn
       , frequency = model.frequency
-      , knobs = knobs
+      , knobs = knobs'
       }
+    -- encoded
     -- _ = Debug.log "encoded:" encoded
   in
     encoded
 
+
+
+
+(initModel, _) = init
+
+initialEncodedModel : EncodedModel
+initialEncodedModel = encode initModel
 
 --------------------------------------------------------------------------------
 -- UPDATE
