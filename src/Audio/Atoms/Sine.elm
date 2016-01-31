@@ -47,27 +47,42 @@ sinWave frequency frequencyOffset phaseOffset prevPhase =
     in
         (amplitude, currPhase)  -- I actually think returning a tuple is problematic for performance! You want to stick to as basic as possible data types.
 
-type alias Args =
-  { id : String
-  , frequency: Input
-  , frequencyOffset: Input
-  , phaseOffset: Input
+type alias Args idType =
+  { id : Maybe idType
+  , frequency: Input idType
+  , frequencyOffset: Input idType
+  , phaseOffset: Input idType
   }
 
-sine : Args -> AudioNode
-sine {frequency, frequencyOffset, phaseOffset} =
-  Oscillator
-    { id = ""
-    , func = sinWave
-    , inputs = { frequency = frequency, frequencyOffset = frequencyOffset, phaseOffset = phaseOffset }
-    , state =
-        { outputValue = 0.0, phase = 0.0  }
-    }
+
+sine : Args idType -> AudioNode idType
+sine args =
+  let
+    x = args.id
+    osc = Oscillator
+      { id = args.id
+      , func = sinWave
+      , inputs =
+        { frequency = args.frequency
+        , frequencyOffset = args.frequencyOffset
+        , phaseOffset = args.phaseOffset
+        }
+      , state =
+          { outputValue = 0.0, phase = 0.0  }
+      }
+  in
+    osc
 
 
-sineDefaults : Args
+-- This is pretty Annoying, but it seems we must force the user
+-- to provide a union type for Nothing, or wrap it in a maybe?
+-- Lets worry about maybe later. It will be annoying to have to wrap
+-- a node with `Just` whe providing an id, but still, feedback is the rarer use case.
+-- Things might get interesting if we want to display audio model data in the UI :/
+
+sineDefaults : Args idType
 sineDefaults =
-  { id = ""
+  { id = Nothing
   , frequency = Value 440.0
   , frequencyOffset = Value 0.0
   , phaseOffset = Value 0.0

@@ -3,12 +3,14 @@ module ReactiveAudio where
 import Gui exposing(dummy) -- this is pretty wierd, but the native stuff doesn't work unless you import at least something from the main module
 import Dict
 
-import Audio.AudioNodes exposing(..)
+-- import Audio.AudioNodes exposing(..)
 import Audio.MainTypes exposing(..)
 -- import Audio.Components.FmSynth exposing(..)
-import Audio.Components.AdditiveSynth exposing(..)
-import Audio.Atoms.Sine exposing (sine, sineDefaults)
-import Audio.Atoms.Add exposing (add)
+-- import Audio.Components.AdditiveSynth exposing(..)
+import Audio.Atoms.Sine as Sine exposing (sine, sineDefaults)
+-- import Audio.Atoms.Add exposing (add)
+
+import Dict exposing (Dict)
 
 
 -- import BufferHandler exposing (initialState)
@@ -57,38 +59,62 @@ reallyDumb = dummy
 --   }
 
 
-audioGraph3 : ListGraph
-audioGraph3 =
-    (additiveSynthAudioGraph {fundamentalFrequency= Value 100.0, numOscillators=30}) -- this is where we pass input, not value
-    ++ [ destinationNode <| ID "additiveSynth" ]
+-- audioGraph3 : ListGraph NodeID
+-- audioGraph3 =
+--     (additiveSynthAudioGraph {fundamentalFrequency= Value 100.0, numOscillators=30}) -- this is where we pass input, not value
+--     ++ [ destinationNode <| ID "additiveSynth" ]
 
 -- fmSynthGraph : ListGraph
 -- fmSynthGraph =
 --   fmSynth1
 --     ++ [ destinationNode <| ID "fm" ]
 
-theremin : ListGraph
-theremin =
-  -- [ sinNode "a" {frequency = GUI "frequency", frequencyOffset = Default, phaseOffset = Default}
-  -- , sinNode "b" {frequency = GUI "frequency", frequencyOffset = Default, phaseOffset = Default}
-  -- [ sinNode "a" { Sin.d | frequency = GUI "frequency"}
-  -- , sinNode "b" { Sin.d | frequency = GUI "frequency"}
-  [ destinationNode <| Node <|
-      add
-        [ Node <| sine
-            { sineDefaults
-            -- | frequency = GUI "frequency"
-            | frequency = Value 400.0
-            }
-        , Node <| sine
-            { sineDefaults
-            -- | frequency = Node <| add [GUI "frequency", Value 81.0]
-            | frequency = Node <| add [Value 20.0, Value 81.0]
-            }
-        ]
-  ]
+-- theremin : ListGraph NodeID
+-- theremin =
+--   -- [ sinNode "a" {frequency = GUI "frequency", frequencyOffset = Default, phaseOffset = Default}
+--   -- , sinNode "b" {frequency = GUI "frequency", frequencyOffset = Default, phaseOffset = Default}
+--   -- [ sinNode "a" { Sin.d | frequency = GUI "frequency"}
+--   -- , sinNode "b" { Sin.d | frequency = GUI "frequency"}
+--   [ destinationNode <| Node <|
+--       add
+--         [ Node <| sine
+--             { sineDefaults
+--             -- | frequency = GUI "frequency"
+--             | frequency = Value 400.0
+--             }
+--         , Node <| sine
+--             { sineDefaults
+--             -- | frequency = Node <| add [GUI "frequency", Value 81.0]
+--             | frequency = Node <| add [Value 20.0, Value 81.0]
+--             }
+--         ]
+--   ]
+
+type alias ListGraph id = List (AudioNode id)
+-- type alias ListGraph id =  List (AudioNode (Maybe id))
 
 
+type NodeID = Sin1 | Sin2
+
+-- basicGraph : ListGraph NodeID
+-- basicGraph : List (AudioNode NodeID)
+basicGraph : List (AudioNode NodeID) -- WTF is going on here?
+basicGraph =
+    -- [ sine sineDefaults]
+    [ sine
+      { sineDefaults
+      | id = Just Sin1
+      , frequency = Value 10.0
+      }
+    ]
+
+    --     { sineDefaults
+    --     -- | id = Just (ID Sin1)
+    --     -- | frequency = Node <| add [GUI "frequency", Value 81.0]
+    --     -- | frequency = Value 10.0
+    --     -- | frequency = Just (ID Sin1)
+    --     }
+    -- ]
 
 -- inlineNodesExample : ListGraph
 
@@ -99,27 +125,32 @@ theremin =
 -- audioGraph = theremin
 
 -- audioGraph = fmSynthGraph
-toDict : ListGraph -> DictGraph
-toDict listGraph =
-    let
-        createTuple node =
-            case node of
-                Destination props ->
-                    (props.id, node)
-                Oscillator props ->
-                    (props.id, node)
-                FeedforwardProcessor props ->
-                    (props.id, node)
-                Add props ->
-                    (props.id, node)
-                Gain props ->
-                    (props.id, node)
-                Multiply _ ->
-                    Debug.crash "Multiply not supported"
-        tuples = List.map createTuple listGraph
-    in
-        Dict.fromList tuples
 
 
-audioGraph : DictGraph
-audioGraph = toDict theremin
+
+type alias DictGraph id = Dict id AudioNode
+
+-- toDict : ListGraph NodeID -> DictGraph NodeID
+-- toDict listGraph =
+--     let
+--         createTuple node =
+--             case node of
+--                 Destination props ->
+--                     (props.id, node)
+--                 Oscillator props ->
+--                     (props.id, node)
+--                 FeedforwardProcessor props ->
+--                     (props.id, node)
+--                 Add props ->
+--                     (props.id, node)
+--                 Gain props ->
+--                     (props.id, node)
+--                 Multiply _ ->
+--                     Debug.crash "Multiply not supported"
+--         tuples = List.map createTuple listGraph
+--     in
+--         Dict.fromList tuples
+--
+--
+-- audioGraph : DictGraph
+-- audioGraph = toDict theremin

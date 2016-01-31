@@ -1,18 +1,20 @@
 module Audio.MainTypes where
 
-import Dict exposing(Dict)
+-- import Dict exposing(Dict)
 
 --------------------------------------------------------------------------------
 -- TYPE DEFINITIONS
 --------------------------------------------------------------------------------
 
-type Input
-  = ID String
+type Input idType
+  = ID idType
   | Value Float
   | Default
   -- | GUI (guiModel -> Float)
   | GUI Float
   | Node AudioNode
+
+
 
 
     -- or it could be an AudioNode! Maybe?
@@ -26,18 +28,18 @@ type Input
          -- the good thing about "External" is that you can tap into the signal for debugging easily.
              -- and maybe apply a smoothing func to the inputs?
 
-type AudioNode =
+type AudioNode idType =
     Oscillator
-        { id : String
+        { id : Maybe idType
+        , inputs: OscillatorInputs idType
         , func : OscillatorF
-        , inputs: OscillatorInputs
         , state :
             { phase: Float
             , outputValue : Float -- do we really need this? Is it just for feedback? Doesn't really hurt to keep as we need inputs anyway.
             }
         }
     | Gain
-        { id : String
+        { id : Maybe idType
         , func : GainF
         , inputs: {signal: Input, gain: Input}
         , state :
@@ -45,7 +47,7 @@ type AudioNode =
             }
         }
     | FeedforwardProcessor
-        { id : String
+        { id : Maybe idType
         , input : Input
         , func : FeedforwardProcessorF -- this is the "update"
         , state :  -- this is the "model"
@@ -54,14 +56,14 @@ type AudioNode =
             }
         }
     | Add
-        { id : String
+        { id : Maybe idType
         , inputs : List Input
         , state :
             { outputValue : Float
             }
         }
     | Multiply
-        { id : String
+        { id : Maybe idType
         , inputs : List Input
         , state :
             { outputValue : Float
@@ -75,7 +77,7 @@ type AudioNode =
     --         }
     --     }
     | Destination
-        { id : String
+        { id : idType -- #why do we need an id? Can't we just do case of?
         , input: Input
         , state :
             { outputValue : Float
@@ -103,15 +105,13 @@ type alias OscillatorF =
     -> (OutputFloat, PhaseFloat)
 type alias GainF = Float -> Float -> Float
 
-type alias OscillatorInputs =
-    { frequency : Input
-    , frequencyOffset : Input
-    , phaseOffset : Input
+type alias OscillatorInputs idType =
+    { frequency : Input idType
+    , frequencyOffset : Input idType
+    , phaseOffset : Input idType
     }
 
 -- aliases for readability
-type alias ListGraph = List AudioNode
-type alias DictGraph = Dict String AudioNode
 
 type alias ExternalInputState =
     { xWindowFraction : Float

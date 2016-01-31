@@ -15,8 +15,9 @@ import Signal exposing (Address)
 import Maybe exposing (withDefault)
 import Array
 import Effects
+import Dict exposing (Dict)
 
-import Helpers exposing (prefixDict)
+-- import Helpers exposing (prefixDict)
 
 import Lib.ColorExtra as ColorExtra exposing (toCssRgb)
 import Lib.MouseExtra as MouseExtra
@@ -103,35 +104,35 @@ getAttack : Model -> Float
 getAttack model =
   KnobRegistry.getKnobValue model.knobRegistry "attack"
 
-type alias EncodedModel =
+type alias EncodedModel = Dict String
   { audioOn : Bool
   , frequency : Float
   , knobs : KnobRegistry.EncodedModel
   }
 
-encode : Model -> EncodedModel
-encode model =
-  let
-    knobs = KnobRegistry.encode model.knobRegistry
-    knobs' = prefixDict ".knobs" knobs
-    -- _ = Debug.log "knobs encoded" knobs
-    encoded =
-      { audioOn = model.audioOn
-      , frequency = model.frequency
-      , knobs = knobs'
-      }
-    -- encoded
-    -- _ = Debug.log "encoded:" encoded
-  in
-    encoded
+-- encode : Model -> EncodedModel
+-- encode model =
+--   let
+--     knobs = KnobRegistry.encode model.knobRegistry
+--     knobs' = prefixDict ".knobs" knobs
+--     -- _ = Debug.log "knobs encoded" knobs
+--     encoded =
+--       { audioOn = model.audioOn
+--       , frequency = model.frequency
+--       , knobs = knobs'
+--       }
+--     -- encoded
+--     -- _ = Debug.log "encoded:" encoded
+--   in
+--     encoded
 
 
 
 
 (initModel, _) = init
 
-initialEncodedModel : EncodedModel
-initialEncodedModel = encode initModel
+-- initialEncodedModel : EncodedModel
+-- initialEncodedModel = encode initModel
 
 --------------------------------------------------------------------------------
 -- UPDATE
