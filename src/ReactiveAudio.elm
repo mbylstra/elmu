@@ -1,16 +1,19 @@
 module ReactiveAudio where
 
-import Gui exposing(dummy) -- this is pretty wierd, but the native stuff doesn't work unless you import at least something from the main module
-import Dict
+import Gui exposing(getFrequency) -- this is pretty wierd, but the native stuff doesn't work unless you import at least something from the main module
+-- import Dict
 
 -- import Audio.AudioNodes exposing(..)
 import Audio.MainTypes exposing(..)
 -- import Audio.Components.FmSynth exposing(..)
 -- import Audio.Components.AdditiveSynth exposing(..)
 import Audio.Atoms.Sine as Sine exposing (sine, sineDefaults)
+
+
+
 -- import Audio.Atoms.Add exposing (add)
 
-import Dict exposing (Dict)
+-- import Dict exposing (Dict)
 
 
 -- import BufferHandler exposing (initialState)
@@ -21,9 +24,6 @@ import Dict exposing (Dict)
 -- in
 --   1
 
--- This is necessary so that The Gui code is linked so we can expose it. I have no idea why.
-reallyDumb : String
-reallyDumb = dummy
 
 -- fmSynth1 : ListGraph
 -- fmSynth1 = fmSynth "fm"
@@ -90,31 +90,38 @@ reallyDumb = dummy
 --         ]
 --   ]
 
-type alias ListGraph id = List (AudioNode id)
 -- type alias ListGraph id =  List (AudioNode (Maybe id))
 
+destinationNode : Input idType uiModel -> AudioNode idType uiModel
+destinationNode input =
+    Destination
+        { input = input
+        , state =
+            { outputValue = 0.0 }
+        }
 
 type NodeID = Sin1 | Sin2
 
+-- type alias GuiModel = {a: Float}
+
+-- getA guiModel = guiModel.a
+
+-- guiModel = { a = 1.0}
+
 -- basicGraph : ListGraph NodeID
 -- basicGraph : List (AudioNode NodeID)
-basicGraph : List (AudioNode NodeID) -- WTF is going on here?
+basicGraph : (List (AudioNode NodeID Gui.Model), AudioNode NodeID Gui.Model)
 basicGraph =
     -- [ sine sineDefaults]
-    [ sine
-      { sineDefaults
-      | id = Just Sin1
-      , frequency = Value 10.0
-      }
-    ]
-
-    --     { sineDefaults
-    --     -- | id = Just (ID Sin1)
-    --     -- | frequency = Node <| add [GUI "frequency", Value 81.0]
-    --     -- | frequency = Value 10.0
-    --     -- | frequency = Just (ID Sin1)
-    --     }
-    -- ]
+    ( [ sine
+        { sineDefaults
+        | id = Just Sin1
+        -- , frequency = Value 10.0
+        , frequency = UI getFrequency
+        }
+      ]
+    , destinationNode (ID Sin1)
+    )
 
 -- inlineNodesExample : ListGraph
 
@@ -128,29 +135,8 @@ basicGraph =
 
 
 
-type alias DictGraph id = Dict id AudioNode
 
--- toDict : ListGraph NodeID -> DictGraph NodeID
--- toDict listGraph =
---     let
---         createTuple node =
---             case node of
---                 Destination props ->
---                     (props.id, node)
---                 Oscillator props ->
---                     (props.id, node)
---                 FeedforwardProcessor props ->
---                     (props.id, node)
---                 Add props ->
---                     (props.id, node)
---                 Gain props ->
---                     (props.id, node)
---                 Multiply _ ->
---                     Debug.crash "Multiply not supported"
---         tuples = List.map createTuple listGraph
---     in
---         Dict.fromList tuples
 --
 --
 -- audioGraph : DictGraph
--- audioGraph = toDict theremin
+audioGraph = toDict basicGraph

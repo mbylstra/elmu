@@ -10203,68 +10203,107 @@ Elm.ElmTest.make = function (_elm) {
                                 ,consoleRunner: consoleRunner
                                 ,stringRunner: stringRunner};
 };
-Elm.Native.MutableArray = {};
-Elm.Native.MutableArray.make = function(localRuntime) {
+Elm.Native.MutableEnumDict = {};
+Elm.Native.MutableEnumDict.make = function(localRuntime) {
 
 	localRuntime.Native = localRuntime.Native || {};
-	localRuntime.Native.MutableArray = localRuntime.Native.MutableArray || {};
-	if (localRuntime.Native.MutableArray.values)
+	localRuntime.Native.MutableEnumDict = localRuntime.Native.MutableEnumDict || {};
+	if (localRuntime.Native.MutableEnumDict.values)
 	{
-		return localRuntime.Native.MutableArray.values;
+		return localRuntime.Native.MutableEnumDict.values;
 	}
-	if ('values' in Elm.Native.MutableArray)
+	if ('values' in Elm.Native.MutableEnumDict)
 	{
-		return localRuntime.Native.MutableArray.values = Elm.Native.MutableArray.values;
+		return localRuntime.Native.MutableEnumDict.values = Elm.Native.MutableEnumDict.values;
 	}
 
-	function get(i, array)
-	{
-		if (i < 0 || i >= length(array))
+	var List = Elm.Native.List.make(localRuntime);
+
+  function empty()
+  {
+    return {};
+  }
+
+  // function fromList(list)
+  // {
+  //
+  // }
+  function fromList(list)
+  {
+		if (list === List.Nil)
 		{
-			throw new Error(
-				'Index ' + i + ' is out of range. Check the length of ' +
-				'your array first or use getMaybe or getWithDefault.');
+			return empty();
 		}
-		return array[i];
-	}
 
-	function set(i, item, array)
-	{
-    array[i] = item;
-    return array;
-	}
+    var jsArray = List.toArray(list);
 
-	function initialize(len, f)
-	{
-    var array = [];
-  	for (var i = 0; i < len; i++)
-		{
-		  array[i] = f(i);
-		}
-    return array;
-	}
+    var out = {};
 
-	// Maps a function over the elements of an array.
-	function map(f, a)
-	{
-    return a.map(f);
-	}
+    for (var i = 0; i < jsArray.length; i++) {
+      var item = jsArray[i];
+      var key = item._0.ctor;
+      var value = item._1;
+      out[key] = value
+    }
+    return out;
+  }
 
-	// Returns how many items are in the tree.
-	function length(array)
-	{
-    return array.length;
-	}
+  function get(key, dict) {
+    console.log('key', key);
+    console.log('dict', dict);
+    return dict[key.ctor];
+  }
 
-	Elm.Native.MutableArray.values = {
-		initialize: F2(initialize),
+	// function get(i, array)
+	// {
+	// 	if (i < 0 || i >= length(array))
+	// 	{
+	// 		throw new Error(
+	// 			'Index ' + i + ' is out of range. Check the length of ' +
+	// 			'your array first or use getMaybe or getWithDefault.');
+	// 	}
+	// 	return array[i];
+	// }
+  //
+	// function set(i, item, array)
+	// {
+  //   array[i] = item;
+  //   return array;
+	// }
+  //
+	// function initialize(len, f)
+	// {
+  //   var array = [];
+  // 	for (var i = 0; i < len; i++)
+	// 	{
+	// 	  array[i] = f(i);
+	// 	}
+  //   return array;
+	// }
+  //
+	// // Maps a function over the elements of an array.
+	// function map(f, a)
+	// {
+  //   return a.map(f);
+	// }
+  //
+	// // Returns how many items are in the tree.
+	// function length(array)
+	// {
+  //   return array.length;
+	// }
+
+	Elm.Native.MutableEnumDict.values = {
+		empty: empty,
+		fromList: fromList,
+		// initialize: F2(initialize),
 		get: F2(get),
-		set: F3(set),
-		map: F2(map),
-		length: length,
+		// set: F3(set),
+		// map: F2(map),
+		// length: length,
 	};
 
-	return localRuntime.Native.MutableArray.values = Elm.Native.MutableArray.values;
+	return localRuntime.Native.MutableEnumDict.values = Elm.Native.MutableEnumDict.values;
 };
 
 Elm.Main = Elm.Main || {};
@@ -10278,57 +10317,49 @@ Elm.Main.make = function (_elm) {
    $ElmTest = Elm.ElmTest.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
-   $Native$MutableArray = Elm.Native.MutableArray.make(_elm),
+   $Native$MutableEnumDict = Elm.Native.MutableEnumDict.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm);
    var _op = {};
-   var length = $Native$MutableArray.length;
-   var set = $Native$MutableArray.set;
-   var get = F2(function (i,array) {
-      return _U.cmp(0,i) < 1 && _U.cmp(i,
-      $Native$MutableArray.length(array)) < 0 ? $Maybe.Just(A2($Native$MutableArray.get,
-      i,
-      array)) : $Maybe.Nothing;
+   var Gamma = {ctor: "Gamma"};
+   var Beta = {ctor: "Beta"};
+   var Alpha = {ctor: "Alpha"};
+   var get = F2(function (key,dict) {
+      return A2($Native$MutableEnumDict.get,key,dict);
    });
-   var map = $Native$MutableArray.map;
-   var initialize = $Native$MutableArray.initialize;
-   var repeat = F2(function (n,e) {
-      return A2(initialize,n,$Basics.always(e));
-   });
+   var fromList = function (list) {
+      return $Native$MutableEnumDict.fromList(list);
+   };
+   var empty = $Native$MutableEnumDict.empty;
    var tests = A2($ElmTest.suite,
    "",
    _U.list([A2($ElmTest.test,
-   "",
-   A2($ElmTest.assertEqual,
-   A2(get,
-   7,
-   A3(set,
-   7,
-   7,
-   A3(set,
-   6,
-   6,
-   A3(set,
-   5,
-   5,
-   A3(set,
-   4,
-   4,
-   A3(set,
-   3,
-   3,
-   A3(set,2,2,A3(set,1,1,A3(set,0,0,A2(repeat,5,0)))))))))),
-   $Maybe.Just(7)))]));
+           "",
+           A2($ElmTest.assertEqual,empty,empty))
+           ,A2($ElmTest.test,
+           "",
+           A2($ElmTest.assertEqual,
+           fromList(_U.list([{ctor: "_Tuple2",_0: Alpha,_1: 1}
+                            ,{ctor: "_Tuple2",_0: Beta,_1: 2}])),
+           fromList(_U.list([{ctor: "_Tuple2",_0: Alpha,_1: 1}
+                            ,{ctor: "_Tuple2",_0: Beta,_1: 2}]))))
+           ,A2($ElmTest.test,
+           "",
+           A2($ElmTest.assertEqual,
+           A2(get,
+           Alpha,
+           fromList(_U.list([{ctor: "_Tuple2",_0: Alpha,_1: 1}]))),
+           1))]));
    var main = $ElmTest.elementRunner(tests);
-   var MutableArray = {ctor: "MutableArray"};
+   var MutableEnumDict = {ctor: "MutableEnumDict"};
    return _elm.Main.values = {_op: _op
-                             ,MutableArray: MutableArray
-                             ,initialize: initialize
-                             ,repeat: repeat
-                             ,map: map
+                             ,MutableEnumDict: MutableEnumDict
+                             ,empty: empty
+                             ,fromList: fromList
                              ,get: get
-                             ,set: set
-                             ,length: length
+                             ,Alpha: Alpha
+                             ,Beta: Beta
+                             ,Gamma: Gamma
                              ,tests: tests
                              ,main: main};
 };

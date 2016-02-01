@@ -47,15 +47,15 @@ sinWave frequency frequencyOffset phaseOffset prevPhase =
     in
         (amplitude, currPhase)  -- I actually think returning a tuple is problematic for performance! You want to stick to as basic as possible data types.
 
-type alias Args idType =
+type alias Args idType uiModel =
   { id : Maybe idType
-  , frequency: Input idType
-  , frequencyOffset: Input idType
-  , phaseOffset: Input idType
+  , frequency: Input idType uiModel
+  , frequencyOffset: Input idType uiModel
+  , phaseOffset: Input idType uiModel
   }
 
 
-sine : Args idType -> AudioNode idType
+sine : (Args idType uiModel) -> (AudioNode idType uiModel)
 sine args =
   let
     x = args.id
@@ -80,7 +80,7 @@ sine args =
 -- a node with `Just` whe providing an id, but still, feedback is the rarer use case.
 -- Things might get interesting if we want to display audio model data in the UI :/
 
-sineDefaults : Args idType
+sineDefaults : Args idType uiModel
 sineDefaults =
   { id = Nothing
   , frequency = Value 440.0

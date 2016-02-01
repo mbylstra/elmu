@@ -96,7 +96,7 @@ init =
 --         ]
 --     )
 
-getFrequency :Model -> Float
+getFrequency : Model -> Float
 getFrequency model =
   model.frequency
 
