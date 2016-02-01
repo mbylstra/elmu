@@ -1,15 +1,15 @@
-Elm.Native.MutableEnumDict = {};
-Elm.Native.MutableEnumDict.make = function(localRuntime) {
+Elm.Native.MutableDict = {};
+Elm.Native.MutableDict.make = function(localRuntime) {
 
 	localRuntime.Native = localRuntime.Native || {};
-	localRuntime.Native.MutableEnumDict = localRuntime.Native.MutableEnumDict || {};
-	if (localRuntime.Native.MutableEnumDict.values)
+	localRuntime.Native.MutableDict = localRuntime.Native.MutableDict || {};
+	if (localRuntime.Native.MutableDict.values)
 	{
-		return localRuntime.Native.MutableEnumDict.values;
+		return localRuntime.Native.MutableDict.values;
 	}
-	if ('values' in Elm.Native.MutableEnumDict)
+	if ('values' in Elm.Native.MutableDict)
 	{
-		return localRuntime.Native.MutableEnumDict.values = Elm.Native.MutableEnumDict.values;
+		return localRuntime.Native.MutableDict.values = Elm.Native.MutableDict.values;
 	}
 
 	var List = Elm.Native.List.make(localRuntime);
@@ -88,7 +88,7 @@ Elm.Native.MutableEnumDict.make = function(localRuntime) {
   //   return array.length;
 	// }
 
-	Elm.Native.MutableEnumDict.values = {
+	Elm.Native.MutableDict.values = {
 		empty: empty,
 		fromList: fromList,
 		// initialize: F2(initialize),
@@ -98,5 +98,5 @@ Elm.Native.MutableEnumDict.make = function(localRuntime) {
 		// length: length,
 	};
 
-	return localRuntime.Native.MutableEnumDict.values = Elm.Native.MutableEnumDict.values;
+	return localRuntime.Native.MutableDict.values = Elm.Native.MutableDict.values;
 };

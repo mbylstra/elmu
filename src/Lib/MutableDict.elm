@@ -1,10 +1,10 @@
--- module MutableEnumDict
---     ( MutableEnumDict
---     , empty
---     -- , fromList
---     ) where
+module Lib.MutableDict
+    ( MutableDict
+    , empty
+    , fromList
+    ) where
 
-import Native.MutableEnumDict
+import Native.MutableDict
 -- import Basics exposing (..)
 -- import Maybe exposing (..)
 -- import List
@@ -13,49 +13,49 @@ import Native.MutableEnumDict
 import ElmTest exposing (..)
 
 
-type MutableEnumDict a = MutableEnumDict
+type MutableDict a b = MutableDict
 
 
-empty : MutableEnumDict keyType valueType
+empty : MutableDict keyType valueType
 empty =
-  Native.MutableEnumDict.empty
+  Native.MutableDict.empty
 
-fromList : List (keyType, valueType) -> MutableEnumDict keyType valueType
+fromList : List (keyType, valueType) -> MutableDict keyType valueType
 fromList list =
-  Native.MutableEnumDict.fromList list
+  Native.MutableDict.fromList list
 
-get : keyType -> MutableEnumDict keyType valueType -> valueType
+get : keyType -> MutableDict keyType valueType -> valueType
 get key dict =
-  Native.MutableEnumDict.get key dict
+  Native.MutableDict.get key dict
 
--- empty : MutableEnumDict keyType valueType
+-- empty : MutableDict keyType valueType
 -- empty =
---   Native.MutableEnumDict.empty
+--   Native.MutableDict.empty
 
--- initialize : Int -> (Int -> a) -> MutableEnumDict a
+-- initialize : Int -> (Int -> a) -> MutableDict a
 -- initialize =
---   Native.MutableEnumDict.initialize
+--   Native.MutableDict.initialize
 --
--- repeat : Int -> a -> MutableEnumDict a
+-- repeat : Int -> a -> MutableDict a
 -- repeat n e =
 --   initialize n (always e)
 --
 --
--- map : (a -> b) -> MutableEnumDict a -> MutableEnumDict b
+-- map : (a -> b) -> MutableDict a -> MutableDict b
 -- map =
---   Native.MutableEnumDict.map
+--   Native.MutableDict.map
 --
 --
 --
 --
--- set : Int -> a -> MutableEnumDict a -> MutableEnumDict a
+-- set : Int -> a -> MutableDict a -> MutableDict a
 -- set =
---   Native.MutableEnumDict.set
+--   Native.MutableDict.set
 --
 --
--- length : MutableEnumDict a -> Int
+-- length : MutableDict a -> Int
 -- length =
---   Native.MutableEnumDict.length
+--   Native.MutableDict.length
 
 
 type TestEnum = Alpha | Beta | Gamma
@@ -94,5 +94,5 @@ tests =
         ]
 
 -- main : Graphics.Element.Element
-main =
-    elementRunner tests
+-- main =
+--     elementRunner tests

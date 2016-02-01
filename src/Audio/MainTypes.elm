@@ -1,6 +1,6 @@
 module Audio.MainTypes where
 
-import Dict exposing(Dict)
+-- import Dict exposing(Dict)
 
 --------------------------------------------------------------------------------
 -- TYPE DEFINITIONS
@@ -126,4 +126,4 @@ type alias ExternalState =
 
 
 type alias ListGraph idType uiModel = List (AudioNode idType uiModel)
-type alias DictGraph idType uiModel = Dict idType (AudioNode idType uiModel)
+-- type alias DictGraph idType uiModel = Dict idType (AudioNode idType uiModel)
