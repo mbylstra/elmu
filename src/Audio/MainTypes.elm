@@ -28,6 +28,15 @@ type Input idType uiModel
          -- the good thing about "External" is that you can tap into the signal for debugging easily.
              -- and maybe apply a smoothing func to the inputs?
 
+
+
+-- It could be argued that having nested records is completely pointless if you're
+-- not using extendable records. It will only lower performance, and make updating
+-- records a massive pain in the arse. The only real benefit is slightly
+-- better readability and namespacing (but I doubt we'd have clashes,
+-- and the compiler helps with this anytway. You can alwas break things up
+-- visually
+
 type AudioNode idType uiModel =
     Oscillator
         { id : Maybe idType
