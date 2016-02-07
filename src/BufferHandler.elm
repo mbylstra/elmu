@@ -2,7 +2,7 @@ module BufferHandler where
 
 -- import Html exposing (text)
 
-import Gui exposing(EncodedModel, initialEncodedModel)
+-- import Gui exposing(EncodedModel, initialEncodedModel)
 
 import Dict exposing (Dict)
 

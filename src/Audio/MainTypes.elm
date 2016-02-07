@@ -1,6 +1,7 @@
 module Audio.MainTypes where
 
 -- import Dict exposing(Dict)
+import Lib.MutableDict exposing (MutableDict)
 
 --------------------------------------------------------------------------------
 -- TYPE DEFINITIONS
@@ -11,8 +12,7 @@ type Input idType uiModel
   | Value Float
   | Default
   | UI (uiModel -> Float)
-  -- | GUI Float
-  | Node AudioNode
+  | Node (AudioNode idType uiModel)
 
 
 
@@ -76,13 +76,12 @@ type AudioNode idType uiModel =
     --         { outputValue : Float
     --         }
     --     }
-    | Destination
-        { input: Input idType uiModel
-        , state :
-            { outputValue : Float
-            }
-        }
 
+type alias Destination idType uiModel =
+  { input : Input idType uiModel
+  , state :
+      { outputValue : Float }
+  }
 
 -- Update funcs
 type alias ProcessorF = TimeFloat -> ValueFloat -> ValueFloat
@@ -126,4 +125,4 @@ type alias ExternalState =
 
 
 type alias ListGraph idType uiModel = List (AudioNode idType uiModel)
--- type alias DictGraph idType uiModel = Dict idType (AudioNode idType uiModel)
+type alias DictGraph idType uiModel = MutableDict idType (AudioNode idType uiModel)

@@ -13,16 +13,13 @@ Elm.Native.MutableDict.make = function(localRuntime) {
 	}
 
 	var List = Elm.Native.List.make(localRuntime);
+	var Maybe = Elm.Maybe.make(localRuntime);
 
   function empty()
   {
     return {};
   }
 
-  // function fromList(list)
-  // {
-  //
-  // }
   function fromList(list)
   {
 		if (list === List.Nil)
@@ -44,49 +41,18 @@ Elm.Native.MutableDict.make = function(localRuntime) {
   }
 
   function get(key, dict) {
-    console.log('key', key);
-    console.log('dict', dict);
-    return dict[key.ctor];
+    var value = return dict[key.ctor];
+    if (value !== undefined) {
+      return Maybe.Just(value);
+    } else {
+		  Maybe.Nothing
+    }
   }
 
-	// function get(i, array)
-	// {
-	// 	if (i < 0 || i >= length(array))
-	// 	{
-	// 		throw new Error(
-	// 			'Index ' + i + ' is out of range. Check the length of ' +
-	// 			'your array first or use getMaybe or getWithDefault.');
-	// 	}
-	// 	return array[i];
-	// }
-  //
-	// function set(i, item, array)
-	// {
-  //   array[i] = item;
-  //   return array;
-	// }
-  //
-	// function initialize(len, f)
-	// {
-  //   var array = [];
-  // 	for (var i = 0; i < len; i++)
-	// 	{
-	// 	  array[i] = f(i);
-	// 	}
-  //   return array;
-	// }
-  //
-	// // Maps a function over the elements of an array.
-	// function map(f, a)
-	// {
-  //   return a.map(f);
-	// }
-  //
-	// // Returns how many items are in the tree.
-	// function length(array)
-	// {
-  //   return array.length;
-	// }
+  function insert(key, value, dict) {
+    dict[key.ctor] = value;
+    return dict;
+  }
 
 	Elm.Native.MutableDict.values = {
 		empty: empty,

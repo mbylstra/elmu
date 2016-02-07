@@ -6,8 +6,7 @@ module Orchestrator where
 
 -- import Dict exposing (Dict)
 -- import ElmTest exposing (..)
-
-
+import Lib.MutableDict as MutableDict
 --------------------------------------------------------------------------------
 -- INTERNAL DEPENDENCIES
 --------------------------------------------------------------------------------
@@ -74,9 +73,9 @@ type alias ExternalState uiModel=
 -- --                 frequencyInputNode = getInputNode graph frequencyInput
 --                     -- this should be abstracted into a func that just gets the value and updates the graph at the same time (regardless of input type etc)
 -- --                 _ = Debug.log "------------------------" True
---                 (graph2, frequencyValue) = updateGraphNode' graph externalState props.inputs.frequency
---                 (graph3, frequencyOffsetValue) = updateGraphNode' graph2 externalState props.inputs.frequencyOffset
---                 (graph4, phaseOffsetValue) = updateGraphNode' graph3 externalState props.inputs.phaseOffset
+--                 (graph2, frequencyValue) = updateGraphNodeGivenInput graph externalState props.inputs.frequency
+--                 (graph3, frequencyOffsetValue) = updateGraphNodeGivenInput graph2 externalState props.inputs.frequencyOffset
+--                 (graph4, phaseOffsetValue) = updateGraphNodeGivenInput graph3 externalState props.inputs.phaseOffset
 -- --                 _ = Debug.log "phaseOffsetValue" phaseOffsetValue
 --                 (newValue, newPhase) = props.func frequencyValue frequencyOffsetValue phaseOffsetValue props.state.phase -- this func should start accepting frequency
 -- {-                 _ = Debug.log "newValue" newValue
@@ -129,7 +128,7 @@ type alias ExternalState uiModel=
 --             let
 --                 updateFunc input (graph, accValue) =
 --                     let
---                         (newGraph, inputValue) = updateGraphNode' graph externalState input
+--                         (newGraph, inputValue) = updateGraphNodeGivenInput graph externalState input
 --                     in
 --                         (replaceGraphNode newNode newGraph, accValue + inputValue)
 --
@@ -146,8 +145,8 @@ type alias ExternalState uiModel=
 -- --                 frequencyInputNode = getInputNode graph frequencyInput
 --                     -- this should be abstracted into a func that just gets the value and updates the graph at the same externalState (regardless of input type etc)
 -- --                 _ = Debug.log "------------------------" True
---                 (graph2, signalValue) = updateGraphNode' graph externalState props.inputs.signal
---                 (graph3, gainValue) = updateGraphNode' graph2 externalState props.inputs.gain
+--                 (graph2, signalValue) = updateGraphNodeGivenInput graph externalState props.inputs.signal
+--                 (graph3, gainValue) = updateGraphNodeGivenInput graph2 externalState props.inputs.gain
 -- --                 _ = Debug.log "phaseOffsetValue" phaseOffsetValue
 --                 newValue = props.func signalValue gainValue -- this func should start accepting frequency
 -- {-                 _ = Debug.log "newValue" newValue
@@ -187,12 +186,12 @@ type alias ExternalState uiModel=
 
 
 {- this naming is pretty gross! Difference is it takes an Input rather than an AudioNode -}
--- updateGraphNode' : DictGraph -> TimeFloat -> Input -> (DictGraph, Float)
+-- updateGraphNodeGivenInput : DictGraph -> TimeFloat -> Input -> (DictGraph, Float)
 
--- updateGraphNode' : DictGraph idType uiModel -> ExternalState uiModel -> Input -> (DictGraph idType uiModel, OutputFloat)
--- updateGraphNode' graph externalState input =
+-- updateGraphNodeGivenInput : DictGraph idType uiModel -> ExternalState uiModel -> Input -> (DictGraph idType uiModel, OutputFloat)
+-- updateGraphNodeGivenInput graph externalState input =
 --   let
---     _ = Debug.log "updateGraphNode'" graph
+--     _ = Debug.log "updateGraphNodeGivenInput" graph
 --
 --   in
 --     case input of
@@ -226,28 +225,84 @@ getNodeId node =
     --   props.id
     Multiply node' ->
       node'.id
-    _ -> Debug.crash ("getNodeId not all tags supported. Getting a weird error with Destionation")
     -- we must fill this out for all node types, unless we use extensible records!
 
-getInputNode : (NodeList idType uiModel) -> idType -> Result String (AudioNode idType uiModel)
-getInputNode nodeList id =
-  let
-    nodes = List.filter (\node -> (getNodeId node == Just id)) nodeList
-  in
-    case nodes of
-      [node] ->
-        Ok node
-      [] ->
-        Err ("Could not find ID " ++ (toString id))
-      nodes ->
-        Err ("There are multiple nodes with ID " ++ (toString id))
 
 
--- getInputNode : DictGraph idType uiModel -> String -> AudioNode
+-- this would be MUCH faster if it were a dictionary lookup!
+
+-- getInputNode : DictGraph idType uiModel -> idType
+--                -> Result String (AudioNode idType uiModel)
 -- getInputNode graph id =
---     case (Dict.get id graph) of
---         Just node -> node
---         Nothing -> Debug.crash("Can't find node: " ++ (toString id))
+--   MutableDict.get
+  -- let
+  --   nodes = List.filter (\node -> (getNodeId node == Just id)) nodeList
+  -- in
+  --   case nodes of
+  --     [node] ->
+  --       Ok node
+  --     [] ->
+  --       Err ("Could not find ID " ++ (toString id))
+  --     nodes ->
+  --       Err ("There are multiple nodes with ID " ++ (toString id))
+
+
+
+{- the InputHelper type further groups the Input type into
+  two types: NodeInput and ValueInput. This reduces concerns
+  for this implemenetation code, without making the end user
+  API for Input not annoylingly nested to be used as a DSL
+-}
+type InputHelper idType uiModel
+  = NodeInput (AudioNode idType uiModel)
+  | ValueInput Float
+
+
+
+
+
+-- validateGraph nodeList uiModel
+
+-- updateNode : AudioNode idType uiModel -> uiModel -> NodeList idType uiModel
+--              -> Result String (Float, NodeList idType uiModel)
+-- updateNode node uiModel graph =
+--   case node of
+--     Oscillator props ->
+--       let
+--         _ = Debug.crash("todo")
+--         -- graph
+--         result = getInputValue graph uiModel props.inputs.frequency
+--       in
+--         case result of
+--           Err err -> error
+--
+--
+--
+--
+--         -- toMonth : String -> Result String Int
+--         -- toMonth rawString =
+--         --     toInt rawString `andThen` toValidMonth
+--         -- getInputValue props.inputs.frequency
+--
+--       in
+--         Ok (0.0, graph)
+--         --     (graph2, frequencyValue) = updateGraphNodeGivenInput graph externalState props.inputs.frequency
+--
+--     _ -> Debug.crash("todo")
+--         -- let
+--         --     (graph2, frequencyValue) = updateGraphNodeGivenInput graph externalState props.inputs.frequency
+--         --     (graph3, frequencyOffsetValue) = updateGraphNodeGivenInput graph2 externalState props.inputs.frequencyOffset
+--         --     (graph4, phaseOffsetValue) = updateGraphNodeGivenInput graph3 externalState props.inputs.phaseOffset
+--         --     (newValue, newPhase) = props.func frequencyValue frequencyOffsetValue phaseOffsetValue props.state.phase -- this func should start accepting frequency
+--         --     newState = {outputValue = newValue, phase = newPhase}
+--         --     newNode = Oscillator { props | state = newState }
+--         -- in
+--         --     (replaceGraphNode newNode graph4, newValue)
+
+
+-- getInputNode : DictGraph idType uiModel -> idType -> Maybe (AudioNode idType uiModel)
+-- getInputNode graph id =
+--     MutableDict.get id graph
 
 -- given an Input, get the node that this refers to
 -- getInputNode' : DictGraph idType uiModel -> Input -> AudioNode
@@ -333,28 +388,120 @@ updateNodeState node newValue =
 
 
 
--- getDestinationNode : DictGraph idType uiModel -> AudioNode
--- getDestinationNode graph =
---     let
---         nodes = Dict.values graph
---         isDestinationNode node =
---             case node of
---                 Destination _ ->
---                     True
---                 _ ->
---                     False
---         destinationNodes = List.filter isDestinationNode nodes
---     in
---         case List.head destinationNodes of
---             Just node
---                 -> node
---             _
---                 -> Debug.crash("There aren't any nodes of type Destination!")
+-- an input can either be a value (using Value) or it can be a node (using ID or Node)
+-- so getInput doesn't make sense, you need getNodeValueFromInput
 
 
--- replaceGraphNode : AudioNode -> DictGraph idType uiModel -> DictGraph idType uiModel
+
+
+validateGraph : uiModel -> DictGraph idType uiModel -> Destination idType uiModel
+                -> Result String Bool
+validateGraph uiModel graph destination =
+  validateInput uiModel graph destination.input
+
+
+validateInput : uiModel -> DictGraph idType uiModel -> Input idType uiModel -> Result String Bool
+validateInput uiModel graph input =
+  case getInputForValidation uiModel input graph of
+    Ok maybeNode ->
+      case maybeNode of
+        Nothing ->
+          Ok True
+        Just node ->
+          -- Ok True
+          let
+            isErr : Result error value -> Bool
+            isErr result =
+              case result of
+                Ok _ -> False
+                Err _ -> True
+            results = List.map (validateInput uiModel graph) (getNodeInputsList node)
+            errors : List (Result String Bool)
+            errors = List.filter isErr results
+          in
+            Maybe.withDefault (Ok True) (List.head errors)  -- interesting used of withDefault! Default to OK if no errors in list, or get hte first one
+    Err msg ->
+      Err msg
+
+
+getInputForValidation : uiModel -> Input idType uiModel -> DictGraph idType uiModel
+          -> Result String (Maybe (AudioNode  idType uiModel))
+getInputForValidation uiModel input graph =
+  case input of
+    Value value ->
+      Ok (Nothing)
+    Default ->
+      Ok (Nothing)
+    UI func ->
+      Ok (Nothing) -- for now, assume we can only get valid inputs from UI
+    Node node ->
+      Ok (Just node)
+    ID nodeId ->
+      case MutableDict.get nodeId graph of
+        Just node ->
+          Ok (Just node)
+        Nothing ->
+          Err ("There are no nodes in the graph with ID `" ++ toString(nodeId) ++ "`")
+
+
+getNodeInputsList : AudioNode idType uiModel -> List (Input idType uiModel)
+getNodeInputsList node =
+  case node of
+    Oscillator props ->
+      let inputs = props.inputs
+      in [inputs.frequency, inputs.frequencyOffset, inputs.phaseOffset]
+    _ -> Debug.crash "todo"
+
+-- getInputValue : NodeList idType uiModel -> uiModel -> Input idType uiModel
+--                 -> Result String (Float, NodeList idType uiModel)
+-- getInputValue nodeList uiModel input =
+--   case getInputHelper nodeList uiModel input of
+--     ValueInput value ->
+--       Ok (value, nodeList)
+--     -- _ -> Debug.crash("")
+--     NodeInput result ->
+--       case result of
+--         Err err -> Err err
+--         _ -> Debug.crash("toto")
+        -- Ok node ->
+        --   updateNode ?? --TODO
+
+
+
+
+
+
+
+
+
+
+{- this should only ever be run immediately after validateGraph has been run! -}
+-- unsafeUpdateGraph : uiModel -> DictGraph idType uiMOdel -> Destination idTypeModel
+--   -> (DictGraph idType uiMOdel, Destination idTypeModel)
+-- unsafeUpdateGraph uiModel graph destination =
+
+
+getInputHelper : uiModel -> DictGraph idType uiModel -> Input idType uiModel
+          -> InputHelper idType uiModel
+getInputHelper uiModel graph input =
+  case input of
+    Value value ->
+      ValueInput value
+    Default ->
+      ValueInput 0.0
+    UI func ->
+      ValueInput <| func uiModel
+    Node node ->
+      NodeInput <| node
+    ID nodeId ->
+      NodeInput <| MutableDict.unsafeGet nodeId graph -- assumes graph has been validated
+
+-- replaceGraphNode : AudioNode idType uiModel -> DictGraph idType uiModel -> Maybe (DictGraph idType uiModel)
 -- replaceGraphNode node graph =
---     Dict.insert (getNodeId node) node graph
+--     case getNodeId node of
+--       Just id ->
+--         Just <| MutableDict.insert id node graph
+--       Nothing -> Nothing
 
 
 -- getNodeId : AudioNode -> String
@@ -368,14 +515,14 @@ updateNodeState node newValue =
 --         Multiply _ -> Debug.crash "Multiply not supported"
 
 
-feetless : List a -> List a
-feetless list =
-    List.take ((List.length list) - 1) list
+-- feetless : List a -> List a
+-- feetless list =
+    -- List.take ((List.length list) - 1) list
 
 
-rotateList : a -> List a -> List a
-rotateList value list  =
-  [value] ++ feetless list
+-- rotateList : a -> List a -> List a
+-- rotateList value list  =
+--   [value] ++ feetless list
 
 -- rotateArray : Array -> Array
 
