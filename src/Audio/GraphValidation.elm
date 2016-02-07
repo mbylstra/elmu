@@ -2,6 +2,12 @@ import Audio.MainTypes exposing (..)
 import Lib.MutableDict as MutableDict
 
 
+{-
+  This should be run any time the graph layout is updated, and before
+  unsafeUpdateGraph is run. unsafeUpdateGraph assumes the graph has
+  been validated and uses unsafe methods for graph look up which
+  assume valid data.
+-}
 validateGraph : uiModel -> DictGraph idType uiModel -> Destination idType uiModel
                 -> Result String Bool
 validateGraph uiModel graph destination =
