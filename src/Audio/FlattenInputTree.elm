@@ -27,18 +27,25 @@ type alias FlattenResponse uiModel
   = (AudioNode uiModel, List (AudioNode uiModel), Int)
 
 
-flattenNode : FlattenResponse idModel -> FlattenResponse idModel
-flattenNode (node1, accNodes1, lastId1) =
-  case node1 of
+flattenNode : (AudioNode uiModel, List (AudioNode uiModel), Int) -> (Int, List (AudioNode uiModel))
+flattenNode (node, accNodes, lastId) =
+  case node of
     Oscillator props ->
       let
 
-        (node2, accNodes2, lastId2) =
-          case flattenInput accNodes1 lastId1 props.frequency of
-            Just result -> result
-            Nothing -> (node1, accNodes1, lastId1)
+        (lastId3, accNodes3, props3) =
+          case flattenInput accNodes lastId props.frequency of
+            Just (lastId2, accNodes2) ->
+              (lastId2, accNodes2, { props | frequency = AutoID lastId2})  -- the input now points to an id, rather than an inline node
+            Nothing ->
+              -- Nothing needs to be changed, so values stay the same
+              (lastId, accNodes, props)
 
-        -- props2 = { props | frequency = AutoID lastId2}  -- the input now points to an id, rather than an inline node
+        -- It's annoying that there's so much boilerplate, but things
+        -- started getting really crazy (was it even possible??) using
+        -- "getters and setters"
+
+        -- node3
 
         -- (node3, accNodes3, lastId3) = flattenInput accNodes2 lastId2 props2.frequencyOffset
         -- props3 = { props2 | frequencyOffset = AutoID lastId3}  -- the input now points to an id, rather than an inline node
@@ -57,7 +64,7 @@ flattenNode (node1, accNodes1, lastId1) =
         -- ugh, we need the "primary node" thing so we can create a new node,
         -- and point it to that
       in
-        (node2, accNodes2, lastId2)
+        (lastId3, accNodes3)
     -- _ -> Debug.crash ""
 
 
@@ -70,45 +77,17 @@ getNestedInputNode input =
     _ ->
       Nothing
 
-
--- flattenDictTreeGraph : (AudioNode uiModel, DictGraph uiModel)
---                        -> DictGraph uiModel
--- flattenDictTreeGraph (node, graph) =
---   case node of
---     Oscillator props ->
---       let
---         inputs = props.inputs
---       in
---         (newInput, graph) = flattenInput inputs.frequency
-
-        -- ah, so this is fucked. after this we can no longer rely
-        -- on props.inputs, because props is a copy of node.props, but
-        -- node is now a new node, because on of it's inputs has changed?
-        -- Not true. Ok this is how:
-          -- doing flattenInput returns a LIST OF AUDIO NODES. It doesn't modify
-          -- anything. Right at the top we have an unmodified audioGraph and a list
-          -- of now flattened inputs. Now, either add those to the dictGraph, or
-          -- replace an element in the graph if it has the same id. Phew.. i think
-          -- that will work. Yikes. Confusing.
-          -- I don't even think the flatten Dict graph needs to know about graph, which is nice!
-
--- type FlattenResponse  uiModel
---   = NotChanged
---   | Changed (AudioNode uiModel, List (AudioNode uiModel), Int)
-
-
-
 flattenInput : List (AudioNode uiModel) -> Int -> Input uiModel
-               -> Maybe (FlattenResponse uiModel)
+               -> Maybe (Int, List (AudioNode uiModel))
 flattenInput accNodes lastId input =
   case getNestedInputNode input of
     Nothing ->
       Nothing
     Just childNode ->
       let
-        (newChildNode, accNodes2, childNodeId) = flattenNode (childNode, accNodes, lastId)
+        (childNodeId, accNodes2) = flattenNode (childNode, accNodes, lastId)
       in
-        Just (newChildNode, accNodes2, childNodeId + 1)
+        Just (childNodeId + 1, accNodes2)
       -- Debug.crash "asdf"
 
       -- in
