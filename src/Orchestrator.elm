@@ -67,6 +67,18 @@ updateNode uiModel graph1 maybeNodeId node =
           -- frequency might be inline, which is challenging, as we actually need to
           -- updateing props.inputs.frequency as well as the graph
             -- do we?? I'm confused :( if getInputValue returns a graph, we're good right?
+          -- I doubt this is working. Really we need to update a tree, rather than a list,
+          -- and updating a tree is MUCH harder!! fuckk.
+
+          -- the problem is that props.inputs.frequency is just a copy of that value from the DictGraph, and
+          -- although we get the new value, in the graph returned, the value in the tree path is never
+          -- actually updated! On man, trees really suck with immutable data structures!
+          -- Must we introduct mutable tree?? LOL. I guess it makes a bit of sense
+          -- I have a bad feeling this mutable stuff is going to introduce some really weird bugs!!
+
+          -- maybe the Lens library is useful here?
+
+
         (frequencyOffsetValue, graph3) = getInputValue uiModel graph2 props.inputs.frequencyOffset
         (phaseOffsetValue, graph4) = getInputValue uiModel graph3 props.inputs.phaseOffset
         (newValue, newPhase) = props.func frequencyValue frequencyOffsetValue phaseOffsetValue props.state.phase

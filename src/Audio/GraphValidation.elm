@@ -56,12 +56,13 @@ getInputForValidation uiModel input graph =
           Ok (Just node)
         Nothing ->
           Err ("There are no nodes in the graph with ID `" ++ toString(nodeId) ++ "`")
-
+    AutoID nodeId ->
+      Ok (Nothing) -- Nodes with an AutoID and their children were automatically
+        -- generated. So there's no need to validate them or their children.
 
 getNodeInputsList : AudioNode idType uiModel -> List (Input idType uiModel)
 getNodeInputsList node =
   case node of
     Oscillator props ->
-      let inputs = props.inputs
-      in [inputs.frequency, inputs.frequencyOffset, inputs.phaseOffset]
+      [props.frequency, props.frequencyOffset, props.phaseOffset]
     _ -> Debug.crash "todo"

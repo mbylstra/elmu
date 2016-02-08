@@ -30,8 +30,11 @@ flattenNode (node1, accNodes1, lastId1) =
   case node1 of
     Oscillator props ->
       let
-        inputs = props.inputs
-        (node2, accNodes2, lastId2) = flattenInput (node1, accNodes1, lastId1) inputs.frequency
+        (node2, accNodes2, id, lastId2) = flattenInput (node1, accNodes1, lastId1) props.frequency
+        -- now we must update node.props.inputs.frequency .... oh dear, what a hassle, three levels deep!
+        props2 = { props | frequency = Input (ID id)}  -- the input now points to an id, rather than an inline node
+          -- now we need to introduce two input things though!
+
           -- Changed rootNode childNodes lastId ->
           --   (rootNode, childNodes, lastId)
           -- NotChange ->
