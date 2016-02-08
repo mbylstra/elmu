@@ -8,13 +8,13 @@ import Lib.MutableDict as MutableDict
   been validated and uses unsafe methods for graph look up which
   assume valid data.
 -}
-validateGraph : uiModel -> DictGraph idType uiModel -> Destination idType uiModel
+validateGraph : uiModel -> DictGraph uiModel -> Destination uiModel
                 -> Result String Bool
 validateGraph uiModel graph destination =
   validateInput uiModel graph destination.input
 
 
-validateInput : uiModel -> DictGraph idType uiModel -> Input idType uiModel -> Result String Bool
+validateInput : uiModel -> DictGraph uiModel -> Input uiModel -> Result String Bool
 validateInput uiModel graph input =
   case getInputForValidation uiModel input graph of
     Ok maybeNode ->
@@ -38,8 +38,8 @@ validateInput uiModel graph input =
       Err msg
 
 
-getInputForValidation : uiModel -> Input idType uiModel -> DictGraph idType uiModel
-          -> Result String (Maybe (AudioNode  idType uiModel))
+getInputForValidation : uiModel -> Input uiModel -> DictGraph uiModel
+          -> Result String (Maybe (AudioNode  uiModel))
 getInputForValidation uiModel input graph =
   case input of
     Value value ->
@@ -57,12 +57,11 @@ getInputForValidation uiModel input graph =
         Nothing ->
           Err ("There are no nodes in the graph with ID `" ++ toString(nodeId) ++ "`")
     AutoID nodeId ->
-      Ok (Nothing) -- Nodes with an AutoID and their children were automatically
-        -- generated. So there's no need to validate them or their children.
+      Ok (Nothing)
 
-getNodeInputsList : AudioNode idType uiModel -> List (Input idType uiModel)
+getNodeInputsList : AudioNode uiModel -> List (Input uiModel)
 getNodeInputsList node =
   case node of
     Oscillator props ->
       [props.frequency, props.frequencyOffset, props.phaseOffset]
-    _ -> Debug.crash "todo"
+    -- _ -> Debug.crash "todo"

@@ -28,9 +28,9 @@ type alias ExternalState uiModel=
   for this implemenetation code, without making the end user
   API for Input not annoylingly nested to be used as a DSL
 -}
-type InputHelper idType uiModel
-  = InlineNodeInput (AudioNode idType uiModel)
-  | ReferencedNodeInput idType (AudioNode idType uiModel)
+type InputHelper uiModel
+  = InlineNodeInput (AudioNode uiModel)
+  | ReferencedNodeInput (AudioNode uiModel)
   | ValueInput Float
 
 
@@ -38,26 +38,26 @@ type InputHelper idType uiModel
 -- MAIN
 --------------------------------------------------------------------------------
 
-getNodeId : (AudioNode idType guiModel) -> Maybe idType
+getNodeId : (AudioNode guiModel) -> Maybe idType
 getNodeId node =
   case node of
     Oscillator props ->
       props.id
-    FeedforwardProcessor props ->
-      props.id
-    Add props ->
-      props.id
-    Gain props ->
-      props.id
-    -- Destination props ->
+    -- FeedforwardProcessor props ->
     --   props.id
-    Multiply node' ->
-      node'.id
+    -- Add props ->
+    --   props.id
+    -- Gain props ->
+    --   props.id
+    -- -- Destination props ->
+    -- --   props.id
+    -- Multiply node' ->
+    --   node'.id
     -- we must fill this out for all node types, unless we use extensible records!
 
 
-updateNode : uiModel -> DictGraph idType uiModel -> Maybe idType -> AudioNode idType uiModel
-  -> (Float, DictGraph idType uiModel)
+updateNode : uiModel -> DictGraph uiModel -> Maybe -> AudioNode uiModel
+  -> (Float, DictGraph uiModel)
 updateNode uiModel graph1 maybeNodeId node =
   case node of
     Oscillator props ->
@@ -95,8 +95,8 @@ updateNode uiModel graph1 maybeNodeId node =
     _ -> Debug.crash("todo")
 
 
-getInputValue : uiModel -> DictGraph idType uiModel -> Input idType uiModel
-                -> (Float, DictGraph idType uiModel)
+getInputValue : uiModel -> DictGraph uiModel -> Input uiModel
+                -> (Float, DictGraph uiModel)
 getInputValue uiModel graph input =
   case getInputHelper uiModel graph input of
     ValueInput value ->
@@ -109,13 +109,13 @@ getInputValue uiModel graph input =
 
 
 {- this should only ever be run immediately after validateGraph has been run! -}
--- unsafeUpdateGraph : uiModel -> DictGraph idType uiMOdel -> Destination idTypeModel
---   -> (DictGraph idType uiMOdel, Destination idTypeModel)
+-- unsafeUpdateGraph : uiModel -> DictGraph uiMOdel -> Destination idTypeModel
+--   -> (DictGraph uiMOdel, Destination idTypeModel)
 -- unsafeUpdateGraph uiModel graph destination =
 
 
-getInputHelper : uiModel -> DictGraph idType uiModel -> Input idType uiModel
-          -> InputHelper idType uiModel
+getInputHelper : uiModel -> DictGraph uiModel -> Input uiModel
+          -> InputHelper uiModel
 getInputHelper uiModel graph input =
   case input of
     Value value ->

@@ -7,12 +7,12 @@ import Lib.MutableDict exposing (MutableDict)
 -- TYPE DEFINITIONS
 --------------------------------------------------------------------------------
 
-type Input idType uiModel
-  = ID idType -- a user supplied ID type. Could be a tagged union, for type safety.
+type Input uiModel
+  = ID String -- a user supplied id
   | Value Float
   | Default -- Not needed now that we discovered using records as defaults. DELETEME
   | UI (uiModel -> Float) -- A user supplied function that maps from a user supplied model to a value
-  | Node (AudioNode idType uiModel)
+  | Node (AudioNode uiModel)
   | AutoID Int  -- These ids are generated automatically when nested nodes are flattened by the Orchestrator
     -- hmm, we have a big problem now. The DictGraph key can now be either a user supplied key or
     -- an Auto ID. We could make another union type, but that would make dict lookup slow and
@@ -42,41 +42,38 @@ type Input idType uiModel
 -- better readability and namespacing (but I doubt we'd have clashes,
 -- and the compiler helps with this anytway. You can alwas break things up
 -- visually
+-- Note. This has been changed.
 
-type alias Identifiable r idType =
-  { r | userId : Maybe idType, autoId : Int }
+type alias Identifiable r =
+  { r | userId : Maybe String, autoId : Maybe Int }
 
--- type alias Identifiable r idType =
---   { r | autoId : Int, id : Maybe idType }
+type alias OscillatorProps uiModel =
+  (Identifiable
+    -- inputs
+    { frequency : Input uiModel
+    , frequencyOffset : Input uiModel
+    , phaseOffset : Input uiModel
+    -- state
+    , phase: Float
+    , outputValue : Float
+    }
+  )
 
--- type alias OscillatorR idType = Identifiable { score: Int } idType
-
-type AudioNode idType uiModel =
-  Oscillator
-    (Identifiable
-      -- inputs
-      { frequency : Input idType uiModel
-      , frequencyOffset : Input idType uiModel
-      , phaseOffset : Input idType uiModel
-      -- state
-      , phase: Float
-      , outputValue : Float
-      }
-      idType
-    )
+type AudioNode uiModel =
+  Oscillator (OscillatorProps uiModel)
 
   -- These need to be converted to Identifiable's.
   -- | Gain
   --     { id : Maybe idType
   --     , func : GainF
-  --     , inputs: {signal: Input idType uiModel, gain: Input idType uiModel}
+  --     , inputs: {signal: Input uiModel, gain: Input uiModel}
   --     , state :
   --         { outputValue : Float -- do we really need this? Is it just for feedback? Doesn't really hurt to keep as we need inputs anyway.
   --         }
   --     }
   -- | FeedforwardProcessor
   --     { id : Maybe idType
-  --     , input : Input idType uiModel
+  --     , input : Input uiModel
   --     , func : FeedforwardProcessorF -- this is the "update"
   --     , state :  -- this is the "model"
   --         { outputValue : Float
@@ -85,21 +82,22 @@ type AudioNode idType uiModel =
   --     }
   -- | Add
   --     { id : Maybe idType
-  --     , inputs : List (Input idType uiModel)
+  --     , inputs : List (Input uiModel)
   --     , state :
   --         { outputValue : Float
   --         }
   --     }
   -- | Multiply
   --     { id : Maybe idType
-  --     , inputs : List (Input idType uiModel)
+  --     , inputs : List (Input uiModel)
   --     , state :
   --         { outputValue : Float
   --         }
   --     }
 
-type alias Destination idType uiModel =
-  { input : Input idType uiModel
+
+type alias Destination uiModel =
+  { input : Input uiModel
   , state :
       { outputValue : Float }
   }
@@ -139,6 +137,6 @@ type alias ExternalState =
 
 
 
-type alias ListGraph idType uiModel = List (AudioNode idType uiModel)
--- type alias DictGraph idType uiModel = MutableDict idType (AudioNode idType uiModel)
-type alias DictGraph idType uiModel = MutableDict String (AudioNode idType uiModel)
+type alias ListGraph uiModel = List (AudioNode uiModel)
+-- type alias DictGraph uiModel = MutableDict (AudioNode uiModel)
+type alias DictGraph uiModel = MutableDict String (AudioNode uiModel)

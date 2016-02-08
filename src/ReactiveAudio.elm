@@ -54,7 +54,7 @@ import Helpers exposing (toMutableDict)
 --     -- , { mid = "2"
 --     --     multiple = Value 1.0
 --     --     detune = Default
---     --     modulator : Self -- union type: Carrier | Self | MID String | NodeID  --- modulate with ANYTHING outside the graph
+--     --     modulator : Self -- union type: Carrier | Self | MID String |  --- modulate with ANYTHING outside the graph
 --     --   }
 --     ]
 --   }
@@ -93,14 +93,12 @@ import Helpers exposing (toMutableDict)
 
 -- type alias ListGraph id =  List (AudioNode (Maybe id))
 
-makeDestination : Input idType uiModel -> Destination idType uiModel
+makeDestination : Input uiModel -> Destination uiModel
 makeDestination input =
         { input = input
         , state =
             { outputValue = 0.0 }
         }
-
-type NodeID = Sin1 | Sin2
 
 -- type alias GuiModel = {a: Float}
 
@@ -110,18 +108,18 @@ type NodeID = Sin1 | Sin2
 
 -- basicGraph : ListGraph NodeID
 -- basicGraph : List (AudioNode NodeID)
--- basicGraph : (List (AudioNode NodeID Gui.Model), AudioNode NodeID Gui.Model)
-basicGraph : (ListGraph NodeID Gui.Model, Destination NodeID Gui.Model)
+-- basicGraph : (List (AudioNode Gui.Model), AudioNode Gui.Model)
+basicGraph : (ListGraph Gui.Model, Destination Gui.Model)
 basicGraph =
     -- [ sine sineDefaults]
     ( [ sine
         { sineDefaults
-        | id = Just Sin1
+        | id = Just "sin1"
         , frequency = Value 440.0
         -- , frequency = UI getFrequency
         }
       ]
-    , makeDestination <| ID Sin1
+    , makeDestination <| ID "sin1"
     )
 
 -- inlineNodesExample : ListGraph
@@ -143,5 +141,5 @@ basicGraph =
 (listNodes, destination) = basicGraph
 
 
-audioGraph : DictGraph NodeID Gui.Model
+audioGraph : DictGraph Gui.Model
 audioGraph = toMutableDict listNodes
