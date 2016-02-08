@@ -2,9 +2,6 @@ import Audio.MainTypes exposing (..)
 -- import Lib.MutableDict as MutableDict
 
 
-import Audio.AudioNodeTypes.Oscillator as Osc
-
-
 -- type InputHelper uiModel
 --   = InlineNodeInput (AudioNode uiModel)
 --   | ReferencedNodeInput (AudioNode uiModel)
@@ -25,53 +22,43 @@ import Audio.AudioNodeTypes.Oscillator as Osc
 --     ID nodeId ->
 --       ReferencedNodeInput nodeId (MutableDict.unsafeGet nodeId graph) -- assumes graph has been validated
 
+
 type alias FlattenResponse uiModel
-  = (AudioNode uiModel, List (AudioNode uiModel), Int, Identifiable) -- I think not given the full type for props is where shit will hit the fan!
+  = (AudioNode uiModel, List (AudioNode uiModel), Int)
 
 
+flattenNode : FlattenResponse idModel -> FlattenResponse idModel
+flattenNode (node1, accNodes1, lastId1) =
+  case node1 of
+    Oscillator props ->
+      let
 
--- flattenNode : FlattenResponse idModel -> FlattenResponse idModel
--- flattenNode (node1, accNodes1, lastId1) =
---   case node1 of
---     Oscillator props ->
---       let
---         (node2, accNodes2, lastId2, props2) = flattenInput getter setter (node1, accNodes1, lastId1, props)
---         props2 = { props | frequency = AutoID lastId2}  -- the input now points to an id, rather than an inline node
---         -- List.map
---         --   (\(getter, setter) -> Osc.accessors )
---         --   Osc.accessors
---
---
---         getFrequency = Osc.accessors[0][0]  -- imaginary
---         setFrequency = Osc.accessors[0][1]  -- imaginary
---
---         flattenInput getter setter (no
---
---
---
---
---
---         -- how can we reduce this boilerplate?
---         -- can we make a function that just takes an accessor function, and a 4-tuple,
---         -- and returns a 4 tuple, and even use the pipe operater, or map
---         -- over a list of accessors?, or even automatically get a list of type accessors from
---         -- a record?
---         (node3, accNodes3, lastId3) = flattenInput (node2, accNodes2, lastId2) props.frequencyOffset
---         props3 = { props2 | frequency = AutoID lastId3}  -- the input now points to an id, rather than an inline node
---
---
---
---
---           -- Changed rootNode childNodes lastId ->
---           --   (rootNode, childNodes, lastId)
---           -- NotChange ->
---           --   (node1, extraNodes1, lastId1)
---
---         -- ugh, we need the "primary node" thing so we can create a new node,
---         -- and point it to that
---       in
---         (node2, accNodes2, lastId2)
---     -- _ -> Debug.crash ""
+        (node2, accNodes2, lastId2) =
+          case flattenInput accNodes1 lastId1 props.frequency of
+            Just result -> result
+            Nothing -> (node1, accNodes1, lastId1)
+
+        -- props2 = { props | frequency = AutoID lastId2}  -- the input now points to an id, rather than an inline node
+
+        -- (node3, accNodes3, lastId3) = flattenInput accNodes2 lastId2 props2.frequencyOffset
+        -- props3 = { props2 | frequencyOffset = AutoID lastId3}  -- the input now points to an id, rather than an inline node
+
+
+        -- TODO: phaseOffset
+
+        -- new
+
+
+          -- Changed rootNode childNodes lastId ->
+          --   (rootNode, childNodes, lastId)
+          -- NotChange ->
+          --   (node1, extraNodes1, lastId1)
+
+        -- ugh, we need the "primary node" thing so we can create a new node,
+        -- and point it to that
+      in
+        (node2, accNodes2, lastId2)
+    -- _ -> Debug.crash ""
 
 
 
@@ -111,22 +98,27 @@ getNestedInputNode input =
 
 
 
--- flattenInput : FlattenResponse uiModel -> Input uiModel -> FlattenResponse uiModel
-flattenInput getter setter (node, accNodes, lastId, props) =
+flattenInput : List (AudioNode uiModel) -> Int -> Input uiModel
+               -> Maybe (FlattenResponse uiModel)
+flattenInput accNodes lastId input =
   case getNestedInputNode input of
     Nothing ->
-      -- nothing needs to be changed, so just return the data as supplied
-      (node, accNodes, lastId, props)
-    Just innerNode ->
-      -- now we have the node that input is referencing.
-      -- that node may have children, so we must run flattenNode on it
+      Nothing
+    Just childNode ->
       let
-        -- (flattenedInnerNode, accNodes2, lastId2) = flattenNode (innerNode, accNodes, lastId)
-        (flattenedInnerNode, accNodes2, lastId2) = (innerNode, accNodes, lastId)
-        nodeId = lastId2 + 1
-        newProps = setter (AutoID nodeId) props
+        (newChildNode, accNodes2, childNodeId) = flattenNode (childNode, accNodes, lastId)
       in
-        (extractedNode, accNodes2, nodeId, newProps)
+        Just (newChildNode, accNodes2, childNodeId + 1)
+      -- Debug.crash "asdf"
+
+      -- in
+      --   Debug.crash "TODO"
+    --     -- (nodes, lastId') = flattenNode
+    --   -- id
+    --   -- we must
+    --   --   make an id
+    --   --   somehow update the parent with this new id
+    --   --   insert into the dictgraph
 
 
 -- How the F do we do this?
