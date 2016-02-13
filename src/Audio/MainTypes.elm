@@ -1,18 +1,18 @@
 module Audio.MainTypes where
 
--- import Dict exposing(Dict)
+import Dict exposing(Dict)
 import Lib.MutableDict exposing (MutableDict)
 
 --------------------------------------------------------------------------------
 -- TYPE DEFINITIONS
 --------------------------------------------------------------------------------
 
-type Input uiModel
+type Input ui
   = ID String -- a user supplied id
   | Value Float
   | Default -- Not needed now that we discovered using records as defaults. DELETEME
-  | UI (uiModel -> Float) -- A user supplied function that maps from a user supplied model to a value
-  | Node (AudioNode uiModel)
+  | UI (ui -> Float) -- A user supplied function that maps from a user supplied model to a value
+  | Node (AudioNode ui)
   | AutoID Int  -- These ids are generated automatically when nested nodes are flattened by the Orchestrator
     -- hmm, we have a big problem now. The DictGraph key can now be either a user supplied key or
     -- an Auto ID. We could make another union type, but that would make dict lookup slow and
@@ -44,36 +44,49 @@ type Input uiModel
 -- visually
 -- Note. This has been changed.
 
-type alias Identifiable r =
-  { r | userId : Maybe String, autoId : Maybe Int }
-
-type alias OscillatorProps uiModel =
-  (Identifiable
-    -- inputs
-    { frequency : Input uiModel
-    , frequencyOffset : Input uiModel
-    , phaseOffset : Input uiModel
-    -- state
-    , phase: Float
+type alias BaseNodeProps r ui =
+  { r |
+      userId : Maybe String
+    , autoId : Maybe Int
+    , inputs : Dict String (Input ui)
     , outputValue : Float
+  }
+
+type alias OscillatorProps ui =
+  (BaseNodeProps
+    { phase: Float
+    , func: OscillatorF
     }
+    ui
   )
 
-type AudioNode uiModel =
-  Oscillator (OscillatorProps uiModel)
+type AudioNode ui =
+  Oscillator (OscillatorProps ui)
 
-  -- These need to be converted to Identifiable's.
+type alias AudioNodes ui = List AudioNode ui
+
+
+-- Can we remove the unions, and have just one data type?
+-- you can make inputs a dict, and state could be some ungodly dict or matrix,
+-- but the main problem is the func: This would get really ugly - it would
+-- have to take a list of strings as an argument or something, at which
+-- point, what is the advantage of functional programming?? At least with
+-- js you can use an object for named arguments. Also, the actual (for example)
+-- sine function would necessarily need to take in a list of strings,
+
+type alias InputsDict ui = Dict String (Input ui)
+  -- These need to be converted to NodeBase's.
   -- | Gain
   --     { id : Maybe idType
   --     , func : GainF
-  --     , inputs: {signal: Input uiModel, gain: Input uiModel}
+  --     , inputs: {signal: Input ui, gain: Input ui}
   --     , state :
   --         { outputValue : Float -- do we really need this? Is it just for feedback? Doesn't really hurt to keep as we need inputs anyway.
   --         }
   --     }
   -- | FeedforwardProcessor
   --     { id : Maybe idType
-  --     , input : Input uiModel
+  --     , input : Input ui
   --     , func : FeedforwardProcessorF -- this is the "update"
   --     , state :  -- this is the "model"
   --         { outputValue : Float
@@ -82,22 +95,22 @@ type AudioNode uiModel =
   --     }
   -- | Add
   --     { id : Maybe idType
-  --     , inputs : List (Input uiModel)
+  --     , inputs : List (Input ui)
   --     , state :
   --         { outputValue : Float
   --         }
   --     }
   -- | Multiply
   --     { id : Maybe idType
-  --     , inputs : List (Input uiModel)
+  --     , inputs : List (Input ui)
   --     , state :
   --         { outputValue : Float
   --         }
   --     }
 
 
-type alias Destination uiModel =
-  { input : Input uiModel
+type alias Destination ui =
+  { input : Input ui
   , state :
       { outputValue : Float }
   }
@@ -137,6 +150,6 @@ type alias ExternalState =
 
 
 
-type alias ListGraph uiModel = List (AudioNode uiModel)
--- type alias DictGraph uiModel = MutableDict (AudioNode uiModel)
-type alias DictGraph uiModel = MutableDict String (AudioNode uiModel)
+type alias ListGraph ui = List (AudioNode ui)
+-- type alias DictGraph ui = MutableDict (AudioNode ui)
+type alias DictGraph ui = MutableDict String (AudioNode ui)

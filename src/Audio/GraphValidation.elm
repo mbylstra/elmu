@@ -1,5 +1,6 @@
 import Audio.MainTypes exposing (..)
 import Lib.MutableDict as MutableDict
+import Dict
 
 
 {-
@@ -63,5 +64,5 @@ getNodeInputsList : AudioNode uiModel -> List (Input uiModel)
 getNodeInputsList node =
   case node of
     Oscillator props ->
-      [props.frequency, props.frequencyOffset, props.phaseOffset]
+      Dict.values props.inputs
     -- _ -> Debug.crash "todo"

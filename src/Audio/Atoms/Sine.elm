@@ -3,6 +3,7 @@ module Audio.Atoms.Sine where
 import Array exposing (Array)
 import Basics
 import ElmTest exposing (..)
+import Dict exposing(Dict)
 
 import Audio.MainTypes exposing (..)
 import Audio.AudioNodeFunctions exposing (getPeriodSeconds, sampleDuration, fmod)
@@ -31,7 +32,6 @@ sinLookup =
 
 sinWave : Float -> Float -> Float -> Float -> (Float, Float)
 sinWave frequency frequencyOffset phaseOffset prevPhase =
-    -- currently ignore frequencyOffset
     let
         phaseOffset = phaseOffset / 2.0
         periodSeconds = getPeriodSeconds (frequency + frequencyOffset)
@@ -47,31 +47,28 @@ sinWave frequency frequencyOffset phaseOffset prevPhase =
     in
         (amplitude, currPhase)  -- I actually think returning a tuple is problematic for performance! You want to stick to as basic as possible data types.
 
-type alias Args idType uiModel =
-  { id : Maybe idType
-  , frequency: Input idType uiModel
-  , frequencyOffset: Input idType uiModel
-  , phaseOffset: Input idType uiModel
+type alias Args uiModel =
+  { id : Maybe String
+  , frequency: Input uiModel
+  , frequencyOffset: Input uiModel
+  , phaseOffset: Input uiModel
   }
 
 
-sine : (Args idType uiModel) -> (AudioNode idType uiModel)
+sine : (Args uiModel) -> (AudioNode uiModel)
 sine args =
-  let
-    x = args.id
-    osc = Oscillator
-      { id = args.id
-      , func = sinWave
-      , inputs =
-        { frequency = args.frequency
-        , frequencyOffset = args.frequencyOffset
-        , phaseOffset = args.phaseOffset
-        }
-      , state =
-          { outputValue = 0.0, phase = 0.0  }
-      }
-  in
-    osc
+  Oscillator
+    { userId = args.id
+    , autoId = Nothing
+    , func = sinWave
+    , inputs = Dict.fromList
+      [ ("frequency", args.frequency)
+      , ("frequencyOffset", args.frequencyOffset)
+      , ("phaseOffset", args.phaseOffset)
+      ]
+    , outputValue = 0.0
+    , phase = 0.0
+    }
 
 
 -- This is pretty Annoying, but it seems we must force the user
@@ -80,7 +77,7 @@ sine args =
 -- a node with `Just` whe providing an id, but still, feedback is the rarer use case.
 -- Things might get interesting if we want to display audio model data in the UI :/
 
-sineDefaults : Args idType uiModel
+sineDefaults : Args uiModel
 sineDefaults =
   { id = Nothing
   , frequency = Value 440.0

@@ -1,113 +1,88 @@
 import Audio.MainTypes exposing (..)
--- import Lib.MutableDict as MutableDict
+import Dict exposing (Dict)
+
+unsafeDictGet : comparable -> Dict comparable value -> value
+unsafeDictGet key dict =
+  case Dict.get key dict of
+    Just value ->
+      value
+    Nothing ->
+      Debug.crash("Dict.get returned Nothing from within usafeDictGet")
 
 
--- type InputHelper uiModel
---   = InlineNodeInput (AudioNode uiModel)
---   | ReferencedNodeInput (AudioNode uiModel)
---   | ValueInput Float
---
--- getInputHelper : uiModel -> DictGraph uiModel -> Input uiModel
---           -> InputHelper uiModel
--- getInputHelper uiModel graph input =
---   case input of
---     Value value ->
---       ValueInput value
---     Default ->
---       ValueInput 0.0
---     UI func ->
---       ValueInput (func uiModel)
---     Node node ->
---       InlineNodeInput node
---     ID nodeId ->
---       ReferencedNodeInput nodeId (MutableDict.unsafeGet nodeId graph) -- assumes graph has been validated
+-- flattenNode node =
+--   case
 
 
-type alias FlattenResponse uiModel
-  = (AudioNode uiModel, List (AudioNode uiModel), Int)
 
-
-flattenNode : (AudioNode uiModel, List (AudioNode uiModel), Int) -> (Int, List (AudioNode uiModel))
-flattenNode (node, accNodes, lastId) =
+flattenInputTop : { inputName : String, node : AudioNode ui, lastId : Int, accNodes : AudioNodes ui}
+                  -> { accNodes : AudioNodes ui, lastId : Int, node : AudioNode ui }
+flattenInputTop { inputName, node, lastId, accNodes } =
   case node of
     Oscillator props ->
       let
-
-        (lastId3, accNodes3, props3) =
-          case flattenInput accNodes lastId props.frequency of
-            Just (lastId2, accNodes2) ->
-              (lastId2, accNodes2, { props | frequency = AutoID lastId2})  -- the input now points to an id, rather than an inline node
-            Nothing ->
-              -- Nothing needs to be changed, so values stay the same
-              (lastId, accNodes, props)
-
-        -- It's annoying that there's so much boilerplate, but things
-        -- started getting really crazy (was it even possible??) using
-        -- "getters and setters"
-
-        -- node3
-
-        -- (node3, accNodes3, lastId3) = flattenInput accNodes2 lastId2 props2.frequencyOffset
-        -- props3 = { props2 | frequencyOffset = AutoID lastId3}  -- the input now points to an id, rather than an inline node
-
-
-        -- TODO: phaseOffset
-
-        -- new
-
-
-          -- Changed rootNode childNodes lastId ->
-          --   (rootNode, childNodes, lastId)
-          -- NotChange ->
-          --   (node1, extraNodes1, lastId1)
-
-        -- ugh, we need the "primary node" thing so we can create a new node,
-        -- and point it to that
+        { props, accNodes, lastId} = flattenInputUpperMiddle
+          { inputName = inputName
+          , props = props
+          , lastId = lastId
+          , accNodes = accNodes
+          }
+        newNode = Oscillator props -- fark... this is the issue!!!
+      -- oscillator specifically requires a Oscillator record,
+      -- but this function might be given something that ISNT an oscillator
+    -- accNodes' = [newNode] ++ accNodes
       in
-        (lastId3, accNodes3)
-    -- _ -> Debug.crash ""
+        { accNodes = accNodes, lastId = lastId, node = newNode }
 
+flattenInputUpperMiddle : { inputName : String, props : BaseNodeProps r ui, lastId : Int, accNodes : AudioNodes ui }
+  -> { props : BaseNodeProps r ui, accNodes : AudioNodes ui, lastId : Int }
+flattenInputUpperMiddle { inputName, props, lastId, accNodes } =
+  let
+    { lastId, accNodes, inputs } =
+      flattenInputMiddle
+        { accNodes = accNodes
+        , lastId = lastId
+        , input = unsafeDictGet inputName props.inputs  -- this assumes the inputName as already been validated
+        , inputName = inputName
+        , inputs = props.inputs
+        }
+    newProps = { props | inputs = inputs }
+    -- newNode = Oscillator props2 -- fark... this is the issue!!!
+      -- oscillator specifically requires a Oscillator record,
+      -- but this function might be given something that ISNT an oscillator
 
+    -- accNodes' = [newNode] ++ accNodes
+    -- accNodes' = [newNode] ++ accNodes
+  in
+    { props = newProps, accNodes = accNodes, lastId = lastId }
+    -- 0
 
-getNestedInputNode : Input uiModel -> Maybe (AudioNode uiModel)
-getNestedInputNode input =
-  case input of
-    Node node ->
-      Just node
-    _ ->
-      Nothing
-
-flattenInput : List (AudioNode uiModel) -> Int -> Input uiModel
-               -> Maybe (Int, List (AudioNode uiModel))
-flattenInput accNodes lastId input =
-  case getNestedInputNode input of
+flattenInputMiddle :
+  {  input : Input ui, inputName : String, inputs  : InputsDict ui
+  , accNodes : AudioNodes ui,  lastId : Int
+  }
+  -> { lastId : Int, accNodes : AudioNodes ui, inputs : InputsDict ui }
+flattenInputMiddle { accNodes, lastId, input, inputName, inputs } =
+  case flattenInputLower { accNodes = accNodes, lastId = lastId, input = input} of
+    Just (lastId, accNodes) ->
+      { lastId = lastId
+      , accNodes = accNodes
+      , inputs = Dict.insert inputName (AutoID lastId) inputs  -- the input now points to an id, rather than an inline node
+      }
     Nothing ->
-      Nothing
-    Just childNode ->
+      { lastId = lastId, accNodes = accNodes, inputs = inputs }
+
+
+flattenInputLower :
+  { accNodes : AudioNodes ui, lastId : Int, input : Input ui }
+  -> Maybe (Int, AudioNodes ui)
+flattenInputLower {accNodes, lastId, input} =
+  case input of
+    Node childNode ->
       let
-        (childNodeId, accNodes2) = flattenNode (childNode, accNodes, lastId)
+        -- (childNodeId, accNodes2) = flattenNode (childNode, accNodes, lastId)
+        (childNodeId, accNodes2) = (lastId, accNodes)
       in
         Just (childNodeId + 1, accNodes2)
-      -- Debug.crash "asdf"
-
-      -- in
-      --   Debug.crash "TODO"
-    --     -- (nodes, lastId') = flattenNode
-    --   -- id
-    --   -- we must
-    --   --   make an id
-    --   --   somehow update the parent with this new id
-    --   --   insert into the dictgraph
-
-
--- How the F do we do this?
-  -- We are at a leaf if none of the inputs are inlined
-  -- we can detect a leaf by getting all inputs of a node (using getInputsList)
-    -- and return true if none of them are inline inputs.
-    -- If they are all leafs, then we don't have to do anyting at this level,
-    --   If any of them aren't leafs, then we run flattenDict on them, and
-    -- update them.
-      -- and record makes this really difficult!
-        -- perhaps a dict of inputs is MUCH easier to work with, but not type safe
-    -- what we can do is run FlattenInput on any input, the function will then
-      -- take care of whether it needs to do anyting
+    _ ->
+      Nothing

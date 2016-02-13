@@ -35,6 +35,26 @@ updateA transformFunc record =
   { record | a = (transformFunc record.a) }
 
 
+
+
+type alias BaseRecord = { alpha : Int }
+
+childRecord = { alpha = 1, beta = 1 }
+childRecord2 = { alpha = 1, gamma = 1 }
+
+getAlpha : { a | alpha : Int} -> Int
+getAlpha r =
+  r.alpha
+
+
+x = getAlpha childRecord
+y = getAlpha childRecord2
+
+
+
+
+
+
 -- there's no way to automatically generate this stuff. It must be hand typed!
 -- would be great if you dynamically generate a list of field to update, with their
 -- values2
