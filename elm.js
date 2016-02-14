@@ -10799,7 +10799,7 @@ Elm.Main.make = function (_elm) {
                              ,_1: A2($Basics._op["++"],outputNodes,r.nodes)};
                   var lastId2 = _p39._0;
                   var outputNodes2 = _p39._1;
-                  var _v14 = _p38._1,_v15 = outputNodes2,_v16 = lastId;
+                  var _v14 = _p38._1,_v15 = outputNodes2,_v16 = lastId2;
                   remainderNodes = _v14;
                   outputNodes = _v15;
                   lastId = _v16;

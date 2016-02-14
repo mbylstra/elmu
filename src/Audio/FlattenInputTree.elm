@@ -33,7 +33,7 @@ flattenNodeList nodes =
             r = flattenNode node lastId []
             (lastId2, outputNodes2) = (r.lastId, outputNodes ++ r.nodes)
           in
-            flattenNodeList' remainderRemainderNodes outputNodes2 lastId
+            flattenNodeList' remainderRemainderNodes outputNodes2 lastId2
 
     (_, outputNodes3) = flattenNodeList' nodes [] 0
 
@@ -322,8 +322,6 @@ main =
     elementRunner tests
 
 
--- (3,
---   [ Dummy { userId = Just "dummy4", autoId = Just 1, inputs = Dict.fromList [("inputA",Value 1)], outputValue = 0, func = 0 }
---   , Dummy { userId = Just "dummy3", autoId = Just 2, inputs = Dict.fromList [("inputA",AutoID 1)], outputValue = 0, func = 0 }
---   , Dummy { userId = Just "dummy2", autoId = Just 3, inputs = Dict.fromList [("inputA",AutoID 2)], outputValue = 0, func = 0 }
---   ])
+-- result: [Dummy { userId = Just "dummy1", autoId = Just NaN, inputs = Dict.fromList [("inputA",Value 440)], outputValue = 0, func = 0 },
+-- Dummy { userId = Just "dummy4", autoId = Just NaN, inputs = Dict.fromList [("inputA",Value 1)], outputValue = 0, func = 0 },
+-- Dummy { userId = Just "dummy3", autoId = Just NaN, inputs = Dict.fromList [("inputA",AutoID NaN)], outputValue = 0, func = 0 },Dummy { userId = Just "dummy2", autoId = Just NaN, inputs = Dict.fromList [("inputA",AutoID NaN)], outputValue = 0, func = 0 }]
