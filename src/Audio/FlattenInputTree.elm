@@ -173,11 +173,11 @@ dummy1 : AudioNode ui
 dummy1 = Dummy
   { userId = Nothing
   , autoId = Nothing
-  , inputs = Dict.fromList []
-    -- [("frequency", Value 440.0)
-    -- ,("frequencyOffset", Value 0.0)
-    -- ,("phaseOffset", Value 0.0)
-    -- ]
+  , inputs = Dict.fromList
+    [("frequency", Value 440.0)
+    ,("frequencyOffset", Value 0.0)
+    ,("phaseOffset", Value 0.0)
+    ]
   , outputValue = 0.0
   , func = 0.0
   }

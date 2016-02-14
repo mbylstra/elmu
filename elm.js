@@ -10614,7 +10614,15 @@ Elm.Main.make = function (_elm) {
    var _op = {};
    var dummy1 = $Audio$MainTypes.Dummy({userId: $Maybe.Nothing
                                        ,autoId: $Maybe.Nothing
-                                       ,inputs: $Dict.fromList(_U.list([]))
+                                       ,inputs: $Dict.fromList(_U.list([{ctor: "_Tuple2"
+                                                                        ,_0: "frequency"
+                                                                        ,_1: $Audio$MainTypes.Value(440.0)}
+                                                                       ,{ctor: "_Tuple2"
+                                                                        ,_0: "frequencyOffset"
+                                                                        ,_1: $Audio$MainTypes.Value(0.0)}
+                                                                       ,{ctor: "_Tuple2"
+                                                                        ,_0: "phaseOffset"
+                                                                        ,_1: $Audio$MainTypes.Value(0.0)}]))
                                        ,outputValue: 0.0
                                        ,func: 0.0});
    var oscillator1 = $Audio$MainTypes.Oscillator({userId: $Maybe.Nothing
