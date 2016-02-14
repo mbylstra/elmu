@@ -60,8 +60,16 @@ type alias OscillatorProps ui =
     ui
   )
 
-type AudioNode ui =
-  Oscillator (OscillatorProps ui)
+type alias DummyProps ui =
+  (BaseNodeProps
+    { func: DummyF
+    }
+    ui
+  )
+
+type AudioNode ui
+  = Oscillator (OscillatorProps ui)
+  | Dummy (DummyProps ui)
 
 type alias AudioNodes ui = List (AudioNode ui)
 
@@ -134,6 +142,8 @@ type alias OscillatorF =
     -> TimeFloat
     -> (OutputFloat, PhaseFloat)
 type alias GainF = Float -> Float -> Float
+
+type alias DummyF = Float
 
 -- aliases for readability
 

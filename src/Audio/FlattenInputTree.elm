@@ -16,42 +16,63 @@ unsafeDictGet key dict =
       Debug.crash("Dict.get returned Nothing from within usafeDictGet")
 
 
-type alias FlattenNodeState r ui =
-  { props : BaseNodeProps r ui
-  , lastId : Int
-  , accNodes : AudioNodes ui
-  }
+flattenNode : AudioNode ui -> Int -> AudioNodes ui
+              -> (Int, AudioNodes ui)
+flattenNode node lastId accNodes =
 
-flattenNode : AudioNode ui -> Int
-            -> (Int, AudioNodes ui)
-flattenNode node lastId =
-  case node of
-    -- geez. Maybe this works, but this crap here will need to be repeated for every node type!!
-    Oscillator props ->
-      let
-        -- doInputs : List (String, Input ui) -> FlattenNodeState -> FlattenNodeState
-        doInputs inputsList2 state2 =
-          case inputsList2 of
-            [] ->
-              state2
-            (inputName2, _) :: inputs ->
-              let
-                state3 = flattenInputTop
-                  { inputName=inputName2, node=node, lastId=lastId, accNodes =accNodes }
-              in
-                doInputs inputs state3
-        inputsList = Dict.toList props.inputs
-        {props, lastId, accNodes} = doInputs inputsList {props = props, lastId = lastId, accNodes = accNodes}
-        newNode = Oscillator props
+  let
+    _ = Debug.log "flattenNode" 0
+  in
+    case node of
+      -- geez. Maybe this works, but this crap here will need to be repeated for every node type!!
+      Dummy props ->
+        let
+          _ = Debug.log "end of Dummy props" (lastId, accNodes)
+          inputNames = Dict.keys props.inputs
+          {props, lastId, accNodes} =  doInputs inputNames {props = props, lastId = lastId, accNodes = accNodes, node=node}
+          newNode = Dummy props
+          _ = Debug.log "start of Dummy props" props.inputs
 
-      in
-        (lastId, accNodes)
+        in
+          (lastId, accNodes ++ [newNode])
+      Oscillator props ->
+        Debug.crash "todo"
+
+
+doInputs : List String -> { props : BaseNodeProps r ui, lastId : Int, accNodes : AudioNodes ui, node : AudioNode ui }
+  -> { props : BaseNodeProps r ui, lastId : Int, accNodes : AudioNodes ui}
+doInputs currInputNames {props, lastId, accNodes, node} =
+  let
+    _ = Debug.log "currInputNames" currInputNames
+    -- _ = Debug.log "inputNames" inputNames
+  in
+    -- state2
+    case currInputNames of
+      [] ->
+        {props=props, lastId=lastId, accNodes=accNodes}
+      -- _ -> Debug.crash ""
+      -- _ ->
+      --   state2
+      inputName :: inputNamesTail ->
+        -- state2
+        let
+          {props, lastId, accNodes} = flattenInputTop
+            { inputName=inputName, node=node, lastId=lastId, accNodes = accNodes }
+        in
+          doInputs inputNamesTail
+            { props = props
+            , lastId = lastId
+            , accNodes = accNodes
+            , node = node
+            }
+
+
 
 flattenInputTop : { inputName : String, node : AudioNode ui, lastId : Int, accNodes : AudioNodes ui}
-                  -> { accNodes : AudioNodes ui, lastId : Int, node : AudioNode ui }
+                  -> { accNodes : AudioNodes ui, lastId : Int, props : BaseNodeProps r ui }
 flattenInputTop { inputName, node, lastId, accNodes } =
   case node of
-    Oscillator props ->
+    Dummy props ->
       let
         { props, accNodes, lastId} = flattenInputUpperMiddle
           { inputName = inputName
@@ -59,12 +80,14 @@ flattenInputTop { inputName, node, lastId, accNodes } =
           , lastId = lastId
           , accNodes = accNodes
           }
-        newNode = Oscillator props -- fark... this is the issue!!!
-      -- oscillator specifically requires a Oscillator record,
+        -- newNode = Dummy props -- fark... this is the issue!!!
+      -- oscillator specifically requires a Dummy record,
       -- but this function might be given something that ISNT an oscillator
     -- accNodes' = [newNode] ++ accNodes
       in
-        { accNodes = accNodes, lastId = lastId, node = newNode }
+        { accNodes = accNodes, lastId = lastId, props = props }
+    Oscillator props ->
+      Debug.crash "todo"
 
 flattenInputUpperMiddle : { inputName : String, props : BaseNodeProps r ui, lastId : Int, accNodes : AudioNodes ui }
   -> { props : BaseNodeProps r ui, accNodes : AudioNodes ui, lastId : Int }
@@ -79,8 +102,8 @@ flattenInputUpperMiddle { inputName, props, lastId, accNodes } =
         , inputs = props.inputs
         }
     newProps = { props | inputs = inputs }
-    -- newNode = Oscillator props2 -- fark... this is the issue!!!
-      -- oscillator specifically requires a Oscillator record,
+    -- newNode = Dummy props2 -- fark... this is the issue!!!
+      -- oscillator specifically requires a Dummy record,
       -- but this function might be given something that ISNT an oscillator
 
     -- accNodes' = [newNode] ++ accNodes
@@ -109,14 +132,18 @@ flattenInputLower :
   { accNodes : AudioNodes ui, lastId : Int, input : Input ui }
   -> Maybe (Int, AudioNodes ui)
 flattenInputLower {accNodes, lastId, input} =
-  case input of
-    Node childNode ->
-      let
-        (childNodeId, accNodes) = flattenNode childNode lastId
-      in
-        Just (childNodeId + 1, accNodes)
-    _ ->
-      Nothing
+  let
+    _ = Debug.log "start of flattenInputLower" 0
+  in
+    case input of
+      Node childNode ->
+        let
+          (childNodeId, accNodes) = flattenNode childNode lastId accNodes
+          _ = Debug.log "'start' of Node childNode"  0
+        in
+          Just (childNodeId + 1, accNodes)
+      _ ->
+        Nothing
 
 
 --------------------------------------------------------------------------------
@@ -132,11 +159,30 @@ oscillator1 : AudioNode ui
 oscillator1 = Oscillator
   { userId = Nothing
   , autoId = Nothing
-  , inputs = Dict.fromList []
+  , inputs = Dict.fromList
+    [("frequency", Value 440.0)
+    ,("frequencyOffset", Value 0.0)
+    ,("phaseOffset", Value 0.0)
+    ]
   , outputValue = 0.0
   , phase = 0.0
   , func = sinWave
   }
+
+dummy1 : AudioNode ui
+dummy1 = Dummy
+  { userId = Nothing
+  , autoId = Nothing
+  , inputs = Dict.fromList []
+    -- [("frequency", Value 440.0)
+    -- ,("frequencyOffset", Value 0.0)
+    -- ,("phaseOffset", Value 0.0)
+    -- ]
+  , outputValue = 0.0
+  , func = 0.0
+  }
+
+-- dummy1
 -- type alias BaseNodeProps r ui =
 --   { r |
 --       userId : Maybe String
@@ -145,16 +191,19 @@ oscillator1 = Oscillator
 --     , outputValue : Float
 --   }
 --
--- type alias OscillatorProps ui =
+-- type alias DummyProps ui =
 --   (BaseNodeProps
 --     { phase: Float
---     , func: OscillatorF
+--     , func: DummyF
 --     }
 --     ui
 --   )
 
 tests : Test
 tests =
+  let
+    _ = Debug.log "start of tests" 0
+  in
     suite ""
         [
           test ""
@@ -166,13 +215,26 @@ tests =
             )
         , test ""
             (assertEqual
-              (flattenInputLower
-                { accNodes=[]
-                , lastId=0
-                , input= Node oscillator1
-                }
+              1
+              (
+                let
+                  result = flattenInputLower
+                    { accNodes=[]
+                    , lastId=0
+                    , input= Node dummy1
+                    }
+                  _ = Debug.log "result" result
+                  justResult = Maybe.withDefault (0, []) result
+                  _ = Debug.log "justResult" justResult
+                  nodes = snd justResult
+                  _ = Debug.log "nodes"  nodes
+                  _ = Debug.log "head of nodes" (List.head nodes)
+                in
+                  result
+                    |> Maybe.withDefault (0, [])
+                    |> snd
+                    |> List.length
               )
-              Nothing
             )
         ]
 
