@@ -41,7 +41,7 @@ Elm.Native.MutableDict.make = function(localRuntime) {
   }
 
   function get(key, dict) {
-    var value = return dict[key.ctor];
+    var value = dict[key.ctor];
     if (value !== undefined) {
       return Maybe.Just(value);
     } else {

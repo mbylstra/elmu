@@ -63,7 +63,7 @@ type alias OscillatorProps ui =
 type AudioNode ui =
   Oscillator (OscillatorProps ui)
 
-type alias AudioNodes ui = List AudioNode ui
+type alias AudioNodes ui = List (AudioNode ui)
 
 
 -- Can we remove the unions, and have just one data type?

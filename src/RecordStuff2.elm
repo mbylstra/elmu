@@ -36,4 +36,3 @@ getRecord oneOrTwo =
   case oneOrTwo of
     One r -> r
     -- Two r -> r
-    _ -> Debug.crash("")
