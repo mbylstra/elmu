@@ -7,6 +7,8 @@ import Audio.Atoms.Sine exposing (sinWave)
 
 
 
+-- Amazingly, this haneous pile of shit code actually seems to work :)
+
 unsafeDictGet : comparable -> Dict comparable value -> value
 unsafeDictGet key dict =
   case Dict.get key dict of
@@ -16,10 +18,32 @@ unsafeDictGet key dict =
       Debug.crash("Dict.get returned Nothing from within usafeDictGet")
 
 
-flattenNode : AudioNode ui -> Int -> AudioNodes ui
-              -> (Int, Int, AudioNodes ui)
-flattenNode node lastId accNodes =
+flattenNodeList : AudioNodes ui -> AudioNodes ui
+flattenNodeList nodes =
+  let
 
+    flattenNodeList' : AudioNodes ui -> AudioNodes ui -> Int
+      -> (Int, AudioNodes ui)
+    flattenNodeList' remainderNodes outputNodes lastId =
+      case remainderNodes of
+        [] ->
+          (lastId, outputNodes)
+        node :: remainderRemainderNodes ->
+          let
+            r = flattenNode node lastId []
+            (lastId2, outputNodes2) = (r.lastId, outputNodes ++ r.nodes)
+          in
+            flattenNodeList' remainderRemainderNodes outputNodes2 lastId
+
+    (_, outputNodes3) = flattenNodeList' nodes [] 0
+
+  in
+    outputNodes3
+
+
+flattenNode : AudioNode ui -> Int -> AudioNodes ui
+              -> {lastId: Int, nodes : AudioNodes ui}
+flattenNode node lastId accNodes =
   let
     _ = Debug.log "flattenNode" 0
   in
@@ -31,13 +55,12 @@ flattenNode node lastId accNodes =
           inputNames = Dict.keys props.inputs
           {props, lastId, accNodes} =  doInputs inputNames {props = props, lastId = lastId, accNodes = accNodes, node=node}
           id = lastId + 1
-          newLastId = id
           newProps = { props | autoId = Just id }
           newNode = Dummy newProps
           _ = Debug.log "start of Dummy props" props.inputs
 
         in
-          (id, newLastId, accNodes ++ [newNode])
+          { lastId = id, nodes = accNodes ++ [newNode]}
       Oscillator props ->
         Debug.crash "todo"
 
@@ -122,10 +145,10 @@ flattenInputMiddle :
   -> { lastId : Int, accNodes : AudioNodes ui, inputs : InputsDict ui }
 flattenInputMiddle { accNodes, lastId, input, inputName, inputs } =
   case flattenInputLower { accNodes = accNodes, lastId = lastId, input = input} of
-    Just (childNodeId, lastId, accNodes) ->
+    Just {lastId, nodes} ->
       { lastId = lastId
-      , accNodes = accNodes
-      , inputs = Dict.insert inputName (AutoID childNodeId) inputs  -- the input now points to an id, rather than an inline node
+      , accNodes = nodes
+      , inputs = Dict.insert inputName (AutoID lastId) inputs  -- the input now points to an id, rather than an inline node
       }
     Nothing ->
       { lastId = lastId, accNodes = accNodes, inputs = inputs }
@@ -133,18 +156,14 @@ flattenInputMiddle { accNodes, lastId, input, inputName, inputs } =
 
 flattenInputLower :
   { accNodes : AudioNodes ui, lastId : Int, input : Input ui }
-  -> Maybe (Int, Int, AudioNodes ui)
+  -> Maybe {lastId : Int, nodes : AudioNodes ui}
 flattenInputLower {accNodes, lastId, input} =
   let
     _ = Debug.log "start of flattenInputLower" 0
   in
     case input of
       Node childNode ->
-        let
-          (childNodeId, lastId, accNodes) = flattenNode childNode lastId accNodes
-          _ = Debug.log "'start' of Node childNode"  0
-        in
-          Just (childNodeId, lastId, accNodes)
+        Just <| flattenNode childNode lastId accNodes
       _ ->
         Nothing
 
@@ -271,15 +290,29 @@ tests =
         --     )
         , test ""
             (assertEqual
-              2
+              3
               (
                 let
                   result = flattenNode dummy2 0 []
                   _ = Debug.log "result" result
                 in
                   result
-                    |> \(_,_,a) -> a
+                    |> \{lastId, nodes} -> nodes
                     |> List.length
+              )
+            )
+        , test ""
+            (assertEqual
+              4
+              (
+                let
+                  result = flattenNodeList [dummy1, dummy2]
+                  _ = Debug.log "result" result
+                in
+                  List.length result
+                  -- result
+                  --   |> \{lastId, nodes} -> nodes
+                  --   |> List.length
               )
             )
         ]
@@ -289,46 +322,8 @@ main =
     elementRunner tests
 
 
--- result =
---   ( 1
---   , [ Dummy { userId = Nothing, autoId = Nothing, inputs = Dict.fromList [("inputA",Value 440)], outputValue = 0, func = 0 }
---     , Dummy { userId = Nothing, autoId = Nothing, inputs = Dict.fromList [("inputA",AutoID 1)], outputValue = 0, func = 0 }
---     ]
---   )
-
-
--- result:
---   ( 2
---   , [ Dummy { userId = Just "dummy4", autoId = Nothing, inputs = Dict.fromList [("inputA",Value 1)], outputValue = 0, func = 0 }
---     , Dummy { userId = Just "dummy3", autoId = Nothing, inputs = Dict.fromList [("inputA",AutoID 1)], outputValue = 0, func = 0 }
---     , Dummy { userId = Just "dummy2", autoId = Nothing, inputs = Dict.fromList [("inputA",AutoID 2)], outputValue = 0, func = 0 }
---     ]
---   )
-
-
-
-
--- result: (2,
---   [ Dummy { userId = Just "dummy4", autoId = Just 0, inputs = Dict.fromList [("inputA",Value 1)], outputValue = 0, func = 0 }
---   , Dummy { userId = Just "dummy3", autoId = Just 1, inputs = Dict.fromList [("inputA",AutoID 1)], outputValue = 0, func = 0 }
---   , Dummy { userId = Just "dummy2", autoId = Just 2, inputs = Dict.fromList [("inputA",AutoID 2)], outputValue = 0, func = 0 }
---   ])
-
-
--- result: (1,0,
+-- (3,
 --   [ Dummy { userId = Just "dummy4", autoId = Just 1, inputs = Dict.fromList [("inputA",Value 1)], outputValue = 0, func = 0 }
---   , Dummy { userId = Just "dummy3", autoId = Just 1, inputs = Dict.fromList [("inputA",AutoID 1)], outputValue = 0, func = 0 }
---   , Dummy { userId = Just "dummy2", autoId = Just 1, inputs = Dict.fromList [("inputA",AutoID 1)], outputValue = 0, func = 0 }
+--   , Dummy { userId = Just "dummy3", autoId = Just 2, inputs = Dict.fromList [("inputA",AutoID 1)], outputValue = 0, func = 0 }
+--   , Dummy { userId = Just "dummy2", autoId = Just 3, inputs = Dict.fromList [("inputA",AutoID 2)], outputValue = 0, func = 0 }
 --   ])
-
--- result: (3,3,[Dummy { userId = Just "dummy4", autoId = Just 1, inputs = Dict.fromList [("inputA",Value 1)], outputValue = 0, func = 0 },
--- Dummy { userId = Just "dummy3", autoId = Just 2, inputs = Dict.fromList [("inputA",AutoID 1)], outputValue = 0, func = 0 },
--- Dummy { userId = Just "dummy2", autoId = Just 3, inputs = Dict.fromList [("inputA",AutoID 2)], outputValue = 0, func = 0 }])
-
-
--- thiking this through:
-
---  when a child gets detached, it is given an id
--- The parent needs to know this id, so that when it sets the id, it gets the correct one
--- consider having Node ID (rather than lastId)
-    -- This way, flattenInput should return a triple of (childNodeId, lastId, accNodes)
