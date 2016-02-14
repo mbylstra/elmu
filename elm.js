@@ -10612,20 +10612,33 @@ Elm.Main.make = function (_elm) {
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm);
    var _op = {};
-   var dummy1 = $Audio$MainTypes.Dummy({userId: $Maybe.Nothing
+   var dummy2 = $Audio$MainTypes.Dummy({userId: $Maybe.Just("dummy2")
                                        ,autoId: $Maybe.Nothing
                                        ,inputs: $Dict.fromList(_U.list([{ctor: "_Tuple2"
-                                                                        ,_0: "frequency"
-                                                                        ,_1: $Audio$MainTypes.Value(440.0)}
-                                                                       ,{ctor: "_Tuple2"
-                                                                        ,_0: "frequencyOffset"
-                                                                        ,_1: $Audio$MainTypes.Value(0.0)}
-                                                                       ,{ctor: "_Tuple2"
-                                                                        ,_0: "phaseOffset"
-                                                                        ,_1: $Audio$MainTypes.Value(0.0)}]))
+                                                                        ,_0: "inputA"
+                                                                        ,_1: $Audio$MainTypes.Node($Audio$MainTypes.Dummy({userId: $Maybe.Just("dummy3")
+                                                                                                                          ,autoId: $Maybe.Nothing
+                                                                                                                          ,inputs: $Dict.fromList(_U.list([{ctor: "_Tuple2"
+                                                                                                                                                           ,_0: "inputA"
+                                                                                                                                                           ,_1: $Audio$MainTypes.Node($Audio$MainTypes.Dummy({userId: $Maybe.Just("dummy4")
+                                                                                                                                                                                                             ,autoId: $Maybe.Nothing
+                                                                                                                                                                                                             ,inputs: $Dict.fromList(_U.list([{ctor: "_Tuple2"
+                                                                                                                                                                                                                                              ,_0: "inputA"
+                                                                                                                                                                                                                                              ,_1: $Audio$MainTypes.Value(1.0)}]))
+                                                                                                                                                                                                             ,outputValue: 0.0
+                                                                                                                                                                                                             ,func: 0.0}))}]))
+                                                                                                                          ,outputValue: 0.0
+                                                                                                                          ,func: 0.0}))}]))
                                        ,outputValue: 0.0
                                        ,func: 0.0});
-   var oscillator1 = $Audio$MainTypes.Oscillator({userId: $Maybe.Nothing
+   var dummy1 = $Audio$MainTypes.Dummy({userId: $Maybe.Just("dummy1")
+                                       ,autoId: $Maybe.Nothing
+                                       ,inputs: $Dict.fromList(_U.list([{ctor: "_Tuple2"
+                                                                        ,_0: "inputA"
+                                                                        ,_1: $Audio$MainTypes.Value(440.0)}]))
+                                       ,outputValue: 0.0
+                                       ,func: 0.0});
+   var oscillator1 = $Audio$MainTypes.Oscillator({userId: $Maybe.Just("osc1")
                                                  ,autoId: $Maybe.Nothing
                                                  ,inputs: $Dict.fromList(_U.list([{ctor: "_Tuple2"
                                                                                   ,_0: "frequency"
@@ -10712,7 +10725,8 @@ Elm.Main.make = function (_elm) {
             var props = _p22.props;
             var lastId = _p22.lastId;
             var accNodes = _p22.accNodes;
-            var newNode = $Audio$MainTypes.Dummy(props);
+            var newProps = _U.update(props,{autoId: $Maybe.Just(lastId)});
+            var newNode = $Audio$MainTypes.Dummy(newProps);
             var _p23 = A2($Debug.log,"start of Dummy props",props.inputs);
             var _p24 = A2($Debug.log,
             "end of Dummy props",
@@ -10722,7 +10736,7 @@ Elm.Main.make = function (_elm) {
                    ,_1: A2($Basics._op["++"],accNodes,_U.list([newNode]))};
          } else {
             return _U.crashCase("Main",
-            {start: {line: 26,column: 5},end: {line: 39,column: 27}},
+            {start: {line: 26,column: 5},end: {line: 40,column: 27}},
             _p21)("todo");
          }
    });
@@ -10769,7 +10783,7 @@ Elm.Main.make = function (_elm) {
             return {accNodes: accNodes,lastId: lastId,props: props};
          } else {
             return _U.crashCase("Main",
-            {start: {line: 74,column: 3},end: {line: 90,column: 25}},
+            {start: {line: 75,column: 3},end: {line: 91,column: 25}},
             _p37)("todo");
          }
    };
@@ -10792,17 +10806,18 @@ Elm.Main.make = function (_elm) {
                  var result = flattenInputLower({accNodes: _U.list([])
                                                 ,lastId: 0
                                                 ,input: $Audio$MainTypes.Node(dummy1)});
-                 var _p41 = A2($Debug.log,"result",result);
-                 var justResult = A2($Maybe.withDefault,
-                 {ctor: "_Tuple2",_0: 0,_1: _U.list([])},
-                 result);
-                 var _p42 = A2($Debug.log,"justResult",justResult);
-                 var nodes = $Basics.snd(justResult);
-                 var _p43 = A2($Debug.log,"nodes",nodes);
-                 var _p44 = A2($Debug.log,"head of nodes",$List.head(nodes));
                  return $List.length($Basics.snd(A2($Maybe.withDefault,
                  {ctor: "_Tuple2",_0: 0,_1: _U.list([])},
                  result)));
+              }()))
+              ,A2($ElmTest.test,
+              "",
+              A2($ElmTest.assertEqual,
+              2,
+              function () {
+                 var result = A3(flattenNode,dummy2,0,_U.list([]));
+                 var _p41 = A2($Debug.log,"result",result);
+                 return $List.length($Basics.snd(result));
               }()))]));
    }();
    var main = $ElmTest.elementRunner(tests);
@@ -10816,6 +10831,7 @@ Elm.Main.make = function (_elm) {
                              ,flattenInputLower: flattenInputLower
                              ,oscillator1: oscillator1
                              ,dummy1: dummy1
+                             ,dummy2: dummy2
                              ,tests: tests
                              ,main: main};
 };
