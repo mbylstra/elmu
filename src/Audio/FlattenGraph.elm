@@ -1,23 +1,21 @@
+module Audio.FlattenGraph (flattenGraph) where
+
 import Audio.MainTypes exposing (..)
 import Dict exposing (Dict)
 import ElmTest exposing (..)
 import Graphics.Element
+import Lib.Misc exposing (unsafeDictGet)
 
 import Audio.Atoms.Sine exposing (sinWave)
 
 
+flattenGraph : AudioNodes ui -> Dict Int (AudioNode ui)
+flattenGraph graph =
+  graph
+  |> flattenNodeList
+  |> flatNodeListToDict
 
 -- Amazingly, this haneous pile of shit code actually seems to work :)
-
-unsafeDictGet : comparable -> Dict comparable value -> value
-unsafeDictGet key dict =
-  case Dict.get key dict of
-    Just value ->
-      value
-    Nothing ->
-      Debug.crash("Dict.get returned Nothing from within usafeDictGet")
-
-
 flattenNodeList : AudioNodes ui -> AudioNodes ui
 flattenNodeList nodes =
   let
@@ -166,6 +164,25 @@ flattenInputLower {accNodes, lastId, input} =
         Just <| flattenNode childNode lastId accNodes
       _ ->
         Nothing
+
+
+flatNodeListToDict : AudioNodes ui -> Dict Int (AudioNode ui)
+flatNodeListToDict nodes =
+  nodes
+  |> List.map (\node -> (getNodeAutoId node, node))
+  |> Dict.fromList
+
+getNodeAutoId : AudioNode ui -> Int
+getNodeAutoId node =
+  let
+    handle props =
+      Maybe.withDefault -1 props.autoId  -- this should only be called on a node that has been flattened and given an AutoID
+  in
+    case node of
+      Dummy props ->
+        handle props
+      Oscillator props ->
+        handle props
 
 
 --------------------------------------------------------------------------------
@@ -325,3 +342,10 @@ main =
 -- result: [Dummy { userId = Just "dummy1", autoId = Just NaN, inputs = Dict.fromList [("inputA",Value 440)], outputValue = 0, func = 0 },
 -- Dummy { userId = Just "dummy4", autoId = Just NaN, inputs = Dict.fromList [("inputA",Value 1)], outputValue = 0, func = 0 },
 -- Dummy { userId = Just "dummy3", autoId = Just NaN, inputs = Dict.fromList [("inputA",AutoID NaN)], outputValue = 0, func = 0 },Dummy { userId = Just "dummy2", autoId = Just NaN, inputs = Dict.fromList [("inputA",AutoID NaN)], outputValue = 0, func = 0 }]
+
+
+-- result:
+-- [Dummy { userId = Just "dummy1", autoId = Just 1, inputs = Dict.fromList [("inputA",Value 440)], outputValue = 0, func = 0 },
+-- Dummy { userId = Just "dummy4", autoId = Just 2, inputs = Dict.fromList [("inputA",Value 1)], outputValue = 0, func = 0 },
+-- Dummy { userId = Just "dummy3", autoId = Just 3, inputs = Dict.fromList [("inputA",AutoID 2)], outputValue = 0, func = 0 },
+-- Dummy { userId = Just "dummy2", autoId = Just 4, inputs = Dict.fromList [("inputA",AutoID 3)], outputValue = 0, func = 0 }]
