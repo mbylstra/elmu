@@ -10679,116 +10679,120 @@ Elm.Main.make = function (_elm) {
    };
    var flattenInputMiddle = function (_p7) {
       var _p8 = _p7;
-      var _p13 = _p8.lastId;
-      var _p12 = _p8.inputs;
-      var _p11 = _p8.accNodes;
-      var _p9 = flattenInputLower({accNodes: _p11
-                                  ,lastId: _p13
+      var _p12 = _p8.lastId;
+      var _p11 = _p8.inputs;
+      var _p10 = _p8.accNodes;
+      var _p9 = flattenInputLower({accNodes: _p10
+                                  ,lastId: _p12
                                   ,input: _p8.input});
       if (_p9.ctor === "Just") {
-            var _p10 = _p9._0._0;
-            return {lastId: _p10
-                   ,accNodes: _p9._0._1
+            return {lastId: _p9._0._1
+                   ,accNodes: _p9._0._2
                    ,inputs: A3($Dict.insert,
                    _p8.inputName,
-                   $Audio$MainTypes.AutoID(_p10),
-                   _p12)};
+                   $Audio$MainTypes.AutoID(_p9._0._0),
+                   _p11)};
          } else {
-            return {lastId: _p13,accNodes: _p11,inputs: _p12};
+            return {lastId: _p12,accNodes: _p10,inputs: _p11};
          }
    };
-   var flattenInputLower = function (_p14) {
-      var _p15 = _p14;
-      var _p16 = A2($Debug.log,"start of flattenInputLower",0);
-      var _p17 = _p15.input;
-      if (_p17.ctor === "Node") {
-            var _p18 = A2($Debug.log,"\'start\' of Node childNode",0);
-            var _p19 = A3(flattenNode,_p17._0,_p15.lastId,_p15.accNodes);
-            var childNodeId = _p19._0;
-            var accNodes = _p19._1;
-            return $Maybe.Just({ctor: "_Tuple2"
-                               ,_0: childNodeId + 1
-                               ,_1: accNodes});
+   var flattenInputLower = function (_p13) {
+      var _p14 = _p13;
+      var _p15 = A2($Debug.log,"start of flattenInputLower",0);
+      var _p16 = _p14.input;
+      if (_p16.ctor === "Node") {
+            var _p17 = A2($Debug.log,"\'start\' of Node childNode",0);
+            var _p18 = A3(flattenNode,_p16._0,_p14.lastId,_p14.accNodes);
+            var childNodeId = _p18._0;
+            var lastId = _p18._1;
+            var accNodes = _p18._2;
+            return $Maybe.Just({ctor: "_Tuple3"
+                               ,_0: childNodeId
+                               ,_1: lastId
+                               ,_2: accNodes});
          } else {
             return $Maybe.Nothing;
          }
    };
    var flattenNode = F3(function (node,lastId,accNodes) {
-      var _p20 = A2($Debug.log,"flattenNode",0);
-      var _p21 = node;
-      if (_p21.ctor === "Dummy") {
-            var _p25 = _p21._0;
-            var inputNames = $Dict.keys(_p25.inputs);
-            var _p22 = A2(doInputs,
+      var _p19 = A2($Debug.log,"flattenNode",0);
+      var _p20 = node;
+      if (_p20.ctor === "Dummy") {
+            var _p24 = _p20._0;
+            var inputNames = $Dict.keys(_p24.inputs);
+            var _p21 = A2(doInputs,
             inputNames,
-            {props: _p25,lastId: lastId,accNodes: accNodes,node: node});
-            var props = _p22.props;
-            var lastId = _p22.lastId;
-            var accNodes = _p22.accNodes;
-            var newProps = _U.update(props,{autoId: $Maybe.Just(lastId)});
+            {props: _p24,lastId: lastId,accNodes: accNodes,node: node});
+            var props = _p21.props;
+            var lastId = _p21.lastId;
+            var accNodes = _p21.accNodes;
+            var id = lastId + 1;
+            var newLastId = id;
+            var newProps = _U.update(props,{autoId: $Maybe.Just(id)});
             var newNode = $Audio$MainTypes.Dummy(newProps);
-            var _p23 = A2($Debug.log,"start of Dummy props",props.inputs);
-            var _p24 = A2($Debug.log,
+            var _p22 = A2($Debug.log,"start of Dummy props",props.inputs);
+            var _p23 = A2($Debug.log,
             "end of Dummy props",
             {ctor: "_Tuple2",_0: lastId,_1: accNodes});
-            return {ctor: "_Tuple2"
-                   ,_0: lastId
-                   ,_1: A2($Basics._op["++"],accNodes,_U.list([newNode]))};
+            return {ctor: "_Tuple3"
+                   ,_0: id
+                   ,_1: newLastId
+                   ,_2: A2($Basics._op["++"],accNodes,_U.list([newNode]))};
          } else {
             return _U.crashCase("Main",
-            {start: {line: 26,column: 5},end: {line: 40,column: 27}},
-            _p21)("todo");
+            {start: {line: 26,column: 5},end: {line: 42,column: 27}},
+            _p20)("todo");
          }
    });
-   var doInputs = F2(function (currInputNames,_p27) {
+   var doInputs = F2(function (currInputNames,_p26) {
       doInputs: while (true) {
-         var _p28 = _p27;
-         var _p34 = _p28.node;
-         var _p33 = _p28.lastId;
-         var _p32 = _p28.accNodes;
-         var _p29 = A2($Debug.log,"currInputNames",currInputNames);
-         var _p30 = currInputNames;
-         if (_p30.ctor === "[]") {
-               return {props: _p28.props,lastId: _p33,accNodes: _p32};
+         var _p27 = _p26;
+         var _p33 = _p27.node;
+         var _p32 = _p27.lastId;
+         var _p31 = _p27.accNodes;
+         var _p28 = A2($Debug.log,"currInputNames",currInputNames);
+         var _p29 = currInputNames;
+         if (_p29.ctor === "[]") {
+               return {props: _p27.props,lastId: _p32,accNodes: _p31};
             } else {
-               var _p31 = flattenInputTop({inputName: _p30._0
-                                          ,node: _p34
-                                          ,lastId: _p33
-                                          ,accNodes: _p32});
-               var props = _p31.props;
-               var lastId = _p31.lastId;
-               var accNodes = _p31.accNodes;
-               var _v9 = _p30._1,
+               var _p30 = flattenInputTop({inputName: _p29._0
+                                          ,node: _p33
+                                          ,lastId: _p32
+                                          ,accNodes: _p31});
+               var props = _p30.props;
+               var lastId = _p30.lastId;
+               var accNodes = _p30.accNodes;
+               var _v9 = _p29._1,
                _v10 = {props: props
                       ,lastId: lastId
                       ,accNodes: accNodes
-                      ,node: _p34};
+                      ,node: _p33};
                currInputNames = _v9;
-               _p27 = _v10;
+               _p26 = _v10;
                continue doInputs;
             }
       }
    });
-   var flattenInputTop = function (_p35) {
-      var _p36 = _p35;
-      var _p37 = _p36.node;
-      if (_p37.ctor === "Dummy") {
-            var _p38 = flattenInputUpperMiddle({inputName: _p36.inputName
-                                               ,props: _p37._0
-                                               ,lastId: _p36.lastId
-                                               ,accNodes: _p36.accNodes});
-            var props = _p38.props;
-            var accNodes = _p38.accNodes;
-            var lastId = _p38.lastId;
+   var flattenInputTop = function (_p34) {
+      var _p35 = _p34;
+      var _p36 = _p35.node;
+      if (_p36.ctor === "Dummy") {
+            var _p37 = flattenInputUpperMiddle({inputName: _p35.inputName
+                                               ,props: _p36._0
+                                               ,lastId: _p35.lastId
+                                               ,accNodes: _p35.accNodes});
+            var props = _p37.props;
+            var accNodes = _p37.accNodes;
+            var lastId = _p37.lastId;
             return {accNodes: accNodes,lastId: lastId,props: props};
          } else {
             return _U.crashCase("Main",
-            {start: {line: 75,column: 3},end: {line: 91,column: 25}},
-            _p37)("todo");
+            {start: {line: 77,column: 3},end: {line: 93,column: 25}},
+            _p36)("todo");
          }
    };
    var tests = function () {
-      var _p40 = A2($Debug.log,"start of tests",0);
+      var _p39 = A2($Debug.log,"start of tests",0);
       return A2($ElmTest.suite,
       "",
       _U.list([A2($ElmTest.test,
@@ -10801,23 +10805,14 @@ Elm.Main.make = function (_elm) {
               ,A2($ElmTest.test,
               "",
               A2($ElmTest.assertEqual,
-              1,
-              function () {
-                 var result = flattenInputLower({accNodes: _U.list([])
-                                                ,lastId: 0
-                                                ,input: $Audio$MainTypes.Node(dummy1)});
-                 return $List.length($Basics.snd(A2($Maybe.withDefault,
-                 {ctor: "_Tuple2",_0: 0,_1: _U.list([])},
-                 result)));
-              }()))
-              ,A2($ElmTest.test,
-              "",
-              A2($ElmTest.assertEqual,
               2,
               function () {
                  var result = A3(flattenNode,dummy2,0,_U.list([]));
-                 var _p41 = A2($Debug.log,"result",result);
-                 return $List.length($Basics.snd(result));
+                 var _p40 = A2($Debug.log,"result",result);
+                 return function (_p41) {
+                    var _p42 = _p41;
+                    return $List.length(_p42._2);
+                 }(result);
               }()))]));
    }();
    var main = $ElmTest.elementRunner(tests);

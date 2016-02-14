@@ -17,7 +17,7 @@ unsafeDictGet key dict =
 
 
 flattenNode : AudioNode ui -> Int -> AudioNodes ui
-              -> (Int, AudioNodes ui)
+              -> (Int, Int, AudioNodes ui)
 flattenNode node lastId accNodes =
 
   let
@@ -30,12 +30,14 @@ flattenNode node lastId accNodes =
           _ = Debug.log "end of Dummy props" (lastId, accNodes)
           inputNames = Dict.keys props.inputs
           {props, lastId, accNodes} =  doInputs inputNames {props = props, lastId = lastId, accNodes = accNodes, node=node}
-          newProps = { props | autoId = Just lastId }
+          id = lastId + 1
+          newLastId = id
+          newProps = { props | autoId = Just id }
           newNode = Dummy newProps
           _ = Debug.log "start of Dummy props" props.inputs
 
         in
-          (lastId, accNodes ++ [newNode])
+          (id, newLastId, accNodes ++ [newNode])
       Oscillator props ->
         Debug.crash "todo"
 
@@ -120,10 +122,10 @@ flattenInputMiddle :
   -> { lastId : Int, accNodes : AudioNodes ui, inputs : InputsDict ui }
 flattenInputMiddle { accNodes, lastId, input, inputName, inputs } =
   case flattenInputLower { accNodes = accNodes, lastId = lastId, input = input} of
-    Just (lastId, accNodes) ->
+    Just (childNodeId, lastId, accNodes) ->
       { lastId = lastId
       , accNodes = accNodes
-      , inputs = Dict.insert inputName (AutoID lastId) inputs  -- the input now points to an id, rather than an inline node
+      , inputs = Dict.insert inputName (AutoID childNodeId) inputs  -- the input now points to an id, rather than an inline node
       }
     Nothing ->
       { lastId = lastId, accNodes = accNodes, inputs = inputs }
@@ -131,7 +133,7 @@ flattenInputMiddle { accNodes, lastId, input, inputName, inputs } =
 
 flattenInputLower :
   { accNodes : AudioNodes ui, lastId : Int, input : Input ui }
-  -> Maybe (Int, AudioNodes ui)
+  -> Maybe (Int, Int, AudioNodes ui)
 flattenInputLower {accNodes, lastId, input} =
   let
     _ = Debug.log "start of flattenInputLower" 0
@@ -139,10 +141,10 @@ flattenInputLower {accNodes, lastId, input} =
     case input of
       Node childNode ->
         let
-          (childNodeId, accNodes) = flattenNode childNode lastId accNodes
+          (childNodeId, lastId, accNodes) = flattenNode childNode lastId accNodes
           _ = Debug.log "'start' of Node childNode"  0
         in
-          Just (childNodeId + 1, accNodes)
+          Just (childNodeId, lastId, accNodes)
       _ ->
         Nothing
 
@@ -250,23 +252,23 @@ tests =
               )
               Nothing
             )
-        , test ""
-            (assertEqual
-              1
-              (
-                let
-                  result = flattenInputLower
-                    { accNodes=[]
-                    , lastId=0
-                    , input= Node dummy1
-                    }
-                in
-                  result
-                    |> Maybe.withDefault (0, [])
-                    |> snd
-                    |> List.length
-              )
-            )
+        -- , test ""
+        --     (assertEqual
+        --       1
+        --       (
+        --         let
+        --           result = flattenInputLower
+        --             { accNodes=[]
+        --             , lastId=0
+        --             , input= Node dummy1
+        --             }
+        --         in
+        --           result
+        --             |> Maybe.withDefault (0, 0, [])
+        --             |> snd
+        --             |> List.length
+        --       )
+        --     )
         , test ""
             (assertEqual
               2
@@ -276,7 +278,7 @@ tests =
                   _ = Debug.log "result" result
                 in
                   result
-                    |> snd
+                    |> \(_,_,a) -> a
                     |> List.length
               )
             )
@@ -312,6 +314,16 @@ main =
 --   , Dummy { userId = Just "dummy2", autoId = Just 2, inputs = Dict.fromList [("inputA",AutoID 2)], outputValue = 0, func = 0 }
 --   ])
 
+
+-- result: (1,0,
+--   [ Dummy { userId = Just "dummy4", autoId = Just 1, inputs = Dict.fromList [("inputA",Value 1)], outputValue = 0, func = 0 }
+--   , Dummy { userId = Just "dummy3", autoId = Just 1, inputs = Dict.fromList [("inputA",AutoID 1)], outputValue = 0, func = 0 }
+--   , Dummy { userId = Just "dummy2", autoId = Just 1, inputs = Dict.fromList [("inputA",AutoID 1)], outputValue = 0, func = 0 }
+--   ])
+
+-- result: (3,3,[Dummy { userId = Just "dummy4", autoId = Just 1, inputs = Dict.fromList [("inputA",Value 1)], outputValue = 0, func = 0 },
+-- Dummy { userId = Just "dummy3", autoId = Just 2, inputs = Dict.fromList [("inputA",AutoID 1)], outputValue = 0, func = 0 },
+-- Dummy { userId = Just "dummy2", autoId = Just 3, inputs = Dict.fromList [("inputA",AutoID 2)], outputValue = 0, func = 0 }])
 
 
 -- thiking this through:
