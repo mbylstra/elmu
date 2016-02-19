@@ -69,17 +69,17 @@ getNumberOfFingerControls instrument =
     Tuba (_, t) ->
       t.numValves
 
--- instrumentToString : Instrument -> String
--- instrumentToString (instrumentSpecific, common) =
---   let
---     commonString =
---       "id: " ++ toString common.id
---       ++ "\n years old: " ++ toString common.yearsOld
---   in
---     case instrumentSpecific of
---       Guitar g ->
---         "type: Guitar, " ++ commonString ++ "\nno. strings: " ++  (toString g.numStrings)
---       Keyboard k ->
---         "type: Keyboard, " ++ commonString ++ "\nno. keys: " ++  (toString k.numKeys)
---       Tuba t ->
---         "type: Tuba, " ++ commonString ++ "\nno. valves: " ++  (toString t.numValves)
+instrumentToString : Instrument -> String
+instrumentToString instrument =
+  let
+    commonString common =
+      "id: " ++ toString common.id
+      ++ "\n years old: " ++ toString common.yearsOld
+  in
+    case instrument of
+      Guitar (common, g) ->
+        "type: Guitar, " ++ commonString common ++ "\nno. strings: " ++  (toString g.numStrings)
+      Keyboard (common, k) ->
+        "type: Keyboard, " ++ commonString common ++ "\nno. keys: " ++  (toString k.numKeys)
+      Tuba (common, t) ->
+        "type: Tuba, " ++ commonString common ++ "\nno. valves: " ++  (toString t.numValves)

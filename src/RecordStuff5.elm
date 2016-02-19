@@ -57,8 +57,7 @@ instrumentToString : Instrument -> String
 instrumentToString (instrumentSpecific, common) =
   let
     commonString =
-      "id: " ++ toString common.id
-      ++ "\n years old: " ++ toString common.yearsOld
+      "id: " ++ toString common.id ++ "\n years old: " ++ toString common.yearsOld
   in
     case instrumentSpecific of
       Guitar g ->
