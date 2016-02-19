@@ -15,7 +15,7 @@ flattenGraph graph =
   |> flattenNodeList
   |> flatNodeListToDict
 
--- Amazingly, this haneous pile of shit code actually seems to work :)
+
 flattenNodeList : AudioNodes ui -> AudioNodes ui
 flattenNodeList nodes =
   let
@@ -42,53 +42,43 @@ flattenNodeList nodes =
 flattenNode : AudioNode ui -> Int -> AudioNodes ui
               -> {lastId: Int, nodes : AudioNodes ui}
 flattenNode node lastId accNodes =
-  let
-    _ = Debug.log "flattenNode" 0
-  in
-    case node of
-      -- geez. Maybe this works, but this crap here will need to be repeated for every node type!!
-      Dummy props ->
-        let
-          _ = Debug.log "end of Dummy props" (lastId, accNodes)
-          inputNames = Dict.keys props.inputs
-          {props, lastId, accNodes} =  doInputs inputNames {props = props, lastId = lastId, accNodes = accNodes, node=node}
-          id = lastId + 1
-          newProps = { props | autoId = Just id }
-          newNode = Dummy newProps
-          _ = Debug.log "start of Dummy props" props.inputs
+  case node of
+    Dummy props ->
+      let
+        inputNames = Dict.keys props.inputs
+        {props, lastId, accNodes} =
+          doInputs
+            inputNames
+            {props = props, lastId = lastId, accNodes = accNodes, node=node}
+        id = lastId + 1
+        newProps = { props | autoId = Just id }
+        newNode = Dummy newProps
 
-        in
-          { lastId = id, nodes = accNodes ++ [newNode]}
-      Oscillator props ->
-        Debug.crash "todo"
+      in
+        { lastId = id, nodes = accNodes ++ [newNode]}
+    Oscillator props ->
+      Debug.crash "todo"
 
 
-doInputs : List String -> { props : BaseNodeProps r ui, lastId : Int, accNodes : AudioNodes ui, node : AudioNode ui }
+doInputs :
+  List String
+  -> { props : BaseNodeProps r ui, lastId : Int, accNodes : AudioNodes ui, node : AudioNode ui }
   -> { props : BaseNodeProps r ui, lastId : Int, accNodes : AudioNodes ui}
 doInputs currInputNames {props, lastId, accNodes, node} =
-  let
-    _ = Debug.log "currInputNames" currInputNames
-    -- _ = Debug.log "inputNames" inputNames
-  in
-    -- state2
-    case currInputNames of
-      [] ->
-        {props=props, lastId=lastId, accNodes=accNodes}
-      -- _ -> Debug.crash ""
-      -- _ ->
-      --   state2
-      inputName :: inputNamesTail ->
-        -- state2
-        let
-          {props, lastId, accNodes} = flattenInputTop
-            { inputName=inputName, node=node, lastId=lastId, accNodes = accNodes }
-        in
-          doInputs inputNamesTail
-            { props = props
-            , lastId = lastId
-            , accNodes = accNodes
-            , node = node
-            }
+  case currInputNames of
+    [] ->
+      {props=props, lastId=lastId, accNodes=accNodes}
+    inputName :: inputNamesTail ->
+      let
+        {props, lastId, accNodes} = flattenInputTop
+          { inputName=inputName, node=node, lastId=lastId, accNodes = accNodes }
+      in
+        doInputs inputNamesTail
+          { props = props
+          , lastId = lastId
+          , accNodes = accNodes
+          , node = node
+          }
 
 
 
@@ -104,16 +94,13 @@ flattenInputTop { inputName, node, lastId, accNodes } =
           , lastId = lastId
           , accNodes = accNodes
           }
-        -- newNode = Dummy props -- fark... this is the issue!!!
-      -- oscillator specifically requires a Dummy record,
-      -- but this function might be given something that ISNT an oscillator
-    -- accNodes' = [newNode] ++ accNodes
       in
         { accNodes = accNodes, lastId = lastId, props = props }
     Oscillator props ->
       Debug.crash "todo"
 
-flattenInputUpperMiddle : { inputName : String, props : BaseNodeProps r ui, lastId : Int, accNodes : AudioNodes ui }
+flattenInputUpperMiddle :
+  { inputName : String, props : BaseNodeProps r ui, lastId : Int, accNodes : AudioNodes ui }
   -> { props : BaseNodeProps r ui, accNodes : AudioNodes ui, lastId : Int }
 flattenInputUpperMiddle { inputName, props, lastId, accNodes } =
   let
@@ -126,15 +113,8 @@ flattenInputUpperMiddle { inputName, props, lastId, accNodes } =
         , inputs = props.inputs
         }
     newProps = { props | inputs = inputs }
-    -- newNode = Dummy props2 -- fark... this is the issue!!!
-      -- oscillator specifically requires a Dummy record,
-      -- but this function might be given something that ISNT an oscillator
-
-    -- accNodes' = [newNode] ++ accNodes
-    -- accNodes' = [newNode] ++ accNodes
   in
     { props = newProps, accNodes = accNodes, lastId = lastId }
-    -- 0
 
 flattenInputMiddle :
   {  input : Input ui, inputName : String, inputs  : InputsDict ui

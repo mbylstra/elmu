@@ -39,17 +39,6 @@ type InputHelper ui
 -- MAIN
 --------------------------------------------------------------------------------
 
-getNodeAutoId : AudioNode ui -> Int
-getNodeAutoId node =
-  let
-    handle props =
-      Maybe.withDefault -1 props.autoId  -- this should only be called on a node that has been flattened and given an AutoID
-  in
-    case node of
-      Dummy props ->
-        handle props
-      Oscillator props ->
-        handle props
 
 
 updateNode : ui -> DictGraph ui -> AudioNode ui
@@ -76,10 +65,22 @@ updateNode uiModel graph node =
         (newValue, graph)
     _ -> Debug.crash("")
 
-type alias InputValuesDict = Dict String Float
+
+getNodeAutoId : AudioNode ui -> Int
+getNodeAutoId node =
+  let
+    handle props =
+      Maybe.withDefault -1 props.autoId  -- this should only be called on a node that has been flattened and given an AutoID
+  in
+    case node of
+      Dummy props ->
+        handle props
+      Oscillator props ->
+        handle props
+
 
 getInputValues : ui -> DictGraph ui -> InputsDict ui
-                 -> (InputValuesDict, DictGraph ui)
+                 -> (Dict String Float, DictGraph ui)
 getInputValues uiModel graph inputs =
   let
     accInitial = (Dict.empty, graph)
@@ -105,11 +106,6 @@ getInputValue uiModel graph input =
     ReferencedNodeInput node ->
       updateNode uiModel graph node
 
-{- this should only ever be run immediately after validateGraph has been run! -}
--- unsafeUpdateGraph : ui -> DictGraph uiMOdel -> Destination idTypeModel
---   -> (DictGraph uiMOdel, Destination idTypeModel)
--- unsafeUpdateGraph ui graph destination =
-
 
 getInputHelper : ui -> DictGraph ui -> Input ui
           -> InputHelper ui
@@ -124,7 +120,6 @@ getInputHelper ui graph input =
     Node node ->
       Debug.crash "The graph should have been flattened"
     AutoID id ->
-    -- ID nodeId ->
       ReferencedNodeInput (unsafeDictGet id graph) -- assumes graph has been validated
     ID id ->
       Debug.crash "I'm not sure what to do here! Ideally we'd have converted all inputs first, so we don't have to handle this"

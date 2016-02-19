@@ -164,3 +164,12 @@ type alias ListGraph ui = List (AudioNode ui)
 -- type alias DictGraph ui = MutableDict (AudioNode ui)
 -- type alias DictGraph ui = MutableDict String (AudioNode ui)
 type alias DictGraph ui = Dict Int (AudioNode ui)
+
+
+updateBaseProps : (BaseNodeProps r ui -> BaseNodeProps r ui) -> AudioNode ui -> AudioNode ui
+updateBaseProps updateFunction node =
+  case node of
+    Oscillator props ->
+      Oscillator (updateFunction props)
+    _ ->
+      Debug.crash ""
