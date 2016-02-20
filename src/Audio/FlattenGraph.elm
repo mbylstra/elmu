@@ -168,9 +168,6 @@ flatNodeListToDict nodes =
   |> List.map (\node -> (getNodeAutoId node, node))
   |> Dict.fromList
 
-getNodeAutoId : AudioNode ui -> Int
-getNodeAutoId node =
-  Maybe.withDefault -1 (applyToBaseProps .autoId node)
 
 
 

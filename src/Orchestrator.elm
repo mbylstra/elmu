@@ -45,38 +45,24 @@ updateNode : ui -> DictGraph ui -> AudioNode ui
   -> (Float, DictGraph ui)
 updateNode uiModel graph node =
   case node of
-    Oscillator props ->
+    Oscillator (baseProps, oscProps) ->
       let
-        inputs = props.inputs
+        inputs = baseProps.inputs
         (inputValues, graph2) = getInputValues uiModel graph inputs
         (newValue, newPhase) =
-          props.func
+          oscProps.func
             (unsafeDictGet "frequency" inputValues)
             (unsafeDictGet "frequencyOffset" inputValues)
             (unsafeDictGet "phaseOffset" inputValues)
-            props.phase
+            oscProps.phase
         newNode = Oscillator
-          { props |
-            phase = newPhase
-          , outputValue = newValue
-          }
-        graph3 = Dict.insert (getNodeAutoId node) newNode graph2 -- TODO: get id
+          ( { baseProps | outputValue = newValue }
+          , { oscProps | phase = newPhase }
+          )
+        graph3 = Dict.insert (getNodeAutoId node) newNode graph2
       in
         (newValue, graph)
     _ -> Debug.crash("")
-
-
-getNodeAutoId : AudioNode ui -> Int
-getNodeAutoId node =
-  let
-    handle props =
-      Maybe.withDefault -1 props.autoId  -- this should only be called on a node that has been flattened and given an AutoID
-  in
-    case node of
-      Dummy props ->
-        handle props
-      Oscillator props ->
-        handle props
 
 
 getInputValues : ui -> DictGraph ui -> InputsDict ui
@@ -88,8 +74,7 @@ getInputValues uiModel graph inputs =
     update inputName input acc =
       let
         (inputValues, graph2) = acc
-        -- (value, graph3) = getInputValue ui graph2 input
-        (value, graph3) = (0.0, graph2)
+        (value, graph3) = getInputValue uiModel graph2 input
         inputValues2 = Dict.insert inputName value inputValues
       in
         (inputValues2, graph3)

@@ -189,3 +189,7 @@ applyToBaseProps func node =
 getBaseProps : AudioNode ui -> BaseProps ui
 getBaseProps node =
   applyToBaseProps identity node
+
+getNodeAutoId : AudioNode ui -> Int
+getNodeAutoId node =
+  Maybe.withDefault -1 (applyToBaseProps .autoId node)
