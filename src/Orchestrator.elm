@@ -50,7 +50,6 @@ getDestinationNode : DictGraph ui -> AudioNode ui
 getDestinationNode graph =
   unsafeDictGet 0 graph
 
-
 updateNode : ui -> DictGraph ui -> AudioNode ui
   -> (Float, DictGraph ui)
 updateNode uiModel graph node =

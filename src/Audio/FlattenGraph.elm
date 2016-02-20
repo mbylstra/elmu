@@ -1,4 +1,4 @@
--- module Audio.FlattenGraph (flattenGraph) where
+module Audio.FlattenGraph (flattenGraph) where
 
 import Audio.MainTypes exposing (..)
 import Dict exposing (Dict)
