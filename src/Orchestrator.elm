@@ -39,6 +39,16 @@ type InputHelper ui
 -- MAIN
 --------------------------------------------------------------------------------
 
+updateGraph : ui -> DictGraph ui -> (Float, DictGraph ui)
+updateGraph uiModel graph =
+  let
+    destinationNode = getDestinationNode graph
+  in
+    updateNode uiModel graph destinationNode
+
+getDestinationNode : DictGraph ui -> AudioNode ui
+getDestinationNode graph =
+  unsafeDictGet 0 graph
 
 
 updateNode : ui -> DictGraph ui -> AudioNode ui
@@ -102,9 +112,13 @@ getInputHelper ui graph input =
       ValueInput 0.0
     UI func ->
       ValueInput (func ui)
-    Node node ->
-      Debug.crash "The graph should have been flattened"
     AutoID id ->
-      ReferencedNodeInput (unsafeDictGet id graph) -- assumes graph has been validated
+      case Dict.get id graph of
+        Just node ->
+          ReferencedNodeInput node
+        Nothing ->
+          Debug.crash "This shouldn't happen. Could not find a node. The graph must not have been validated first"
+    Node node ->
+      Debug.crash "This shouldn't happen. The graph should have been flattened"
     ID id ->
-      Debug.crash "I'm not sure what to do here! Ideally we'd have converted all inputs first, so we don't have to handle this"
+      Debug.crash "This shouldn't happen. All ID inputs should have been converted to AutoID inputs"

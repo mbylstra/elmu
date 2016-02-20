@@ -58,17 +58,19 @@ type alias Args uiModel =
 sine : (Args uiModel) -> (AudioNode uiModel)
 sine args =
   Oscillator
-    { userId = args.id
-    , autoId = Nothing
-    , func = sinWave
-    , inputs = Dict.fromList
-      [ ("frequency", args.frequency)
-      , ("frequencyOffset", args.frequencyOffset)
-      , ("phaseOffset", args.phaseOffset)
-      ]
-    , outputValue = 0.0
-    , phase = 0.0
-    }
+    ( { userId = args.id
+      , autoId = Nothing
+      , inputs = Dict.fromList
+        [ ("frequency", args.frequency)
+        , ("frequencyOffset", args.frequencyOffset)
+        , ("phaseOffset", args.phaseOffset)
+        ]
+      , outputValue = 0.0
+      }
+    , { func = sinWave
+      , phase = 0.0
+      }
+    )
 
 
 -- This is pretty Annoying, but it seems we must force the user

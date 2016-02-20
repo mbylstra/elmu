@@ -49,6 +49,7 @@ type alias DummyProps = { func: DummyF }
 
 type AudioNode ui
   = Oscillator (BaseProps ui, OscillatorProps)
+  | Destination (BaseProps ui, ())
   | Dummy (BaseProps ui, DummyProps)
 
 type alias AudioNodes ui = List (AudioNode ui)
@@ -96,12 +97,6 @@ type alias InputsDict ui = Dict String (Input ui)
   --         }
   --     }
 
-
-type alias Destination ui =
-  { input : Input ui
-  , state :
-      { outputValue : Float }
-  }
 
 -- Update funcs
 type alias ProcessorF = TimeFloat -> ValueFloat -> ValueFloat
@@ -168,22 +163,33 @@ updateBasePropsCollectExtra updateFunc audioNode =
           (newBaseProps, extra) = updateFunc baseProps
         in
           (Dummy (newBaseProps, specific), extra)
-      _ ->
-        Debug.crash("todo")
+      Oscillator (baseProps, specific) ->
+        let
+          (newBaseProps, extra) = updateFunc baseProps
+        in
+          (Oscillator (newBaseProps, specific), extra)
+      Destination (baseProps, specific) ->
+        let
+          (newBaseProps, extra) = updateFunc baseProps
+        in
+          (Destination (newBaseProps, specific), extra)
 
 updateBaseProps : (BaseProps ui -> BaseProps ui) -> AudioNode ui -> AudioNode ui
 updateBaseProps updateFunc audioNode =
     case audioNode of
       Dummy (baseProps, specific) ->
         Dummy (updateFunc baseProps, specific)
-      _ ->
-        Debug.crash("todo")
+      Oscillator (baseProps, specific) ->
+        Oscillator (updateFunc baseProps, specific)
+      Destination (baseProps, specific) ->
+        Destination (updateFunc baseProps, specific)
 
 applyToBaseProps : (BaseProps ui -> a) -> AudioNode ui -> a
 applyToBaseProps func node =
   case node of
     Dummy (baseProps, _) -> func baseProps
-    _ -> Debug.crash "TODO"
+    Oscillator (baseProps, _) -> func baseProps
+    Destination (baseProps, _) -> func baseProps
 
 
 getBaseProps : AudioNode ui -> BaseProps ui

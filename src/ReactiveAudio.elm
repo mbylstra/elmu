@@ -8,7 +8,7 @@ import Audio.MainTypes exposing(..)
 -- import Audio.Components.FmSynth exposing(..)
 -- import Audio.Components.AdditiveSynth exposing(..)
 import Audio.Atoms.Sine as Sine exposing (sine, sineDefaults)
-import Helpers exposing (toMutableDict)
+-- import Helpers exposing (toMutableDict)
 
 
 
@@ -93,12 +93,11 @@ import Helpers exposing (toMutableDict)
 
 -- type alias ListGraph id =  List (AudioNode (Maybe id))
 
-makeDestination : Input uiModel -> Destination uiModel
-makeDestination input =
-        { input = input
-        , state =
-            { outputValue = 0.0 }
-        }
+destination : Input uiModel -> Destination uiModel
+destination input =
+  { input = input
+  , outputValue = 0.0
+  }
 
 -- type alias GuiModel = {a: Float}
 
@@ -109,7 +108,7 @@ makeDestination input =
 -- basicGraph : ListGraph NodeID
 -- basicGraph : List (AudioNode NodeID)
 -- basicGraph : (List (AudioNode Gui.Model), AudioNode Gui.Model)
-basicGraph : (ListGraph Gui.Model, Destination Gui.Model)
+basicGraph : (AudioNodes Gui.Model, Destination Gui.Model)
 basicGraph =
     -- [ sine sineDefaults]
     ( [ sine
@@ -119,7 +118,7 @@ basicGraph =
         -- , frequency = UI getFrequency
         }
       ]
-    , makeDestination <| ID "sin1"
+    , destination <| ID "sin1"
     )
 
 -- inlineNodesExample : ListGraph
@@ -138,8 +137,8 @@ basicGraph =
 --
 --
 -- audioGraph : DictGraph
-(listNodes, destination) = basicGraph
+(listNodes, destination') = basicGraph
 
 
-audioGraph : DictGraph Gui.Model
-audioGraph = toMutableDict listNodes
+-- audioGraph : DictGraph Gui.Model
+-- audioGraph = toMutableDict listNodes
