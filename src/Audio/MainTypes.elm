@@ -36,40 +36,20 @@ type Input ui
 
 
 
--- It could be argued that having nested records is completely pointless if you're
--- not using extendable records. It will only lower performance, and make updating
--- records a massive pain in the arse. The only real benefit is slightly
--- better readability and namespacing (but I doubt we'd have clashes,
--- and the compiler helps with this anytway. You can alwas break things up
--- visually
--- Note. This has been changed.
-
-type alias BaseNodeProps r ui =
-  { r |
-      userId : Maybe String
-    , autoId : Maybe Int
-    , inputs : Dict String (Input ui)
-    , outputValue : Float
+type alias BaseProps ui =
+  { userId : Maybe String
+  , autoId : Maybe Int
+  , inputs : Dict String (Input ui)
+  , outputValue : Float
   }
 
-type alias OscillatorProps ui =
-  (BaseNodeProps
-    { phase: Float
-    , func: OscillatorF
-    }
-    ui
-  )
+type alias OscillatorProps = { phase: Float, func: OscillatorF }
 
-type alias DummyProps ui =
-  (BaseNodeProps
-    { func: DummyF
-    }
-    ui
-  )
+type alias DummyProps = { func: DummyF }
 
 type AudioNode ui
-  = Oscillator (OscillatorProps ui)
-  | Dummy (DummyProps ui)
+  = Oscillator (BaseProps ui, OscillatorProps)
+  | Dummy (BaseProps ui, DummyProps)
 
 type alias AudioNodes ui = List (AudioNode ui)
 
@@ -166,10 +146,41 @@ type alias ListGraph ui = List (AudioNode ui)
 type alias DictGraph ui = Dict Int (AudioNode ui)
 
 
-updateBaseProps : (BaseNodeProps r ui -> BaseNodeProps r ui) -> AudioNode ui -> AudioNode ui
-updateBaseProps updateFunction node =
-  case node of
-    Oscillator props ->
-      Oscillator (updateFunction props)
-    _ ->
-      Debug.crash ""
+-- updateBaseProps : (BaseodeProps r ui -> BaseNodeProps r ui) -> AudioNode ui -> AudioNode ui
+-- updateBaseProps updateFunction node =
+--   case node of
+--     Oscillator props ->
+--       Oscillator (updateFunction props)
+--     _ ->
+--       Debug.crash ""
+
+
+
+-- HELPER FUNCTIONS ------------------------------------------------------------
+
+
+
+updateBaseProps : (BaseProps ui -> (BaseProps ui, a)) -> AudioNode ui -> (AudioNode ui, a)
+updateBaseProps updateFunc audioNode =
+    case audioNode of
+      -- Oscillator (baseProps, specific) ->
+      --   let
+      --     (newBaseProps, extra) = updateFunc baseProps
+      --   in
+      --     Oscillator (updateFunc base, specific)
+      Dummy (baseProps, specific) ->
+        let
+          (newBaseProps, extra) = updateFunc baseProps
+        in
+          (Dummy (newBaseProps, specific), extra)
+      _ -> Debug.crash("todo")
+      -- Dummy (base, specific) -> Dummy (updateFunc base, specific)
+      -- Dummy ->
+      --   pass
+
+
+applyToBaseProps : (BaseProps ui -> a) -> AudioNode ui -> a
+applyToBaseProps func instrument =
+  case instrument of
+    Dummy (baseProps, _) -> func baseProps
+    _ -> Debug.crash "TODO"

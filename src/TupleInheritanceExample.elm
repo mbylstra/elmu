@@ -34,7 +34,7 @@ getInstrumentId instrument =
 -- This would be definined in a module that contains only instruments.
 -- and could be called like this:
 -- Instrument.mapCommonData .id guitar1
-mapCommon : (InstrumentCommon -> a) -> Instrument -> a
+mapCommon : (a -> b) -> Instrument -> b
 mapCommon func instrument =
   case instrument of
     Guitar (common, _) -> func common

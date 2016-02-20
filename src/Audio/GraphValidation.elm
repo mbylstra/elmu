@@ -3,6 +3,9 @@ import Lib.MutableDict as MutableDict
 import Dict
 
 
+-- Note, we basically aren't bothering with this at the moment! It needs
+-- to be done though.
+
 {-
   This should be run any time the graph layout is updated, and before
   unsafeUpdateGraph is run. unsafeUpdateGraph assumes the graph has
