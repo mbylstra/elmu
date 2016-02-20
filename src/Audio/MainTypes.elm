@@ -160,8 +160,8 @@ type alias DictGraph ui = Dict Int (AudioNode ui)
 
 
 
-updateBaseProps : (BaseProps ui -> (BaseProps ui, a)) -> AudioNode ui -> (AudioNode ui, a)
-updateBaseProps updateFunc audioNode =
+updateBasePropsCollectExtra : (BaseProps ui -> (BaseProps ui, a)) -> AudioNode ui -> (AudioNode ui, a)
+updateBasePropsCollectExtra updateFunc audioNode =
     case audioNode of
       Dummy (baseProps, specific) ->
         let
@@ -171,6 +171,13 @@ updateBaseProps updateFunc audioNode =
       _ ->
         Debug.crash("todo")
 
+updateBaseProps : (BaseProps ui -> BaseProps ui) -> AudioNode ui -> AudioNode ui
+updateBaseProps updateFunc audioNode =
+    case audioNode of
+      Dummy (baseProps, specific) ->
+        Dummy (updateFunc baseProps, specific)
+      _ ->
+        Debug.crash("todo")
 
 applyToBaseProps : (BaseProps ui -> a) -> AudioNode ui -> a
 applyToBaseProps func node =

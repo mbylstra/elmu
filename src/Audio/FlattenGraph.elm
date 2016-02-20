@@ -6,13 +6,20 @@ import ElmTest exposing (..)
 import Graphics.Element
 import Lib.Misc exposing (unsafeDictGet)
 
+import Lib.ListExtra as ListExtra
+
 -- import Audio.Atoms.Sine exposing (sinWave)
 
+
+{-
+  This could probably be cleaned up now that we've moved to "tuple inheritance"
+-}
 
 flattenGraph : AudioNodes ui -> Dict Int (AudioNode ui)
 flattenGraph graph =
   graph
   |> flattenNodeList
+  |> convertUserIdInputs
   |> flatNodeListToDict
 
 
@@ -56,7 +63,7 @@ flattenNode node oldLastId oldAccNodes =
       in
         ({ props | autoId = Just id }, (accNodes, id))
 
-    (newNode, (accNodes2, id)) = updateBaseProps updateBasePropsFunc node
+    (newNode, (accNodes2, id)) = updateBasePropsCollectExtra updateBasePropsFunc node
   in
     { lastId = id, nodes = accNodes2 ++ [newNode]}
 
@@ -166,6 +173,50 @@ getNodeAutoId node =
   Maybe.withDefault -1 (applyToBaseProps .autoId node)
 
 
+
+convertUserIdInputs : AudioNodes ui -> AudioNodes ui
+convertUserIdInputs nodes =
+  let
+    getAutoIdForUserId userId =
+      let
+        filter node =
+          let
+            currMaybeUserId = .userId (getBaseProps node)
+          in
+            case currMaybeUserId of
+              Just currUserId ->
+                currUserId == userId
+              Nothing ->
+                False
+        foundNode = ListExtra.unsafeHead (List.filter filter nodes)
+      in
+        Maybe.withDefault -1 (.autoId (getBaseProps foundNode))
+
+    convertInput inputTuple =
+      case inputTuple of
+        (inputName, ID userId) ->
+          (inputName, AutoID <| getAutoIdForUserId userId)
+        _ ->
+          inputTuple
+
+    convertUserIdInputs' baseProps =
+      { baseProps |
+        inputs =
+          baseProps.inputs
+          |> Dict.toList
+          |> List.map convertInput
+          |> Dict.fromList
+      }
+
+    convertNodeUserIdInputs node =
+      updateBaseProps convertUserIdInputs' node
+
+  in
+    List.map convertNodeUserIdInputs nodes
+
+
+
+
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
@@ -221,7 +272,7 @@ dummy2 = Dummy
                         , autoId = Nothing
                         , inputs = Dict.fromList
                           [ ( "inputA"
-                            , Value 220.0
+                            , ID "dummy1"
                             )
                           ]
                         , outputValue = 0.0
@@ -308,7 +359,10 @@ tests =
               4
               (
                 let
-                  result = flattenNodeList [dummy1, dummy2]
+                  result =
+                    [dummy1, dummy2]
+                    |> flattenNodeList
+                    |> convertUserIdInputs
                   _ = Debug.log "result" result
                 in
                   List.length result
@@ -339,5 +393,12 @@ main =
 
 -- [Dummy (({ userId = Just "dummy1", autoId = Just 1, inputs = Dict.fromList [("inputA",Value 440)], outputValue = 0 },{ func = 0 })),
 -- Dummy (({ userId = Just "dummy4", autoId = Just 2, inputs = Dict.fromList [("inputA",Value 1)], outputValue = 0 },{ func = 0 })),
+-- Dummy (({ userId = Just "dummy3", autoId = Just 3, inputs = Dict.fromList [("inputA",AutoID 2)], outputValue = 0 },{ func = 0 })),
+-- Dummy (({ userId = Just "dummy2", autoId = Just 4, inputs = Dict.fromList [("inputA",AutoID 3)], outputValue = 0 },{ func = 0 }))]
+
+
+
+-- [Dummy (({ userId = Just "dummy1", autoId = Just 1, inputs = Dict.fromList [("inputA",Value 440)], outputValue = 0 },{ func = 0 })),
+-- Dummy (({ userId = Just "dummy4", autoId = Just 2, inputs = Dict.fromList [("inputA",AutoID 1)], outputValue = 0 },{ func = 0 })),
 -- Dummy (({ userId = Just "dummy3", autoId = Just 3, inputs = Dict.fromList [("inputA",AutoID 2)], outputValue = 0 },{ func = 0 })),
 -- Dummy (({ userId = Just "dummy2", autoId = Just 4, inputs = Dict.fromList [("inputA",AutoID 3)], outputValue = 0 },{ func = 0 }))]
