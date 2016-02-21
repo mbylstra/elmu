@@ -72,7 +72,7 @@ updateNode uiModel graph node =
   case node of
     Oscillator (baseProps, oscProps) ->
       let
-        _ = Debug.log "old phase" oscProps.phase
+        -- _ = Debug.log "old phase" oscProps.phase
         inputs = baseProps.inputs
         (inputValues, graph2) = getInputValues uiModel graph inputs
         (newValue, newPhase) =
@@ -86,8 +86,8 @@ updateNode uiModel graph node =
           , { oscProps | phase = newPhase }
           )
         graph3 = Dict.insert (getNodeAutoId node) newNode graph2
-        _ = Debug.log "new phase" newPhase
-        _ = Debug.log "new value" newValue
+        -- _ = Debug.log "new phase" newPhase
+        -- _ = Debug.log "new value" newValue
       in
         (newValue, graph3)
 

@@ -1,5 +1,5 @@
-var PROFILING = 1;
-var DEBUG = 1;
+var PROFILING = 0;
+var DEBUG = 0;
 var ITERATIONS = 1;
 
 
@@ -27,7 +27,7 @@ var uiModel;
 
 if (DEBUG) {
     ITERATIONS = 1;
-    var BUFFER_SIZE = 64;  //92 milliseconds, pretty shit!
+    var BUFFER_SIZE = 10;  //92 milliseconds, pretty shit!
     // var BUFFER_SIZE = 4096;  //92 milliseconds, pretty shit!
     // var BUFFER_SIZE = 2048;  //92 milliseconds, pretty shit!
     // var BUFFER_SIZE = 1024;  //92 milliseconds, pretty shit!
@@ -65,6 +65,7 @@ if (PROFILING) {
         console.log('start');
         console.log('updateBufferState', BufferHandler.updateBufferState);
         bufferState = BufferHandler.updateBufferState(uiModel)(bufferState);
+        console.log('bufferState', bufferState);
         console.log('end');
 
     }
@@ -100,11 +101,11 @@ if (PROFILING) {
           // would be good if we could pass in outputData, rather than user previous array and have to copy across
           for (var i = 0; i < outputBuffer.length; i++) {
               var value;
-              if (externalState.externalInputState.audioOn) {
-                value = newBuffer[i];
-              } else {
-                value = 0.0;
-              }
+              // if (externalState.externalInputState.audioOn) {
+              value = newBuffer[i];
+              // } else {
+              // value = 0.0;
+              // }
               outputData[i] = value;
           }
         }
