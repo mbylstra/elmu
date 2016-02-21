@@ -51,7 +51,6 @@ flattenNode : AudioNode ui -> Int -> AudioNodes ui
 flattenNode node oldLastId oldAccNodes =
 
   let
-    _ = Debug.log "flattenNode" 0
     updateBasePropsFunc oldProps =
       let
         inputNames = Dict.keys oldProps.inputs
@@ -73,24 +72,20 @@ doInputs :
   -> { props : BaseProps ui, lastId : Int, accNodes : AudioNodes ui, node : AudioNode ui }
   -> { props : BaseProps ui, lastId : Int, accNodes : AudioNodes ui}
 doInputs currInputNames {props, lastId, accNodes, node} =
-  let
-    _ = Debug.log "doIinputs" 0
-
-  in
-    case currInputNames of
-      [] ->
-        {props=props, lastId=lastId, accNodes=accNodes}
-      inputName :: inputNamesTail ->
-        let
-          {props, lastId, accNodes} = flattenInputTop
-            { inputName=inputName, node=node, lastId=lastId, accNodes = accNodes }
-        in
-          doInputs inputNamesTail
-            { props = props
-            , lastId = lastId
-            , accNodes = accNodes
-            , node = node
-            }
+  case currInputNames of
+    [] ->
+      {props=props, lastId=lastId, accNodes=accNodes}
+    inputName :: inputNamesTail ->
+      let
+        {props, lastId, accNodes} = flattenInputTop
+          { inputName=inputName, node=node, lastId=lastId, accNodes = accNodes }
+      in
+        doInputs inputNamesTail
+          { props = props
+          , lastId = lastId
+          , accNodes = accNodes
+          , node = node
+          }
 
 
 
@@ -98,7 +93,6 @@ flattenInputTop : { inputName : String, node : AudioNode ui, lastId : Int, accNo
                   -> { accNodes : AudioNodes ui, lastId : Int, props : BaseProps ui }
 flattenInputTop { inputName, node, lastId, accNodes } =
   let
-    _ = Debug.log "flattenInputTop" 0
     oldProps = getBaseProps node
   in
       let
@@ -116,7 +110,6 @@ flattenInputUpperMiddle :
   -> { props : BaseProps ui, accNodes : AudioNodes ui, lastId : Int }
 flattenInputUpperMiddle { inputName, props, lastId, accNodes } =
   let
-    _ = Debug.log "flattenInputUpperMiddel" 0
     { lastId, accNodes, inputs } =
       flattenInputMiddle
         { accNodes = accNodes
@@ -135,31 +128,25 @@ flattenInputMiddle :
   }
   -> { lastId : Int, accNodes : AudioNodes ui, inputs : InputsDict ui }
 flattenInputMiddle { accNodes, lastId, input, inputName, inputs } =
-  let
-    _ = Debug.log "flattenInputMiddle" 0
-  in
-    case flattenInputLower { accNodes = accNodes, lastId = lastId, input = input} of
-      Just {lastId, nodes} ->
-        { lastId = lastId
-        , accNodes = nodes
-        , inputs = Dict.insert inputName (AutoID lastId) inputs  -- the input now points to an id, rather than an inline node
-        }
-      Nothing ->
-        { lastId = lastId, accNodes = accNodes, inputs = inputs }
+  case flattenInputLower { accNodes = accNodes, lastId = lastId, input = input} of
+    Just {lastId, nodes} ->
+      { lastId = lastId
+      , accNodes = nodes
+      , inputs = Dict.insert inputName (AutoID lastId) inputs  -- the input now points to an id, rather than an inline node
+      }
+    Nothing ->
+      { lastId = lastId, accNodes = accNodes, inputs = inputs }
 
 
 flattenInputLower :
   { accNodes : AudioNodes ui, lastId : Int, input : Input ui }
   -> Maybe {lastId : Int, nodes : AudioNodes ui}
 flattenInputLower {accNodes, lastId, input} =
-  let
-    _ = Debug.log "start of flattenInputLower" 0
-  in
-    case input of
-      Node childNode ->
-        Just <| flattenNode childNode lastId accNodes
-      _ ->
-        Nothing
+  case input of
+    Node childNode ->
+      Just <| flattenNode childNode lastId accNodes
+    _ ->
+      Nothing
 
 
 flatNodeListToDict : AudioNodes ui -> Dict Int (AudioNode ui)
@@ -309,66 +296,61 @@ dummy2 = Dummy
 
 tests : Test
 tests =
-  let
-    _ = Debug.log "start of tests" 0
-  in
-    suite ""
-        [
-          test ""
-            (assertEqual
-              (flattenInputLower
-                {accNodes=[], lastId=0, input=(Value 0.0)}
-              )
-              Nothing
+  suite ""
+      [
+        test ""
+          (assertEqual
+            (flattenInputLower
+              {accNodes=[], lastId=0, input=(Value 0.0)}
             )
-        -- , test ""
-        --     (assertEqual
-        --       1
-        --       (
-        --         let
-        --           result = flattenInputLower
-        --             { accNodes=[]
-        --             , lastId=0
-        --             , input= Node dummy1
-        --             }
-        --         in
-        --           result
-        --             |> Maybe.withDefault (0, 0, [])
-        --             |> snd
-        --             |> List.length
-        --       )
-        --     )
-        , test ""
-            (assertEqual
-              3
-              (
-                let
-                  result = flattenNode dummy2 0 []
-                  _ = Debug.log "result" result
-                in
-                  result
-                    |> \{lastId, nodes} -> nodes
-                    |> List.length
-              )
+            Nothing
+          )
+      -- , test ""
+      --     (assertEqual
+      --       1
+      --       (
+      --         let
+      --           result = flattenInputLower
+      --             { accNodes=[]
+      --             , lastId=0
+      --             , input= Node dummy1
+      --             }
+      --         in
+      --           result
+      --             |> Maybe.withDefault (0, 0, [])
+      --             |> snd
+      --             |> List.length
+      --       )
+      --     )
+      , test ""
+          (assertEqual
+            3
+            (
+              let
+                result = flattenNode dummy2 0 []
+              in
+                result
+                  |> \{lastId, nodes} -> nodes
+                  |> List.length
             )
-        , test ""
-            (assertEqual
-              4
-              (
-                let
-                  result =
-                    [dummy1, dummy2]
-                    |> flattenNodeList
-                    |> convertUserIdInputs
-                  _ = Debug.log "result" result
-                in
-                  List.length result
-                  -- result
-                  --   |> \{lastId, nodes} -> nodes
-                  --   |> List.length
-              )
+          )
+      , test ""
+          (assertEqual
+            4
+            (
+              let
+                result =
+                  [dummy1, dummy2]
+                  |> flattenNodeList
+                  |> convertUserIdInputs
+              in
+                List.length result
+                -- result
+                --   |> \{lastId, nodes} -> nodes
+                --   |> List.length
             )
-        ]
+          )
+      ]
 
 main : Graphics.Element.Element
 main =

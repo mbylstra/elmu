@@ -42,13 +42,29 @@ type InputHelper ui
 updateGraph : ui -> DictGraph ui -> (Float, DictGraph ui)
 updateGraph uiModel graph =
   let
-    destinationNode = getDestinationNode graph
+    destinationNode =
+      case getDestinationNode graph of
+        Just node ->
+          node
+        Nothing ->
+          Debug.crash (
+            "the DictGraph does not have a destination node. This is the audioGraph: "
+            ++ toString graph
+          )
   in
     updateNode uiModel graph destinationNode
 
-getDestinationNode : DictGraph ui -> AudioNode ui
+getDestinationNode : DictGraph ui -> Maybe (AudioNode ui)
 getDestinationNode graph =
-  unsafeDictGet 0 graph
+  graph
+  |> Dict.values
+  |> List.filter
+            ( \node ->
+                case node of
+                  Destination _-> True
+                  _ -> False
+            )
+  |> List.head
 
 updateNode : ui -> DictGraph ui -> AudioNode ui
   -> (Float, DictGraph ui)
@@ -56,6 +72,7 @@ updateNode uiModel graph node =
   case node of
     Oscillator (baseProps, oscProps) ->
       let
+        _ = Debug.log "old phase" oscProps.phase
         inputs = baseProps.inputs
         (inputValues, graph2) = getInputValues uiModel graph inputs
         (newValue, newPhase) =
@@ -69,8 +86,24 @@ updateNode uiModel graph node =
           , { oscProps | phase = newPhase }
           )
         graph3 = Dict.insert (getNodeAutoId node) newNode graph2
+        _ = Debug.log "new phase" newPhase
+        _ = Debug.log "new value" newValue
       in
-        (newValue, graph)
+        (newValue, graph3)
+
+    Destination (baseProps, specificProps) ->
+      let
+        inputs = baseProps.inputs
+        (inputValues, graph2) = getInputValues uiModel graph inputs
+        newValue = (unsafeDictGet "A" inputValues)
+        newNode = Destination
+          ( { baseProps | outputValue = newValue }
+          , specificProps
+          )
+        graph3 = Dict.insert (getNodeAutoId node) newNode graph2
+      in
+        (newValue, graph3)
+
     _ -> Debug.crash("")
 
 

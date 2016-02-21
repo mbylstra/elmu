@@ -54,12 +54,13 @@ getKnobValue model id =
     knob.value
 
 type alias EncodedModel =
-  Dict ID Knob.EncodedModel
+  List (String, Knob.EncodedModel)
 
 encode : Model -> EncodedModel
 encode model =
   model.knobs
   |> Dict.map (\k v -> Knob.encode v)
+  |> Dict.toList
 
 
 --------------------------------------------------------------------------------

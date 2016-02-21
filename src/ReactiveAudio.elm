@@ -1,6 +1,6 @@
 module ReactiveAudio where
 
-import Gui exposing(getFrequency) -- this is pretty wierd, but the native stuff doesn't work unless you import at least something from the main module
+import Gui exposing (getFrequency, bufferSize) -- this is pretty wierd, but the native stuff doesn't work unless you import at least something from the main module
 -- import Dict
 
 -- import Audio.AudioNodes exposing(..)
@@ -12,6 +12,9 @@ import Audio.Atoms.Destination exposing (destination)
 import Audio.FlattenGraph exposing (flattenGraph)
 -- import Helpers exposing (toMutableDict)
 
+
+import BufferHandler exposing (updateBufferState)
+ -- we need to import this so that JS can see it!
 
 
 -- import Audio.Atoms.Add exposing (add)

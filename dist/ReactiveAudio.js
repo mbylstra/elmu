@@ -15089,34 +15089,88 @@ Elm.Audio.MainTypes.make = function (_elm) {
    var _U = Elm.Native.Utils.make(_elm),
    $Basics = Elm.Basics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
+   $Dict = Elm.Dict.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm);
    var _op = {};
+   var applyToBaseProps = F2(function (func,node) {
+      var _p0 = node;
+      switch (_p0.ctor)
+      {case "Dummy": return func(_p0._0._0);
+         case "Oscillator": return func(_p0._0._0);
+         default: return func(_p0._0._0);}
+   });
+   var getBaseProps = function (node) {
+      return A2(applyToBaseProps,$Basics.identity,node);
+   };
+   var getNodeAutoId = function (node) {
+      return A2($Maybe.withDefault,
+      -1,
+      A2(applyToBaseProps,function (_) {    return _.autoId;},node));
+   };
    var ExternalState = F2(function (a,b) {
       return {time: a,externalInputState: b};
    });
    var ExternalInputState = F3(function (a,b,c) {
       return {xWindowFraction: a,yWindowFraction: b,audioOn: c};
    });
-   var OscillatorInputs = F3(function (a,b,c) {
-      return {frequency: a,frequencyOffset: b,phaseOffset: c};
-   });
+   var Dummy = function (a) {    return {ctor: "Dummy",_0: a};};
    var Destination = function (a) {
       return {ctor: "Destination",_0: a};
    };
-   var Multiply = function (a) {
-      return {ctor: "Multiply",_0: a};
-   };
-   var Add = function (a) {    return {ctor: "Add",_0: a};};
-   var FeedforwardProcessor = function (a) {
-      return {ctor: "FeedforwardProcessor",_0: a};
-   };
-   var Gain = function (a) {    return {ctor: "Gain",_0: a};};
    var Oscillator = function (a) {
       return {ctor: "Oscillator",_0: a};
    };
+   var updateBasePropsCollectExtra = F2(function (updateFunc,
+   audioNode) {
+      var _p1 = audioNode;
+      switch (_p1.ctor)
+      {case "Dummy": var _p2 = updateFunc(_p1._0._0);
+           var newBaseProps = _p2._0;
+           var extra = _p2._1;
+           return {ctor: "_Tuple2"
+                  ,_0: Dummy({ctor: "_Tuple2",_0: newBaseProps,_1: _p1._0._1})
+                  ,_1: extra};
+         case "Oscillator": var _p3 = updateFunc(_p1._0._0);
+           var newBaseProps = _p3._0;
+           var extra = _p3._1;
+           return {ctor: "_Tuple2"
+                  ,_0: Oscillator({ctor: "_Tuple2"
+                                  ,_0: newBaseProps
+                                  ,_1: _p1._0._1})
+                  ,_1: extra};
+         default: var _p4 = updateFunc(_p1._0._0);
+           var newBaseProps = _p4._0;
+           var extra = _p4._1;
+           return {ctor: "_Tuple2"
+                  ,_0: Destination({ctor: "_Tuple2"
+                                   ,_0: newBaseProps
+                                   ,_1: _p1._0._1})
+                  ,_1: extra};}
+   });
+   var updateBaseProps = F2(function (updateFunc,audioNode) {
+      var _p5 = audioNode;
+      switch (_p5.ctor)
+      {case "Dummy": return Dummy({ctor: "_Tuple2"
+                                  ,_0: updateFunc(_p5._0._0)
+                                  ,_1: _p5._0._1});
+         case "Oscillator": return Oscillator({ctor: "_Tuple2"
+                                              ,_0: updateFunc(_p5._0._0)
+                                              ,_1: _p5._0._1});
+         default: return Destination({ctor: "_Tuple2"
+                                     ,_0: updateFunc(_p5._0._0)
+                                     ,_1: _p5._0._1});}
+   });
+   var DummyProps = function (a) {    return {func: a};};
+   var OscillatorProps = F2(function (a,b) {
+      return {phase: a,func: b};
+   });
+   var BaseProps = F4(function (a,b,c,d) {
+      return {userId: a,autoId: b,inputs: c,outputValue: d};
+   });
+   var AutoID = function (a) {    return {ctor: "AutoID",_0: a};};
    var Node = function (a) {    return {ctor: "Node",_0: a};};
    var UI = function (a) {    return {ctor: "UI",_0: a};};
    var Default = {ctor: "Default"};
@@ -15128,15 +15182,53 @@ Elm.Audio.MainTypes.make = function (_elm) {
                                         ,Default: Default
                                         ,UI: UI
                                         ,Node: Node
+                                        ,AutoID: AutoID
+                                        ,BaseProps: BaseProps
+                                        ,OscillatorProps: OscillatorProps
+                                        ,DummyProps: DummyProps
                                         ,Oscillator: Oscillator
-                                        ,Gain: Gain
-                                        ,FeedforwardProcessor: FeedforwardProcessor
-                                        ,Add: Add
-                                        ,Multiply: Multiply
                                         ,Destination: Destination
-                                        ,OscillatorInputs: OscillatorInputs
+                                        ,Dummy: Dummy
                                         ,ExternalInputState: ExternalInputState
-                                        ,ExternalState: ExternalState};
+                                        ,ExternalState: ExternalState
+                                        ,updateBasePropsCollectExtra: updateBasePropsCollectExtra
+                                        ,updateBaseProps: updateBaseProps
+                                        ,applyToBaseProps: applyToBaseProps
+                                        ,getBaseProps: getBaseProps
+                                        ,getNodeAutoId: getNodeAutoId};
+};
+Elm.Audio = Elm.Audio || {};
+Elm.Audio.Atoms = Elm.Audio.Atoms || {};
+Elm.Audio.Atoms.Destination = Elm.Audio.Atoms.Destination || {};
+Elm.Audio.Atoms.Destination.make = function (_elm) {
+   "use strict";
+   _elm.Audio = _elm.Audio || {};
+   _elm.Audio.Atoms = _elm.Audio.Atoms || {};
+   _elm.Audio.Atoms.Destination = _elm.Audio.Atoms.Destination || {};
+   if (_elm.Audio.Atoms.Destination.values)
+   return _elm.Audio.Atoms.Destination.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Audio$MainTypes = Elm.Audio.MainTypes.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Dict = Elm.Dict.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var _op = {};
+   var destination = function (userId) {
+      return $Audio$MainTypes.Destination({ctor: "_Tuple2"
+                                          ,_0: {userId: $Maybe.Nothing
+                                               ,autoId: $Maybe.Just(0)
+                                               ,inputs: $Dict.fromList(_U.list([{ctor: "_Tuple2"
+                                                                                ,_0: "A"
+                                                                                ,_1: $Audio$MainTypes.ID(userId)}]))
+                                               ,outputValue: 0.0}
+                                          ,_1: {ctor: "_Tuple0"}});
+   };
+   return _elm.Audio.Atoms.Destination.values = {_op: _op
+                                                ,destination: destination};
 };
 Elm.Audio = Elm.Audio || {};
 Elm.Audio.AudioNodeFunctions = Elm.Audio.AudioNodeFunctions || {};
@@ -15274,6 +15366,7 @@ Elm.Audio.Atoms.Sine.make = function (_elm) {
    $Audio$MainTypes = Elm.Audio.MainTypes.make(_elm),
    $Basics = Elm.Basics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
+   $Dict = Elm.Dict.make(_elm),
    $ElmTest = Elm.ElmTest.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
@@ -15326,14 +15419,18 @@ Elm.Audio.Atoms.Sine.make = function (_elm) {
       return {ctor: "_Tuple2",_0: amplitude,_1: currPhase};
    });
    var sine = function (args) {
-      var osc = $Audio$MainTypes.Oscillator({id: args.id
-                                            ,func: sinWave
-                                            ,inputs: {frequency: args.frequency
-                                                     ,frequencyOffset: args.frequencyOffset
-                                                     ,phaseOffset: args.phaseOffset}
-                                            ,state: {outputValue: 0.0,phase: 0.0}});
-      var x = args.id;
-      return osc;
+      return $Audio$MainTypes.Oscillator({ctor: "_Tuple2"
+                                         ,_0: {userId: args.id
+                                              ,autoId: $Maybe.Nothing
+                                              ,inputs: $Dict.fromList(_U.list([{ctor: "_Tuple2"
+                                                                               ,_0: "frequency"
+                                                                               ,_1: args.frequency}
+                                                                              ,{ctor: "_Tuple2"
+                                                                               ,_0: "frequencyOffset"
+                                                                               ,_1: args.frequencyOffset}
+                                                                              ,{ctor: "_Tuple2",_0: "phaseOffset",_1: args.phaseOffset}]))
+                                              ,outputValue: 0.0}
+                                         ,_1: {func: sinWave,phase: 0.0}});
    };
    var tests = A2($ElmTest.suite,
    "sineWave",
@@ -15379,6 +15476,345 @@ Elm.Audio.AudioUtil.make = function (_elm) {
    };
    return _elm.Audio.AudioUtil.values = {_op: _op
                                         ,pitchToFrequency: pitchToFrequency};
+};
+Elm.Lib = Elm.Lib || {};
+Elm.Lib.Misc = Elm.Lib.Misc || {};
+Elm.Lib.Misc.make = function (_elm) {
+   "use strict";
+   _elm.Lib = _elm.Lib || {};
+   _elm.Lib.Misc = _elm.Lib.Misc || {};
+   if (_elm.Lib.Misc.values) return _elm.Lib.Misc.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Dict = Elm.Dict.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var _op = {};
+   var unsafeDictGet = F2(function (key,dict) {
+      var _p0 = A2($Dict.get,key,dict);
+      if (_p0.ctor === "Just") {
+            return _p0._0;
+         } else {
+            return _U.crashCase("Lib.Misc",
+            {start: {line: 7,column: 3},end: {line: 11,column: 72}},
+            _p0)("Dict.get returned Nothing from within usafeDictGet");
+         }
+   });
+   return _elm.Lib.Misc.values = {_op: _op
+                                 ,unsafeDictGet: unsafeDictGet};
+};
+Elm.Lib = Elm.Lib || {};
+Elm.Lib.ListExtra = Elm.Lib.ListExtra || {};
+Elm.Lib.ListExtra.make = function (_elm) {
+   "use strict";
+   _elm.Lib = _elm.Lib || {};
+   _elm.Lib.ListExtra = _elm.Lib.ListExtra || {};
+   if (_elm.Lib.ListExtra.values) return _elm.Lib.ListExtra.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var _op = {};
+   var unsafeHead = function (l) {
+      var _p0 = $List.head(l);
+      if (_p0.ctor === "Just") {
+            return _p0._0;
+         } else {
+            return _U.crashCase("Lib.ListExtra",
+            {start: {line: 5,column: 3},end: {line: 7,column: 69}},
+            _p0)("unsafeHead was called on an empty list!");
+         }
+   };
+   return _elm.Lib.ListExtra.values = {_op: _op
+                                      ,unsafeHead: unsafeHead};
+};
+Elm.Audio = Elm.Audio || {};
+Elm.Audio.FlattenGraph = Elm.Audio.FlattenGraph || {};
+Elm.Audio.FlattenGraph.make = function (_elm) {
+   "use strict";
+   _elm.Audio = _elm.Audio || {};
+   _elm.Audio.FlattenGraph = _elm.Audio.FlattenGraph || {};
+   if (_elm.Audio.FlattenGraph.values)
+   return _elm.Audio.FlattenGraph.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Audio$MainTypes = Elm.Audio.MainTypes.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Dict = Elm.Dict.make(_elm),
+   $ElmTest = Elm.ElmTest.make(_elm),
+   $Graphics$Element = Elm.Graphics.Element.make(_elm),
+   $Lib$ListExtra = Elm.Lib.ListExtra.make(_elm),
+   $Lib$Misc = Elm.Lib.Misc.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var _op = {};
+   var dummy2 = $Audio$MainTypes.Dummy({ctor: "_Tuple2"
+                                       ,_0: {userId: $Maybe.Just("dummy2")
+                                            ,autoId: $Maybe.Nothing
+                                            ,inputs: $Dict.fromList(_U.list([{ctor: "_Tuple2"
+                                                                             ,_0: "inputA"
+                                                                             ,_1: $Audio$MainTypes.Node($Audio$MainTypes.Dummy({ctor: "_Tuple2"
+                                                                                                                               ,_0: {userId: $Maybe.Just("dummy3")
+                                                                                                                                    ,autoId: $Maybe.Nothing
+                                                                                                                                    ,inputs: $Dict.fromList(_U.list([{ctor: "_Tuple2"
+                                                                                                                                                                     ,_0: "inputA"
+                                                                                                                                                                     ,_1: $Audio$MainTypes.Node($Audio$MainTypes.Dummy({ctor: "_Tuple2"
+                                                                                                                                                                                                                       ,_0: {userId: $Maybe.Just("dummy4")
+                                                                                                                                                                                                                            ,autoId: $Maybe.Nothing
+                                                                                                                                                                                                                            ,inputs: $Dict.fromList(_U.list([{ctor: "_Tuple2"
+                                                                                                                                                                                                                                                             ,_0: "inputA"
+                                                                                                                                                                                                                                                             ,_1: $Audio$MainTypes.ID("dummy1")}]))
+                                                                                                                                                                                                                            ,outputValue: 0.0}
+                                                                                                                                                                                                                       ,_1: {func: 0.0}}))}]))
+                                                                                                                                    ,outputValue: 0.0}
+                                                                                                                               ,_1: {func: 0.0}}))}]))
+                                            ,outputValue: 0.0}
+                                       ,_1: {func: 0.0}});
+   var dummy1 = $Audio$MainTypes.Dummy({ctor: "_Tuple2"
+                                       ,_0: {userId: $Maybe.Just("dummy1")
+                                            ,autoId: $Maybe.Nothing
+                                            ,inputs: $Dict.fromList(_U.list([{ctor: "_Tuple2"
+                                                                             ,_0: "inputA"
+                                                                             ,_1: $Audio$MainTypes.Value(440.0)}]))
+                                            ,outputValue: 0.0}
+                                       ,_1: {func: 0.0}});
+   var convertUserIdInputs = function (nodes) {
+      var getAutoIdForUserId = function (userId) {
+         var filter = function (node) {
+            var currMaybeUserId = function (_) {
+               return _.userId;
+            }($Audio$MainTypes.getBaseProps(node));
+            var _p0 = currMaybeUserId;
+            if (_p0.ctor === "Just") {
+                  return _U.eq(_p0._0,userId);
+               } else {
+                  return false;
+               }
+         };
+         var foundNode = $Lib$ListExtra.unsafeHead(A2($List.filter,
+         filter,
+         nodes));
+         return A2($Maybe.withDefault,
+         -1,
+         function (_) {
+            return _.autoId;
+         }($Audio$MainTypes.getBaseProps(foundNode)));
+      };
+      var convertInput = function (inputTuple) {
+         var _p1 = inputTuple;
+         if (_p1.ctor === "_Tuple2" && _p1._1.ctor === "ID") {
+               return {ctor: "_Tuple2"
+                      ,_0: _p1._0
+                      ,_1: $Audio$MainTypes.AutoID(getAutoIdForUserId(_p1._1._0))};
+            } else {
+               return inputTuple;
+            }
+      };
+      var convertUserIdInputs$ = function (baseProps) {
+         return _U.update(baseProps,
+         {inputs: $Dict.fromList(A2($List.map,
+         convertInput,
+         $Dict.toList(baseProps.inputs)))});
+      };
+      var convertNodeUserIdInputs = function (node) {
+         return A2($Audio$MainTypes.updateBaseProps,
+         convertUserIdInputs$,
+         node);
+      };
+      return A2($List.map,convertNodeUserIdInputs,nodes);
+   };
+   var flatNodeListToDict = function (nodes) {
+      return $Dict.fromList(A2($List.map,
+      function (node) {
+         return {ctor: "_Tuple2"
+                ,_0: $Audio$MainTypes.getNodeAutoId(node)
+                ,_1: node};
+      },
+      nodes));
+   };
+   var flattenNode = F3(function (node,oldLastId,oldAccNodes) {
+      var updateBasePropsFunc = function (oldProps) {
+         var inputNames = $Dict.keys(oldProps.inputs);
+         var _p2 = A2(doInputs,
+         inputNames,
+         {props: oldProps
+         ,lastId: oldLastId
+         ,accNodes: oldAccNodes
+         ,node: node});
+         var props = _p2.props;
+         var lastId = _p2.lastId;
+         var accNodes = _p2.accNodes;
+         var id = lastId + 1;
+         return {ctor: "_Tuple2"
+                ,_0: _U.update(props,{autoId: $Maybe.Just(id)})
+                ,_1: {ctor: "_Tuple2",_0: accNodes,_1: id}};
+      };
+      var _p3 = A2($Audio$MainTypes.updateBasePropsCollectExtra,
+      updateBasePropsFunc,
+      node);
+      var newNode = _p3._0;
+      var accNodes2 = _p3._1._0;
+      var id = _p3._1._1;
+      return {lastId: id
+             ,nodes: A2($Basics._op["++"],accNodes2,_U.list([newNode]))};
+   });
+   var doInputs = F2(function (currInputNames,_p4) {
+      doInputs: while (true) {
+         var _p5 = _p4;
+         var _p10 = _p5.node;
+         var _p9 = _p5.lastId;
+         var _p8 = _p5.accNodes;
+         var _p6 = currInputNames;
+         if (_p6.ctor === "[]") {
+               return {props: _p5.props,lastId: _p9,accNodes: _p8};
+            } else {
+               var _p7 = flattenInputTop({inputName: _p6._0
+                                         ,node: _p10
+                                         ,lastId: _p9
+                                         ,accNodes: _p8});
+               var props = _p7.props;
+               var lastId = _p7.lastId;
+               var accNodes = _p7.accNodes;
+               var _v4 = _p6._1,
+               _v5 = {props: props
+                     ,lastId: lastId
+                     ,accNodes: accNodes
+                     ,node: _p10};
+               currInputNames = _v4;
+               _p4 = _v5;
+               continue doInputs;
+            }
+      }
+   });
+   var flattenInputTop = function (_p11) {
+      var _p12 = _p11;
+      var oldProps = $Audio$MainTypes.getBaseProps(_p12.node);
+      var _p13 = flattenInputUpperMiddle({inputName: _p12.inputName
+                                         ,props: oldProps
+                                         ,lastId: _p12.lastId
+                                         ,accNodes: _p12.accNodes});
+      var props = _p13.props;
+      var accNodes = _p13.accNodes;
+      var lastId = _p13.lastId;
+      return {accNodes: accNodes,lastId: lastId,props: props};
+   };
+   var flattenInputUpperMiddle = function (_p14) {
+      var _p15 = _p14;
+      var _p18 = _p15.props;
+      var _p17 = _p15.inputName;
+      var _p16 = flattenInputMiddle({accNodes: _p15.accNodes
+                                    ,lastId: _p15.lastId
+                                    ,input: A2($Lib$Misc.unsafeDictGet,_p17,_p18.inputs)
+                                    ,inputName: _p17
+                                    ,inputs: _p18.inputs});
+      var lastId = _p16.lastId;
+      var accNodes = _p16.accNodes;
+      var inputs = _p16.inputs;
+      var newProps = _U.update(_p18,{inputs: inputs});
+      return {props: newProps,accNodes: accNodes,lastId: lastId};
+   };
+   var flattenInputMiddle = function (_p19) {
+      var _p20 = _p19;
+      var _p25 = _p20.lastId;
+      var _p24 = _p20.inputs;
+      var _p23 = _p20.accNodes;
+      var _p21 = flattenInputLower({accNodes: _p23
+                                   ,lastId: _p25
+                                   ,input: _p20.input});
+      if (_p21.ctor === "Just") {
+            var _p22 = _p21._0.lastId;
+            return {lastId: _p22
+                   ,accNodes: _p21._0.nodes
+                   ,inputs: A3($Dict.insert,
+                   _p20.inputName,
+                   $Audio$MainTypes.AutoID(_p22),
+                   _p24)};
+         } else {
+            return {lastId: _p25,accNodes: _p23,inputs: _p24};
+         }
+   };
+   var flattenInputLower = function (_p26) {
+      var _p27 = _p26;
+      var _p28 = _p27.input;
+      if (_p28.ctor === "Node") {
+            return $Maybe.Just(A3(flattenNode,
+            _p28._0,
+            _p27.lastId,
+            _p27.accNodes));
+         } else {
+            return $Maybe.Nothing;
+         }
+   };
+   var flattenNodeList = function (nodes) {
+      var flattenNodeList$ = F3(function (remainderNodes,
+      outputNodes,
+      lastId) {
+         flattenNodeList$: while (true) {
+            var _p29 = remainderNodes;
+            if (_p29.ctor === "[]") {
+                  return {ctor: "_Tuple2",_0: lastId,_1: outputNodes};
+               } else {
+                  var r = A3(flattenNode,_p29._0,lastId,_U.list([]));
+                  var _p30 = {ctor: "_Tuple2"
+                             ,_0: r.lastId
+                             ,_1: A2($Basics._op["++"],outputNodes,r.nodes)};
+                  var lastId2 = _p30._0;
+                  var outputNodes2 = _p30._1;
+                  var _v13 = _p29._1,_v14 = outputNodes2,_v15 = lastId2;
+                  remainderNodes = _v13;
+                  outputNodes = _v14;
+                  lastId = _v15;
+                  continue flattenNodeList$;
+               }
+         }
+      });
+      var _p31 = A3(flattenNodeList$,nodes,_U.list([]),0);
+      var outputNodes3 = _p31._1;
+      return outputNodes3;
+   };
+   var tests = A2($ElmTest.suite,
+   "",
+   _U.list([A2($ElmTest.test,
+           "",
+           A2($ElmTest.assertEqual,
+           flattenInputLower({accNodes: _U.list([])
+                             ,lastId: 0
+                             ,input: $Audio$MainTypes.Value(0.0)}),
+           $Maybe.Nothing))
+           ,A2($ElmTest.test,
+           "",
+           A2($ElmTest.assertEqual,
+           3,
+           function () {
+              var result = A3(flattenNode,dummy2,0,_U.list([]));
+              return function (_p32) {
+                 var _p33 = _p32;
+                 return $List.length(_p33.nodes);
+              }(result);
+           }()))
+           ,A2($ElmTest.test,
+           "",
+           A2($ElmTest.assertEqual,
+           4,
+           function () {
+              var result = convertUserIdInputs(flattenNodeList(_U.list([dummy1
+                                                                       ,dummy2])));
+              return $List.length(result);
+           }()))]));
+   var main = $ElmTest.elementRunner(tests);
+   var flattenGraph = function (graph) {
+      return flatNodeListToDict(convertUserIdInputs(flattenNodeList(graph)));
+   };
+   return _elm.Audio.FlattenGraph.values = {_op: _op
+                                           ,flattenGraph: flattenGraph};
 };
 Elm.Lib = Elm.Lib || {};
 Elm.Lib.MouseExtra = Elm.Lib.MouseExtra || {};
@@ -16245,9 +16681,9 @@ Elm.Gui.KnobRegistry.make = function (_elm) {
       return {ctor: "KnobAction",_0: a,_1: b};
    });
    var encode = function (model) {
-      return A2($Dict.map,
+      return $Dict.toList(A2($Dict.map,
       F2(function (k,v) {    return $Gui$Knob.encode(v);}),
-      model.knobs);
+      model.knobs));
    };
    var getKnob = F2(function (knobs,id) {
       var _p6 = A2($Dict.get,id,knobs);
@@ -16303,7 +16739,6 @@ Elm.Gui.make = function (_elm) {
    $Array = Elm.Array.make(_elm),
    $Basics = Elm.Basics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
-   $Dict = Elm.Dict.make(_elm),
    $Effects = Elm.Effects.make(_elm),
    $Gui$ColorScheme = Elm.Gui.ColorScheme.make(_elm),
    $Gui$ColorSchemeChooser = Elm.Gui.ColorSchemeChooser.make(_elm),
@@ -16324,7 +16759,12 @@ Elm.Gui.make = function (_elm) {
    $Signal = Elm.Signal.make(_elm),
    $StartApp = Elm.StartApp.make(_elm);
    var _op = {};
-   var dummy = "dummy!";
+   var bufferSize = 512;
+   var bufferSizePort = Elm.Native.Port.make(_elm).outbound("bufferSizePort",
+   function (v) {
+      return v;
+   },
+   bufferSize);
    var guiFrequency = A2($Signal.merge,
    $Gui$KeyboardNoteInput.keyboardGuiFrequency,
    $Gui$Piano.pianoGuiFrequency);
@@ -16468,6 +16908,16 @@ Elm.Gui.make = function (_elm) {
               A2($Signal.forwardTo,address,ColorSchemeChooserAction),
               model.colorSchemeChooser)]));
    });
+   var encode = function (model) {
+      var knobs = $Gui$KnobRegistry.encode(model.knobRegistry);
+      var encoded = {audioOn: model.audioOn
+                    ,frequency: model.frequency
+                    ,knobs: knobs};
+      return encoded;
+   };
+   var EncodedModel = F3(function (a,b,c) {
+      return {audioOn: a,frequency: b,knobs: c};
+   });
    var getAttack = function (model) {
       return A2($Gui$KnobRegistry.getKnobValue,
       model.knobRegistry,
@@ -16514,6 +16964,15 @@ Elm.Gui.make = function (_elm) {
                              ,view: view
                              ,inputs: _U.list([guiFrequencyActionSignal])});
    var main = app.html;
+   var outgoingUiModel = Elm.Native.Port.make(_elm).outboundSignal("outgoingUiModel",
+   function (v) {
+      return {audioOn: v.audioOn
+             ,frequency: v.frequency
+             ,knobs: Elm.Native.List.make(_elm).toArray(v.knobs).map(function (v) {
+                return [v._0,v._1];
+             })};
+   },
+   A2($Signal.map,encode,app.model));
    return _elm.Gui.values = {_op: _op
                             ,randomPrimer: randomPrimer
                             ,randomSeed: randomSeed
@@ -16521,6 +16980,8 @@ Elm.Gui.make = function (_elm) {
                             ,init: init
                             ,getFrequency: getFrequency
                             ,getAttack: getAttack
+                            ,EncodedModel: EncodedModel
+                            ,encode: encode
                             ,initModel: initModel
                             ,AudioOn: AudioOn
                             ,KnobRegistryAction: KnobRegistryAction
@@ -16534,178 +16995,370 @@ Elm.Gui.make = function (_elm) {
                             ,guiFrequencyActionSignal: guiFrequencyActionSignal
                             ,app: app
                             ,main: main
-                            ,dummy: dummy};
+                            ,bufferSize: bufferSize};
 };
-Elm.Native.MutableDict = {};
-Elm.Native.MutableDict.make = function(localRuntime) {
+Elm.Native.MutableArray = {};
+Elm.Native.MutableArray.make = function(localRuntime) {
 
 	localRuntime.Native = localRuntime.Native || {};
-	localRuntime.Native.MutableDict = localRuntime.Native.MutableDict || {};
-	if (localRuntime.Native.MutableDict.values)
+	localRuntime.Native.MutableArray = localRuntime.Native.MutableArray || {};
+	if (localRuntime.Native.MutableArray.values)
 	{
-		return localRuntime.Native.MutableDict.values;
+		return localRuntime.Native.MutableArray.values;
 	}
-	if ('values' in Elm.Native.MutableDict)
+	if ('values' in Elm.Native.MutableArray)
 	{
-		return localRuntime.Native.MutableDict.values = Elm.Native.MutableDict.values;
+		return localRuntime.Native.MutableArray.values = Elm.Native.MutableArray.values;
 	}
 
-	var List = Elm.Native.List.make(localRuntime);
-
-  function empty()
-  {
-    return {};
-  }
-
-  // function fromList(list)
-  // {
-  //
-  // }
-  function fromList(list)
-  {
-		if (list === List.Nil)
+	function get(i, array)
+	{
+		if (i < 0 || i >= length(array))
 		{
-			return empty();
+			throw new Error(
+				'Index ' + i + ' is out of range. Check the length of ' +
+				'your array first or use getMaybe or getWithDefault.');
 		}
+		return array[i];
+	}
 
-    var jsArray = List.toArray(list);
+	function set(i, item, array)
+	{
+    array[i] = item;
+    return array;
+	}
 
-    var out = {};
+	function initialize(len, f)
+	{
+    var array = [];
+  	for (var i = 0; i < len; i++)
+		{
+		  array[i] = f(i);
+		}
+    return array;
+	}
 
-    for (var i = 0; i < jsArray.length; i++) {
-      var item = jsArray[i];
-      var key = item._0.ctor;
-      var value = item._1;
-      out[key] = value
-    }
-    return out;
-  }
+	// Maps a function over the elements of an array.
+	function map(f, a)
+	{
+    return a.map(f);
+	}
 
-  function get(key, dict) {
-    console.log('key', key);
-    console.log('dict', dict);
-    return dict[key.ctor];
-  }
+	// Returns how many items are in the tree.
+	function length(array)
+	{
+    return array.length;
+	}
 
-	// function get(i, array)
-	// {
-	// 	if (i < 0 || i >= length(array))
-	// 	{
-	// 		throw new Error(
-	// 			'Index ' + i + ' is out of range. Check the length of ' +
-	// 			'your array first or use getMaybe or getWithDefault.');
-	// 	}
-	// 	return array[i];
-	// }
-  //
-	// function set(i, item, array)
-	// {
-  //   array[i] = item;
-  //   return array;
-	// }
-  //
-	// function initialize(len, f)
-	// {
-  //   var array = [];
-  // 	for (var i = 0; i < len; i++)
-	// 	{
-	// 	  array[i] = f(i);
-	// 	}
-  //   return array;
-	// }
-  //
-	// // Maps a function over the elements of an array.
-	// function map(f, a)
-	// {
-  //   return a.map(f);
-	// }
-  //
-	// // Returns how many items are in the tree.
-	// function length(array)
-	// {
-  //   return array.length;
-	// }
-
-	Elm.Native.MutableDict.values = {
-		empty: empty,
-		fromList: fromList,
-		// initialize: F2(initialize),
+	Elm.Native.MutableArray.values = {
+		initialize: F2(initialize),
 		get: F2(get),
-		// set: F3(set),
-		// map: F2(map),
-		// length: length,
+		set: F3(set),
+		map: F2(map),
+		length: length,
 	};
 
-	return localRuntime.Native.MutableDict.values = Elm.Native.MutableDict.values;
+	return localRuntime.Native.MutableArray.values = Elm.Native.MutableArray.values;
 };
 
 Elm.Lib = Elm.Lib || {};
-Elm.Lib.MutableDict = Elm.Lib.MutableDict || {};
-Elm.Lib.MutableDict.make = function (_elm) {
+Elm.Lib.MutableArray = Elm.Lib.MutableArray || {};
+Elm.Lib.MutableArray.make = function (_elm) {
    "use strict";
    _elm.Lib = _elm.Lib || {};
-   _elm.Lib.MutableDict = _elm.Lib.MutableDict || {};
-   if (_elm.Lib.MutableDict.values)
-   return _elm.Lib.MutableDict.values;
+   _elm.Lib.MutableArray = _elm.Lib.MutableArray || {};
+   if (_elm.Lib.MutableArray.values)
+   return _elm.Lib.MutableArray.values;
    var _U = Elm.Native.Utils.make(_elm),
    $Basics = Elm.Basics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
+   $ElmTest = Elm.ElmTest.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
-   $Native$MutableDict = Elm.Native.MutableDict.make(_elm),
+   $Native$MutableArray = Elm.Native.MutableArray.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm);
    var _op = {};
-   var get = F2(function (key,dict) {
-      return A2($Native$MutableDict.get,key,dict);
+   var length = $Native$MutableArray.length;
+   var set = $Native$MutableArray.set;
+   var get = F2(function (i,array) {
+      return _U.cmp(0,i) < 1 && _U.cmp(i,
+      $Native$MutableArray.length(array)) < 0 ? $Maybe.Just(A2($Native$MutableArray.get,
+      i,
+      array)) : $Maybe.Nothing;
    });
-   var fromList = function (list) {
-      return $Native$MutableDict.fromList(list);
-   };
-   var empty = $Native$MutableDict.empty;
-   var MutableDict = {ctor: "MutableDict"};
-   return _elm.Lib.MutableDict.values = {_op: _op
-                                        ,empty: empty
-                                        ,fromList: fromList};
+   var map = $Native$MutableArray.map;
+   var initialize = $Native$MutableArray.initialize;
+   var repeat = F2(function (n,e) {
+      return A2(initialize,n,$Basics.always(e));
+   });
+   var tests = A2($ElmTest.suite,
+   "",
+   _U.list([A2($ElmTest.test,
+   "",
+   A2($ElmTest.assertEqual,
+   A2(get,
+   7,
+   A3(set,
+   7,
+   7,
+   A3(set,
+   6,
+   6,
+   A3(set,
+   5,
+   5,
+   A3(set,
+   4,
+   4,
+   A3(set,
+   3,
+   3,
+   A3(set,2,2,A3(set,1,1,A3(set,0,0,A2(repeat,5,0)))))))))),
+   $Maybe.Just(7)))]));
+   var MutableArray = {ctor: "MutableArray"};
+   return _elm.Lib.MutableArray.values = {_op: _op
+                                         ,initialize: initialize
+                                         ,length: length
+                                         ,get: get
+                                         ,set: set
+                                         ,map: map
+                                         ,repeat: repeat};
 };
-Elm.Helpers = Elm.Helpers || {};
-Elm.Helpers.make = function (_elm) {
+Elm.Orchestrator = Elm.Orchestrator || {};
+Elm.Orchestrator.make = function (_elm) {
    "use strict";
-   _elm.Helpers = _elm.Helpers || {};
-   if (_elm.Helpers.values) return _elm.Helpers.values;
+   _elm.Orchestrator = _elm.Orchestrator || {};
+   if (_elm.Orchestrator.values) return _elm.Orchestrator.values;
    var _U = Elm.Native.Utils.make(_elm),
    $Audio$MainTypes = Elm.Audio.MainTypes.make(_elm),
    $Basics = Elm.Basics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
-   $Lib$MutableDict = Elm.Lib.MutableDict.make(_elm),
+   $Dict = Elm.Dict.make(_elm),
+   $Lib$Misc = Elm.Lib.Misc.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm);
    var _op = {};
-   var createTuple = function (node) {
-      var _p0 = node;
-      if (_p0.ctor === "Oscillator") {
-            var _p1 = _p0._0.id;
-            if (_p1.ctor === "Just") {
-                  return $Maybe.Just({ctor: "_Tuple2",_0: _p1._0,_1: node});
-               } else {
-                  return $Maybe.Nothing;
-               }
+   var getDestinationNode = function (graph) {
+      return $List.head(A2($List.filter,
+      function (node) {
+         var _p0 = node;
+         if (_p0.ctor === "Destination") {
+               return true;
+            } else {
+               return false;
+            }
+      },
+      $Dict.values(graph)));
+   };
+   var ValueInput = function (a) {
+      return {ctor: "ValueInput",_0: a};
+   };
+   var ReferencedNodeInput = function (a) {
+      return {ctor: "ReferencedNodeInput",_0: a};
+   };
+   var getInputHelper = F3(function (ui,graph,input) {
+      var _p1 = input;
+      switch (_p1.ctor)
+      {case "Value": return ValueInput(_p1._0);
+         case "Default": return ValueInput(0.0);
+         case "UI": return ValueInput(_p1._0(ui));
+         case "AutoID": var _p2 = A2($Dict.get,_p1._0,graph);
+           if (_p2.ctor === "Just") {
+                 return ReferencedNodeInput(_p2._0);
+              } else {
+                 return _U.crashCase("Orchestrator",
+                 {start: {line: 148,column: 7},end: {line: 152,column: 115}},
+                 _p2)("This shouldn\'t happen. Could not find a node. The graph must not have been validated first");
+              }
+         case "Node": return _U.crashCase("Orchestrator",
+           {start: {line: 140,column: 3},end: {line: 156,column: 101}},
+           _p1)("This shouldn\'t happen. The graph should have been flattened");
+         default: return _U.crashCase("Orchestrator",
+           {start: {line: 140,column: 3},end: {line: 156,column: 101}},
+           _p1)("This shouldn\'t happen. All ID inputs should have been converted to AutoID inputs");}
+   });
+   var getInputValue = F3(function (uiModel,graph,input) {
+      var _p6 = A3(getInputHelper,uiModel,graph,input);
+      if (_p6.ctor === "ValueInput") {
+            return {ctor: "_Tuple2",_0: _p6._0,_1: graph};
          } else {
-            return _U.crashCase("Helpers",
-            {start: {line: 19,column: 3},end: {line: 35,column: 27}},
-            _p0)("todo");
+            return A3(updateNode,uiModel,graph,_p6._0);
          }
-   };
-   var toMutableDict = function (listGraph) {
-      var tuples = A2($List.map,createTuple,listGraph);
-      var validTuples = A2($List.filterMap,$Basics.identity,tuples);
-      return $Lib$MutableDict.fromList(validTuples);
-   };
-   return _elm.Helpers.values = {_op: _op
-                                ,createTuple: createTuple
-                                ,toMutableDict: toMutableDict};
+   });
+   var updateNode = F3(function (uiModel,graph,node) {
+      var _p7 = node;
+      _v4_2: do {
+         switch (_p7.ctor)
+         {case "Oscillator": if (_p7._0.ctor === "_Tuple2") {
+                    var _p14 = _p7._0._1;
+                    var _p13 = _p7._0._0;
+                    var inputs = _p13.inputs;
+                    var _p8 = A3(getInputValues,uiModel,graph,inputs);
+                    var inputValues = _p8._0;
+                    var graph2 = _p8._1;
+                    var _p9 = A4(_p14.func,
+                    A2($Lib$Misc.unsafeDictGet,"frequency",inputValues),
+                    A2($Lib$Misc.unsafeDictGet,"frequencyOffset",inputValues),
+                    A2($Lib$Misc.unsafeDictGet,"phaseOffset",inputValues),
+                    _p14.phase);
+                    var newValue = _p9._0;
+                    var newPhase = _p9._1;
+                    var newNode = $Audio$MainTypes.Oscillator({ctor: "_Tuple2"
+                                                              ,_0: _U.update(_p13,{outputValue: newValue})
+                                                              ,_1: _U.update(_p14,{phase: newPhase})});
+                    var _p10 = A2($Debug.log,"new phase",newPhase);
+                    var _p11 = A2($Debug.log,"new value",newValue);
+                    var graph3 = A3($Dict.insert,
+                    $Audio$MainTypes.getNodeAutoId(node),
+                    newNode,
+                    graph2);
+                    var _p12 = A2($Debug.log,"old phase",_p14.phase);
+                    return {ctor: "_Tuple2",_0: newValue,_1: graph3};
+                 } else {
+                    break _v4_2;
+                 }
+            case "Destination": if (_p7._0.ctor === "_Tuple2") {
+                    var _p16 = _p7._0._0;
+                    var inputs = _p16.inputs;
+                    var _p15 = A3(getInputValues,uiModel,graph,inputs);
+                    var inputValues = _p15._0;
+                    var graph2 = _p15._1;
+                    var newValue = A2($Lib$Misc.unsafeDictGet,"A",inputValues);
+                    var newNode = $Audio$MainTypes.Destination({ctor: "_Tuple2"
+                                                               ,_0: _U.update(_p16,{outputValue: newValue})
+                                                               ,_1: _p7._0._1});
+                    var graph3 = A3($Dict.insert,
+                    $Audio$MainTypes.getNodeAutoId(node),
+                    newNode,
+                    graph2);
+                    return {ctor: "_Tuple2",_0: newValue,_1: graph3};
+                 } else {
+                    break _v4_2;
+                 }
+            default: break _v4_2;}
+      } while (false);
+      return _U.crashCase("Orchestrator",
+      {start: {line: 72,column: 3},end: {line: 107,column: 25}},
+      _p7)("");
+   });
+   var getInputValues = F3(function (uiModel,graph,inputs) {
+      var update = F3(function (inputName,input,acc) {
+         var _p18 = acc;
+         var inputValues = _p18._0;
+         var graph2 = _p18._1;
+         var _p19 = A3(getInputValue,uiModel,graph2,input);
+         var value = _p19._0;
+         var graph3 = _p19._1;
+         var inputValues2 = A3($Dict.insert,inputName,value,inputValues);
+         return {ctor: "_Tuple2",_0: inputValues2,_1: graph3};
+      });
+      var accInitial = {ctor: "_Tuple2",_0: $Dict.empty,_1: graph};
+      return A3($Dict.foldl,update,accInitial,inputs);
+   });
+   var updateGraph = F2(function (uiModel,graph) {
+      var destinationNode = function () {
+         var _p20 = getDestinationNode(graph);
+         if (_p20.ctor === "Just") {
+               return _p20._0;
+            } else {
+               return _U.crashCase("Orchestrator",
+               {start: {line: 46,column: 7},end: {line: 53,column: 12}},
+               _p20)(A2($Basics._op["++"],
+               "the DictGraph does not have a destination node. This is the audioGraph: ",
+               $Basics.toString(graph)));
+            }
+      }();
+      return A3(updateNode,uiModel,graph,destinationNode);
+   });
+   var ExternalState = F2(function (a,b) {
+      return {time: a,externalInputState: b};
+   });
+   return _elm.Orchestrator.values = {_op: _op
+                                     ,ExternalState: ExternalState
+                                     ,ReferencedNodeInput: ReferencedNodeInput
+                                     ,ValueInput: ValueInput
+                                     ,updateGraph: updateGraph
+                                     ,getDestinationNode: getDestinationNode
+                                     ,updateNode: updateNode
+                                     ,getInputValues: getInputValues
+                                     ,getInputValue: getInputValue
+                                     ,getInputHelper: getInputHelper};
+};
+Elm.BufferHandler = Elm.BufferHandler || {};
+Elm.BufferHandler.make = function (_elm) {
+   "use strict";
+   _elm.BufferHandler = _elm.BufferHandler || {};
+   if (_elm.BufferHandler.values) return _elm.BufferHandler.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Audio$MainTypes = Elm.Audio.MainTypes.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Dict = Elm.Dict.make(_elm),
+   $Gui = Elm.Gui.make(_elm),
+   $Lib$MutableArray = Elm.Lib.MutableArray.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Orchestrator = Elm.Orchestrator.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var _op = {};
+   var foldn = F3(function (func,initial,count) {
+      foldn: while (true) if (_U.cmp(count,0) > 0) {
+            var _v0 = func,_v1 = func(initial),_v2 = count - 1;
+            func = _v0;
+            initial = _v1;
+            count = _v2;
+            continue foldn;
+         } else return initial;
+   });
+   var sampleRate = 44100.0;
+   var sampleDuration = 1.0 / sampleRate;
+   var updateForSample = F2(function (uiModel,_p0) {
+      var _p1 = _p0;
+      var newBufferIndex = _p1.bufferIndex + 1;
+      var newTime = _p1.time + sampleDuration;
+      var _p2 = A2($Orchestrator.updateGraph,uiModel,_p1.graph);
+      var value = _p2._0;
+      var newGraph = _p2._1;
+      return {time: newTime
+             ,graph: newGraph
+             ,buffer: A3($Lib$MutableArray.set,
+             newBufferIndex,
+             value,
+             _p1.buffer)
+             ,bufferIndex: newBufferIndex};
+   });
+   var updateBufferState = F2(function (uiModel,prevBufferState) {
+      var prevBuffer = prevBufferState.buffer;
+      var initialGraph = prevBufferState.graph;
+      var time = prevBufferState.time + sampleDuration;
+      var initialBufferState = {time: time
+                               ,graph: initialGraph
+                               ,buffer: prevBuffer
+                               ,bufferIndex: 0};
+      return A3(foldn,
+      updateForSample(uiModel),
+      initialBufferState,
+      $Gui.bufferSize);
+   });
+   var initialState = {time: 0.0
+                      ,graph: $Dict.fromList(_U.list([]))
+                      ,buffer: A2($Lib$MutableArray.repeat,$Gui.bufferSize,0.0)
+                      ,bufferIndex: 0};
+   var BufferState = F4(function (a,b,c,d) {
+      return {time: a,graph: b,buffer: c,bufferIndex: d};
+   });
+   return _elm.BufferHandler.values = {_op: _op
+                                      ,BufferState: BufferState
+                                      ,initialState: initialState
+                                      ,sampleRate: sampleRate
+                                      ,sampleDuration: sampleDuration
+                                      ,foldn: foldn
+                                      ,updateForSample: updateForSample
+                                      ,updateBufferState: updateBufferState};
 };
 Elm.ReactiveAudio = Elm.ReactiveAudio || {};
 Elm.ReactiveAudio.make = function (_elm) {
@@ -16713,38 +17366,24 @@ Elm.ReactiveAudio.make = function (_elm) {
    _elm.ReactiveAudio = _elm.ReactiveAudio || {};
    if (_elm.ReactiveAudio.values) return _elm.ReactiveAudio.values;
    var _U = Elm.Native.Utils.make(_elm),
+   $Audio$Atoms$Destination = Elm.Audio.Atoms.Destination.make(_elm),
    $Audio$Atoms$Sine = Elm.Audio.Atoms.Sine.make(_elm),
+   $Audio$FlattenGraph = Elm.Audio.FlattenGraph.make(_elm),
    $Audio$MainTypes = Elm.Audio.MainTypes.make(_elm),
    $Basics = Elm.Basics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
    $Gui = Elm.Gui.make(_elm),
-   $Helpers = Elm.Helpers.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm);
    var _op = {};
-   var Sin2 = {ctor: "Sin2"};
-   var Sin1 = {ctor: "Sin1"};
-   var destinationNode = function (input) {
-      return $Audio$MainTypes.Destination({input: input
-                                          ,state: {outputValue: 0.0}});
-   };
-   var basicGraph = {ctor: "_Tuple2"
-                    ,_0: _U.list([$Audio$Atoms$Sine.sine(_U.update($Audio$Atoms$Sine.sineDefaults,
-                    {id: $Maybe.Just(Sin1)
-                    ,frequency: $Audio$MainTypes.Value(440.0)}))])
-                    ,_1: destinationNode($Audio$MainTypes.ID(Sin1))};
-   var _p0 = basicGraph;
-   var listNodes = _p0._0;
-   var destination = _p0._1;
-   var audioGraph = $Helpers.toMutableDict(listNodes);
+   var basicGraph = _U.list([$Audio$Atoms$Sine.sine(_U.update($Audio$Atoms$Sine.sineDefaults,
+                            {id: $Maybe.Just("sin1")
+                            ,frequency: $Audio$MainTypes.Value(440.0)}))
+                            ,$Audio$Atoms$Destination.destination("sin1")]);
+   var audioGraph = $Audio$FlattenGraph.flattenGraph(basicGraph);
    return _elm.ReactiveAudio.values = {_op: _op
-                                      ,destinationNode: destinationNode
-                                      ,Sin1: Sin1
-                                      ,Sin2: Sin2
                                       ,basicGraph: basicGraph
-                                      ,destination: destination
-                                      ,listNodes: listNodes
                                       ,audioGraph: audioGraph};
 };

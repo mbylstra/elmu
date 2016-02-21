@@ -15,7 +15,7 @@ import Signal exposing (Address)
 import Maybe exposing (withDefault)
 import Array
 import Effects
-import Dict exposing (Dict)
+-- import Dict exposing (Dict)
 
 -- import Helpers exposing (prefixDict)
 
@@ -96,6 +96,15 @@ init =
 --         ]
 --     )
 
+--------------------------------------------------------------------------------
+-- ENCODED MODEL
+-- This is to make the model compatible with outgoing ports, even though
+-- it's never actually used in JS. This is an extremely annoying. It would
+-- be great if there was a compiler option to allow raw Elm objects through
+-- a port?? (seeing as it ends up as a JS object eventually anyway)
+
+--------------------------------------------------------------------------------
+
 getFrequency : Model -> Float
 getFrequency model =
   model.frequency
@@ -104,27 +113,23 @@ getAttack : Model -> Float
 getAttack model =
   KnobRegistry.getKnobValue model.knobRegistry "attack"
 
-type alias EncodedModel = Dict String
+type alias EncodedModel =
   { audioOn : Bool
-  , frequency : Float
-  , knobs : KnobRegistry.EncodedModel
+    , frequency : Float
+    , knobs : List (String, Float)
   }
 
--- encode : Model -> EncodedModel
--- encode model =
---   let
---     knobs = KnobRegistry.encode model.knobRegistry
---     knobs' = prefixDict ".knobs" knobs
---     -- _ = Debug.log "knobs encoded" knobs
---     encoded =
---       { audioOn = model.audioOn
---       , frequency = model.frequency
---       , knobs = knobs'
---       }
---     -- encoded
---     -- _ = Debug.log "encoded:" encoded
---   in
---     encoded
+encode : Model -> EncodedModel
+encode model =
+  let
+    knobs = KnobRegistry.encode model.knobRegistry
+    encoded =
+      { audioOn = model.audioOn
+      , frequency = model.frequency
+      , knobs = knobs
+      }
+  in
+    encoded
 
 
 
@@ -305,9 +310,14 @@ main = app.html
 -- port tasks =
 --   app.tasks
 
--- port outgoingUiModel : Signal EncodedModel
--- port outgoingUiModel =
---   Signal.map encode app.model
+port outgoingUiModel : Signal EncodedModel
+port outgoingUiModel = Signal.map encode app.model
+
+
+bufferSize : Int
+bufferSize = 512
+port bufferSizePort : Int
+port bufferSizePort = bufferSize
 
 -- port randomPrimer : Float
 
@@ -317,6 +327,6 @@ main = app.html
 -- ???
 --------------------------------------------------------------------------------
 
--- I guess we could use main instead?
-dummy : String
-dummy = "dummy!"
+-- -- I guess we could use main instead?
+-- dummy : String
+-- dummy = "dummy!"

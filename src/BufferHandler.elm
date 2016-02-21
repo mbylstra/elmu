@@ -1,6 +1,7 @@
 module BufferHandler where
 
 
+import Gui exposing(getFrequency, bufferSize) -- this is pretty wierd, but the native stuff doesn't work unless you import at least something from the main module
 -- import Gui
 
 import Lib.MutableArray as MutableArray exposing (MutableArray)
@@ -57,10 +58,6 @@ initialState =
 -- initialBuffer : Array Float
 -- initialBuffer = Array.repeat bufferSize 0.0
 
-
-bufferSize : Int
-bufferSize = 1024
--- bufferSize =
 
 sampleRate : Float
 sampleRate = 44100.0
