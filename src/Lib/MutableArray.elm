@@ -1,9 +1,10 @@
-module MutableArray
+module Lib.MutableArray
     ( MutableArray
     , initialize
     , length
     , get, set
     , map
+    , repeat
     ) where
 
 import Native.MutableArray
