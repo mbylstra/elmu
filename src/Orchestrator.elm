@@ -6,8 +6,9 @@ module Orchestrator where
 
 -- import ElmTest exposing (..)
 -- import Lib.MutableDict as MutableDict
-import Lib.Misc exposing (unsafeDictGet)
-import Dict exposing (Dict)
+import Lib.MutableArray as MutableArray
+-- import Lib.Misc exposing (unsafeDictGet)
+-- import Dict exposing (Dict)
 
 import Lib.StringKeyMutableDict as StringKeyMutableDict
 --------------------------------------------------------------------------------
@@ -73,20 +74,25 @@ updateNode uiModel graph node =
       let
         -- _ = Debug.log "old phase" oscProps.phase
         inputs = baseProps.inputs
-        (inputValues, graph2) = getInputValues uiModel graph inputs
-        (newValue, newPhase) =
-          oscProps.func
-            (unsafeDictGet "frequency" inputValues)
-            (unsafeDictGet "frequencyOffset" inputValues)
-            (unsafeDictGet "phaseOffset" inputValues)
-            oscProps.phase
-        -- newValue = 0.0
+        _ = Debug.log "inputs" inputs
+        (inputValues, graph2) = getInputValues uiModel graph inputs  -- this adds like 80%!!! Why???
+        -- graph2 = graph
+
+        -- This function seems to add 10%. But that's perhaps mostly the the dict gets?
+        -- (newValue, newPhase) =
+        --   oscProps.func
+        --     (unsafeDictGet "frequency" inputValues)
+        --     (unsafeDictGet "frequencyOffset" inputValues)
+        --     (unsafeDictGet "phaseOffset" inputValues)
+        --     oscProps.phase
+        newValue = 0.0
         -- newPhase = 0.0
 
-        newNode = Oscillator
-          ( { baseProps | outputValue = newValue }
-          , { oscProps | phase = newPhase }
-          )
+        -- newNode = Oscillator
+        --   ( { baseProps | outputValue = newValue }
+        --   , { oscProps | phase = newPhase }
+        --   )
+        newNode = node
         graph3 = StringKeyMutableDict.insert (getNodeAutoId node) newNode graph2
         -- _ = Debug.log "new phase" newPhase
         -- _ = Debug.log "new value" newValue
@@ -99,7 +105,7 @@ updateNode uiModel graph node =
         inputs = baseProps.inputs
         -- graph2 = graph
         (inputValues, graph2) = getInputValues uiModel graph inputs
-        newValue = (unsafeDictGet "A" inputValues)
+        newValue = MutableArray.unsafeNativeGet 0 inputValues
         newNode = Destination
           ( { baseProps | outputValue = newValue }   -- and it's specifically the record update that does it (I think) ~ 5 - 10 %
           -- ( baseProps
@@ -123,22 +129,82 @@ updateNode uiModel graph node =
     _ -> Debug.crash("")
 
 
-getInputValues : ui -> DictGraph ui -> InputsDict ui
-                 -> (Dict String Float, DictGraph ui)
+-- getInputValues : ui -> DictGraph ui -> InputsList ui
+--                  -> (Dict String Float, DictGraph ui)
+-- getInputValues uiModel graph inputs =
+--   let
+--     accInitial = (inputs, graph)
+--
+--     update inputName input acc =
+--       let
+--         (inputValues, graph2) = acc
+--         (value, graph3) = getInputValue uiModel graph2 input
+--         inputValues2 = StringKeyMutableDict.insert inputName value inputValues   -- this is probably the big killer. First, lets change InputsList to StringKeyMutableDict
+--       in
+--         (inputValues2, graph3)
+--   in
+--     Dict.foldl update accInitial inputs   -- hmm, we need to implement foldl on a dict... This will be fun :/. Hang on, why aren't we using Map???? Maybe it's
+--     -- even faster than a js object! And it might have a fold function.
+
+
+
+getInputValues : ui -> DictGraph ui -> InputsList ui
+                 -> (InputValuesArray, DictGraph ui)
 getInputValues uiModel graph inputs =
+
   let
-    accInitial = (Dict.empty, graph)
+    _ = Debug.log "inputs" inputs
+    inputValues = MutableArray.empty
 
-    update inputName input acc =
-      let
-        (inputValues, graph2) = acc
-        (value, graph3) = getInputValue uiModel graph2 input
-        inputValues2 = Dict.insert inputName value inputValues
-      in
-        (inputValues2, graph3)
+    getInputValues' graph2 remainderInputs =
+      case remainderInputs of
+        [] ->
+          graph2
+        input :: rest ->
+          let
+            (value, graph3) = getInputValue uiModel graph2 input
+            _ = MutableArray.push value inputValues -- it's mutable and doesn't return a value!
+          in
+            getInputValues' graph3 rest
+    graph4 = getInputValues' graph inputs
+    _ = Debug.log "inputs" inputs
+
   in
-    Dict.foldl update accInitial inputs
+    (inputValues, graph4)
 
+
+
+  -- This is were we get ***really dodgy***
+  -- No need to foldl on the inputs, as inputs is a mutable dict, so
+  -- we just mutate it, don't care about intermediatery dicts, and
+  -- just return the original dict. Just like good old fashioned JS!
+
+  -- However, we do have to Iterate the dict, and this means we must
+  -- convert the object to a list of , and then to a
+
+  -- let
+  --   -- accInitial = (inputs, graph)
+  --
+  --   getInputValue' inputname input graph2 =
+  --     let
+  --       (value, graph3) = getInputValue uiModel graph2 input
+  --       inputValues2 = StringKeyMutableDict.insert inputName value inputValues   -- this is probably the big killer. First, lets change InputsList to StringKeyMutableDict
+  --     in
+  --       remainderInputs
+  -- in
+  --   Dict.foldl update accInitial inputs   -- hmm, we need to implement foldl on a dict... This will be fun :/. Hang on, why aren't we using Map???? Maybe it's
+  --   getInputValues'
+  -- (MutableArray.empty, graph)
+
+
+
+    -- this might be easier with recursion.
+    -- even faster than a js object! And it might have a fold function.
+
+    -- Process:
+    -- - initialize a Mutable array with 0.0s for the size of the InputsList. This is the slowest part.
+    -- - use recursion to update the inputs array.
+    -- but
 
 getInputValue : ui -> DictGraph ui -> Input ui
                 -> (Float, DictGraph ui)

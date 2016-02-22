@@ -126,10 +126,10 @@ flattenInputUpperMiddle { inputName, props, lastId, accNodes } =
     { props = newProps, accNodes = accNodes, lastId = lastId }
 
 flattenInputMiddle :
-  {  input : Input ui, inputName : String, inputs  : InputsDict ui
+  {  input : Input ui, inputName : String, inputs  : InputsList ui
   , accNodes : AudioNodes ui,  lastId : Int
   }
-  -> { lastId : Int, accNodes : AudioNodes ui, inputs : InputsDict ui }
+  -> { lastId : Int, accNodes : AudioNodes ui, inputs : InputsList ui }
 flattenInputMiddle { accNodes, lastId, input, inputName, inputs } =
   case flattenInputLower { accNodes = accNodes, lastId = lastId, input = input} of
     Just {lastId, nodes} ->

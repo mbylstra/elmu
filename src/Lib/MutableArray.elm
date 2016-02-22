@@ -1,9 +1,14 @@
 module Lib.MutableArray
     ( MutableArray
     , initialize
+    , fromList
     , length
-    , get, set
+    , push
+    , get
+    , unsafeNativeGet
+    , set
     , map
+    , empty
     , repeat
     ) where
 
@@ -17,6 +22,13 @@ import ElmTest exposing (..)
 
 type MutableArray a = MutableArray
 
+empty : MutableArray a
+empty =
+  Native.MutableArray.empty
+
+fromList : List a -> MutableArray a
+fromList list =
+  Native.MutableArray.fromList list
 
 initialize : Int -> (Int -> a) -> MutableArray a
 initialize =
@@ -39,6 +51,9 @@ get i array =
   else
     Nothing
 
+unsafeNativeGet : Int -> MutableArray a -> a
+unsafeNativeGet i array =
+  Native.MutableArray.unsafeNativeGet i array
 
 set : Int -> a -> MutableArray a -> MutableArray a
 set =
@@ -48,6 +63,10 @@ set =
 length : MutableArray a -> Int
 length =
   Native.MutableArray.length
+
+push : a -> MutableArray a -> MutableArray a
+push =
+  Native.MutableArray.push
 
 
 tests : Test

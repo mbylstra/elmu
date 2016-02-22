@@ -1,7 +1,8 @@
 module Audio.MainTypes where
 
-import Dict exposing(Dict)
+-- import Dict exposing(Dict)
 -- import Lib.MutableDict exposing (MutableDict)
+import Lib.MutableArray exposing (MutableArray)
 import Lib.StringKeyMutableDict exposing (StringKeyMutableDict)
 
 --------------------------------------------------------------------------------
@@ -37,10 +38,15 @@ type Input ui
 
 
 
+type alias InputsList ui = List (Input ui)
+type alias InputValuesArray = MutableArray Float
+
+
+
 type alias BaseProps ui =
   { userId : Maybe String
   , autoId : Maybe String
-  , inputs : Dict String (Input ui)
+  , inputs : InputsList ui
   , outputValue : Float
   }
 
@@ -64,7 +70,6 @@ type alias AudioNodes ui = List (AudioNode ui)
 -- js you can use an object for named arguments. Also, the actual (for example)
 -- sine function would necessarily need to take in a list of strings,
 
-type alias InputsDict ui = Dict String (Input ui)
   -- These need to be converted to NodeBase's.
   -- | Gain
   --     { id : Maybe idType
@@ -105,18 +110,16 @@ type alias FeedforwardProcessorF = Float -> List ValueFloat -> ValueFloat
 
 type alias ValueFloat = Float
 type alias TimeFloat = Float
-type alias FrequencyFloat = Float
-type alias PhaseOffsetFloat = Float
+-- type alias FrequencyFloat = Float
+-- type alias PhaseOffsetFloat = Float
 type alias OutputFloat = Float
 type alias PhaseFloat = Float
-type alias FrequencyOffsetFloat = Float
+-- type alias FrequencyOffsetFloat = Float
 
-type alias OscillatorF
-    =  FrequencyFloat
-    -> FrequencyOffsetFloat
-    -> PhaseOffsetFloat
-    -> PhaseFloat
-    -> (OutputFloat, PhaseFloat)
+
+type alias OscillatorInputs = { frequency : Float, frequencyOffset : Float, phaseOffset : Float }
+type alias OscillatorState = PhaseFloat  -- this is the previous phase
+type alias OscillatorF = OscillatorInputs -> OscillatorState -> (OutputFloat, OscillatorState)
 type alias GainF = Float -> Float -> Float
 
 type alias DummyF = Float
