@@ -39,6 +39,20 @@ type InputHelper ui
 -- MAIN
 --------------------------------------------------------------------------------
 
+-- What is so frickin slow???
+
+-- candidates:
+--  - pointless destination lookup
+--  - use of immutable records
+--  - having to look up input values from a dictionary (can we use a tuple instead??)
+--  -   this can work, but the function has to accept a tuple as an argument, but that
+--  -   sounds ok.
+--  - all the general crap that has to be done (function calls are slow?)
+--  - currying turns a function with 3 args into three functino calls! How can we avoid this??
+--  - the immutable dict insert that happens for every input
+--  - the two record updates that happend for every node
+
+
 updateGraph : ui -> DictGraph ui -> (Float, DictGraph ui)
 updateGraph uiModel graph =
   let
@@ -90,19 +104,33 @@ updateNode uiModel graph node =
         -- _ = Debug.log "new value" newValue
       in
         (newValue, graph3)
+      -- (0.0, graph)
 
     Destination (baseProps, specificProps) ->
       let
-        inputs = baseProps.inputs
-        (inputValues, graph2) = getInputValues uiModel graph inputs
-        newValue = (unsafeDictGet "A" inputValues)
-        newNode = Destination
-          ( { baseProps | outputValue = newValue }
-          , specificProps
-          )
-        graph3 = Dict.insert (getNodeAutoId node) newNode graph2
+        -- inputs = baseProps.inputs
+        graph2 = graph
+        -- (inputValues, graph2) = getInputValues uiModel graph inputs
+        -- newValue = (unsafeDictGet "A" inputValues)
+        newValue = 0.0
+        -- newNode = Destination
+        --   -- ( { baseProps | outputValue = newValue }   -- and it's specifically the record update that does it (I think) ~ 5 - 10 %
+        --   ( baseProps
+        --   , specificProps
+        --   )   -- this adds ~ 5 - 10 %
+        -- newNode = node
+        -- id = getNodeAutoId newNode  -- < 1%
+        -- graph3 = Dict.insert id newNode graph2   -- the dict insert adds ~ 5-10 %
+        graph3 = graph2
       in
         (newValue, graph3)
+      -- (0.0, graph)
+
+      -- NOTE: just doing destination (ignoring inputs) seems to add 15% to cpu!
+      -- why?
+      --  - the Dict.insert
+      --  - updating the tuple (?)
+      --  -
 
     _ -> Debug.crash("")
 

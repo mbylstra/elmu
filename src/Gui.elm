@@ -315,7 +315,7 @@ port outgoingUiModel = Signal.map encode app.model
 
 
 bufferSize : Int
-bufferSize = 512
+bufferSize = 1024
 port bufferSizePort : Int
 port bufferSizePort = bufferSize
 

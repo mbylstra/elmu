@@ -1,6 +1,6 @@
-var PROFILING = 0;
+var PROFILING = 1;
 var DEBUG = 0;
-var ITERATIONS = 1;
+var ITERATIONS = 200;
 
 
 var elmGui = Elm.fullscreen(Elm.Gui);
@@ -43,7 +43,7 @@ if (DEBUG) {
 //expose Elm modules
 var ReactiveAudio = exposeElmModule(Elm.ReactiveAudio);
 var BufferHandler = exposeElmModule(Elm.BufferHandler);
-console.log('BufferHandler', BufferHandler);
+// console.log('BufferHandler', BufferHandler);
 // var  = exposeElmModule(Elm.ReactiveAudio);
 var _Utils = exposeElmModule(Elm.Native.Utils);
 var _List = exposeElmModule(Elm.Native.List);
@@ -51,22 +51,22 @@ var _List = exposeElmModule(Elm.Native.List);
 var audioGraph = ReactiveAudio.audioGraph;
 
 var bufferState = BufferHandler.initialState;
-console.log(bufferState);
+// console.log(bufferState);
 bufferState.graph = audioGraph;
 
-console.log('bufferState', bufferState);
-console.log('audioGraph', audioGraph);
+// console.log('bufferState', bufferState);
+// console.log('audioGraph', audioGraph);
 
 if (PROFILING) {
 
     console.log('start profiling');
     for (var i = 0; i < ITERATIONS; i++) {
         // fillBuffer();
-        console.log('start');
-        console.log('updateBufferState', BufferHandler.updateBufferState);
+        // console.log('start');
+        // console.log('updateBufferState', BufferHandler.updateBufferState);
         bufferState = BufferHandler.updateBufferState(uiModel)(bufferState);
-        console.log('bufferState', bufferState);
-        console.log('end');
+        // console.log('bufferState', bufferState);
+        // console.log('end');
 
     }
     if (PROFILING && DEBUG) {
@@ -98,7 +98,7 @@ if (PROFILING) {
         for (var channelNumber = 0; channelNumber < outputBuffer.numberOfChannels; channelNumber++) {
           var outputData = outputBuffer.getChannelData(channelNumber);
 
-          // would be good if we could pass in outputData, rather than user previous array and have to copy across
+          // would be good if we could pass in outputData, rather than using the previous array and have to copy across
           for (var i = 0; i < outputBuffer.length; i++) {
               var value;
               // if (externalState.externalInputState.audioOn) {

@@ -87,6 +87,7 @@ updateForSample uiModel {time, graph, buffer, bufferIndex} =
   in
     let
       (value, newGraph) = updateGraph uiModel graph
+      -- (value, newGraph) = (0.0, graph)
     in
       { time  = newTime
       , graph = newGraph

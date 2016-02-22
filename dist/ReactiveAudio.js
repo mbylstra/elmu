@@ -16759,7 +16759,7 @@ Elm.Gui.make = function (_elm) {
    $Signal = Elm.Signal.make(_elm),
    $StartApp = Elm.StartApp.make(_elm);
    var _op = {};
-   var bufferSize = 512;
+   var bufferSize = 1024;
    var bufferSizePort = Elm.Native.Port.make(_elm).outbound("bufferSizePort",
    function (v) {
       return v;
@@ -17170,14 +17170,14 @@ Elm.Orchestrator.make = function (_elm) {
                  return ReferencedNodeInput(_p2._0);
               } else {
                  return _U.crashCase("Orchestrator",
-                 {start: {line: 148,column: 7},end: {line: 152,column: 115}},
+                 {start: {line: 176,column: 7},end: {line: 180,column: 115}},
                  _p2)("This shouldn\'t happen. Could not find a node. The graph must not have been validated first");
               }
          case "Node": return _U.crashCase("Orchestrator",
-           {start: {line: 140,column: 3},end: {line: 156,column: 101}},
+           {start: {line: 168,column: 3},end: {line: 184,column: 101}},
            _p1)("This shouldn\'t happen. The graph should have been flattened");
          default: return _U.crashCase("Orchestrator",
-           {start: {line: 140,column: 3},end: {line: 156,column: 101}},
+           {start: {line: 168,column: 3},end: {line: 184,column: 101}},
            _p1)("This shouldn\'t happen. All ID inputs should have been converted to AutoID inputs");}
    });
    var getInputValue = F3(function (uiModel,graph,input) {
@@ -17218,19 +17218,9 @@ Elm.Orchestrator.make = function (_elm) {
                     break _v4_2;
                  }
             case "Destination": if (_p7._0.ctor === "_Tuple2") {
-                    var _p13 = _p7._0._0;
-                    var inputs = _p13.inputs;
-                    var _p12 = A3(getInputValues,uiModel,graph,inputs);
-                    var inputValues = _p12._0;
-                    var graph2 = _p12._1;
-                    var newValue = A2($Lib$Misc.unsafeDictGet,"A",inputValues);
-                    var newNode = $Audio$MainTypes.Destination({ctor: "_Tuple2"
-                                                               ,_0: _U.update(_p13,{outputValue: newValue})
-                                                               ,_1: _p7._0._1});
-                    var graph3 = A3($Dict.insert,
-                    $Audio$MainTypes.getNodeAutoId(node),
-                    newNode,
-                    graph2);
+                    var newValue = 0.0;
+                    var graph2 = graph;
+                    var graph3 = graph2;
                     return {ctor: "_Tuple2",_0: newValue,_1: graph3};
                  } else {
                     break _v4_2;
@@ -17238,17 +17228,17 @@ Elm.Orchestrator.make = function (_elm) {
             default: break _v4_2;}
       } while (false);
       return _U.crashCase("Orchestrator",
-      {start: {line: 72,column: 3},end: {line: 107,column: 25}},
+      {start: {line: 86,column: 3},end: {line: 135,column: 25}},
       _p7)("");
    });
    var getInputValues = F3(function (uiModel,graph,inputs) {
       var update = F3(function (inputName,input,acc) {
-         var _p15 = acc;
-         var inputValues = _p15._0;
-         var graph2 = _p15._1;
-         var _p16 = A3(getInputValue,uiModel,graph2,input);
-         var value = _p16._0;
-         var graph3 = _p16._1;
+         var _p13 = acc;
+         var inputValues = _p13._0;
+         var graph2 = _p13._1;
+         var _p14 = A3(getInputValue,uiModel,graph2,input);
+         var value = _p14._0;
+         var graph3 = _p14._1;
          var inputValues2 = A3($Dict.insert,inputName,value,inputValues);
          return {ctor: "_Tuple2",_0: inputValues2,_1: graph3};
       });
@@ -17257,13 +17247,13 @@ Elm.Orchestrator.make = function (_elm) {
    });
    var updateGraph = F2(function (uiModel,graph) {
       var destinationNode = function () {
-         var _p17 = getDestinationNode(graph);
-         if (_p17.ctor === "Just") {
-               return _p17._0;
+         var _p15 = getDestinationNode(graph);
+         if (_p15.ctor === "Just") {
+               return _p15._0;
             } else {
                return _U.crashCase("Orchestrator",
-               {start: {line: 46,column: 7},end: {line: 53,column: 12}},
-               _p17)(A2($Basics._op["++"],
+               {start: {line: 60,column: 7},end: {line: 67,column: 12}},
+               _p15)(A2($Basics._op["++"],
                "the DictGraph does not have a destination node. This is the audioGraph: ",
                $Basics.toString(graph)));
             }
