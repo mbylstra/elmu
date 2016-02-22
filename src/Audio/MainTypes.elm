@@ -111,11 +111,11 @@ type alias OutputFloat = Float
 type alias PhaseFloat = Float
 type alias FrequencyOffsetFloat = Float
 
-type alias OscillatorF =
-    FrequencyFloat
+type alias OscillatorF
+    =  FrequencyFloat
     -> FrequencyOffsetFloat
     -> PhaseOffsetFloat
-    -> TimeFloat
+    -> PhaseFloat
     -> (OutputFloat, PhaseFloat)
 type alias GainF = Float -> Float -> Float
 

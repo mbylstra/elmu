@@ -6,7 +6,7 @@ module Orchestrator where
 
 -- import ElmTest exposing (..)
 -- import Lib.MutableDict as MutableDict
--- import Lib.Misc exposing (unsafeDictGet)
+import Lib.Misc exposing (unsafeDictGet)
 import Dict exposing (Dict)
 
 import Lib.StringKeyMutableDict as StringKeyMutableDict
@@ -74,20 +74,20 @@ updateNode uiModel graph node =
         -- _ = Debug.log "old phase" oscProps.phase
         inputs = baseProps.inputs
         (inputValues, graph2) = getInputValues uiModel graph inputs
-        -- (newValue, newPhase) =
-        --   oscProps.func
-        --     (unsafeDictGet "frequency" inputValues)
-        --     (unsafeDictGet "frequencyOffset" inputValues)
-        --     (unsafeDictGet "phaseOffset" inputValues)
-        newValue = 0.0
-        newPhase = 0.0
+        (newValue, newPhase) =
+          oscProps.func
+            (unsafeDictGet "frequency" inputValues)
+            (unsafeDictGet "frequencyOffset" inputValues)
+            (unsafeDictGet "phaseOffset" inputValues)
+            oscProps.phase
+        -- newValue = 0.0
+        -- newPhase = 0.0
 
         newNode = Oscillator
           ( { baseProps | outputValue = newValue }
           , { oscProps | phase = newPhase }
           )
         graph3 = StringKeyMutableDict.insert (getNodeAutoId node) newNode graph2
-        -- graph3 = Dict.insert (getNodeAutoId node) newNode graph2
         -- _ = Debug.log "new phase" newPhase
         -- _ = Debug.log "new value" newValue
       in
@@ -96,21 +96,20 @@ updateNode uiModel graph node =
 
     Destination (baseProps, specificProps) ->
       let
-        -- inputs = baseProps.inputs
-        graph2 = graph
-        -- (inputValues, graph2) = getInputValues uiModel graph inputs
-        -- newValue = (unsafeDictGet "A" inputValues)
-        newValue = 0.0
-        -- newNode = Destination
-        --   -- ( { baseProps | outputValue = newValue }   -- and it's specifically the record update that does it (I think) ~ 5 - 10 %
-        --   ( baseProps
-        --   , specificProps
-        --   )   -- this adds ~ 5 - 10 %
+        inputs = baseProps.inputs
+        -- graph2 = graph
+        (inputValues, graph2) = getInputValues uiModel graph inputs
+        newValue = (unsafeDictGet "A" inputValues)
+        newNode = Destination
+          ( { baseProps | outputValue = newValue }   -- and it's specifically the record update that does it (I think) ~ 5 - 10 %
+          -- ( baseProps
+          , specificProps
+          )   -- this adds ~ 5 - 10 %
         -- creating a new node and a new tuple doesn't seem to add an appreciable amount
         -- newNode = node
-        -- id = getNodeAutoId newNode  -- < 1%
-        -- graph3 = Dict.insert id newNode graph2   -- the dict insert adds ~ 5-10 %
-        graph3 = graph2
+        id = getNodeAutoId newNode  -- < 1%
+        graph3 = StringKeyMutableDict.insert id newNode graph2   -- the dict insert adds ~ 5-10 %  -- this is so much faster now!!
+        -- graph3 = graph2
       in
         (newValue, graph3)
       -- (0.0, graph)
