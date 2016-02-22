@@ -2,6 +2,7 @@ module Audio.MainTypes where
 
 import Dict exposing(Dict)
 -- import Lib.MutableDict exposing (MutableDict)
+import Lib.StringKeyMutableDict exposing (StringKeyMutableDict)
 
 --------------------------------------------------------------------------------
 -- TYPE DEFINITIONS
@@ -138,7 +139,8 @@ type alias ExternalState =
 type alias ListGraph ui = List (AudioNode ui)
 -- type alias DictGraph ui = MutableDict (AudioNode ui)
 -- type alias DictGraph ui = MutableDict String (AudioNode ui)
-type alias DictGraph ui = Dict String (AudioNode ui)
+-- type alias DictGraph ui = Dict String (AudioNode ui)
+type alias DictGraph ui = StringKeyMutableDict (AudioNode ui)
 
 
 -- updateBaseProps : (BaseodeProps r ui -> BaseNodeProps r ui) -> AudioNode ui -> AudioNode ui

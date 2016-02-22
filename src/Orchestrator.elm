@@ -6,8 +6,10 @@ module Orchestrator where
 
 -- import ElmTest exposing (..)
 -- import Lib.MutableDict as MutableDict
-import Lib.Misc exposing (unsafeDictGet)
+-- import Lib.Misc exposing (unsafeDictGet)
 import Dict exposing (Dict)
+
+import Lib.StringKeyMutableDict as StringKeyMutableDict
 --------------------------------------------------------------------------------
 -- INTERNAL DEPENDENCIES
 --------------------------------------------------------------------------------
@@ -55,30 +57,13 @@ type InputHelper ui
 
 updateGraph : ui -> DictGraph ui -> (Float, DictGraph ui)
 updateGraph uiModel graph =
-  let
-    destinationNode =
-      case getDestinationNode graph of
-        Just node ->
-          node
-        Nothing ->
-          Debug.crash (
-            "the DictGraph does not have a destination node. This is the audioGraph: "
-            ++ toString graph
-          )
-  in
-    updateNode uiModel graph destinationNode
+  updateNode uiModel graph (getDestinationNode graph)
+  -- (0.0, graph)  -- 3% when updateGraph not called
 
-getDestinationNode : DictGraph ui -> Maybe (AudioNode ui)
+getDestinationNode : DictGraph ui -> AudioNode ui
 getDestinationNode graph =
-  graph
-  |> Dict.values
-  |> List.filter
-            ( \node ->
-                case node of
-                  Destination _-> True
-                  _ -> False
-            )
-  |> List.head
+  -- 3-6% when js object is used to look up destination
+  StringKeyMutableDict.unsafeNativeGet "Destination" graph
 
 updateNode : ui -> DictGraph ui -> AudioNode ui
   -> (Float, DictGraph ui)
@@ -89,17 +74,20 @@ updateNode uiModel graph node =
         -- _ = Debug.log "old phase" oscProps.phase
         inputs = baseProps.inputs
         (inputValues, graph2) = getInputValues uiModel graph inputs
-        (newValue, newPhase) =
-          oscProps.func
-            (unsafeDictGet "frequency" inputValues)
-            (unsafeDictGet "frequencyOffset" inputValues)
-            (unsafeDictGet "phaseOffset" inputValues)
-            oscProps.phase
+        -- (newValue, newPhase) =
+        --   oscProps.func
+        --     (unsafeDictGet "frequency" inputValues)
+        --     (unsafeDictGet "frequencyOffset" inputValues)
+        --     (unsafeDictGet "phaseOffset" inputValues)
+        newValue = 0.0
+        newPhase = 0.0
+
         newNode = Oscillator
           ( { baseProps | outputValue = newValue }
           , { oscProps | phase = newPhase }
           )
-        graph3 = Dict.insert (getNodeAutoId node) newNode graph2
+        graph3 = StringKeyMutableDict.insert (getNodeAutoId node) newNode graph2
+        -- graph3 = Dict.insert (getNodeAutoId node) newNode graph2
         -- _ = Debug.log "new phase" newPhase
         -- _ = Debug.log "new value" newValue
       in
@@ -174,7 +162,7 @@ getInputHelper ui graph input =
     UI func ->
       ValueInput (func ui)
     AutoID id ->
-      case Dict.get id graph of
+      case StringKeyMutableDict.get id graph of
         Just node ->
           ReferencedNodeInput node
         Nothing ->

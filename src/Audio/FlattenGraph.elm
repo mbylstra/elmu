@@ -8,6 +8,8 @@ import Lib.Misc exposing (unsafeDictGet)
 
 import Lib.ListExtra as ListExtra
 
+import Lib.StringKeyMutableDict as StringKeyMutableDict exposing (StringKeyMutableDict)
+
 -- import Audio.Atoms.Sine exposing (sinWave)
 
 
@@ -15,11 +17,12 @@ import Lib.ListExtra as ListExtra
   This could probably be cleaned up now that we've moved to "tuple inheritance"
 -}
 
-flattenGraph : AudioNodes ui -> Dict String (AudioNode ui)
+flattenGraph : AudioNodes ui -> StringKeyMutableDict (AudioNode ui)
 flattenGraph graph =
   graph
   |> flattenNodeList
   |> convertUserIdInputs
+  |> updateDestinationNode
   |> flatNodeListToDict
 
 
@@ -149,11 +152,11 @@ flattenInputLower {accNodes, lastId, input} =
       Nothing
 
 
-flatNodeListToDict : AudioNodes ui -> Dict String (AudioNode ui)
+flatNodeListToDict : AudioNodes ui -> StringKeyMutableDict (AudioNode ui)
 flatNodeListToDict nodes =
   nodes
   |> List.map (\node -> (getNodeAutoId node, node))
-  |> Dict.fromList
+  |> StringKeyMutableDict.fromList
 
 
 
@@ -200,7 +203,25 @@ convertUserIdInputs nodes =
     List.map convertNodeUserIdInputs nodes
 
 
-
+updateDestinationNode : AudioNodes ui -> AudioNodes ui
+updateDestinationNode nodes =
+  let
+    updateDestinationNode' prevNodes remainderNodes =
+      case remainderNodes of
+        [] ->
+          Debug.crash "no nodes of type Destination were found"
+        node :: remainderRemainderNodes ->
+          case node of
+            Destination (baseProps, specificProps) ->
+              let
+                newBaseProps = { baseProps | autoId = Just "Destination" }
+                newNode = Destination (newBaseProps, specificProps)
+              in
+                prevNodes ++ [newNode] ++ remainderRemainderNodes
+            _ ->
+              updateDestinationNode' (prevNodes ++ [node]) remainderRemainderNodes
+  in
+    updateDestinationNode' [] nodes
 
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
