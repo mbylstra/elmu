@@ -15,7 +15,7 @@ import Lib.ListExtra as ListExtra
   This could probably be cleaned up now that we've moved to "tuple inheritance"
 -}
 
-flattenGraph : AudioNodes ui -> Dict Int (AudioNode ui)
+flattenGraph : AudioNodes ui -> Dict String (AudioNode ui)
 flattenGraph graph =
   graph
   |> flattenNodeList
@@ -60,7 +60,7 @@ flattenNode node oldLastId oldAccNodes =
             {props = oldProps, lastId = oldLastId, accNodes = oldAccNodes, node=node}
         id = lastId + 1
       in
-        ({ props | autoId = Just id }, (accNodes, id))
+        ({ props | autoId = Just <| toString id }, (accNodes, id))
 
     (newNode, (accNodes2, id)) = updateBasePropsCollectExtra updateBasePropsFunc node
   in
@@ -132,7 +132,7 @@ flattenInputMiddle { accNodes, lastId, input, inputName, inputs } =
     Just {lastId, nodes} ->
       { lastId = lastId
       , accNodes = nodes
-      , inputs = Dict.insert inputName (AutoID lastId) inputs  -- the input now points to an id, rather than an inline node
+      , inputs = Dict.insert inputName (AutoID <| toString lastId) inputs  -- the input now points to an id, rather than an inline node
       }
     Nothing ->
       { lastId = lastId, accNodes = accNodes, inputs = inputs }
@@ -149,7 +149,7 @@ flattenInputLower {accNodes, lastId, input} =
       Nothing
 
 
-flatNodeListToDict : AudioNodes ui -> Dict Int (AudioNode ui)
+flatNodeListToDict : AudioNodes ui -> Dict String (AudioNode ui)
 flatNodeListToDict nodes =
   nodes
   |> List.map (\node -> (getNodeAutoId node, node))
@@ -174,7 +174,8 @@ convertUserIdInputs nodes =
                 False
         foundNode = ListExtra.unsafeHead (List.filter filter nodes)
       in
-        Maybe.withDefault -1 (.autoId (getBaseProps foundNode))
+        -- Maybe.withDefault "Nothing" (.autoId (getBaseProps foundNode))
+        Maybe.withDefault "Nothing" (.autoId (getBaseProps foundNode))
 
     convertInput inputTuple =
       case inputTuple of
@@ -277,22 +278,6 @@ dummy2 = Dummy
     }
   , { func = 0.0 }
   )
--- dummy1
--- type alias BaseNodeProps r ui =
---   { r |
---       userId : Maybe String
---     , autoId : Maybe Int
---     , inputs : Dict String (Input ui)
---     , outputValue : Float
---   }
---
--- type alias DummyProps ui =
---   (BaseNodeProps
---     { phase: Float
---     , func: DummyF
---     }
---     ui
---   )
 
 tests : Test
 tests =

@@ -118,6 +118,7 @@ updateNode uiModel graph node =
         --   ( baseProps
         --   , specificProps
         --   )   -- this adds ~ 5 - 10 %
+        -- creating a new node and a new tuple doesn't seem to add an appreciable amount
         -- newNode = node
         -- id = getNodeAutoId newNode  -- < 1%
         -- graph3 = Dict.insert id newNode graph2   -- the dict insert adds ~ 5-10 %

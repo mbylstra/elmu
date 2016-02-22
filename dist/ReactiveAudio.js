@@ -15107,7 +15107,7 @@ Elm.Audio.MainTypes.make = function (_elm) {
    };
    var getNodeAutoId = function (node) {
       return A2($Maybe.withDefault,
-      -1,
+      "Nothing",
       A2(applyToBaseProps,function (_) {    return _.autoId;},node));
    };
    var ExternalState = F2(function (a,b) {
@@ -15603,7 +15603,7 @@ Elm.Audio.FlattenGraph.make = function (_elm) {
          filter,
          nodes));
          return A2($Maybe.withDefault,
-         -1,
+         "Nothing",
          function (_) {
             return _.autoId;
          }($Audio$MainTypes.getBaseProps(foundNode)));
@@ -15654,7 +15654,8 @@ Elm.Audio.FlattenGraph.make = function (_elm) {
          var accNodes = _p2.accNodes;
          var id = lastId + 1;
          return {ctor: "_Tuple2"
-                ,_0: _U.update(props,{autoId: $Maybe.Just(id)})
+                ,_0: _U.update(props,
+                {autoId: $Maybe.Just($Basics.toString(id))})
                 ,_1: {ctor: "_Tuple2",_0: accNodes,_1: id}};
       };
       var _p3 = A2($Audio$MainTypes.updateBasePropsCollectExtra,
@@ -15735,7 +15736,7 @@ Elm.Audio.FlattenGraph.make = function (_elm) {
                    ,accNodes: _p21._0.nodes
                    ,inputs: A3($Dict.insert,
                    _p20.inputName,
-                   $Audio$MainTypes.AutoID(_p22),
+                   $Audio$MainTypes.AutoID($Basics.toString(_p22)),
                    _p24)};
          } else {
             return {lastId: _p25,accNodes: _p23,inputs: _p24};
@@ -17170,14 +17171,14 @@ Elm.Orchestrator.make = function (_elm) {
                  return ReferencedNodeInput(_p2._0);
               } else {
                  return _U.crashCase("Orchestrator",
-                 {start: {line: 176,column: 7},end: {line: 180,column: 115}},
+                 {start: {line: 177,column: 7},end: {line: 181,column: 115}},
                  _p2)("This shouldn\'t happen. Could not find a node. The graph must not have been validated first");
               }
          case "Node": return _U.crashCase("Orchestrator",
-           {start: {line: 168,column: 3},end: {line: 184,column: 101}},
+           {start: {line: 169,column: 3},end: {line: 185,column: 101}},
            _p1)("This shouldn\'t happen. The graph should have been flattened");
          default: return _U.crashCase("Orchestrator",
-           {start: {line: 168,column: 3},end: {line: 184,column: 101}},
+           {start: {line: 169,column: 3},end: {line: 185,column: 101}},
            _p1)("This shouldn\'t happen. All ID inputs should have been converted to AutoID inputs");}
    });
    var getInputValue = F3(function (uiModel,graph,input) {
@@ -17228,7 +17229,7 @@ Elm.Orchestrator.make = function (_elm) {
             default: break _v4_2;}
       } while (false);
       return _U.crashCase("Orchestrator",
-      {start: {line: 86,column: 3},end: {line: 135,column: 25}},
+      {start: {line: 86,column: 3},end: {line: 136,column: 25}},
       _p7)("");
    });
    var getInputValues = F3(function (uiModel,graph,inputs) {

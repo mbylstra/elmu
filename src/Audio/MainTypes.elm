@@ -13,7 +13,7 @@ type Input ui
   | Default -- Not needed now that we discovered using records as defaults. DELETEME
   | UI (ui -> Float) -- A user supplied function that maps from a user supplied model to a value
   | Node (AudioNode ui)
-  | AutoID Int  -- These ids are generated automatically when nested nodes are flattened by the Orchestrator
+  | AutoID String  -- These ids are generated automatically when nested nodes are flattened by the Orchestrator
     -- hmm, we have a big problem now. The DictGraph key can now be either a user supplied key or
     -- an Auto ID. We could make another union type, but that would make dict lookup slow and
     -- annoying to implement. So, the really dodgy solution is to make both AutoID and ID to
@@ -38,7 +38,7 @@ type Input ui
 
 type alias BaseProps ui =
   { userId : Maybe String
-  , autoId : Maybe Int
+  , autoId : Maybe String
   , inputs : Dict String (Input ui)
   , outputValue : Float
   }
@@ -138,7 +138,7 @@ type alias ExternalState =
 type alias ListGraph ui = List (AudioNode ui)
 -- type alias DictGraph ui = MutableDict (AudioNode ui)
 -- type alias DictGraph ui = MutableDict String (AudioNode ui)
-type alias DictGraph ui = Dict Int (AudioNode ui)
+type alias DictGraph ui = Dict String (AudioNode ui)
 
 
 -- updateBaseProps : (BaseodeProps r ui -> BaseNodeProps r ui) -> AudioNode ui -> AudioNode ui
@@ -196,6 +196,6 @@ getBaseProps : AudioNode ui -> BaseProps ui
 getBaseProps node =
   applyToBaseProps identity node
 
-getNodeAutoId : AudioNode ui -> Int
+getNodeAutoId : AudioNode ui -> String
 getNodeAutoId node =
-  Maybe.withDefault -1 (applyToBaseProps .autoId node)
+  Maybe.withDefault "Nothing" (applyToBaseProps .autoId node)
