@@ -15366,7 +15366,7 @@ Elm.Audio.Atoms.Destination.make = function (_elm) {
    var destination = function (userId) {
       return $Audio$MainTypes.Destination({ctor: "_Tuple2"
                                           ,_0: {userId: $Maybe.Nothing
-                                               ,autoId: $Maybe.Just(0)
+                                               ,autoId: $Maybe.Just("Nothing")
                                                ,inputs: $Dict.fromList(_U.list([{ctor: "_Tuple2"
                                                                                 ,_0: "A"
                                                                                 ,_1: $Audio$MainTypes.ID(userId)}]))
@@ -17204,11 +17204,21 @@ Elm.Native.MutableArray.make = function(localRuntime) {
 		return array[i];
 	}
 
+  function unsafeNativeGet(i, array) {
+    return array[i];
+  }
+
 	function set(i, item, array)
 	{
     array[i] = item;
     return array;
 	}
+
+  function push(item, array)
+  {
+    array.push(item);
+    return array;
+  }
 
 	function initialize(len, f)
 	{
@@ -17219,6 +17229,11 @@ Elm.Native.MutableArray.make = function(localRuntime) {
 		}
     return array;
 	}
+
+  function empty()
+  {
+    return [];
+  }
 
 	// Maps a function over the elements of an array.
 	function map(f, a)
@@ -17233,10 +17248,13 @@ Elm.Native.MutableArray.make = function(localRuntime) {
 	}
 
 	Elm.Native.MutableArray.values = {
+    empty: empty,
 		initialize: F2(initialize),
 		get: F2(get),
+		unsafeNativeGet: F2(unsafeNativeGet),
 		set: F3(set),
 		map: F2(map),
+		push: F2(push),
 		length: length,
 	};
 
@@ -17262,7 +17280,13 @@ Elm.Lib.MutableArray.make = function (_elm) {
    $Signal = Elm.Signal.make(_elm);
    var _op = {};
    var length = $Native$MutableArray.length;
+   var push = F2(function (item,array) {
+      return A2($Native$MutableArray.push,item,array);
+   });
    var set = $Native$MutableArray.set;
+   var unsafeNativeGet = F2(function (i,array) {
+      return A2($Native$MutableArray.unsafeNativeGet,i,array);
+   });
    var get = F2(function (i,array) {
       return _U.cmp(0,i) < 1 && _U.cmp(i,
       $Native$MutableArray.length(array)) < 0 ? $Maybe.Just(A2($Native$MutableArray.get,
@@ -17298,12 +17322,16 @@ Elm.Lib.MutableArray.make = function (_elm) {
    3,
    A3(set,2,2,A3(set,1,1,A3(set,0,0,A2(repeat,5,0)))))))))),
    $Maybe.Just(7)))]));
+   var empty = $Native$MutableArray.empty;
    var MutableArray = {ctor: "MutableArray"};
    return _elm.Lib.MutableArray.values = {_op: _op
                                          ,initialize: initialize
+                                         ,empty: empty
                                          ,length: length
                                          ,get: get
+                                         ,unsafeNativeGet: unsafeNativeGet
                                          ,set: set
+                                         ,push: push
                                          ,map: map
                                          ,repeat: repeat};
 };
@@ -17317,7 +17345,7 @@ Elm.Orchestrator.make = function (_elm) {
    $Basics = Elm.Basics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
    $Dict = Elm.Dict.make(_elm),
-   $Lib$Misc = Elm.Lib.Misc.make(_elm),
+   $Lib$MutableArray = Elm.Lib.MutableArray.make(_elm),
    $Lib$StringKeyMutableDict = Elm.Lib.StringKeyMutableDict.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
@@ -17348,14 +17376,14 @@ Elm.Orchestrator.make = function (_elm) {
                  return ReferencedNodeInput(_p1._0);
               } else {
                  return _U.crashCase("Orchestrator",
-                 {start: {line: 164,column: 7},end: {line: 168,column: 115}},
+                 {start: {line: 168,column: 7},end: {line: 172,column: 115}},
                  _p1)("This shouldn\'t happen. Could not find a node. The graph must not have been validated first");
               }
          case "Node": return _U.crashCase("Orchestrator",
-           {start: {line: 156,column: 3},end: {line: 172,column: 101}},
+           {start: {line: 160,column: 3},end: {line: 176,column: 101}},
            _p0)("This shouldn\'t happen. The graph should have been flattened");
          default: return _U.crashCase("Orchestrator",
-           {start: {line: 156,column: 3},end: {line: 172,column: 101}},
+           {start: {line: 160,column: 3},end: {line: 176,column: 101}},
            _p0)("This shouldn\'t happen. All ID inputs should have been converted to AutoID inputs");}
    });
    var getInputValue = F3(function (uiModel,graph,input) {
@@ -17378,9 +17406,9 @@ Elm.Orchestrator.make = function (_elm) {
                     var inputValues = _p7._0;
                     var graph2 = _p7._1;
                     var _p8 = A4(_p10.func,
-                    A2($Lib$Misc.unsafeDictGet,"frequency",inputValues),
-                    A2($Lib$Misc.unsafeDictGet,"frequencyOffset",inputValues),
-                    A2($Lib$Misc.unsafeDictGet,"phaseOffset",inputValues),
+                    A2($Lib$MutableArray.unsafeNativeGet,0,inputValues),
+                    A2($Lib$MutableArray.unsafeNativeGet,1,inputValues),
+                    A2($Lib$MutableArray.unsafeNativeGet,2,inputValues),
                     _p10.phase);
                     var newValue = _p8._0;
                     var newPhase = _p8._1;
@@ -17401,7 +17429,9 @@ Elm.Orchestrator.make = function (_elm) {
                     var _p11 = A3(getInputValues,uiModel,graph,inputs);
                     var inputValues = _p11._0;
                     var graph2 = _p11._1;
-                    var newValue = A2($Lib$Misc.unsafeDictGet,"A",inputValues);
+                    var newValue = A2($Lib$MutableArray.unsafeNativeGet,
+                    0,
+                    inputValues);
                     var newNode = $Audio$MainTypes.Destination({ctor: "_Tuple2"
                                                                ,_0: _U.update(_p12,{outputValue: newValue})
                                                                ,_1: _p6._0._1});
@@ -17417,7 +17447,7 @@ Elm.Orchestrator.make = function (_elm) {
             default: break _v3_2;}
       } while (false);
       return _U.crashCase("Orchestrator",
-      {start: {line: 71,column: 3},end: {line: 123,column: 25}},
+      {start: {line: 72,column: 3},end: {line: 124,column: 25}},
       _p6)("");
    });
    var getInputValues = F3(function (uiModel,graph,inputs) {
@@ -17428,10 +17458,12 @@ Elm.Orchestrator.make = function (_elm) {
          var _p15 = A3(getInputValue,uiModel,graph2,input);
          var value = _p15._0;
          var graph3 = _p15._1;
-         var inputValues2 = A3($Dict.insert,inputName,value,inputValues);
+         var inputValues2 = A2($Lib$MutableArray.push,value,inputValues);
          return {ctor: "_Tuple2",_0: inputValues2,_1: graph3};
       });
-      var accInitial = {ctor: "_Tuple2",_0: $Dict.empty,_1: graph};
+      var accInitial = {ctor: "_Tuple2"
+                       ,_0: $Lib$MutableArray.empty({ctor: "_Tuple0"})
+                       ,_1: graph};
       return A3($Dict.foldl,update,accInitial,inputs);
    });
    var updateGraph = F2(function (uiModel,graph) {

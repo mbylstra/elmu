@@ -23,11 +23,21 @@ Elm.Native.MutableArray.make = function(localRuntime) {
 		return array[i];
 	}
 
+  function unsafeNativeGet(i, array) {
+    return array[i];
+  }
+
 	function set(i, item, array)
 	{
     array[i] = item;
     return array;
 	}
+
+  function push(item, array)
+  {
+    array.push(item);
+    return array;
+  }
 
 	function initialize(len, f)
 	{
@@ -38,6 +48,11 @@ Elm.Native.MutableArray.make = function(localRuntime) {
 		}
     return array;
 	}
+
+  function empty()
+  {
+    return [];
+  }
 
 	// Maps a function over the elements of an array.
 	function map(f, a)
@@ -52,10 +67,13 @@ Elm.Native.MutableArray.make = function(localRuntime) {
 	}
 
 	Elm.Native.MutableArray.values = {
+    empty: empty,
 		initialize: F2(initialize),
 		get: F2(get),
+		unsafeNativeGet: F2(unsafeNativeGet),
 		set: F3(set),
 		map: F2(map),
+		push: F2(push),
 		length: length,
 	};
 

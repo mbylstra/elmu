@@ -6,7 +6,8 @@ module Orchestrator where
 
 -- import ElmTest exposing (..)
 -- import Lib.MutableDict as MutableDict
-import Lib.Misc exposing (unsafeDictGet)
+-- import Lib.Misc exposing (unsafeDictGet)
+import Lib.MutableArray as MutableArray exposing (MutableArray)
 import Dict exposing (Dict)
 
 import Lib.StringKeyMutableDict as StringKeyMutableDict
@@ -76,9 +77,9 @@ updateNode uiModel graph node =
         (inputValues, graph2) = getInputValues uiModel graph inputs
         (newValue, newPhase) =
           oscProps.func
-            (unsafeDictGet "frequency" inputValues)
-            (unsafeDictGet "frequencyOffset" inputValues)
-            (unsafeDictGet "phaseOffset" inputValues)
+            (MutableArray.unsafeNativeGet 0 inputValues)
+            (MutableArray.unsafeNativeGet 1 inputValues)
+            (MutableArray.unsafeNativeGet 2 inputValues)
             oscProps.phase
         -- newValue = 0.0
         -- newPhase = 0.0
@@ -99,7 +100,7 @@ updateNode uiModel graph node =
         inputs = baseProps.inputs
         -- graph2 = graph
         (inputValues, graph2) = getInputValues uiModel graph inputs
-        newValue = (unsafeDictGet "A" inputValues)
+        newValue = (MutableArray.unsafeNativeGet 0 inputValues)
         newNode = Destination
           ( { baseProps | outputValue = newValue }   -- and it's specifically the record update that does it (I think) ~ 5 - 10 %
           -- ( baseProps
@@ -124,20 +125,23 @@ updateNode uiModel graph node =
 
 
 getInputValues : ui -> DictGraph ui -> InputsDict ui
-                 -> (Dict String Float, DictGraph ui)
+                 -> (MutableArray Float, DictGraph ui)
 getInputValues uiModel graph inputs =
   let
-    accInitial = (Dict.empty, graph)
+    accInitial = (MutableArray.empty (), graph)
+      -- it's the dict updates for every input that's slow.
+      -- make this a mutable Array instead
+
 
     update inputName input acc =
       let
         (inputValues, graph2) = acc
         (value, graph3) = getInputValue uiModel graph2 input
-        inputValues2 = Dict.insert inputName value inputValues
+        inputValues2 = MutableArray.push value inputValues
       in
         (inputValues2, graph3)
   in
-    Dict.foldl update accInitial inputs
+    Dict.foldl update accInitial inputs   -- wecan continue using dicts for the Input's
 
 
 getInputValue : ui -> DictGraph ui -> Input ui
