@@ -2,8 +2,8 @@ module Audio.FlattenGraph (flattenGraph) where
 
 import Audio.MainTypes exposing (..)
 import Dict exposing (Dict)
-import ElmTest exposing (..)
-import Graphics.Element
+-- import ElmTest exposing (..)
+-- import Graphics.Element
 import Lib.Misc exposing (unsafeDictGet)
 
 import Lib.ListExtra as ListExtra
@@ -54,7 +54,7 @@ flattenNode : AudioNode ui -> Int -> AudioNodes ui
 flattenNode node oldLastId oldAccNodes =
 
   let
-    updateBasePropsFunc oldProps =
+    updateConstantBasePropsFunc oldProps =
       let
         inputNames = Dict.keys oldProps.inputs
         {props, lastId, accNodes} =
@@ -65,15 +65,15 @@ flattenNode node oldLastId oldAccNodes =
       in
         ({ props | autoId = Just <| toString id }, (accNodes, id))
 
-    (newNode, (accNodes2, id)) = updateBasePropsCollectExtra updateBasePropsFunc node
+    (newNode, (accNodes2, id)) = updateConstantBasePropsCollectExtra updateConstantBasePropsFunc node
   in
     { lastId = id, nodes = accNodes2 ++ [newNode]}
 
 
 doInputs :
   List String
-  -> { props : BaseProps ui, lastId : Int, accNodes : AudioNodes ui, node : AudioNode ui }
-  -> { props : BaseProps ui, lastId : Int, accNodes : AudioNodes ui}
+  -> { props : ConstantBaseProps ui, lastId : Int, accNodes : AudioNodes ui, node : AudioNode ui }
+  -> { props : ConstantBaseProps ui, lastId : Int, accNodes : AudioNodes ui}
 doInputs currInputNames {props, lastId, accNodes, node} =
   case currInputNames of
     [] ->
@@ -93,10 +93,10 @@ doInputs currInputNames {props, lastId, accNodes, node} =
 
 
 flattenInputTop : { inputName : String, node : AudioNode ui, lastId : Int, accNodes : AudioNodes ui}
-                  -> { accNodes : AudioNodes ui, lastId : Int, props : BaseProps ui }
+                  -> { accNodes : AudioNodes ui, lastId : Int, props : ConstantBaseProps ui }
 flattenInputTop { inputName, node, lastId, accNodes } =
   let
-    oldProps = getBaseProps node
+    oldProps = getConstantBaseProps node
   in
       let
         { props, accNodes, lastId} = flattenInputUpperMiddle
@@ -109,8 +109,8 @@ flattenInputTop { inputName, node, lastId, accNodes } =
         { accNodes = accNodes, lastId = lastId, props = props }
 
 flattenInputUpperMiddle :
-  { inputName : String, props : BaseProps ui, lastId : Int, accNodes : AudioNodes ui }
-  -> { props : BaseProps ui, accNodes : AudioNodes ui, lastId : Int }
+  { inputName : String, props : ConstantBaseProps ui, lastId : Int, accNodes : AudioNodes ui }
+  -> { props : ConstantBaseProps ui, accNodes : AudioNodes ui, lastId : Int }
 flattenInputUpperMiddle { inputName, props, lastId, accNodes } =
   let
     { lastId, accNodes, inputs } =
@@ -168,7 +168,7 @@ convertUserIdInputs nodes =
       let
         filter node =
           let
-            currMaybeUserId = .userId (getBaseProps node)
+            currMaybeUserId = .userId (getConstantBaseProps node)
           in
             case currMaybeUserId of
               Just currUserId ->
@@ -177,8 +177,8 @@ convertUserIdInputs nodes =
                 False
         foundNode = ListExtra.unsafeHead (List.filter filter nodes)
       in
-        -- Maybe.withDefault "Nothing" (.autoId (getBaseProps foundNode))
-        Maybe.withDefault "Nothing" (.autoId (getBaseProps foundNode))
+        -- Maybe.withDefault "Nothing" (.autoId (getConstantBaseProps foundNode))
+        Maybe.withDefault "Nothing" (.autoId (getConstantBaseProps foundNode))
 
     convertInput inputTuple =
       case inputTuple of
@@ -197,7 +197,7 @@ convertUserIdInputs nodes =
       }
 
     convertNodeUserIdInputs node =
-      updateBaseProps convertUserIdInputs' node
+      updateConstantBaseProps convertUserIdInputs' node
 
   in
     List.map convertNodeUserIdInputs nodes
@@ -212,10 +212,10 @@ updateDestinationNode nodes =
           Debug.crash "no nodes of type Destination were found"
         node :: remainderRemainderNodes ->
           case node of
-            Destination (baseProps, specificProps) ->
+            Destination constantBaseProps dynamicBaseProps ->
               let
-                newBaseProps = { baseProps | autoId = Just "Destination" }
-                newNode = Destination (newBaseProps, specificProps)
+                newConstantBaseProps = { constantBaseProps | autoId = Just "Destination" }
+                newNode = Destination newConstantBaseProps dynamicBaseProps
               in
                 prevNodes ++ [newNode] ++ remainderRemainderNodes
             _ ->
@@ -246,121 +246,121 @@ updateDestinationNode nodes =
 --   , func = sinWave
 --   }
 
-dummy1 : AudioNode ui
-dummy1 = Dummy
-  ( { userId = Just "dummy1"
-    , autoId = Nothing
-    , inputs = Dict.fromList
-      [("inputA", Value 440.0)]
-    , outputValue = 0.0
-    }
-  , { func = 0.0 }
-  )
-
-
--- dummy 3 points to dummy 4, dummy 2 points to dummy 3
-
-dummy2 : AudioNode ui
-dummy2 = Dummy
-  ( { userId = Just "dummy2"
-    , autoId = Nothing
-    , inputs = Dict.fromList
-      [ ( "inputA"
-        , Node
-          ( Dummy
-            ( { userId = Just "dummy3"
-              , autoId = Nothing
-              , inputs = Dict.fromList
-                [ ( "inputA"
-                  , Node
-                    ( Dummy
-                      ( { userId = Just "dummy4"
-                        , autoId = Nothing
-                        , inputs = Dict.fromList
-                          [ ( "inputA"
-                            , ID "dummy1"
-                            )
-                          ]
-                        , outputValue = 0.0
-                        }
-                      , { func = 0.0 }
-                      )
-                    )
-                  )
-                ]
-              , outputValue = 0.0
-              }
-            , { func = 0.0 }
-            )
-          )
-        )
-      ]
-    , outputValue = 0.0
-    }
-  , { func = 0.0 }
-  )
-
-tests : Test
-tests =
-  suite ""
-      [
-        test ""
-          (assertEqual
-            (flattenInputLower
-              {accNodes=[], lastId=0, input=(Value 0.0)}
-            )
-            Nothing
-          )
-      -- , test ""
-      --     (assertEqual
-      --       1
-      --       (
-      --         let
-      --           result = flattenInputLower
-      --             { accNodes=[]
-      --             , lastId=0
-      --             , input= Node dummy1
-      --             }
-      --         in
-      --           result
-      --             |> Maybe.withDefault (0, 0, [])
-      --             |> snd
-      --             |> List.length
-      --       )
-      --     )
-      , test ""
-          (assertEqual
-            3
-            (
-              let
-                result = flattenNode dummy2 0 []
-              in
-                result
-                  |> \{lastId, nodes} -> nodes
-                  |> List.length
-            )
-          )
-      , test ""
-          (assertEqual
-            4
-            (
-              let
-                result =
-                  [dummy1, dummy2]
-                  |> flattenNodeList
-                  |> convertUserIdInputs
-              in
-                List.length result
-                -- result
-                --   |> \{lastId, nodes} -> nodes
-                --   |> List.length
-            )
-          )
-      ]
-
-main : Graphics.Element.Element
-main =
-    elementRunner tests
+-- dummy1 : AudioNode ui
+-- dummy1 = Dummy
+--   ( { userId = Just "dummy1"
+--     , autoId = Nothing
+--     , inputs = Dict.fromList
+--       [("inputA", Value 440.0)]
+--     , outputValue = 0.0
+--     }
+--   , { func = 0.0 }
+--   )
+--
+--
+-- -- dummy 3 points to dummy 4, dummy 2 points to dummy 3
+--
+-- dummy2 : AudioNode ui
+-- dummy2 = Dummy
+--   ( { userId = Just "dummy2"
+--     , autoId = Nothing
+--     , inputs = Dict.fromList
+--       [ ( "inputA"
+--         , Node
+--           ( Dummy
+--             ( { userId = Just "dummy3"
+--               , autoId = Nothing
+--               , inputs = Dict.fromList
+--                 [ ( "inputA"
+--                   , Node
+--                     ( Dummy
+--                       ( { userId = Just "dummy4"
+--                         , autoId = Nothing
+--                         , inputs = Dict.fromList
+--                           [ ( "inputA"
+--                             , ID "dummy1"
+--                             )
+--                           ]
+--                         , outputValue = 0.0
+--                         }
+--                       , { func = 0.0 }
+--                       )
+--                     )
+--                   )
+--                 ]
+--               , outputValue = 0.0
+--               }
+--             , { func = 0.0 }
+--             )
+--           )
+--         )
+--       ]
+--     , outputValue = 0.0
+--     }
+--   , { func = 0.0 }
+--   )
+--
+-- tests : Test
+-- tests =
+--   suite ""
+--       [
+--         test ""
+--           (assertEqual
+--             (flattenInputLower
+--               {accNodes=[], lastId=0, input=(Value 0.0)}
+--             )
+--             Nothing
+--           )
+--       -- , test ""
+--       --     (assertEqual
+--       --       1
+--       --       (
+--       --         let
+--       --           result = flattenInputLower
+--       --             { accNodes=[]
+--       --             , lastId=0
+--       --             , input= Node dummy1
+--       --             }
+--       --         in
+--       --           result
+--       --             |> Maybe.withDefault (0, 0, [])
+--       --             |> snd
+--       --             |> List.length
+--       --       )
+--       --     )
+--       , test ""
+--           (assertEqual
+--             3
+--             (
+--               let
+--                 result = flattenNode dummy2 0 []
+--               in
+--                 result
+--                   |> \{lastId, nodes} -> nodes
+--                   |> List.length
+--             )
+--           )
+--       , test ""
+--           (assertEqual
+--             4
+--             (
+--               let
+--                 result =
+--                   [dummy1, dummy2]
+--                   |> flattenNodeList
+--                   |> convertUserIdInputs
+--               in
+--                 List.length result
+--                 -- result
+--                 --   |> \{lastId, nodes} -> nodes
+--                 --   |> List.length
+--             )
+--           )
+--       ]
+--
+-- main : Graphics.Element.Element
+-- main =
+--     elementRunner tests
 
 
 -- result: [Dummy { userId = Just "dummy1", autoId = Just NaN, inputs = Dict.fromList [("inputA",Value 440)], outputValue = 0, func = 0 },

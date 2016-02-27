@@ -5,8 +5,9 @@ import Gui exposing(getFrequency, bufferSize) -- this is pretty wierd, but the n
 -- import Gui
 
 import Lib.MutableArray as MutableArray exposing (MutableArray)
+import Lib.StringKeyMutableDict as StringKeyMutableDict exposing (StringKeyMutableDict)
 
-import Dict exposing (Dict)
+-- import Dict exposing (Dict)
 import Orchestrator exposing (updateGraph)
 
 import Audio.MainTypes exposing (..)
@@ -44,7 +45,7 @@ type alias BufferState ui =
 initialState : BufferState ui
 initialState =
   { time = 0.0
-  , graph = Dict.fromList []
+  , graph = StringKeyMutableDict.empty ()
   , buffer = MutableArray.repeat bufferSize 0.0
   , bufferIndex = 0
   }
@@ -68,6 +69,13 @@ sampleDuration = 1.0 / sampleRate
 {- a helper function -}
 foldn : (a -> a) -> a -> Int -> a
 foldn func initial count =
+  let
+    -- _ = Debug.log "func" func
+    -- _ = Debug.log "initial" initial
+    -- _ = Debug.log "count" count
+    _ = 0
+
+  in
     if
         count > 0
     then
@@ -82,12 +90,17 @@ foldn func initial count =
 updateForSample : ui -> BufferState ui -> BufferState ui
 updateForSample uiModel {time, graph, buffer, bufferIndex} =
   let
+      -- _ = Debug.crash "updateForSample"
       newTime  = time + sampleDuration
       newBufferIndex = bufferIndex + 1
+      -- _ = Debug.log "uiModel" uiModel
+      -- _ = Debug.log "time" time
   in
     let
+      -- _ = Debug.log "!!!value" value
       (value, newGraph) = updateGraph uiModel graph
       -- (value, newGraph) = (0.0, graph)
+      -- _ = Debug.crash "updateForSample"
     in
       { time  = newTime
       , graph = newGraph
@@ -99,7 +112,10 @@ updateForSample uiModel {time, graph, buffer, bufferIndex} =
 updateBufferState : ui -> BufferState ui -> BufferState ui
 updateBufferState uiModel prevBufferState =
   let
+    -- _ = Debug.log "prevBufferState" prevBufferState
+    -- _ = Debug.log "uiModel" uiModel
     time = prevBufferState.time + sampleDuration
+    -- _ = Debug.log "time" time
     initialGraph = prevBufferState.graph
     prevBuffer = prevBufferState.buffer
 
@@ -109,6 +125,9 @@ updateBufferState uiModel prevBufferState =
       , buffer = prevBuffer
       , bufferIndex = 0
       }
+
+    -- _ = Debug.log "initialBufferState" initialBufferState
+    -- _ = Debug.log "bufferSize" bufferSize
 
   in
     foldn (updateForSample uiModel) initialBufferState bufferSize

@@ -21,7 +21,7 @@ import Native.StringKeyMutableDict
 type StringKeyMutableDict valueType = StringKeyMutableDict
 
 
-empty : StringKeyMutableDict valueType
+empty : () -> StringKeyMutableDict valueType
 empty =
   Native.StringKeyMutableDict.empty
 

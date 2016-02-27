@@ -1,6 +1,9 @@
 var PROFILING = 1;
-var DEBUG = 0;
-var ITERATIONS = 200;
+var DEBUG = 1;
+// var ITERATIONS = 100000;
+var ITERATIONS = 10;
+
+// var ITERATIONS = 1;
 
 
 var elmGui = Elm.fullscreen(Elm.Gui);

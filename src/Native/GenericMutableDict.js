@@ -33,7 +33,7 @@ Elm.Native.GenericMutableDict.make = function(localRuntime) {
 
     for (var i = 0; i < jsArray.length; i++) {
       var item = jsArray[i];
-      var key = item._0.ctor;
+      var key = item._0;
       var value = item._1;
       out[key] = value
     }
@@ -49,8 +49,12 @@ Elm.Native.GenericMutableDict.make = function(localRuntime) {
     }
   }
 
+  function unsafeNativeGet(key, dict) {
+    return dict[key];
+  }
+
   function insert(key, value, dict) {
-    dict[key.ctor] = value;
+    dict[key] = value;
     return dict;
   }
 
@@ -58,7 +62,9 @@ Elm.Native.GenericMutableDict.make = function(localRuntime) {
 		empty: empty,
 		fromList: fromList,
 		// initialize: F2(initialize),
+    insert: F3(insert),
 		get: F2(get),
+    unsafeNativeGet: F2(unsafeNativeGet)
 		// set: F3(set),
 		// map: F2(map),
 		// length: length,

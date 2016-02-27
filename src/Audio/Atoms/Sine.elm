@@ -33,13 +33,27 @@ sinLookup =
 sinWave : Float -> Float -> Float -> Float -> (Float, Float)
 sinWave frequency frequencyOffset phaseOffset prevPhase =
     let
+        _ = Debug.log "prevPhase" prevPhase
+        _ = Debug.log "phaseOffset" phaseOffset
+        _ = Debug.log "frequencyOffset" frequencyOffset
+        _ = Debug.log "frequency" frequency
+        -- _ = Debug.crash "hello"
         phaseOffset = phaseOffset / 2.0
         periodSeconds = getPeriodSeconds (frequency + frequencyOffset)
+        _ = Debug.log "periodSeconds" periodSeconds
+
         phaseIncrement = sampleDuration / periodSeconds
+        _ = Debug.log "sampleDuration" sampleDuration
         currPhase = prevPhase + phaseIncrement
+        _ = Debug.log "currPhase" currPhase
+
         outputPhase = currPhase + phaseOffset
+        _ = Debug.log "outputPhase" outputPhase
         outputPhaseNormed = fmod outputPhase 1.0
+        _ = Debug.log "outputPhaseNormed" outputPhaseNormed
         lookupArrayIndex = floor (outputPhaseNormed * toFloat sinLookupArrayLength)
+        _ = Debug.log "lookupArrayIndex" lookupArrayIndex
+
         amplitude =
             case Array.get lookupArrayIndex sinLookup of
                 Just amplitude' -> amplitude'
@@ -58,19 +72,17 @@ type alias Args uiModel =
 sine : (Args uiModel) -> (AudioNode uiModel)
 sine args =
   Oscillator
-    ( { userId = args.id
-      , autoId = Nothing
-      , inputs = Dict.fromList
-        [ ("frequency", args.frequency)
-        , ("frequencyOffset", args.frequencyOffset)
-        , ("phaseOffset", args.phaseOffset)
-        ]
-      , outputValue = 0.0
-      }
-    , { func = sinWave
-      , phase = 0.0
-      }
-    )
+    sinWave
+    { userId = args.id
+    , autoId = Nothing
+    , inputs = Dict.fromList
+      [ ("frequency", args.frequency)
+      , ("frequencyOffset", args.frequencyOffset)
+      , ("phaseOffset", args.phaseOffset)
+      ]
+    }
+    (initialiseDynamicBaseProps ())
+    (initialiseOscillatorProps ())
 
 
 -- This is pretty Annoying, but it seems we must force the user
@@ -87,18 +99,18 @@ sineDefaults =
   , phaseOffset = Value 0.0
   }
 
-tests : Test
-tests =
-    suite "sineWave"
-        [
-          test "sineWave"
-            (assertEqual
-                (0.0, 0.0)
-                (sinWave 11025.0 0.0 0.0 0.0)
-            )
-        , test "sinLookup"
-            (assertEqual
-                (Array.fromList([0.0]))
-                (sinLookup)
-            )
-        ]
+-- tests : Test
+-- tests =
+--     suite "sineWave"
+--         [
+--           test "sineWave"
+--             (assertEqual
+--                 (0.0, 0.0)
+--                 (sinWave 11025.0 0.0 0.0 0.0)
+--             )
+--         , test "sinLookup"
+--             (assertEqual
+--                 (Array.fromList([0.0]))
+--                 (sinLookup)
+--             )
+--         ]

@@ -310,14 +310,14 @@ main = app.html
 -- port tasks =
 --   app.tasks
 
-port outgoingUiModel : Signal EncodedModel
-port outgoingUiModel = Signal.map encode app.model
+-- port outgoingUiModel : Signal EncodedModel
+-- port outgoingUiModel = Signal.map encode app.model
 
 
 bufferSize : Int
-bufferSize = 1024
-port bufferSizePort : Int
-port bufferSizePort = bufferSize
+bufferSize = 512
+-- port bufferSizePort : Int
+-- port bufferSizePort = bufferSize
 
 -- port randomPrimer : Float
 

@@ -2,9 +2,8 @@ module Lib.GenericMutableDict
     ( GenericMutableDict
     , empty
     , insert
-    -- , get
-    -- , unsafeGet
-    -- , fromList
+    , unsafeNativeGet
+    , fromList
     ) where
 
 import Native.GenericMutableDict
@@ -23,9 +22,9 @@ empty : () -> GenericMutableDict
 empty =
   Native.GenericMutableDict.empty
 
--- fromList : List (keyType, valueType) -> GenericMutableDict keyType valueType
--- fromList list =
---   Native.GenericMutableDict.fromList list
+fromList : List (keyType, valueType) -> GenericMutableDict
+fromList list =
+  Native.GenericMutableDict.fromList list
 --
 -- get : keyType -> GenericMutableDict keyType valueType -> Maybe valueType
 -- get key dict =
@@ -37,6 +36,11 @@ empty =
 --     Just value -> value
 --     Nothing -> Debug.crash("Dict does not have key `" ++ toString(key) ++ "`")
 --
+
+unsafeNativeGet : keyType -> GenericMutableDict -> valueType
+unsafeNativeGet key dict =
+  Native.GenericMutableDict.unsafeNativeGet key dict
+
 insert : keyType -> valueType -> GenericMutableDict -> ()
 insert key value dict =
   Native.GenericMutableDict.insert key value dict

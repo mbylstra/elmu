@@ -3,6 +3,7 @@ module Audio.MainTypes where
 import Dict exposing(Dict)
 -- import Lib.MutableDict exposing (MutableDict)
 import Lib.StringKeyMutableDict exposing (StringKeyMutableDict)
+import Lib.GenericMutableDict as GenericMutableDict exposing (GenericMutableDict)
 
 --------------------------------------------------------------------------------
 -- TYPE DEFINITIONS
@@ -37,26 +38,59 @@ type Input ui
 
 
 
-type alias BaseProps ui =
+type alias ConstantBaseProps ui =
   { userId : Maybe String
   , autoId : Maybe String
   , inputs : Dict String (Input ui)
-  , outputValue : Float
   }
 
--- type alias BaseProps ui = MutableDict
+type alias DynamicBaseProps = GenericMutableDict
+  -- this will just contain "outputValue" for now (do we even use that? well, we will soon enough)
 
-type alias OscillatorProps = { phase: Float, func: OscillatorF }
+initialiseDynamicBaseProps : () -> GenericMutableDict
+initialiseDynamicBaseProps () = GenericMutableDict.fromList [("outputValue", 0.0)]
+
+  -- pretty annoying how you can't put it in the type definition!
+  -- , outputValue : Float // this needs to be taken outputValue
+-- once you get rid of userId.
+
+-- Note, if none of these need to be updated during the audio loop, then maybe we can get away with putting
+-- them inside the GenericMutableDict as a key:
+-- So the GMD would look like (image it's record)
+--  { baseProps: ConstantBaseProps
+--  , outputValue : Float
+--  , nodeProps : **something specific to the node**
+--
+-- It all has to go into the one GenericMutableDict, because we can't update a tuple.
+-- But what if we have
+
+
+
+-- doSomethingWithNode node =
+--   case node of
+--     Oscillator baseProps oscProps
+--       let
+--         _ = GenericMutableDict.update "phase" 0.1 oscProps  -- I actually thing the "_ =" is good, because it makes it clear that a mutation is happening.
+--       in
+--         node -- we can just return the original node, because node.oscProps still references the same js obj that has been updated in place!!
+--           -- so the only difference, is that we don't have to reconstruct the node when returning it!
+
+
 
 type alias DummyProps = { func: DummyF }
 
+
 type AudioNode ui
-  = Oscillator (BaseProps ui, OscillatorProps)
-  | Destination (BaseProps ui, ())
-  | Dummy (BaseProps ui, DummyProps)
+  = Oscillator OscillatorF (ConstantBaseProps ui) DynamicBaseProps OscillatorProps
+  | Destination (ConstantBaseProps ui) DynamicBaseProps
+  | Dummy (ConstantBaseProps ui) DummyProps
 
 type alias AudioNodes ui = List (AudioNode ui)
 
+
+type alias OscillatorProps = GenericMutableDict
+initialiseOscillatorProps : () -> GenericMutableDict
+initialiseOscillatorProps () = GenericMutableDict.fromList [("phase", 0.0)]
 
 -- Can we remove the unions, and have just one data type?
 -- you can make inputs a dict, and state could be some ungodly dict or matrix,
@@ -145,8 +179,8 @@ type alias ListGraph ui = List (AudioNode ui)
 type alias DictGraph ui = StringKeyMutableDict (AudioNode ui)
 
 
--- updateBaseProps : (BaseodeProps r ui -> BaseNodeProps r ui) -> AudioNode ui -> AudioNode ui
--- updateBaseProps updateFunction node =
+-- updateConstantBaseProps : (BaseodeProps r ui -> BaseNodeProps r ui) -> AudioNode ui -> AudioNode ui
+-- updateConstantBaseProps updateFunction node =
 --   case node of
 --     Oscillator props ->
 --       Oscillator (updateFunction props)
@@ -159,47 +193,47 @@ type alias DictGraph ui = StringKeyMutableDict (AudioNode ui)
 
 
 
-updateBasePropsCollectExtra : (BaseProps ui -> (BaseProps ui, a)) -> AudioNode ui -> (AudioNode ui, a)
-updateBasePropsCollectExtra updateFunc audioNode =
+updateConstantBasePropsCollectExtra : (ConstantBaseProps ui -> (ConstantBaseProps ui, a)) -> AudioNode ui -> (AudioNode ui, a)
+updateConstantBasePropsCollectExtra updateFunc audioNode =
     case audioNode of
-      Dummy (baseProps, specific) ->
+      Dummy baseProps b ->
         let
-          (newBaseProps, extra) = updateFunc baseProps
+          (newConstantBaseProps, extra) = updateFunc baseProps
         in
-          (Dummy (newBaseProps, specific), extra)
-      Oscillator (baseProps, specific) ->
+          (Dummy newConstantBaseProps b, extra)
+      Oscillator f baseProps b c ->
         let
-          (newBaseProps, extra) = updateFunc baseProps
+          (newConstantBaseProps, extra) = updateFunc baseProps
         in
-          (Oscillator (newBaseProps, specific), extra)
-      Destination (baseProps, specific) ->
+          (Oscillator f newConstantBaseProps b c, extra)
+      Destination baseProps b  ->
         let
-          (newBaseProps, extra) = updateFunc baseProps
+          (newConstantBaseProps, extra) = updateFunc baseProps
         in
-          (Destination (newBaseProps, specific), extra)
+          (Destination newConstantBaseProps b, extra)
 
-updateBaseProps : (BaseProps ui -> BaseProps ui) -> AudioNode ui -> AudioNode ui
-updateBaseProps updateFunc audioNode =
+updateConstantBaseProps : (ConstantBaseProps ui -> ConstantBaseProps ui) -> AudioNode ui -> AudioNode ui
+updateConstantBaseProps updateFunc audioNode =
     case audioNode of
-      Dummy (baseProps, specific) ->
-        Dummy (updateFunc baseProps, specific)
-      Oscillator (baseProps, specific) ->
-        Oscillator (updateFunc baseProps, specific)
-      Destination (baseProps, specific) ->
-        Destination (updateFunc baseProps, specific)
+      Dummy baseProps b ->
+        Dummy (updateFunc baseProps) b
+      Oscillator f baseProps b c ->
+        Oscillator f (updateFunc baseProps) b c
+      Destination baseProps b ->
+        Destination (updateFunc baseProps) b
 
-applyToBaseProps : (BaseProps ui -> a) -> AudioNode ui -> a
-applyToBaseProps func node =
+applyToConstantBaseProps : (ConstantBaseProps ui -> a) -> AudioNode ui -> a
+applyToConstantBaseProps func node =
   case node of
-    Dummy (baseProps, _) -> func baseProps
-    Oscillator (baseProps, _) -> func baseProps
-    Destination (baseProps, _) -> func baseProps
+    Dummy baseProps _ -> func baseProps
+    Oscillator _ baseProps _ _ -> func baseProps
+    Destination baseProps _ -> func baseProps
 
 
-getBaseProps : AudioNode ui -> BaseProps ui
-getBaseProps node =
-  applyToBaseProps identity node
+getConstantBaseProps : AudioNode ui -> ConstantBaseProps ui
+getConstantBaseProps node =
+  applyToConstantBaseProps identity node
 
 getNodeAutoId : AudioNode ui -> String
 getNodeAutoId node =
-  Maybe.withDefault "Nothing" (applyToBaseProps .autoId node)
+  Maybe.withDefault "Nothing" (applyToConstantBaseProps .autoId node)

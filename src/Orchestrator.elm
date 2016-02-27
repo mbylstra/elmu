@@ -59,7 +59,15 @@ type InputHelper ui
 
 updateGraph : ui -> DictGraph ui -> (Float, DictGraph ui)
 updateGraph uiModel graph =
-  updateNode uiModel graph (getDestinationNode graph)
+  let
+    -- _ = Debug.log "updateGraph" graph
+    destinationNode = getDestinationNode graph
+    -- _ = Debug.log "destinationNode" destinationNode
+    -- _ = Debug.log "graph" destinationNode
+    -- _ = Debug.log "uiModel" uiModel
+    -- _ = Debug.log "updateNode" updateNode
+  in
+    updateNode uiModel graph destinationNode
   -- (0.0, graph)  -- 3% when updateGraph not called
 
 getDestinationNode : DictGraph ui -> AudioNode ui
@@ -71,53 +79,70 @@ updateNode : ui -> DictGraph ui -> AudioNode ui
   -> (Float, DictGraph ui)
 updateNode uiModel graph node =
 
-
   let
-      gdict = GenericMutableDict.empty ()
-      _ = GenericMutableDict.insert "hello" 5 gdict  -- I think it works!!!!!
-      _ = GenericMutableDict.insert "hello" "string" gdict  -- I think it works!!!!! Fuck yeah!
+      -- gdict = GenericMutableDict.empty ()
+      -- _ = GenericMutableDict.insert "hello" 5 gdict  -- I think it works!!!!!
+      -- _ = GenericMutableDict.insert "hello" "string" gdict  -- I think it works!!!!! Fuck yeah!
+    -- _ = Debug.log "In updateGraph"
+    _ = 1
   in
     case node of
-      Oscillator (baseProps, oscProps) ->
+      Oscillator func constantBaseProps dynamicBaseProps oscProps ->
         let
           -- _ = Debug.log "old phase" oscProps.phase
-          inputs = baseProps.inputs
+          _ = Debug.log "oscPropsStart" oscProps
+          inputs = constantBaseProps.inputs
           (inputValues, graph2) = getInputValues uiModel graph inputs
-          (newValue, newPhase) =
-            oscProps.func
-              (MutableArray.unsafeNativeGet 0 inputValues)
-              (MutableArray.unsafeNativeGet 1 inputValues)
-              (MutableArray.unsafeNativeGet 2 inputValues)
-              oscProps.phase
+          _ = Debug.log "inputValues" inputValues
+
+          frequency = (MutableArray.unsafeNativeGet 0 inputValues)
+          _ = Debug.log "frequency" frequency
+          frequencyOffset = (MutableArray.unsafeNativeGet 1 inputValues)
+          _ = Debug.log "frequencyOffset" frequencyOffset
+          phaseOffset = (MutableArray.unsafeNativeGet 2 inputValues)
+          prevPhase = (GenericMutableDict.unsafeNativeGet "phase" oscProps)
+          _ = Debug.log "prevPhase" prevPhase  -- this is wrong!! Why is it "internal data structure" ??
+          (newValue, newPhase) = -- damn, need to do sometin gabout this friggen tuple
+            func frequency frequencyOffset phaseOffset prevPhase
           -- newValue = 0.0
           -- newPhase = 0.0
 
-          newNode = Oscillator
-            ( { baseProps | outputValue = newValue }
-            , { oscProps | phase = newPhase }
-            )
-          graph3 = StringKeyMutableDict.insert (getNodeAutoId node) newNode graph2
+          -- Fuck yeah, we don't have to do this any more!
+          -- newNode = Oscillator
+          --   ( { dynamicBaseProps | outputValue = newValue }
+          --   , { oscProps | phase = newPhase }
+          --   )
+          _ = GenericMutableDict.insert "outputValue" newValue dynamicBaseProps
+          _ = GenericMutableDict.insert "phase" newPhase oscProps
+          -- _ = Debug.log "oscProps" oscProps
+
+          graph3 = StringKeyMutableDict.insert (getNodeAutoId node) node graph2
+            -- note that we can just pass in the original node, as it's only things it references that have been updated
+            -- also, when working with mutable data structures, I think it's best to not return anything (it makes it clearer that the input has been mutated)
           -- _ = Debug.log "new phase" newPhase
           -- _ = Debug.log "new value" newValue
+          -- _ = Debug.log "oscPropsEnd" oscProps
         in
-          (newValue, graph3)
+          (newValue, graph3) -- we need to do something about this! (this could be pretty annoying to handle)
+            -- actually, if graph is mutable, then there's no need to return it right? We can just return newValue, so no tuple (js object) is required
         -- (0.0, graph)
 
-      Destination (baseProps, specificProps) ->
+      Destination constantBaseProps dynamicBaseProps ->
         let
-          inputs = baseProps.inputs
+          _ = Debug.log "Destination" 0
+          inputs = constantBaseProps.inputs
           -- graph2 = graph
           (inputValues, graph2) = getInputValues uiModel graph inputs
           newValue = (MutableArray.unsafeNativeGet 0 inputValues)
-          newNode = Destination
-            ( { baseProps | outputValue = newValue }   -- and it's specifically the record update that does it (I think) ~ 5 - 10 %
-            -- ( baseProps
-            , specificProps
-            )   -- this adds ~ 5 - 10 %
+
+          _ = GenericMutableDict.insert "outputValue" newValue dynamicBaseProps
+
+
           -- creating a new node and a new tuple doesn't seem to add an appreciable amount
           -- newNode = node
-          id = getNodeAutoId newNode  -- < 1%
-          graph3 = StringKeyMutableDict.insert id newNode graph2   -- the dict insert adds ~ 5-10 %  -- this is so much faster now!!
+          id = getNodeAutoId node  -- < 1%
+          graph3 = StringKeyMutableDict.insert id node graph2   -- the dict insert adds ~ 5-10 %  -- this is so much faster now!!
+          -- _ = Debug.log "Destination" 0
           -- graph3 = graph2
         in
           (newValue, graph3)
