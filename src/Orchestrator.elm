@@ -90,18 +90,18 @@ updateNode uiModel graph node =
       Oscillator func constantBaseProps dynamicBaseProps oscProps ->
         let
           -- _ = Debug.log "old phase" oscProps.phase
-          _ = Debug.log "oscPropsStart" oscProps
+          -- _ = Debug.log "oscPropsStart" oscProps
           inputs = constantBaseProps.inputs
           (inputValues, graph2) = getInputValues uiModel graph inputs
-          _ = Debug.log "inputValues" inputValues
+          -- _ = Debug.log "inputValues" inputValues
 
           frequency = (MutableArray.unsafeNativeGet 0 inputValues)
-          _ = Debug.log "frequency" frequency
+          -- _ = Debug.log "frequency" frequency
           frequencyOffset = (MutableArray.unsafeNativeGet 1 inputValues)
-          _ = Debug.log "frequencyOffset" frequencyOffset
+          -- _ = Debug.log "frequencyOffset" frequencyOffset
           phaseOffset = (MutableArray.unsafeNativeGet 2 inputValues)
           prevPhase = (GenericMutableDict.unsafeNativeGet "phase" oscProps)
-          _ = Debug.log "prevPhase" prevPhase  -- this is wrong!! Why is it "internal data structure" ??
+          -- _ = Debug.log "prevPhase" prevPhase  -- this is wrong!! Why is it "internal data structure" ??
           (newValue, newPhase) = -- damn, need to do sometin gabout this friggen tuple
             func frequency frequencyOffset phaseOffset prevPhase
           -- newValue = 0.0
@@ -129,7 +129,7 @@ updateNode uiModel graph node =
 
       Destination constantBaseProps dynamicBaseProps ->
         let
-          _ = Debug.log "Destination" 0
+          -- _ = Debug.log "Destination" 0
           inputs = constantBaseProps.inputs
           -- graph2 = graph
           (inputValues, graph2) = getInputValues uiModel graph inputs

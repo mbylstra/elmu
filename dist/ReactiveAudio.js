@@ -15671,37 +15671,25 @@ Elm.Audio.Atoms.Sine.make = function (_elm) {
    frequencyOffset,
    phaseOffset,
    prevPhase) {
-      var _p0 = A2($Debug.log,
-      "sampleDuration",
-      $Audio$AudioNodeFunctions.sampleDuration);
       var periodSeconds = $Audio$AudioNodeFunctions.getPeriodSeconds(frequency + frequencyOffset);
-      var _p1 = A2($Debug.log,"periodSeconds",periodSeconds);
       var phaseIncrement = $Audio$AudioNodeFunctions.sampleDuration / periodSeconds;
       var currPhase = prevPhase + phaseIncrement;
-      var _p2 = A2($Debug.log,"currPhase",currPhase);
       var phaseOffset = phaseOffset / 2.0;
       var outputPhase = currPhase + phaseOffset;
-      var _p3 = A2($Debug.log,"outputPhase",outputPhase);
       var outputPhaseNormed = A2($Audio$AudioNodeFunctions.fmod,
       outputPhase,
       1.0);
-      var _p4 = A2($Debug.log,"outputPhaseNormed",outputPhaseNormed);
       var lookupArrayIndex = $Basics.floor(outputPhaseNormed * $Basics.toFloat(sinLookupArrayLength));
-      var _p5 = A2($Debug.log,"lookupArrayIndex",lookupArrayIndex);
       var amplitude = function () {
-         var _p6 = A2($Array.get,lookupArrayIndex,sinLookup);
-         if (_p6.ctor === "Just") {
-               return _p6._0;
+         var _p0 = A2($Array.get,lookupArrayIndex,sinLookup);
+         if (_p0.ctor === "Just") {
+               return _p0._0;
             } else {
                return _U.crashCase("Audio.Atoms.Sine",
-               {start: {line: 58,column: 13},end: {line: 60,column: 67}},
-               _p6)("arraylookup out of index");
+               {start: {line: 61,column: 13},end: {line: 63,column: 67}},
+               _p0)("arraylookup out of index");
             }
       }();
-      var _p8 = A2($Debug.log,"frequency",frequency);
-      var _p9 = A2($Debug.log,"frequencyOffset",frequencyOffset);
-      var _p10 = A2($Debug.log,"phaseOffset",phaseOffset);
-      var _p11 = A2($Debug.log,"prevPhase",prevPhase);
       return {ctor: "_Tuple2",_0: amplitude,_1: currPhase};
    });
    var sine = function (args) {
@@ -17007,7 +16995,7 @@ Elm.Gui.make = function (_elm) {
    $Signal = Elm.Signal.make(_elm),
    $StartApp = Elm.StartApp.make(_elm);
    var _op = {};
-   var bufferSize = 512;
+   var bufferSize = 1024;
    var guiFrequency = A2($Signal.merge,
    $Gui$KeyboardNoteInput.keyboardGuiFrequency,
    $Gui$Piano.pianoGuiFrequency);
@@ -17451,58 +17439,53 @@ Elm.Orchestrator.make = function (_elm) {
       var _p6 = 1;
       var _p7 = node;
       switch (_p7.ctor)
-      {case "Oscillator": var _p17 = _p7._3;
+      {case "Oscillator": var _p12 = _p7._3;
            var prevPhase = A2($Lib$GenericMutableDict.unsafeNativeGet,
            "phase",
-           _p17);
-           var _p8 = A2($Debug.log,"prevPhase",prevPhase);
+           _p12);
            var inputs = _p7._1.inputs;
-           var _p9 = A3(getInputValues,uiModel,graph,inputs);
-           var inputValues = _p9._0;
-           var graph2 = _p9._1;
-           var _p10 = A2($Debug.log,"inputValues",inputValues);
+           var _p8 = A3(getInputValues,uiModel,graph,inputs);
+           var inputValues = _p8._0;
+           var graph2 = _p8._1;
            var frequency = A2($Lib$MutableArray.unsafeNativeGet,
            0,
            inputValues);
-           var _p11 = A2($Debug.log,"frequency",frequency);
            var frequencyOffset = A2($Lib$MutableArray.unsafeNativeGet,
            1,
            inputValues);
-           var _p12 = A2($Debug.log,"frequencyOffset",frequencyOffset);
            var phaseOffset = A2($Lib$MutableArray.unsafeNativeGet,
            2,
            inputValues);
-           var _p13 = A4(_p7._0,
+           var _p9 = A4(_p7._0,
            frequency,
            frequencyOffset,
            phaseOffset,
            prevPhase);
-           var newValue = _p13._0;
-           var newPhase = _p13._1;
-           var _p14 = A3($Lib$GenericMutableDict.insert,
+           var newValue = _p9._0;
+           var newPhase = _p9._1;
+           var _p10 = A3($Lib$GenericMutableDict.insert,
            "outputValue",
            newValue,
            _p7._2);
-           var _p15 = A3($Lib$GenericMutableDict.insert,
+           var _p11 = A3($Lib$GenericMutableDict.insert,
            "phase",
            newPhase,
-           _p17);
+           _p12);
            var graph3 = A3($Lib$StringKeyMutableDict.insert,
            $Audio$MainTypes.getNodeAutoId(node),
            node,
            graph2);
-           var _p16 = A2($Debug.log,"oscPropsStart",_p17);
            return {ctor: "_Tuple2",_0: newValue,_1: graph3};
          case "Destination":
          var id = $Audio$MainTypes.getNodeAutoId(node);
            var inputs = _p7._0.inputs;
-           var _p18 = A3(getInputValues,uiModel,graph,inputs);
-           var inputValues = _p18._0;
-           var graph2 = _p18._1;
+           var _p13 = A3(getInputValues,uiModel,graph,inputs);
+           var inputValues = _p13._0;
+           var graph2 = _p13._1;
            var newValue = A2($Lib$MutableArray.unsafeNativeGet,
            0,
            inputValues);
-           var _p19 = A3($Lib$GenericMutableDict.insert,
+           var _p14 = A3($Lib$GenericMutableDict.insert,
            "outputValue",
            newValue,
            _p7._1);
@@ -17510,7 +17493,6 @@ Elm.Orchestrator.make = function (_elm) {
            id,
            node,
            graph2);
-           var _p20 = A2($Debug.log,"Destination",0);
            return {ctor: "_Tuple2",_0: newValue,_1: graph3};
          default: return _U.crashCase("Orchestrator",
            {start: {line: 89,column: 5},end: {line: 157,column: 27}},
@@ -17518,12 +17500,12 @@ Elm.Orchestrator.make = function (_elm) {
    });
    var getInputValues = F3(function (uiModel,graph,inputs) {
       var update = F3(function (inputName,input,acc) {
-         var _p22 = acc;
-         var inputValues = _p22._0;
-         var graph2 = _p22._1;
-         var _p23 = A3(getInputValue,uiModel,graph2,input);
-         var value = _p23._0;
-         var graph3 = _p23._1;
+         var _p16 = acc;
+         var inputValues = _p16._0;
+         var graph2 = _p16._1;
+         var _p17 = A3(getInputValue,uiModel,graph2,input);
+         var value = _p17._0;
+         var graph3 = _p17._1;
          var inputValues2 = A2($Lib$MutableArray.push,value,inputValues);
          return {ctor: "_Tuple2",_0: inputValues2,_1: graph3};
       });

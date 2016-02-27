@@ -1,7 +1,9 @@
 var PROFILING = 1;
-var DEBUG = 1;
+// var PROFILING = 0;
+// var DEBUG = 0;
+var DEBUG = 0;
 // var ITERATIONS = 100000;
-var ITERATIONS = 10;
+var ITERATIONS = 1000;
 
 // var ITERATIONS = 1;
 
@@ -15,7 +17,8 @@ timeElapsed = 0.0;
 // var BUFFER_SIZE = 1024;  //92 milliseconds, pretty shit!
 // var BUFFER_SIZE = 2;  //92 milliseconds, pretty shit!
 
-var BUFFER_SIZE = elmGui.ports.bufferSizePort
+// var BUFFER_SIZE = elmGui.ports.bufferSizePort
+var BUFFER_SIZE = 1024;
 var SAMPLE_RATE = 44100;
 var SAMPLE_DURATION = 1.0 / SAMPLE_RATE;
 var BUFFER_DURATION = SAMPLE_DURATION * BUFFER_SIZE;
@@ -36,10 +39,11 @@ if (DEBUG) {
     // var BUFFER_SIZE = 1024;  //92 milliseconds, pretty shit!
     // var BUFFER_SIZE = 512;  //92 milliseconds, pretty shit!
     var SAMPLE_RATE = 44100;
-    var SAMPLE_DURATION = 1.0 / SAMPLE_RATE;
     var BUFFER_DURATION = SAMPLE_DURATION * BUFFER_SIZE;
+    var SAMPLE_DURATION = 1.0 / SAMPLE_RATE;
     var MAX_ALLOWED_DURATION = ITERATIONS * BUFFER_DURATION;
 }
+
 
 // var elmGui = Elm.fullscreen(Elm.Gui, {randomPrimer: Date.now()});
 
@@ -83,9 +87,9 @@ if (PROFILING) {
     console.log('max allowed duration: ', MAX_ALLOWED_DURATION);
     console.log('CPU percent:', (secondsElapsed / MAX_ALLOWED_DURATION) * 100.0);
 } else {
-    elmGui.ports.outgoingUiModel.subscribe(function(uiModel) {
-      window.uiModel = uiModel;
-    });
+    // elmGui.ports.outgoingUiModel.subscribe(function(uiModel) {
+    //   window.uiModel = uiModel;
+    // });
 
     var audioCtx = new AudioContext();
     source = audioCtx.createBufferSource();

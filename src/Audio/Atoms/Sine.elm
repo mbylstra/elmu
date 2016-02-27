@@ -33,27 +33,30 @@ sinLookup =
 sinWave : Float -> Float -> Float -> Float -> (Float, Float)
 sinWave frequency frequencyOffset phaseOffset prevPhase =
     let
-        _ = Debug.log "prevPhase" prevPhase
-        _ = Debug.log "phaseOffset" phaseOffset
-        _ = Debug.log "frequencyOffset" frequencyOffset
-        _ = Debug.log "frequency" frequency
+        -- _ = Debug.log "prevPhase" prevPhase
+        -- _ = Debug.log "phaseOffset" phaseOffset
+        -- _ = Debug.log "frequencyOffset" frequencyOffset
+        -- _ = Debug.log "frequency" frequency
         -- _ = Debug.crash "hello"
         phaseOffset = phaseOffset / 2.0
         periodSeconds = getPeriodSeconds (frequency + frequencyOffset)
-        _ = Debug.log "periodSeconds" periodSeconds
+        -- _ = Debug.log "periodSeconds" periodSeconds
 
         phaseIncrement = sampleDuration / periodSeconds
-        _ = Debug.log "sampleDuration" sampleDuration
+        -- _ = Debug.log "sampleDuration" sampleDuration
         currPhase = prevPhase + phaseIncrement
-        _ = Debug.log "currPhase" currPhase
+        -- _ = Debug.log "currPhase" currPhase
 
         outputPhase = currPhase + phaseOffset
-        _ = Debug.log "outputPhase" outputPhase
+        -- _ = Debug.log "outputPhase" outputPhase
         outputPhaseNormed = fmod outputPhase 1.0
-        _ = Debug.log "outputPhaseNormed" outputPhaseNormed
+        -- _ = Debug.log "outputPhaseNormed" outputPhaseNormed
         lookupArrayIndex = floor (outputPhaseNormed * toFloat sinLookupArrayLength)
-        _ = Debug.log "lookupArrayIndex" lookupArrayIndex
+        -- _ = Debug.log "lookupArrayIndex" lookupArrayIndex
 
+        -- I think there might be a bug here, were amptitude should be between 0.0 and 1.0, but it's
+        -- coming out as -1.0 to 1.0. But perhaps the value *should* be between -1.0 and 1.0?
+        -- We should look it up in the web audio spec.
         amplitude =
             case Array.get lookupArrayIndex sinLookup of
                 Just amplitude' -> amplitude'
