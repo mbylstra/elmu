@@ -8,6 +8,7 @@ module Orchestrator where
 -- import Lib.MutableDict as MutableDict
 -- import Lib.Misc exposing (unsafeDictGet)
 import Lib.MutableArray as MutableArray exposing (MutableArray)
+import Lib.GenericMutableDict as GenericMutableDict exposing (GenericMutableDict)
 import Dict exposing (Dict)
 
 import Lib.StringKeyMutableDict as StringKeyMutableDict
@@ -69,59 +70,66 @@ getDestinationNode graph =
 updateNode : ui -> DictGraph ui -> AudioNode ui
   -> (Float, DictGraph ui)
 updateNode uiModel graph node =
-  case node of
-    Oscillator (baseProps, oscProps) ->
-      let
-        -- _ = Debug.log "old phase" oscProps.phase
-        inputs = baseProps.inputs
-        (inputValues, graph2) = getInputValues uiModel graph inputs
-        (newValue, newPhase) =
-          oscProps.func
-            (MutableArray.unsafeNativeGet 0 inputValues)
-            (MutableArray.unsafeNativeGet 1 inputValues)
-            (MutableArray.unsafeNativeGet 2 inputValues)
-            oscProps.phase
-        -- newValue = 0.0
-        -- newPhase = 0.0
 
-        newNode = Oscillator
-          ( { baseProps | outputValue = newValue }
-          , { oscProps | phase = newPhase }
-          )
-        graph3 = StringKeyMutableDict.insert (getNodeAutoId node) newNode graph2
-        -- _ = Debug.log "new phase" newPhase
-        -- _ = Debug.log "new value" newValue
-      in
-        (newValue, graph3)
-      -- (0.0, graph)
 
-    Destination (baseProps, specificProps) ->
-      let
-        inputs = baseProps.inputs
-        -- graph2 = graph
-        (inputValues, graph2) = getInputValues uiModel graph inputs
-        newValue = (MutableArray.unsafeNativeGet 0 inputValues)
-        newNode = Destination
-          ( { baseProps | outputValue = newValue }   -- and it's specifically the record update that does it (I think) ~ 5 - 10 %
-          -- ( baseProps
-          , specificProps
-          )   -- this adds ~ 5 - 10 %
-        -- creating a new node and a new tuple doesn't seem to add an appreciable amount
-        -- newNode = node
-        id = getNodeAutoId newNode  -- < 1%
-        graph3 = StringKeyMutableDict.insert id newNode graph2   -- the dict insert adds ~ 5-10 %  -- this is so much faster now!!
-        -- graph3 = graph2
-      in
-        (newValue, graph3)
-      -- (0.0, graph)
+  let
+      gdict = GenericMutableDict.empty ()
+      _ = GenericMutableDict.insert "hello" 5 gdict  -- I think it works!!!!!
+      _ = GenericMutableDict.insert "hello" "string" gdict  -- I think it works!!!!! Fuck yeah!
+  in
+    case node of
+      Oscillator (baseProps, oscProps) ->
+        let
+          -- _ = Debug.log "old phase" oscProps.phase
+          inputs = baseProps.inputs
+          (inputValues, graph2) = getInputValues uiModel graph inputs
+          (newValue, newPhase) =
+            oscProps.func
+              (MutableArray.unsafeNativeGet 0 inputValues)
+              (MutableArray.unsafeNativeGet 1 inputValues)
+              (MutableArray.unsafeNativeGet 2 inputValues)
+              oscProps.phase
+          -- newValue = 0.0
+          -- newPhase = 0.0
 
-      -- NOTE: just doing destination (ignoring inputs) seems to add 15% to cpu!
-      -- why?
-      --  - the Dict.insert
-      --  - updating the tuple (?)
-      --  -
+          newNode = Oscillator
+            ( { baseProps | outputValue = newValue }
+            , { oscProps | phase = newPhase }
+            )
+          graph3 = StringKeyMutableDict.insert (getNodeAutoId node) newNode graph2
+          -- _ = Debug.log "new phase" newPhase
+          -- _ = Debug.log "new value" newValue
+        in
+          (newValue, graph3)
+        -- (0.0, graph)
 
-    _ -> Debug.crash("")
+      Destination (baseProps, specificProps) ->
+        let
+          inputs = baseProps.inputs
+          -- graph2 = graph
+          (inputValues, graph2) = getInputValues uiModel graph inputs
+          newValue = (MutableArray.unsafeNativeGet 0 inputValues)
+          newNode = Destination
+            ( { baseProps | outputValue = newValue }   -- and it's specifically the record update that does it (I think) ~ 5 - 10 %
+            -- ( baseProps
+            , specificProps
+            )   -- this adds ~ 5 - 10 %
+          -- creating a new node and a new tuple doesn't seem to add an appreciable amount
+          -- newNode = node
+          id = getNodeAutoId newNode  -- < 1%
+          graph3 = StringKeyMutableDict.insert id newNode graph2   -- the dict insert adds ~ 5-10 %  -- this is so much faster now!!
+          -- graph3 = graph2
+        in
+          (newValue, graph3)
+        -- (0.0, graph)
+
+        -- NOTE: just doing destination (ignoring inputs) seems to add 15% to cpu!
+        -- why?
+        --  - the Dict.insert
+        --  - updating the tuple (?)
+        --  -
+
+      _ -> Debug.crash("")
 
 
 getInputValues : ui -> DictGraph ui -> InputsDict ui

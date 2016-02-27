@@ -44,6 +44,8 @@ type alias BaseProps ui =
   , outputValue : Float
   }
 
+-- type alias BaseProps ui = MutableDict
+
 type alias OscillatorProps = { phase: Float, func: OscillatorF }
 
 type alias DummyProps = { func: DummyF }
