@@ -3,7 +3,7 @@ var PROFILING = 1;
 // var DEBUG = 0;
 var DEBUG = 0;
 // var ITERATIONS = 100000;
-var ITERATIONS = 1000;
+var ITERATIONS = 100;
 
 // var ITERATIONS = 1;
 

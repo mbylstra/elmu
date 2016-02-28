@@ -1,0 +1,1 @@
+/home/michael/code/current/elm-pretty-debug-log/Native/PrettyDebug.js

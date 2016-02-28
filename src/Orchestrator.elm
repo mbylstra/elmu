@@ -126,6 +126,15 @@ updateNode uiModel graph node =
           (newValue, graph3) -- we need to do something about this! (this could be pretty annoying to handle)
             -- actually, if graph is mutable, then there's no need to return it right? We can just return newValue, so no tuple (js object) is required
         -- (0.0, graph)
+      Adder func constantBaseProps dynamicBaseProps ->
+        let
+          inputs = constantBaseProps.inputs
+          (inputValues, graph2) = getInputValues uiModel graph inputs
+          newValue = -- damn, need to do sometin gabout this friggen tuple
+            func inputValues
+          graph3 = StringKeyMutableDict.insert (getNodeAutoId node) node graph2
+        in
+          (newValue, graph3)
 
       Destination constantBaseProps dynamicBaseProps ->
         let

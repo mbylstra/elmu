@@ -66,6 +66,13 @@ Elm.Native.MutableArray.make = function(localRuntime) {
     return array.length;
 	}
 
+  function sum(array)
+  {
+    return array.reduce(function(a, b) {
+      return a + b;
+    });
+  }
+
 	Elm.Native.MutableArray.values = {
     empty: empty,
 		initialize: F2(initialize),
@@ -75,6 +82,7 @@ Elm.Native.MutableArray.make = function(localRuntime) {
 		map: F2(map),
 		push: F2(push),
 		length: length,
+		sum: sum,
 	};
 
 	return localRuntime.Native.MutableArray.values = Elm.Native.MutableArray.values;

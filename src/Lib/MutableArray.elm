@@ -9,6 +9,7 @@ module Lib.MutableArray
     , push
     , map
     , repeat
+    , sum
     ) where
 
 import Native.MutableArray
@@ -21,7 +22,7 @@ import ElmTest exposing (..)
 
 type MutableArray a = MutableArray
 
-empty : () -> MutableArray a 
+empty : () -> MutableArray a
 empty =
   Native.MutableArray.empty
 
@@ -64,6 +65,10 @@ push item array =
 length : MutableArray a -> Int
 length =
   Native.MutableArray.length
+
+sum : MutableArray number -> number
+sum =
+  Native.MutableArray.sum
 
 
 tests : Test

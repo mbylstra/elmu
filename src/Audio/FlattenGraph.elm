@@ -1,12 +1,12 @@
-module Audio.FlattenGraph (flattenGraph) where
+module Audio.FlattenGraph (flattenGraph, convertUserIdInputs, flattenNodeList) where
 
 import Audio.MainTypes exposing (..)
 import Dict exposing (Dict)
--- import ElmTest exposing (..)
--- import Graphics.Element
 import Lib.Misc exposing (unsafeDictGet)
 
 import Lib.ListExtra as ListExtra
+
+import PrettyDebug
 
 import Lib.StringKeyMutableDict as StringKeyMutableDict exposing (StringKeyMutableDict)
 
@@ -56,11 +56,17 @@ flattenNode node oldLastId oldAccNodes =
   let
     updateConstantBasePropsFunc oldProps =
       let
+        -- _ = Debug.log "AAA" oldProps
+        _ = "AAA"
+        debugOldInputs = Dict.toList oldProps.inputs
+        -- _ = Debug.log "debugOldInputs" debugOldInputs
         inputNames = Dict.keys oldProps.inputs
         {props, lastId, accNodes} =
           doInputs
             inputNames
             {props = oldProps, lastId = oldLastId, accNodes = oldAccNodes, node=node}
+        debugNewInputs = Dict.keys props.inputs
+        -- _ = Debug.log "debugNewInputs" debugNewInputs
         id = lastId + 1
       in
         ({ props | autoId = Just <| toString id }, (accNodes, id))
@@ -75,33 +81,40 @@ doInputs :
   -> { props : ConstantBaseProps ui, lastId : Int, accNodes : AudioNodes ui, node : AudioNode ui }
   -> { props : ConstantBaseProps ui, lastId : Int, accNodes : AudioNodes ui}
 doInputs currInputNames {props, lastId, accNodes, node} =
+  -- perhaps the props at the top here is shadowed by the props in the let?
   case currInputNames of
     [] ->
       {props=props, lastId=lastId, accNodes=accNodes}
     inputName :: inputNamesTail ->
       let
-        {props, lastId, accNodes} = flattenInputTop
-          { inputName=inputName, node=node, lastId=lastId, accNodes = accNodes }
+        flattenInputTopResult = flattenInputTop
+          { inputName=inputName, props=props, lastId=lastId, accNodes = accNodes }
+        props2 = flattenInputTopResult.props
+        _ = PrettyDebug.log "doInputs props2" props2
+        lastId2 = flattenInputTopResult.lastId
+        accNodes2 = flattenInputTopResult.accNodes
+        -- node2 = flattenInputTopResult.node
       in
         doInputs inputNamesTail
-          { props = props
-          , lastId = lastId
-          , accNodes = accNodes
+          { props = props2
+          , lastId = lastId2
+          , accNodes = accNodes2
           , node = node
           }
 
 
 
-flattenInputTop : { inputName : String, node : AudioNode ui, lastId : Int, accNodes : AudioNodes ui}
+flattenInputTop : { inputName : String, props : ConstantBaseProps ui, lastId : Int, accNodes : AudioNodes ui}
                   -> { accNodes : AudioNodes ui, lastId : Int, props : ConstantBaseProps ui }
-flattenInputTop { inputName, node, lastId, accNodes } =
+flattenInputTop { inputName, props, lastId, accNodes } =
   let
-    oldProps = getConstantBaseProps node
+    -- oldProps = getConstantBaseProps node
+    _ = PrettyDebug.log "flattenInputTop oldProps" props -- Old props is *always* the original props. THat is the problem maybe
   in
       let
         { props, accNodes, lastId} = flattenInputUpperMiddle
           { inputName = inputName
-          , props = oldProps
+          , props = props
           , lastId = lastId
           , accNodes = accNodes
           }
@@ -121,6 +134,7 @@ flattenInputUpperMiddle { inputName, props, lastId, accNodes } =
         , inputName = inputName
         , inputs = props.inputs
         }
+    _ = PrettyDebug.log "flattenInputUpperMiddle inputs" inputs
     newProps = { props | inputs = inputs }
   in
     { props = newProps, accNodes = accNodes, lastId = lastId }
@@ -131,14 +145,23 @@ flattenInputMiddle :
   }
   -> { lastId : Int, accNodes : AudioNodes ui, inputs : InputsDict ui }
 flattenInputMiddle { accNodes, lastId, input, inputName, inputs } =
-  case flattenInputLower { accNodes = accNodes, lastId = lastId, input = input} of
-    Just {lastId, nodes} ->
-      { lastId = lastId
-      , accNodes = nodes
-      , inputs = Dict.insert inputName (AutoID <| toString lastId) inputs  -- the input now points to an id, rather than an inline node
-      }
-    Nothing ->
-      { lastId = lastId, accNodes = accNodes, inputs = inputs }
+  let
+    _ = 0
+    -- _ = Debug.log "flattenInputMiddle inputs" inputs
+  in
+    case flattenInputLower { accNodes = accNodes, lastId = lastId, input = input} of
+      Just {lastId, nodes} ->
+        let
+          _ = PrettyDebug.log "flattenInputMiddle newInputs" newInputs
+          -- _ = Debug.log "flattenInputMiddle iputName" inputName
+          newInputs = Dict.insert inputName (AutoID <| toString lastId) inputs  -- the input now points to an id, rather than an inline node
+        in
+          { lastId = lastId
+          , accNodes = nodes
+          , inputs = newInputs
+          }
+      Nothing ->
+        { lastId = lastId, accNodes = accNodes, inputs = inputs }
 
 
 flattenInputLower :
@@ -222,168 +245,3 @@ updateDestinationNode nodes =
               updateDestinationNode' (prevNodes ++ [node]) remainderRemainderNodes
   in
     updateDestinationNode' [] nodes
-
---------------------------------------------------------------------------------
---------------------------------------------------------------------------------
---------------------------------------------------------------------------------
---------------------------------------------------------------------------------
-
-
--- args1 : {accNodes:List (AudioNode ui), lastId:Int, input: Input ui}
--- args1 = {accNodes=[], lastId=0, input=Value 0.0}
-
--- oscillator1 : AudioNode ui
--- oscillator1 = Oscillator
---   { userId = Just "osc1"
---   , autoId = Nothing
---   , inputs = Dict.fromList
---     [("frequency", Value 440.0)
---     ,("frequencyOffset", Value 0.0)
---     ,("phaseOffset", Value 0.0)
---     ]
---   , outputValue = 0.0
---   , phase = 0.0
---   , func = sinWave
---   }
-
--- dummy1 : AudioNode ui
--- dummy1 = Dummy
---   ( { userId = Just "dummy1"
---     , autoId = Nothing
---     , inputs = Dict.fromList
---       [("inputA", Value 440.0)]
---     , outputValue = 0.0
---     }
---   , { func = 0.0 }
---   )
---
---
--- -- dummy 3 points to dummy 4, dummy 2 points to dummy 3
---
--- dummy2 : AudioNode ui
--- dummy2 = Dummy
---   ( { userId = Just "dummy2"
---     , autoId = Nothing
---     , inputs = Dict.fromList
---       [ ( "inputA"
---         , Node
---           ( Dummy
---             ( { userId = Just "dummy3"
---               , autoId = Nothing
---               , inputs = Dict.fromList
---                 [ ( "inputA"
---                   , Node
---                     ( Dummy
---                       ( { userId = Just "dummy4"
---                         , autoId = Nothing
---                         , inputs = Dict.fromList
---                           [ ( "inputA"
---                             , ID "dummy1"
---                             )
---                           ]
---                         , outputValue = 0.0
---                         }
---                       , { func = 0.0 }
---                       )
---                     )
---                   )
---                 ]
---               , outputValue = 0.0
---               }
---             , { func = 0.0 }
---             )
---           )
---         )
---       ]
---     , outputValue = 0.0
---     }
---   , { func = 0.0 }
---   )
---
--- tests : Test
--- tests =
---   suite ""
---       [
---         test ""
---           (assertEqual
---             (flattenInputLower
---               {accNodes=[], lastId=0, input=(Value 0.0)}
---             )
---             Nothing
---           )
---       -- , test ""
---       --     (assertEqual
---       --       1
---       --       (
---       --         let
---       --           result = flattenInputLower
---       --             { accNodes=[]
---       --             , lastId=0
---       --             , input= Node dummy1
---       --             }
---       --         in
---       --           result
---       --             |> Maybe.withDefault (0, 0, [])
---       --             |> snd
---       --             |> List.length
---       --       )
---       --     )
---       , test ""
---           (assertEqual
---             3
---             (
---               let
---                 result = flattenNode dummy2 0 []
---               in
---                 result
---                   |> \{lastId, nodes} -> nodes
---                   |> List.length
---             )
---           )
---       , test ""
---           (assertEqual
---             4
---             (
---               let
---                 result =
---                   [dummy1, dummy2]
---                   |> flattenNodeList
---                   |> convertUserIdInputs
---               in
---                 List.length result
---                 -- result
---                 --   |> \{lastId, nodes} -> nodes
---                 --   |> List.length
---             )
---           )
---       ]
---
--- main : Graphics.Element.Element
--- main =
---     elementRunner tests
-
-
--- result: [Dummy { userId = Just "dummy1", autoId = Just NaN, inputs = Dict.fromList [("inputA",Value 440)], outputValue = 0, func = 0 },
--- Dummy { userId = Just "dummy4", autoId = Just NaN, inputs = Dict.fromList [("inputA",Value 1)], outputValue = 0, func = 0 },
--- Dummy { userId = Just "dummy3", autoId = Just NaN, inputs = Dict.fromList [("inputA",AutoID NaN)], outputValue = 0, func = 0 },Dummy { userId = Just "dummy2", autoId = Just NaN, inputs = Dict.fromList [("inputA",AutoID NaN)], outputValue = 0, func = 0 }]
-
-
--- result:
--- [Dummy { userId = Just "dummy1", autoId = Just 1, inputs = Dict.fromList [("inputA",Value 440)], outputValue = 0, func = 0 },
--- Dummy { userId = Just "dummy4", autoId = Just 2, inputs = Dict.fromList [("inputA",Value 1)], outputValue = 0, func = 0 },
--- Dummy { userId = Just "dummy3", autoId = Just 3, inputs = Dict.fromList [("inputA",AutoID 2)], outputValue = 0, func = 0 },
--- Dummy { userId = Just "dummy2", autoId = Just 4, inputs = Dict.fromList [("inputA",AutoID 3)], outputValue = 0, func = 0 }]
-
-
-
--- [Dummy (({ userId = Just "dummy1", autoId = Just 1, inputs = Dict.fromList [("inputA",Value 440)], outputValue = 0 },{ func = 0 })),
--- Dummy (({ userId = Just "dummy4", autoId = Just 2, inputs = Dict.fromList [("inputA",Value 1)], outputValue = 0 },{ func = 0 })),
--- Dummy (({ userId = Just "dummy3", autoId = Just 3, inputs = Dict.fromList [("inputA",AutoID 2)], outputValue = 0 },{ func = 0 })),
--- Dummy (({ userId = Just "dummy2", autoId = Just 4, inputs = Dict.fromList [("inputA",AutoID 3)], outputValue = 0 },{ func = 0 }))]
-
-
-
--- [Dummy (({ userId = Just "dummy1", autoId = Just 1, inputs = Dict.fromList [("inputA",Value 440)], outputValue = 0 },{ func = 0 })),
--- Dummy (({ userId = Just "dummy4", autoId = Just 2, inputs = Dict.fromList [("inputA",AutoID 1)], outputValue = 0 },{ func = 0 })),
--- Dummy (({ userId = Just "dummy3", autoId = Just 3, inputs = Dict.fromList [("inputA",AutoID 2)], outputValue = 0 },{ func = 0 })),
--- Dummy (({ userId = Just "dummy2", autoId = Just 4, inputs = Dict.fromList [("inputA",AutoID 3)], outputValue = 0 },{ func = 0 }))]

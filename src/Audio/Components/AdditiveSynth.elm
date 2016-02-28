@@ -1,6 +1,5 @@
 module Audio.Components.AdditiveSynth where
 
-import Audio.MainTypes exposing (..)
 import Audio.Atoms.Add exposing (namedAdd)
 import Audio.Atoms.Sine exposing (sine, sineDefaults)
 import Audio.Atoms.Multiply exposing (multiply)
@@ -24,4 +23,5 @@ additiveSynthAudioGraph {fundamentalFrequency, numOscillators} =
         mixerInputs = List.map (\n -> ID (getId n)) [1..numOscillators]
 
     in
-        oscs ++ [namedAdd "additiveSynth" mixerInputs]
+        -- oscs ++ [namedAdd "additiveSynth" mixerInputs]
+        oscs ++ [adder mixerInputs]

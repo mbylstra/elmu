@@ -4,11 +4,13 @@ import Gui exposing (getFrequency, bufferSize) -- this is pretty wierd, but the 
 -- import Dict
 
 -- import Audio.AudioNodes exposing(..)
-import Audio.MainTypes exposing(..)
+import Audio.MainTypes exposing(Input(Value, Node), AudioNodes, DictGraph)
 -- import Audio.Components.FmSynth exposing(..)
 -- import Audio.Components.AdditiveSynth exposing(..)
 import Audio.Atoms.Sine as Sine exposing (sine, sineDefaults)
+import Audio.Atoms.Adder as Adder exposing (namedAdder)
 import Audio.Atoms.Destination exposing (destination)
+-- import Audio.Components.AdditiveSynth exposing (additiveSynthAudioGraph)
 import Audio.FlattenGraph exposing (flattenGraph)
 -- import Helpers exposing (toMutableDict)
 
@@ -118,6 +120,16 @@ basicGraph =
   , destination "sin1"
   ]
 
+
+basicGraph2 : AudioNodes Gui.Model
+basicGraph2 =
+  [ namedAdder "output"
+    [ Node <| sine { sineDefaults | frequency = Value 440.0 }
+    , Node <| sine { sineDefaults | frequency = Value 880.0 }
+    ]
+  , destination "output"
+  ]
+
 -- inlineNodesExample : ListGraph
 
 -- this is the equivalent to the main function
@@ -130,7 +142,7 @@ basicGraph =
 
 
 audioGraph : DictGraph Gui.Model
-audioGraph = flattenGraph basicGraph
+audioGraph = flattenGraph basicGraph2 -- consider calling flattenGraph from JS, so you don't have to remember to call it
 
 
 --

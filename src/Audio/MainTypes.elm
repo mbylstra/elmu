@@ -4,6 +4,7 @@ import Dict exposing(Dict)
 -- import Lib.MutableDict exposing (MutableDict)
 import Lib.StringKeyMutableDict exposing (StringKeyMutableDict)
 import Lib.GenericMutableDict as GenericMutableDict exposing (GenericMutableDict)
+import Lib.MutableArray as MutableArray exposing (MutableArray)
 
 --------------------------------------------------------------------------------
 -- TYPE DEFINITIONS
@@ -83,6 +84,8 @@ type alias DummyProps = { func: DummyF }
 type AudioNode ui
   = Oscillator OscillatorF (ConstantBaseProps ui) DynamicBaseProps OscillatorProps
   | Destination (ConstantBaseProps ui) DynamicBaseProps
+  -- | Fold   -- this ones a bit of a bummer (like map), as it takes a list of inputs, not a dict!
+  | Adder AdderF (ConstantBaseProps ui) DynamicBaseProps -- we just use the dict as a list (which is pretty wierd)
   | Dummy (ConstantBaseProps ui) DummyProps
 
 type alias AudioNodes ui = List (AudioNode ui)
@@ -153,6 +156,10 @@ type alias OscillatorF
     -> PhaseOffsetFloat
     -> PhaseFloat
     -> (OutputFloat, PhaseFloat)
+
+type alias AdderF = MutableArray Float -> Float
+
+
 type alias GainF = Float -> Float -> Float
 
 type alias DummyF = Float
@@ -206,6 +213,11 @@ updateConstantBasePropsCollectExtra updateFunc audioNode =
           (newConstantBaseProps, extra) = updateFunc baseProps
         in
           (Oscillator f newConstantBaseProps b c, extra)
+      Adder f baseProps b ->
+        let
+          (newConstantBaseProps, extra) = updateFunc baseProps
+        in
+          (Adder f newConstantBaseProps b, extra)
       Destination baseProps b  ->
         let
           (newConstantBaseProps, extra) = updateFunc baseProps
@@ -219,6 +231,8 @@ updateConstantBaseProps updateFunc audioNode =
         Dummy (updateFunc baseProps) b
       Oscillator f baseProps b c ->
         Oscillator f (updateFunc baseProps) b c
+      Adder f baseProps b ->
+        Adder f (updateFunc baseProps) b
       Destination baseProps b ->
         Destination (updateFunc baseProps) b
 
@@ -227,6 +241,7 @@ applyToConstantBaseProps func node =
   case node of
     Dummy baseProps _ -> func baseProps
     Oscillator _ baseProps _ _ -> func baseProps
+    Adder _ baseProps _ -> func baseProps
     Destination baseProps _ -> func baseProps
 
 
