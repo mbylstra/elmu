@@ -6,6 +6,7 @@ module Lib.StringKeyMutableDict
     , unsafeGet
     , unsafeNativeGet
     , fromList
+    , toList
     , values
     ) where
 
@@ -28,6 +29,10 @@ empty =
 fromList : List (String, valueType) -> StringKeyMutableDict valueType
 fromList list =
   Native.StringKeyMutableDict.fromList list
+
+toList : StringKeyMutableDict valueType -> List (String, valueType)
+toList dict =
+  Native.StringKeyMutableDict.toList dict
 
 get : String -> StringKeyMutableDict valueType -> Maybe valueType
 get key dict =

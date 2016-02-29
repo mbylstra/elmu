@@ -15,6 +15,7 @@ Elm.Native.StringKeyMutableDict.make = function(localRuntime) {
 	var List = Elm.Native.List.make(localRuntime);
 	var Maybe = Elm.Maybe.make(localRuntime);
 	var Utils = Elm.Native.Utils.make(localRuntime);
+	var Array = Elm.Native.Array.make(localRuntime);
 	var fromArray = Utils.list;
 
   function empty()
@@ -67,6 +68,14 @@ Elm.Native.StringKeyMutableDict.make = function(localRuntime) {
     );
   }
 
+  function toList(dict) {
+    // convert to an array of tuples, then convert that to a list
+    var tuplesArray = Object.keys(dict).map(function(key) {
+      return Utils.Tuple2(key, dict[key])
+    });
+		return Array.toList(tuplesArray);
+  }
+
 	Elm.Native.StringKeyMutableDict.values = {
 		empty: empty,
 		fromList: fromList,
@@ -75,6 +84,7 @@ Elm.Native.StringKeyMutableDict.make = function(localRuntime) {
 		unsafeNativeGet: F2(unsafeNativeGet),
 		insert: F3(insert),
     values: values,
+    toList: toList,
 		// set: F3(set),
 		// map: F2(map),
 		// length: length,

@@ -17,7 +17,7 @@ import Lib.StringKeyMutableDict as StringKeyMutableDict exposing (StringKeyMutab
   This could probably be cleaned up now that we've moved to "tuple inheritance"
 -}
 
-flattenGraph : AudioNodes ui -> StringKeyMutableDict (AudioNode ui)
+flattenGraph : AudioNodes ui -> DictGraph ui
 flattenGraph graph =
   graph
   |> flattenNodeList
@@ -90,7 +90,7 @@ doInputs currInputNames {props, lastId, accNodes, node} =
         flattenInputTopResult = flattenInputTop
           { inputName=inputName, props=props, lastId=lastId, accNodes = accNodes }
         props2 = flattenInputTopResult.props
-        _ = PrettyDebug.log "doInputs props2" props2
+        -- _ = PrettyDebug.log "doInputs props2" props2
         lastId2 = flattenInputTopResult.lastId
         accNodes2 = flattenInputTopResult.accNodes
         -- node2 = flattenInputTopResult.node
@@ -109,7 +109,8 @@ flattenInputTop : { inputName : String, props : ConstantBaseProps ui, lastId : I
 flattenInputTop { inputName, props, lastId, accNodes } =
   let
     -- oldProps = getConstantBaseProps node
-    _ = PrettyDebug.log "flattenInputTop oldProps" props -- Old props is *always* the original props. THat is the problem maybe
+    -- _ = PrettyDebug.log "flattenInputTop oldProps" props -- Old props is *always* the original props. THat is the problem maybe
+    _ = 0
   in
       let
         { props, accNodes, lastId} = flattenInputUpperMiddle
@@ -134,7 +135,7 @@ flattenInputUpperMiddle { inputName, props, lastId, accNodes } =
         , inputName = inputName
         , inputs = props.inputs
         }
-    _ = PrettyDebug.log "flattenInputUpperMiddle inputs" inputs
+    -- _ = PrettyDebug.log "flattenInputUpperMiddle inputs" inputs
     newProps = { props | inputs = inputs }
   in
     { props = newProps, accNodes = accNodes, lastId = lastId }
@@ -152,7 +153,7 @@ flattenInputMiddle { accNodes, lastId, input, inputName, inputs } =
     case flattenInputLower { accNodes = accNodes, lastId = lastId, input = input} of
       Just {lastId, nodes} ->
         let
-          _ = PrettyDebug.log "flattenInputMiddle newInputs" newInputs
+          -- _ = PrettyDebug.log "flattenInputMiddle newInputs" newInputs
           -- _ = Debug.log "flattenInputMiddle iputName" inputName
           newInputs = Dict.insert inputName (AutoID <| toString lastId) inputs  -- the input now points to an id, rather than an inline node
         in

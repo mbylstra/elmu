@@ -12,6 +12,7 @@ import Lib.GenericMutableDict as GenericMutableDict exposing (GenericMutableDict
 import Dict exposing (Dict)
 
 import Lib.StringKeyMutableDict as StringKeyMutableDict
+import PrettyDebug
 --------------------------------------------------------------------------------
 -- INTERNAL DEPENDENCIES
 --------------------------------------------------------------------------------
@@ -67,16 +68,19 @@ updateGraph uiModel graph =
     -- _ = Debug.log "uiModel" uiModel
     -- _ = Debug.log "updateNode" updateNode
   in
-    updateNode uiModel graph destinationNode
+    (updateNode uiModel graph destinationNode, graph) -- a tuple is OK here beacuse it's only created once
   -- (0.0, graph)  -- 3% when updateGraph not called
 
 getDestinationNode : DictGraph ui -> AudioNode ui
 getDestinationNode graph =
-  -- 3-6% when js object is used to look up destination
-  StringKeyMutableDict.unsafeNativeGet "Destination" graph
+  let
+    _ = 0
+    -- _ = PrettyDebug.log "getDestinationNode graph" graph
+  in
+    -- 3-6% when js object is used to look up destination
+    StringKeyMutableDict.unsafeNativeGet "Destination" graph
 
-updateNode : ui -> DictGraph ui -> AudioNode ui
-  -> (Float, DictGraph ui)
+updateNode : ui -> DictGraph ui -> AudioNode ui -> Float
 updateNode uiModel graph node =
 
   let
@@ -92,7 +96,7 @@ updateNode uiModel graph node =
           -- _ = Debug.log "old phase" oscProps.phase
           -- _ = Debug.log "oscPropsStart" oscProps
           inputs = constantBaseProps.inputs
-          (inputValues, graph2) = getInputValues uiModel graph inputs
+          inputValues = getInputValues uiModel graph inputs
           -- _ = Debug.log "inputValues" inputValues
 
           frequency = (MutableArray.unsafeNativeGet 0 inputValues)
@@ -116,32 +120,32 @@ updateNode uiModel graph node =
           _ = GenericMutableDict.insert "phase" newPhase oscProps
           -- _ = Debug.log "oscProps" oscProps
 
-          graph3 = StringKeyMutableDict.insert (getNodeAutoId node) node graph2
+          _ = StringKeyMutableDict.insert (getNodeAutoId node) node graph
             -- note that we can just pass in the original node, as it's only things it references that have been updated
             -- also, when working with mutable data structures, I think it's best to not return anything (it makes it clearer that the input has been mutated)
           -- _ = Debug.log "new phase" newPhase
           -- _ = Debug.log "new value" newValue
           -- _ = Debug.log "oscPropsEnd" oscProps
         in
-          (newValue, graph3) -- we need to do something about this! (this could be pretty annoying to handle)
+          newValue
             -- actually, if graph is mutable, then there's no need to return it right? We can just return newValue, so no tuple (js object) is required
         -- (0.0, graph)
       Adder func constantBaseProps dynamicBaseProps ->
         let
           inputs = constantBaseProps.inputs
-          (inputValues, graph2) = getInputValues uiModel graph inputs
+          inputValues = getInputValues uiModel graph inputs
           newValue = -- damn, need to do sometin gabout this friggen tuple
             func inputValues
-          graph3 = StringKeyMutableDict.insert (getNodeAutoId node) node graph2
+          _ = StringKeyMutableDict.insert (getNodeAutoId node) node graph
         in
-          (newValue, graph3)
+          newValue
 
       Destination constantBaseProps dynamicBaseProps ->
         let
           -- _ = Debug.log "Destination" 0
           inputs = constantBaseProps.inputs
           -- graph2 = graph
-          (inputValues, graph2) = getInputValues uiModel graph inputs
+          inputValues = getInputValues uiModel graph inputs
           newValue = (MutableArray.unsafeNativeGet 0 inputValues)
 
           _ = GenericMutableDict.insert "outputValue" newValue dynamicBaseProps
@@ -150,11 +154,11 @@ updateNode uiModel graph node =
           -- creating a new node and a new tuple doesn't seem to add an appreciable amount
           -- newNode = node
           id = getNodeAutoId node  -- < 1%
-          graph3 = StringKeyMutableDict.insert id node graph2   -- the dict insert adds ~ 5-10 %  -- this is so much faster now!!
+          graph3 = StringKeyMutableDict.insert id node graph   -- the dict insert adds ~ 5-10 %  -- this is so much faster now!!
           -- _ = Debug.log "Destination" 0
           -- graph3 = graph2
         in
-          (newValue, graph3)
+          newValue
         -- (0.0, graph)
 
         -- NOTE: just doing destination (ignoring inputs) seems to add 15% to cpu!
@@ -166,32 +170,30 @@ updateNode uiModel graph node =
       _ -> Debug.crash("")
 
 
-getInputValues : ui -> DictGraph ui -> InputsDict ui
-                 -> (MutableArray Float, DictGraph ui)
+getInputValues : ui -> DictGraph ui -> InputsDict ui -> MutableArray Float
 getInputValues uiModel graph inputs =
   let
-    accInitial = (MutableArray.empty (), graph)
+    accInitial = MutableArray.empty ()
       -- it's the dict updates for every input that's slow.
       -- make this a mutable Array instead
 
 
     update inputName input acc =
       let
-        (inputValues, graph2) = acc
-        (value, graph3) = getInputValue uiModel graph2 input
+        inputValues = acc
+        value = getInputValue uiModel graph input
         inputValues2 = MutableArray.push value inputValues
       in
-        (inputValues2, graph3)
+        inputValues2
   in
     Dict.foldl update accInitial inputs   -- wecan continue using dicts for the Input's
 
 
-getInputValue : ui -> DictGraph ui -> Input ui
-                -> (Float, DictGraph ui)
+getInputValue : ui -> DictGraph ui -> Input ui -> Float
 getInputValue uiModel graph input =
   case getInputHelper uiModel graph input of
     ValueInput value ->
-      (value, graph)
+      value
     ReferencedNodeInput node ->
       updateNode uiModel graph node
 

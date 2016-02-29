@@ -123,9 +123,28 @@ basicGraph =
 
 basicGraph2 : AudioNodes Gui.Model
 basicGraph2 =
+  -- [ sine { sineDefaults | id = Just "output", frequency = Value 880.0 }
   [ namedAdder "output"
-    [ Node <| sine { sineDefaults | frequency = Value 440.0 }
+    [ Node <| sine { sineDefaults | frequency = Value 880.0 }
     , Node <| sine { sineDefaults | frequency = Value 880.0 }
+    , Node <| sine { sineDefaults | frequency = Value 880.0 }
+    , Node <| sine { sineDefaults | frequency = Value 880.0 }
+    , Node <| sine { sineDefaults | frequency = Value 880.0 }
+    , Node <| sine { sineDefaults | frequency = Value 880.0 }
+    , Node <| sine { sineDefaults | frequency = Value 880.0 }
+    , Node <| sine { sineDefaults | frequency = Value 880.0 }
+    , Node <| sine { sineDefaults | frequency = Value 880.0 }
+    , Node <| sine { sineDefaults | frequency = Value 880.0 }
+    -- , Node <| sine { sineDefaults | frequency = Value 880.0 }
+    -- , Node <| sine { sineDefaults | frequency = Value 880.0 }
+    -- , Node <| sine { sineDefaults | frequency = Value 880.0 }
+    -- , Node <| sine { sineDefaults | frequency = Value 880.0 }
+    -- , Node <| sine { sineDefaults | frequency = Value 880.0 }
+    -- , Node <| sine { sineDefaults | frequency = Value 880.0 }
+    -- , Node <| sine { sineDefaults | frequency = Value 880.0 }
+    -- , Node <| sine { sineDefaults | frequency = Value 880.0 }
+    -- , Node <| sine { sineDefaults | frequency = Value 880.0 }
+    -- , Node <| sine { sineDefaults | frequency = Value 880.0 }
     ]
   , destination "output"
   ]

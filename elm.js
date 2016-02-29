@@ -11404,7 +11404,6 @@ Elm.Audio.FlattenGraph.make = function (_elm) {
    $Lib$StringKeyMutableDict = Elm.Lib.StringKeyMutableDict.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
-   $PrettyDebug = Elm.PrettyDebug.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm);
    var _op = {};
@@ -11415,7 +11414,7 @@ Elm.Audio.FlattenGraph.make = function (_elm) {
             var _p0 = remainderNodes;
             if (_p0.ctor === "[]") {
                   return _U.crashCase("Audio.FlattenGraph",
-                  {start: {line: 233,column: 7},end: {line: 245,column: 83}},
+                  {start: {line: 234,column: 7},end: {line: 246,column: 83}},
                   _p0)("no nodes of type Destination were found");
                } else {
                   var _p4 = _p0._1;
@@ -11529,19 +11528,18 @@ Elm.Audio.FlattenGraph.make = function (_elm) {
    var doInputs = F2(function (currInputNames,_p10) {
       doInputs: while (true) {
          var _p11 = _p10;
-         var _p16 = _p11.props;
-         var _p15 = _p11.lastId;
-         var _p14 = _p11.accNodes;
+         var _p15 = _p11.props;
+         var _p14 = _p11.lastId;
+         var _p13 = _p11.accNodes;
          var _p12 = currInputNames;
          if (_p12.ctor === "[]") {
-               return {props: _p16,lastId: _p15,accNodes: _p14};
+               return {props: _p15,lastId: _p14,accNodes: _p13};
             } else {
                var flattenInputTopResult = flattenInputTop({inputName: _p12._0
-                                                           ,props: _p16
-                                                           ,lastId: _p15
-                                                           ,accNodes: _p14});
+                                                           ,props: _p15
+                                                           ,lastId: _p14
+                                                           ,accNodes: _p13});
                var props2 = flattenInputTopResult.props;
-               var _p13 = A2($PrettyDebug.log,"doInputs props2",props2);
                var lastId2 = flattenInputTopResult.lastId;
                var accNodes2 = flattenInputTopResult.accNodes;
                var _v8 = _p12._1,
@@ -11555,68 +11553,61 @@ Elm.Audio.FlattenGraph.make = function (_elm) {
             }
       }
    });
-   var flattenInputTop = function (_p17) {
-      var _p18 = _p17;
-      var _p21 = _p18.props;
-      var _p19 = A2($PrettyDebug.log,"flattenInputTop oldProps",_p21);
-      var _p20 = flattenInputUpperMiddle({inputName: _p18.inputName
-                                         ,props: _p21
-                                         ,lastId: _p18.lastId
-                                         ,accNodes: _p18.accNodes});
-      var props = _p20.props;
-      var accNodes = _p20.accNodes;
-      var lastId = _p20.lastId;
+   var flattenInputTop = function (_p16) {
+      var _p17 = _p16;
+      var _p18 = 0;
+      var _p19 = flattenInputUpperMiddle({inputName: _p17.inputName
+                                         ,props: _p17.props
+                                         ,lastId: _p17.lastId
+                                         ,accNodes: _p17.accNodes});
+      var props = _p19.props;
+      var accNodes = _p19.accNodes;
+      var lastId = _p19.lastId;
       return {accNodes: accNodes,lastId: lastId,props: props};
    };
-   var flattenInputUpperMiddle = function (_p22) {
-      var _p23 = _p22;
-      var _p27 = _p23.props;
-      var _p26 = _p23.inputName;
-      var _p24 = flattenInputMiddle({accNodes: _p23.accNodes
-                                    ,lastId: _p23.lastId
-                                    ,input: A2($Lib$Misc.unsafeDictGet,_p26,_p27.inputs)
-                                    ,inputName: _p26
-                                    ,inputs: _p27.inputs});
-      var lastId = _p24.lastId;
-      var accNodes = _p24.accNodes;
-      var inputs = _p24.inputs;
-      var _p25 = A2($PrettyDebug.log,
-      "flattenInputUpperMiddle inputs",
-      inputs);
-      var newProps = _U.update(_p27,{inputs: inputs});
+   var flattenInputUpperMiddle = function (_p20) {
+      var _p21 = _p20;
+      var _p24 = _p21.props;
+      var _p23 = _p21.inputName;
+      var _p22 = flattenInputMiddle({accNodes: _p21.accNodes
+                                    ,lastId: _p21.lastId
+                                    ,input: A2($Lib$Misc.unsafeDictGet,_p23,_p24.inputs)
+                                    ,inputName: _p23
+                                    ,inputs: _p24.inputs});
+      var lastId = _p22.lastId;
+      var accNodes = _p22.accNodes;
+      var inputs = _p22.inputs;
+      var newProps = _U.update(_p24,{inputs: inputs});
       return {props: newProps,accNodes: accNodes,lastId: lastId};
    };
-   var flattenInputMiddle = function (_p28) {
-      var _p29 = _p28;
-      var _p36 = _p29.lastId;
-      var _p35 = _p29.inputs;
-      var _p34 = _p29.accNodes;
-      var _p30 = 0;
-      var _p31 = flattenInputLower({accNodes: _p34
-                                   ,lastId: _p36
-                                   ,input: _p29.input});
-      if (_p31.ctor === "Just") {
-            var _p33 = _p31._0.lastId;
+   var flattenInputMiddle = function (_p25) {
+      var _p26 = _p25;
+      var _p32 = _p26.lastId;
+      var _p31 = _p26.inputs;
+      var _p30 = _p26.accNodes;
+      var _p27 = 0;
+      var _p28 = flattenInputLower({accNodes: _p30
+                                   ,lastId: _p32
+                                   ,input: _p26.input});
+      if (_p28.ctor === "Just") {
+            var _p29 = _p28._0.lastId;
             var newInputs = A3($Dict.insert,
-            _p29.inputName,
-            $Audio$MainTypes.AutoID($Basics.toString(_p33)),
-            _p35);
-            var _p32 = A2($PrettyDebug.log,
-            "flattenInputMiddle newInputs",
-            newInputs);
-            return {lastId: _p33,accNodes: _p31._0.nodes,inputs: newInputs};
+            _p26.inputName,
+            $Audio$MainTypes.AutoID($Basics.toString(_p29)),
+            _p31);
+            return {lastId: _p29,accNodes: _p28._0.nodes,inputs: newInputs};
          } else {
-            return {lastId: _p36,accNodes: _p34,inputs: _p35};
+            return {lastId: _p32,accNodes: _p30,inputs: _p31};
          }
    };
-   var flattenInputLower = function (_p37) {
-      var _p38 = _p37;
-      var _p39 = _p38.input;
-      if (_p39.ctor === "Node") {
+   var flattenInputLower = function (_p33) {
+      var _p34 = _p33;
+      var _p35 = _p34.input;
+      if (_p35.ctor === "Node") {
             return $Maybe.Just(A3(flattenNode,
-            _p39._0,
-            _p38.lastId,
-            _p38.accNodes));
+            _p35._0,
+            _p34.lastId,
+            _p34.accNodes));
          } else {
             return $Maybe.Nothing;
          }
@@ -11626,17 +11617,17 @@ Elm.Audio.FlattenGraph.make = function (_elm) {
       outputNodes,
       lastId) {
          flattenNodeList$: while (true) {
-            var _p40 = remainderNodes;
-            if (_p40.ctor === "[]") {
+            var _p36 = remainderNodes;
+            if (_p36.ctor === "[]") {
                   return {ctor: "_Tuple2",_0: lastId,_1: outputNodes};
                } else {
-                  var r = A3(flattenNode,_p40._0,lastId,_U.list([]));
-                  var _p41 = {ctor: "_Tuple2"
+                  var r = A3(flattenNode,_p36._0,lastId,_U.list([]));
+                  var _p37 = {ctor: "_Tuple2"
                              ,_0: r.lastId
                              ,_1: A2($Basics._op["++"],outputNodes,r.nodes)};
-                  var lastId2 = _p41._0;
-                  var outputNodes2 = _p41._1;
-                  var _v17 = _p40._1,_v18 = outputNodes2,_v19 = lastId2;
+                  var lastId2 = _p37._0;
+                  var outputNodes2 = _p37._1;
+                  var _v17 = _p36._1,_v18 = outputNodes2,_v19 = lastId2;
                   remainderNodes = _v17;
                   outputNodes = _v18;
                   lastId = _v19;
@@ -11644,8 +11635,8 @@ Elm.Audio.FlattenGraph.make = function (_elm) {
                }
          }
       });
-      var _p42 = A3(flattenNodeList$,nodes,_U.list([]),0);
-      var outputNodes3 = _p42._1;
+      var _p38 = A3(flattenNodeList$,nodes,_U.list([]),0);
+      var outputNodes3 = _p38._1;
       return outputNodes3;
    };
    var flattenGraph = function (graph) {

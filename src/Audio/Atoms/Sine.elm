@@ -29,6 +29,9 @@ sinLookup =
     in
         Array.initialize sinLookupArrayLength getSample
 
+sinWave2 : Float -> Float -> Float -> Float -> (Float, Float)
+sinWave2 frequency frequencyOffset phaseOffset prevPhase =
+  (0.0, 0.0)  -- I actually think returning a tuple is problematic for performance! You want to stick to as basic as possible data types.
 
 sinWave : Float -> Float -> Float -> Float -> (Float, Float)
 sinWave frequency frequencyOffset phaseOffset prevPhase =
