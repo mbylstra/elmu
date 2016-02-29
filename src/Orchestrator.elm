@@ -4,23 +4,17 @@ module Orchestrator where
 -- EXTERNAL DEPENDENCIES
 --------------------------------------------------------------------------------
 
--- import ElmTest exposing (..)
--- import Lib.MutableDict as MutableDict
--- import Lib.Misc exposing (unsafeDictGet)
-import Lib.MutableArray as MutableArray exposing (MutableArray)
-import Lib.GenericMutableDict as GenericMutableDict exposing (GenericMutableDict)
 import Dict exposing (Dict)
-import Audio.StatePool as StatePool exposing (StatePool)
 
-import Lib.StringKeyMutableDict as StringKeyMutableDict
-import PrettyDebug
 --------------------------------------------------------------------------------
 -- INTERNAL DEPENDENCIES
 --------------------------------------------------------------------------------
 
-import Audio.MainTypes exposing (..)
-
-
+import Lib.MutableArray as MutableArray exposing (MutableArray)
+import Lib.GenericMutableDict as GenericMutableDict exposing (GenericMutableDict)
+import Lib.StringKeyMutableDict as StringKeyMutableDict
+import Audio.StatePool as StatePool exposing (StatePool)
+import Audio.MainTypes exposing (AudioNode(Destination, Oscillator, Adder), getNodeAutoId, DictGraph, InputsDict, Input(Value, Default, UI, AutoID, Node, ID))
 
 --------------------------------------------------------------------------------
 -- TYPE DEFINITIONS
@@ -41,99 +35,47 @@ type InputHelper ui
   | ValueInput Float
 
 
--- type GenericMutableDict = GenericMutableDict
 --------------------------------------------------------------------------------
 -- MAIN
 --------------------------------------------------------------------------------
 
--- What is so frickin slow???
-
--- candidates:
---  - pointless destination lookup
---  - use of immutable records
---  - having to look up input values from a dictionary (can we use a tuple instead??)
---  -   this can work, but the function has to accept a tuple as an argument, but that
---  -   sounds ok.
---  - all the general crap that has to be done (function calls are slow?)
---  - currying turns a function with 3 args into three functino calls! How can we avoid this??
---  - the immutable dict insert that happens for every input
---  - the two record updates that happend for every node
-
-
 updateGraph : ui -> StatePool -> DictGraph ui  -> (Float, DictGraph ui)
 updateGraph uiModel statePool graph  =
   let
-    -- _ = Debug.log "updateGraph" graph
     destinationNode = getDestinationNode graph
-    -- _ = Debug.log "destinationNode" destinationNode
-    -- _ = Debug.log "graph" destinationNode
-    -- _ = Debug.log "uiModel" uiModel
-    -- _ = Debug.log "updateNode" updateNode
   in
     (updateNode uiModel statePool graph destinationNode, graph) -- a tuple is OK here beacuse it's only created once
-  -- (0.0, graph)  -- 3% when updateGraph not called
+
 
 getDestinationNode : DictGraph ui -> AudioNode ui
 getDestinationNode graph =
-  let
-    _ = 0
-    -- _ = PrettyDebug.log "getDestinationNode graph" graph
-  in
-    -- 3-6% when js object is used to look up destination
-    StringKeyMutableDict.unsafeNativeGet "Destination" graph
+  StringKeyMutableDict.unsafeNativeGet "Destination" graph
+
 
 updateNode : ui -> StatePool -> DictGraph ui -> AudioNode ui -> Float
 updateNode uiModel statePool graph node =
 
   let
-      -- gdict = GenericMutableDict.empty ()
-      -- _ = GenericMutableDict.insert "hello" 5 gdict  -- I think it works!!!!!
-      -- _ = GenericMutableDict.insert "hello" "string" gdict  -- I think it works!!!!! Fuck yeah!
-    -- _ = Debug.log "In updateGraph"
-    _ = 1
     nodeId = getNodeAutoId node
     nodeState = StringKeyMutableDict.unsafeNativeGet nodeId statePool
   in
     case node of
       Oscillator func constantBaseProps dynamicBaseProps oscProps ->
         let
-          -- _ = Debug.log "old phase" oscProps.phase
-          -- _ = Debug.log "oscPropsStart" oscProps
           inputs = constantBaseProps.inputs
           inputValues = updateInputValues uiModel statePool nodeState graph inputs
-          -- _ = Debug.log "inputValues" inputValues
-
           frequency = (MutableArray.unsafeNativeGet 0 inputValues)
-          -- _ = Debug.log "frequency" frequency
           frequencyOffset = (MutableArray.unsafeNativeGet 1 inputValues)
-          -- _ = Debug.log "frequencyOffset" frequencyOffset
           phaseOffset = (MutableArray.unsafeNativeGet 2 inputValues)
           prevPhase = (GenericMutableDict.unsafeNativeGet "phase" oscProps)
-          -- _ = Debug.log "prevPhase" prevPhase  -- this is wrong!! Why is it "internal data structure" ??
           (newValue, newPhase) = -- damn, need to do sometin gabout this friggen tuple
             func frequency frequencyOffset phaseOffset prevPhase
-          -- newValue = 0.0
-          -- newPhase = 0.0
-
-          -- Fuck yeah, we don't have to do this any more!
-          -- newNode = Oscillator
-          --   ( { dynamicBaseProps | outputValue = newValue }
-          --   , { oscProps | phase = newPhase }
-          --   )
           _ = GenericMutableDict.insert "outputValue" newValue dynamicBaseProps
           _ = GenericMutableDict.insert "phase" newPhase oscProps
-          -- _ = Debug.log "oscProps" oscProps
-
           _ = StringKeyMutableDict.insert (getNodeAutoId node) node graph
-            -- note that we can just pass in the original node, as it's only things it references that have been updated
-            -- also, when working with mutable data structures, I think it's best to not return anything (it makes it clearer that the input has been mutated)
-          -- _ = Debug.log "new phase" newPhase
-          -- _ = Debug.log "new value" newValue
-          -- _ = Debug.log "oscPropsEnd" oscProps
         in
           newValue
-            -- actually, if graph is mutable, then there's no need to return it right? We can just return newValue, so no tuple (js object) is required
-        -- (0.0, graph)
+
       Adder func constantBaseProps dynamicBaseProps ->
         let
           inputs = constantBaseProps.inputs
@@ -146,30 +88,16 @@ updateNode uiModel statePool graph node =
 
       Destination constantBaseProps dynamicBaseProps ->
         let
-          -- _ = Debug.log "Destination" 0
           inputs = constantBaseProps.inputs
-          -- graph2 = graph
           inputValues = updateInputValues uiModel statePool nodeState graph inputs
           newValue = (MutableArray.unsafeNativeGet 0 inputValues)
 
           _ = GenericMutableDict.insert "outputValue" newValue dynamicBaseProps
 
-
-          -- creating a new node and a new tuple doesn't seem to add an appreciable amount
-          -- newNode = node
           id = getNodeAutoId node  -- < 1%
           graph3 = StringKeyMutableDict.insert id node graph   -- the dict insert adds ~ 5-10 %  -- this is so much faster now!!
-          -- _ = Debug.log "Destination" 0
-          -- graph3 = graph2
         in
           newValue
-        -- (0.0, graph)
-
-        -- NOTE: just doing destination (ignoring inputs) seems to add 15% to cpu!
-        -- why?
-        --  - the Dict.insert
-        --  - updating the tuple (?)
-        --  -
 
       _ -> Debug.crash("")
 
@@ -181,15 +109,12 @@ updateInputValues uiModel statePool nodeState graph inputsDict =
     update inputName input index =
       let
         value = getInputValue uiModel statePool graph input
-        _ = MutableArray.set index value inputValues
+        _ = MutableArray.set index value inputValues  -- WTF.. this adds 10-15% for 10 oscillators???
       in
         index + 1
     _ = Dict.foldl update 0 inputsDict   -- wecan continue using dicts for the Input's
   in
     inputValues
-
-
-    -- we can map and iterate, as inputs values is nice an mutable! haha
 
 
 getInputValue : ui -> StatePool -> DictGraph ui -> Input ui -> Float
