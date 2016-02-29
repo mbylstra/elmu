@@ -3,6 +3,7 @@ module Audio.StatePool where
 import Lib.StringKeyMutableDict as StringKeyMutableDict exposing (StringKeyMutableDict)
 import Lib.GenericMutableDict as GenericMutableDict exposing (GenericMutableDict)
 import Audio.MainTypes exposing (DictGraph, AudioNode(Oscillator, Destination, Adder, Dummy))
+import Lib.MutableArray as MutableArray
 
 -- flattenGraph : AudioNodes ui -> StringKeyMutableDict (AudioNode ui)
 
@@ -39,21 +40,32 @@ nodeToStateDict node =
     Oscillator _ _ _ _ ->
       let
         dict = GenericMutableDict.empty ()
-        _ = GenericMutableDict.insert "value" 0.0
-        _ = GenericMutableDict.insert "inputValues" [0.0, 0.0, 0.0]
-        _ = GenericMutableDict.insert "phase" 0.0
+        _ = GenericMutableDict.insert "value" 0.0 dict
+        _ = GenericMutableDict.insert
+              "inputValues"
+              (MutableArray.repeat 3 0.0)
+              dict
+        _ = GenericMutableDict.insert "phase" 0.0 dict
       in
         dict
     Adder _ _ _ ->
       let
         dict = GenericMutableDict.empty ()
-        _ = GenericMutableDict.insert "value" 0.0
+        _ = GenericMutableDict.insert "value" 0.0 dict
+        _ = GenericMutableDict.insert
+              "inputValues"
+              (MutableArray.repeat 100 0.0) -- this will allow up to 100 nodes to be connected
+              dict
       in
         dict
     Destination _ _ ->
       let
         dict = GenericMutableDict.empty ()
-        _ = GenericMutableDict.insert "value" 0.0
+        _ = GenericMutableDict.insert "value" 0.0 dict
+        _ = GenericMutableDict.insert
+              "inputValues"
+              (MutableArray.repeat 100 0.0) -- this will allows up to 100 nodes to be connected
+              dict
       in
         dict
     Dummy _ _ ->

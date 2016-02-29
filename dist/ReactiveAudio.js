@@ -15896,12 +15896,27 @@ Elm.Audio.Atoms.Sine.make = function (_elm) {
              ,frequencyOffset: c
              ,phaseOffset: d};
    });
-   var sinWave2 = F4(function (frequency,
+   var sinWave = F4(function (frequency,
    frequencyOffset,
    phaseOffset,
    prevPhase) {
       return {ctor: "_Tuple2",_0: 0.0,_1: 0.0};
    });
+   var sine = function (args) {
+      return A4($Audio$MainTypes.Oscillator,
+      sinWave,
+      {userId: args.id
+      ,autoId: $Maybe.Nothing
+      ,inputs: $Dict.fromList(_U.list([{ctor: "_Tuple2"
+                                       ,_0: "frequency"
+                                       ,_1: args.frequency}
+                                      ,{ctor: "_Tuple2"
+                                       ,_0: "frequencyOffset"
+                                       ,_1: args.frequencyOffset}
+                                      ,{ctor: "_Tuple2",_0: "phaseOffset",_1: args.phaseOffset}]))},
+      $Audio$MainTypes.initialiseDynamicBaseProps({ctor: "_Tuple0"}),
+      $Audio$MainTypes.initialiseOscillatorProps({ctor: "_Tuple0"}));
+   };
    var sinLookupFrequency = 20.0;
    var sinLookupDuration = 1.0 / sinLookupFrequency;
    var sinLookupArrayLength = $Basics.floor(sinLookupDuration / $Audio$AudioNodeFunctions.sampleDuration);
@@ -15912,7 +15927,7 @@ Elm.Audio.Atoms.Sine.make = function (_elm) {
       };
       return A2($Array.initialize,sinLookupArrayLength,getSample);
    }();
-   var sinWave = F4(function (frequency,
+   var sinWave2 = F4(function (frequency,
    frequencyOffset,
    phaseOffset,
    prevPhase) {
@@ -15937,28 +15952,13 @@ Elm.Audio.Atoms.Sine.make = function (_elm) {
       }();
       return {ctor: "_Tuple2",_0: amplitude,_1: currPhase};
    });
-   var sine = function (args) {
-      return A4($Audio$MainTypes.Oscillator,
-      sinWave,
-      {userId: args.id
-      ,autoId: $Maybe.Nothing
-      ,inputs: $Dict.fromList(_U.list([{ctor: "_Tuple2"
-                                       ,_0: "frequency"
-                                       ,_1: args.frequency}
-                                      ,{ctor: "_Tuple2"
-                                       ,_0: "frequencyOffset"
-                                       ,_1: args.frequencyOffset}
-                                      ,{ctor: "_Tuple2",_0: "phaseOffset",_1: args.phaseOffset}]))},
-      $Audio$MainTypes.initialiseDynamicBaseProps({ctor: "_Tuple0"}),
-      $Audio$MainTypes.initialiseOscillatorProps({ctor: "_Tuple0"}));
-   };
    return _elm.Audio.Atoms.Sine.values = {_op: _op
                                          ,sinLookupFrequency: sinLookupFrequency
                                          ,sinLookupDuration: sinLookupDuration
                                          ,sinLookupArrayLength: sinLookupArrayLength
                                          ,sinLookup: sinLookup
-                                         ,sinWave2: sinWave2
                                          ,sinWave: sinWave
+                                         ,sinWave2: sinWave2
                                          ,Args: Args
                                          ,sine: sine
                                          ,sineDefaults: sineDefaults};
@@ -16585,6 +16585,7 @@ Elm.Audio.StatePool.make = function (_elm) {
    $Basics = Elm.Basics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
    $Lib$GenericMutableDict = Elm.Lib.GenericMutableDict.make(_elm),
+   $Lib$MutableArray = Elm.Lib.MutableArray.make(_elm),
    $Lib$StringKeyMutableDict = Elm.Lib.StringKeyMutableDict.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
@@ -16594,47 +16595,55 @@ Elm.Audio.StatePool.make = function (_elm) {
    var nodeToStateDict = function (node) {
       var _p0 = node;
       switch (_p0.ctor)
-      {case "Oscillator": var _p1 = A2($Lib$GenericMutableDict.insert,
-           "phase",
-           0.0);
-           var _p2 = A2($Lib$GenericMutableDict.insert,
+      {case "Oscillator":
+         var dict = $Lib$GenericMutableDict.empty({ctor: "_Tuple0"});
+           var _p1 = A3($Lib$GenericMutableDict.insert,"value",0.0,dict);
+           var _p2 = A3($Lib$GenericMutableDict.insert,
            "inputValues",
-           _U.list([0.0,0.0,0.0]));
-           var _p3 = A2($Lib$GenericMutableDict.insert,"value",0.0);
-           var dict = $Lib$GenericMutableDict.empty({ctor: "_Tuple0"});
+           A2($Lib$MutableArray.repeat,3,0.0),
+           dict);
+           var _p3 = A3($Lib$GenericMutableDict.insert,"phase",0.0,dict);
            return dict;
-         case "Adder": var _p4 = A2($Lib$GenericMutableDict.insert,
-           "value",
-           0.0);
-           var dict = $Lib$GenericMutableDict.empty({ctor: "_Tuple0"});
+         case "Adder":
+         var dict = $Lib$GenericMutableDict.empty({ctor: "_Tuple0"});
+           var _p4 = A3($Lib$GenericMutableDict.insert,"value",0.0,dict);
+           var _p5 = A3($Lib$GenericMutableDict.insert,
+           "inputValues",
+           A2($Lib$MutableArray.repeat,100,0.0),
+           dict);
            return dict;
-         case "Destination": var _p5 = A2($Lib$GenericMutableDict.insert,
-           "value",
-           0.0);
-           var dict = $Lib$GenericMutableDict.empty({ctor: "_Tuple0"});
+         case "Destination":
+         var dict = $Lib$GenericMutableDict.empty({ctor: "_Tuple0"});
+           var _p6 = A3($Lib$GenericMutableDict.insert,"value",0.0,dict);
+           var _p7 = A3($Lib$GenericMutableDict.insert,
+           "inputValues",
+           A2($Lib$MutableArray.repeat,100,0.0),
+           dict);
            return dict;
-         default: var _p6 = A2($Lib$GenericMutableDict.insert,
+         default: var _p8 = A2($Lib$GenericMutableDict.insert,
            "value",
            0.0);
            var dict = $Lib$GenericMutableDict.empty({ctor: "_Tuple0"});
            return dict;}
    };
-   var convertGraphTuple = function (_p7) {
-      var _p8 = _p7;
-      return {ctor: "_Tuple2",_0: _p8._0,_1: nodeToStateDict(_p8._1)};
+   var convertGraphTuple = function (_p9) {
+      var _p10 = _p9;
+      return {ctor: "_Tuple2"
+             ,_0: _p10._0
+             ,_1: nodeToStateDict(_p10._1)};
    };
    var initialiseStatePool = function (graph) {
       var graphList = $Lib$StringKeyMutableDict.toList(graph);
       var stateTuples = A2($List.map,convertGraphTuple,graphList);
       var pool = $Lib$StringKeyMutableDict.empty({ctor: "_Tuple0"});
-      var insertNodeState = function (_p9) {
-         var _p10 = _p9;
+      var insertNodeState = function (_p11) {
+         var _p12 = _p11;
          return A3($Lib$StringKeyMutableDict.insert,
-         _p10._0,
-         _p10._1,
+         _p12._0,
+         _p12._1,
          pool);
       };
-      var _p11 = A2($List.map,insertNodeState,stateTuples);
+      var _p13 = A2($List.map,insertNodeState,stateTuples);
       return pool;
    };
    return _elm.Audio.StatePool.values = {_op: _op
@@ -17816,6 +17825,7 @@ Elm.Orchestrator.make = function (_elm) {
    if (_elm.Orchestrator.values) return _elm.Orchestrator.values;
    var _U = Elm.Native.Utils.make(_elm),
    $Audio$MainTypes = Elm.Audio.MainTypes.make(_elm),
+   $Audio$StatePool = Elm.Audio.StatePool.make(_elm),
    $Basics = Elm.Basics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
    $Dict = Elm.Dict.make(_elm),
@@ -17852,25 +17862,32 @@ Elm.Orchestrator.make = function (_elm) {
                  return ReferencedNodeInput(_p2._0);
               } else {
                  return _U.crashCase("Orchestrator",
-                 {start: {line: 212,column: 7},end: {line: 216,column: 115}},
+                 {start: {line: 215,column: 7},end: {line: 219,column: 115}},
                  _p2)("This shouldn\'t happen. Could not find a node. The graph must not have been validated first");
               }
          case "Node": return _U.crashCase("Orchestrator",
-           {start: {line: 204,column: 3},end: {line: 220,column: 101}},
+           {start: {line: 207,column: 3},end: {line: 223,column: 101}},
            _p1)("This shouldn\'t happen. The graph should have been flattened");
          default: return _U.crashCase("Orchestrator",
-           {start: {line: 204,column: 3},end: {line: 220,column: 101}},
+           {start: {line: 207,column: 3},end: {line: 223,column: 101}},
            _p1)("This shouldn\'t happen. All ID inputs should have been converted to AutoID inputs");}
    });
-   var getInputValue = F3(function (uiModel,graph,input) {
+   var getInputValue = F4(function (uiModel,
+   statePool,
+   graph,
+   input) {
       var _p6 = A3(getInputHelper,uiModel,graph,input);
       if (_p6.ctor === "ValueInput") {
             return _p6._0;
          } else {
-            return A3(updateNode,uiModel,graph,_p6._0);
+            return A4(updateNode,uiModel,statePool,graph,_p6._0);
          }
    });
-   var updateNode = F3(function (uiModel,graph,node) {
+   var updateNode = F4(function (uiModel,statePool,graph,node) {
+      var nodeId = $Audio$MainTypes.getNodeAutoId(node);
+      var nodeState = A2($Lib$StringKeyMutableDict.unsafeNativeGet,
+      nodeId,
+      statePool);
       var _p7 = 1;
       var _p8 = node;
       switch (_p8.ctor)
@@ -17883,7 +17900,12 @@ Elm.Orchestrator.make = function (_elm) {
            "phase",
            _p13);
            var inputs = _p8._1.inputs;
-           var inputValues = A3(getInputValues,uiModel,graph,inputs);
+           var inputValues = A5(updateInputValues,
+           uiModel,
+           statePool,
+           nodeState,
+           graph,
+           inputs);
            var frequency = A2($Lib$MutableArray.unsafeNativeGet,
            0,
            inputValues);
@@ -17914,14 +17936,24 @@ Elm.Orchestrator.make = function (_elm) {
            node,
            graph);
            var inputs = _p8._1.inputs;
-           var inputValues = A3(getInputValues,uiModel,graph,inputs);
+           var inputValues = A5(updateInputValues,
+           uiModel,
+           statePool,
+           nodeState,
+           graph,
+           inputs);
            var newValue = _p8._0(inputValues);
            return newValue;
          case "Destination":
          var id = $Audio$MainTypes.getNodeAutoId(node);
            var graph3 = A3($Lib$StringKeyMutableDict.insert,id,node,graph);
            var inputs = _p8._0.inputs;
-           var inputValues = A3(getInputValues,uiModel,graph,inputs);
+           var inputValues = A5(updateInputValues,
+           uiModel,
+           statePool,
+           nodeState,
+           graph,
+           inputs);
            var newValue = A2($Lib$MutableArray.unsafeNativeGet,
            0,
            inputValues);
@@ -17931,23 +17963,29 @@ Elm.Orchestrator.make = function (_elm) {
            _p8._1);
            return newValue;
          default: return _U.crashCase("Orchestrator",
-           {start: {line: 93,column: 5},end: {line: 170,column: 27}},
+           {start: {line: 97,column: 5},end: {line: 174,column: 27}},
            _p8)("");}
    });
-   var getInputValues = F3(function (uiModel,graph,inputs) {
-      var update = F3(function (inputName,input,acc) {
-         var value = A3(getInputValue,uiModel,graph,input);
-         var inputValues = acc;
-         var inputValues2 = A2($Lib$MutableArray.push,value,inputValues);
-         return inputValues2;
+   var updateInputValues = F5(function (uiModel,
+   statePool,
+   nodeState,
+   graph,
+   inputsDict) {
+      var inputValues = A2($Lib$GenericMutableDict.unsafeNativeGet,
+      "inputValues",
+      nodeState);
+      var update = F3(function (inputName,input,index) {
+         var value = A4(getInputValue,uiModel,statePool,graph,input);
+         var _p17 = A3($Lib$MutableArray.set,index,value,inputValues);
+         return index + 1;
       });
-      var accInitial = $Lib$MutableArray.empty({ctor: "_Tuple0"});
-      return A3($Dict.foldl,update,accInitial,inputs);
+      var _p18 = A3($Dict.foldl,update,0,inputsDict);
+      return inputValues;
    });
-   var updateGraph = F2(function (uiModel,graph) {
+   var updateGraph = F3(function (uiModel,statePool,graph) {
       var destinationNode = getDestinationNode(graph);
       return {ctor: "_Tuple2"
-             ,_0: A3(updateNode,uiModel,graph,destinationNode)
+             ,_0: A4(updateNode,uiModel,statePool,graph,destinationNode)
              ,_1: graph};
    });
    var ExternalState = F2(function (a,b) {
@@ -17960,7 +17998,7 @@ Elm.Orchestrator.make = function (_elm) {
                                      ,updateGraph: updateGraph
                                      ,getDestinationNode: getDestinationNode
                                      ,updateNode: updateNode
-                                     ,getInputValues: getInputValues
+                                     ,updateInputValues: updateInputValues
                                      ,getInputValue: getInputValue
                                      ,getInputHelper: getInputHelper};
 };
@@ -17971,6 +18009,7 @@ Elm.BufferHandler.make = function (_elm) {
    if (_elm.BufferHandler.values) return _elm.BufferHandler.values;
    var _U = Elm.Native.Utils.make(_elm),
    $Audio$MainTypes = Elm.Audio.MainTypes.make(_elm),
+   $Audio$StatePool = Elm.Audio.StatePool.make(_elm),
    $Basics = Elm.Basics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
    $Gui = Elm.Gui.make(_elm),
@@ -17998,9 +18037,10 @@ Elm.BufferHandler.make = function (_elm) {
    var sampleDuration = 1.0 / sampleRate;
    var updateForSample = F2(function (uiModel,_p1) {
       var _p2 = _p1;
+      var _p4 = _p2.statePool;
       var newBufferIndex = _p2.bufferIndex + 1;
       var newTime = _p2.time + sampleDuration;
-      var _p3 = A2($Orchestrator.updateGraph,uiModel,_p2.graph);
+      var _p3 = A3($Orchestrator.updateGraph,uiModel,_p4,_p2.graph);
       var value = _p3._0;
       var newGraph = _p3._1;
       return {time: newTime
@@ -18009,16 +18049,13 @@ Elm.BufferHandler.make = function (_elm) {
              newBufferIndex,
              value,
              _p2.buffer)
-             ,bufferIndex: newBufferIndex};
+             ,bufferIndex: newBufferIndex
+             ,statePool: _p4};
    });
    var updateBufferState = F2(function (uiModel,prevBufferState) {
-      var prevBuffer = prevBufferState.buffer;
-      var initialGraph = prevBufferState.graph;
       var time = prevBufferState.time + sampleDuration;
-      var initialBufferState = {time: time
-                               ,graph: initialGraph
-                               ,buffer: prevBuffer
-                               ,bufferIndex: 0};
+      var initialBufferState = _U.update(prevBufferState,
+      {time: time,bufferIndex: 0});
       return A3(foldn,
       updateForSample(uiModel),
       initialBufferState,
@@ -18027,9 +18064,14 @@ Elm.BufferHandler.make = function (_elm) {
    var initialState = {time: 0.0
                       ,graph: $Lib$StringKeyMutableDict.empty({ctor: "_Tuple0"})
                       ,buffer: A2($Lib$MutableArray.repeat,$Gui.bufferSize,0.0)
-                      ,bufferIndex: 0};
-   var BufferState = F4(function (a,b,c,d) {
-      return {time: a,graph: b,buffer: c,bufferIndex: d};
+                      ,bufferIndex: 0
+                      ,statePool: $Lib$StringKeyMutableDict.empty({ctor: "_Tuple0"})};
+   var BufferState = F5(function (a,b,c,d,e) {
+      return {time: a
+             ,graph: b
+             ,buffer: c
+             ,bufferIndex: d
+             ,statePool: e};
    });
    return _elm.BufferHandler.values = {_op: _op
                                       ,BufferState: BufferState

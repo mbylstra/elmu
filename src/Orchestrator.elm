@@ -10,6 +10,7 @@ module Orchestrator where
 import Lib.MutableArray as MutableArray exposing (MutableArray)
 import Lib.GenericMutableDict as GenericMutableDict exposing (GenericMutableDict)
 import Dict exposing (Dict)
+import Audio.StatePool as StatePool exposing (StatePool)
 
 import Lib.StringKeyMutableDict as StringKeyMutableDict
 import PrettyDebug
@@ -40,6 +41,7 @@ type InputHelper ui
   | ValueInput Float
 
 
+-- type GenericMutableDict = GenericMutableDict
 --------------------------------------------------------------------------------
 -- MAIN
 --------------------------------------------------------------------------------
@@ -58,8 +60,8 @@ type InputHelper ui
 --  - the two record updates that happend for every node
 
 
-updateGraph : ui -> DictGraph ui -> (Float, DictGraph ui)
-updateGraph uiModel graph =
+updateGraph : ui -> StatePool -> DictGraph ui  -> (Float, DictGraph ui)
+updateGraph uiModel statePool graph  =
   let
     -- _ = Debug.log "updateGraph" graph
     destinationNode = getDestinationNode graph
@@ -68,7 +70,7 @@ updateGraph uiModel graph =
     -- _ = Debug.log "uiModel" uiModel
     -- _ = Debug.log "updateNode" updateNode
   in
-    (updateNode uiModel graph destinationNode, graph) -- a tuple is OK here beacuse it's only created once
+    (updateNode uiModel statePool graph destinationNode, graph) -- a tuple is OK here beacuse it's only created once
   -- (0.0, graph)  -- 3% when updateGraph not called
 
 getDestinationNode : DictGraph ui -> AudioNode ui
@@ -80,8 +82,8 @@ getDestinationNode graph =
     -- 3-6% when js object is used to look up destination
     StringKeyMutableDict.unsafeNativeGet "Destination" graph
 
-updateNode : ui -> DictGraph ui -> AudioNode ui -> Float
-updateNode uiModel graph node =
+updateNode : ui -> StatePool -> DictGraph ui -> AudioNode ui -> Float
+updateNode uiModel statePool graph node =
 
   let
       -- gdict = GenericMutableDict.empty ()
@@ -89,6 +91,8 @@ updateNode uiModel graph node =
       -- _ = GenericMutableDict.insert "hello" "string" gdict  -- I think it works!!!!! Fuck yeah!
     -- _ = Debug.log "In updateGraph"
     _ = 1
+    nodeId = getNodeAutoId node
+    nodeState = StringKeyMutableDict.unsafeNativeGet nodeId statePool
   in
     case node of
       Oscillator func constantBaseProps dynamicBaseProps oscProps ->
@@ -96,7 +100,7 @@ updateNode uiModel graph node =
           -- _ = Debug.log "old phase" oscProps.phase
           -- _ = Debug.log "oscPropsStart" oscProps
           inputs = constantBaseProps.inputs
-          inputValues = getInputValues uiModel graph inputs
+          inputValues = updateInputValues uiModel statePool nodeState graph inputs
           -- _ = Debug.log "inputValues" inputValues
 
           frequency = (MutableArray.unsafeNativeGet 0 inputValues)
@@ -133,7 +137,7 @@ updateNode uiModel graph node =
       Adder func constantBaseProps dynamicBaseProps ->
         let
           inputs = constantBaseProps.inputs
-          inputValues = getInputValues uiModel graph inputs
+          inputValues = updateInputValues uiModel statePool nodeState graph inputs
           newValue = -- damn, need to do sometin gabout this friggen tuple
             func inputValues
           _ = StringKeyMutableDict.insert (getNodeAutoId node) node graph
@@ -145,7 +149,7 @@ updateNode uiModel graph node =
           -- _ = Debug.log "Destination" 0
           inputs = constantBaseProps.inputs
           -- graph2 = graph
-          inputValues = getInputValues uiModel graph inputs
+          inputValues = updateInputValues uiModel statePool nodeState graph inputs
           newValue = (MutableArray.unsafeNativeGet 0 inputValues)
 
           _ = GenericMutableDict.insert "outputValue" newValue dynamicBaseProps
@@ -170,32 +174,31 @@ updateNode uiModel graph node =
       _ -> Debug.crash("")
 
 
-getInputValues : ui -> DictGraph ui -> InputsDict ui -> MutableArray Float
-getInputValues uiModel graph inputs =
+updateInputValues : ui -> StatePool -> GenericMutableDict -> DictGraph ui -> InputsDict ui -> MutableArray Float
+updateInputValues uiModel statePool nodeState graph inputsDict =
   let
-    accInitial = MutableArray.empty ()
-      -- it's the dict updates for every input that's slow.
-      -- make this a mutable Array instead
-
-
-    update inputName input acc =
+    inputValues = GenericMutableDict.unsafeNativeGet "inputValues" nodeState
+    update inputName input index =
       let
-        inputValues = acc
-        value = getInputValue uiModel graph input
-        inputValues2 = MutableArray.push value inputValues
+        value = getInputValue uiModel statePool graph input
+        _ = MutableArray.set index value inputValues
       in
-        inputValues2
+        index + 1
+    _ = Dict.foldl update 0 inputsDict   -- wecan continue using dicts for the Input's
   in
-    Dict.foldl update accInitial inputs   -- wecan continue using dicts for the Input's
+    inputValues
 
 
-getInputValue : ui -> DictGraph ui -> Input ui -> Float
-getInputValue uiModel graph input =
+    -- we can map and iterate, as inputs values is nice an mutable! haha
+
+
+getInputValue : ui -> StatePool -> DictGraph ui -> Input ui -> Float
+getInputValue uiModel statePool graph input =
   case getInputHelper uiModel graph input of
     ValueInput value ->
       value
     ReferencedNodeInput node ->
-      updateNode uiModel graph node
+      updateNode uiModel statePool graph node
 
 
 getInputHelper : ui -> DictGraph ui -> Input ui

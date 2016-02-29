@@ -7,6 +7,8 @@ import Gui exposing(getFrequency, bufferSize) -- this is pretty wierd, but the n
 import Lib.MutableArray as MutableArray exposing (MutableArray)
 import Lib.StringKeyMutableDict as StringKeyMutableDict exposing (StringKeyMutableDict)
 
+import Audio.StatePool as StatePool exposing (StatePool)
+
 -- import Dict exposing (Dict)
 import Orchestrator exposing (updateGraph)
 
@@ -26,6 +28,7 @@ type alias BufferState ui =
     , graph: DictGraph ui
     , buffer: Buffer
     , bufferIndex: Int
+    , statePool: StatePool
     -- , uiModel: EncodedModel
     }
 
@@ -48,6 +51,7 @@ initialState =
   , graph = StringKeyMutableDict.empty ()
   , buffer = MutableArray.repeat bufferSize 0.0
   , bufferIndex = 0
+  , statePool = StringKeyMutableDict.empty ()
   }
 
 
@@ -88,7 +92,7 @@ foldn func initial count =
 
 
 updateForSample : ui -> BufferState ui -> BufferState ui
-updateForSample uiModel {time, graph, buffer, bufferIndex} =
+updateForSample uiModel {time, graph, buffer, bufferIndex, statePool} =
   let
       -- _ = Debug.crash "updateForSample"
       newTime  = time + sampleDuration
@@ -98,7 +102,7 @@ updateForSample uiModel {time, graph, buffer, bufferIndex} =
   in
     let
       -- _ = Debug.log "!!!value" value
-      (value, newGraph) = updateGraph uiModel graph
+      (value, newGraph) = updateGraph uiModel statePool graph
       -- (value, newGraph) = (0.0, graph)
       -- _ = Debug.crash "updateForSample"
     in
@@ -106,6 +110,7 @@ updateForSample uiModel {time, graph, buffer, bufferIndex} =
       , graph = newGraph
       , buffer = MutableArray.set newBufferIndex value buffer
       , bufferIndex = newBufferIndex
+      , statePool = statePool
       }
 
 
@@ -116,15 +121,9 @@ updateBufferState uiModel prevBufferState =
     -- _ = Debug.log "uiModel" uiModel
     time = prevBufferState.time + sampleDuration
     -- _ = Debug.log "time" time
-    initialGraph = prevBufferState.graph
-    prevBuffer = prevBufferState.buffer
 
     initialBufferState =
-      { time = time
-      , graph = initialGraph
-      , buffer = prevBuffer
-      , bufferIndex = 0
-      }
+      { prevBufferState | time = time, bufferIndex = 0 }
 
     -- _ = Debug.log "initialBufferState" initialBufferState
     -- _ = Debug.log "bufferSize" bufferSize

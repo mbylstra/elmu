@@ -25,6 +25,7 @@ empty =
 fromList : List (keyType, valueType) -> GenericMutableDict
 fromList list =
   Native.GenericMutableDict.fromList list
+
 --
 -- get : keyType -> GenericMutableDict keyType valueType -> Maybe valueType
 -- get key dict =

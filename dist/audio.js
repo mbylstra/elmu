@@ -3,7 +3,9 @@ var PROFILING = 1;
 // var DEBUG = 0;
 var DEBUG = 0;
 // var ITERATIONS = 100000;
+// var ITERATIONS = 1000;
 var ITERATIONS = 100;
+
 
 // var ITERATIONS = 1;
 
@@ -62,6 +64,7 @@ var bufferState = BufferHandler.initialState;
 // console.log(bufferState);
 bufferState.graph = audioGraph;
 bufferState.statePool = StatePool.initialiseStatePool(audioGraph);
+console.log('statePool', bufferState.statePool);
 
 // console.log('bufferState', bufferState);
 // console.log('audioGraph', audioGraph);
@@ -72,7 +75,8 @@ if (PROFILING) {
     for (var i = 0; i < ITERATIONS; i++) {
         // fillBuffer();
         // console.log('start');
-        // console.log('updateBufferState', BufferHandler.updateBufferState);
+        // console.log('updateBufferState');
+        // console.log(BufferHandler.updateBufferState);
         bufferState = BufferHandler.updateBufferState(uiModel)(bufferState);
         // console.log('bufferState', bufferState);
         // console.log('end');
