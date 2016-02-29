@@ -50,6 +50,7 @@ if (DEBUG) {
 //expose Elm modules
 var ReactiveAudio = exposeElmModule(Elm.ReactiveAudio);
 var BufferHandler = exposeElmModule(Elm.BufferHandler);
+var StatePool = exposeElmModule(Elm.Audio.StatePool);
 // console.log('BufferHandler', BufferHandler);
 // var  = exposeElmModule(Elm.ReactiveAudio);
 var _Utils = exposeElmModule(Elm.Native.Utils);
@@ -60,6 +61,7 @@ var audioGraph = ReactiveAudio.audioGraph;
 var bufferState = BufferHandler.initialState;
 // console.log(bufferState);
 bufferState.graph = audioGraph;
+bufferState.statePool = StatePool.initialiseStatePool(audioGraph);
 
 // console.log('bufferState', bufferState);
 // console.log('audioGraph', audioGraph);

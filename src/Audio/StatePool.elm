@@ -1,3 +1,5 @@
+module Audio.StatePool where
+
 import Lib.StringKeyMutableDict as StringKeyMutableDict exposing (StringKeyMutableDict)
 import Lib.GenericMutableDict as GenericMutableDict exposing (GenericMutableDict)
 import Audio.MainTypes exposing (DictGraph, AudioNode(Oscillator, Destination, Adder, Dummy))

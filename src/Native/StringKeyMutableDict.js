@@ -73,7 +73,7 @@ Elm.Native.StringKeyMutableDict.make = function(localRuntime) {
     var tuplesArray = Object.keys(dict).map(function(key) {
       return Utils.Tuple2(key, dict[key])
     });
-		return Array.toList(tuplesArray);
+		return fromArray(tuplesArray);
   }
 
 	Elm.Native.StringKeyMutableDict.values = {

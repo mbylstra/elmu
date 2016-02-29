@@ -15,7 +15,10 @@ import Audio.FlattenGraph exposing (flattenGraph)
 -- import Helpers exposing (toMutableDict)
 
 
+-- The following only used when called from audio.js
+import Audio.StatePool exposing(initialiseStatePool)
 import BufferHandler exposing (updateBufferState)
+
  -- we need to import this so that JS can see it!
 
 

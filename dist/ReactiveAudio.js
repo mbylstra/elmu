@@ -15102,6 +15102,7 @@ Elm.Native.StringKeyMutableDict.make = function(localRuntime) {
 	var List = Elm.Native.List.make(localRuntime);
 	var Maybe = Elm.Maybe.make(localRuntime);
 	var Utils = Elm.Native.Utils.make(localRuntime);
+	var Array = Elm.Native.Array.make(localRuntime);
 	var fromArray = Utils.list;
 
   function empty()
@@ -15154,6 +15155,14 @@ Elm.Native.StringKeyMutableDict.make = function(localRuntime) {
     );
   }
 
+  function toList(dict) {
+    // convert to an array of tuples, then convert that to a list
+    var tuplesArray = Object.keys(dict).map(function(key) {
+      return Utils.Tuple2(key, dict[key])
+    });
+		return fromArray(tuplesArray);
+  }
+
 	Elm.Native.StringKeyMutableDict.values = {
 		empty: empty,
 		fromList: fromList,
@@ -15162,6 +15171,7 @@ Elm.Native.StringKeyMutableDict.make = function(localRuntime) {
 		unsafeNativeGet: F2(unsafeNativeGet),
 		insert: F3(insert),
     values: values,
+    toList: toList,
 		// set: F3(set),
 		// map: F2(map),
 		// length: length,
@@ -15207,7 +15217,7 @@ Elm.Lib.StringKeyMutableDict.make = function (_elm) {
             return _p0._0;
          } else {
             return _U.crashCase("Lib.StringKeyMutableDict",
-            {start: {line: 38,column: 3},end: {line: 40,column: 79}},
+            {start: {line: 43,column: 3},end: {line: 45,column: 79}},
             _p0)(A2($Basics._op["++"],
             "Dict does not have key `",
             A2($Basics._op["++"],$Basics.toString(key),"`")));
@@ -15216,6 +15226,9 @@ Elm.Lib.StringKeyMutableDict.make = function (_elm) {
    var get = F2(function (key,dict) {
       return A2($Native$StringKeyMutableDict.get,key,dict);
    });
+   var toList = function (dict) {
+      return $Native$StringKeyMutableDict.toList(dict);
+   };
    var fromList = function (list) {
       return $Native$StringKeyMutableDict.fromList(list);
    };
@@ -15228,6 +15241,7 @@ Elm.Lib.StringKeyMutableDict.make = function (_elm) {
                                                  ,unsafeGet: unsafeGet
                                                  ,unsafeNativeGet: unsafeNativeGet
                                                  ,fromList: fromList
+                                                 ,toList: toList
                                                  ,values: values};
 };
 Elm.Native.GenericMutableDict = {};
@@ -16557,6 +16571,76 @@ Elm.Audio.FlattenGraph.make = function (_elm) {
                                            ,flattenGraph: flattenGraph
                                            ,convertUserIdInputs: convertUserIdInputs
                                            ,flattenNodeList: flattenNodeList};
+};
+Elm.Audio = Elm.Audio || {};
+Elm.Audio.StatePool = Elm.Audio.StatePool || {};
+Elm.Audio.StatePool.make = function (_elm) {
+   "use strict";
+   _elm.Audio = _elm.Audio || {};
+   _elm.Audio.StatePool = _elm.Audio.StatePool || {};
+   if (_elm.Audio.StatePool.values)
+   return _elm.Audio.StatePool.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Audio$MainTypes = Elm.Audio.MainTypes.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Lib$GenericMutableDict = Elm.Lib.GenericMutableDict.make(_elm),
+   $Lib$StringKeyMutableDict = Elm.Lib.StringKeyMutableDict.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var _op = {};
+   var nodeToStateDict = function (node) {
+      var _p0 = node;
+      switch (_p0.ctor)
+      {case "Oscillator": var _p1 = A2($Lib$GenericMutableDict.insert,
+           "phase",
+           0.0);
+           var _p2 = A2($Lib$GenericMutableDict.insert,
+           "inputValues",
+           _U.list([0.0,0.0,0.0]));
+           var _p3 = A2($Lib$GenericMutableDict.insert,"value",0.0);
+           var dict = $Lib$GenericMutableDict.empty({ctor: "_Tuple0"});
+           return dict;
+         case "Adder": var _p4 = A2($Lib$GenericMutableDict.insert,
+           "value",
+           0.0);
+           var dict = $Lib$GenericMutableDict.empty({ctor: "_Tuple0"});
+           return dict;
+         case "Destination": var _p5 = A2($Lib$GenericMutableDict.insert,
+           "value",
+           0.0);
+           var dict = $Lib$GenericMutableDict.empty({ctor: "_Tuple0"});
+           return dict;
+         default: var _p6 = A2($Lib$GenericMutableDict.insert,
+           "value",
+           0.0);
+           var dict = $Lib$GenericMutableDict.empty({ctor: "_Tuple0"});
+           return dict;}
+   };
+   var convertGraphTuple = function (_p7) {
+      var _p8 = _p7;
+      return {ctor: "_Tuple2",_0: _p8._0,_1: nodeToStateDict(_p8._1)};
+   };
+   var initialiseStatePool = function (graph) {
+      var graphList = $Lib$StringKeyMutableDict.toList(graph);
+      var stateTuples = A2($List.map,convertGraphTuple,graphList);
+      var pool = $Lib$StringKeyMutableDict.empty({ctor: "_Tuple0"});
+      var insertNodeState = function (_p9) {
+         var _p10 = _p9;
+         return A3($Lib$StringKeyMutableDict.insert,
+         _p10._0,
+         _p10._1,
+         pool);
+      };
+      var _p11 = A2($List.map,insertNodeState,stateTuples);
+      return pool;
+   };
+   return _elm.Audio.StatePool.values = {_op: _op
+                                        ,initialiseStatePool: initialiseStatePool
+                                        ,convertGraphTuple: convertGraphTuple
+                                        ,nodeToStateDict: nodeToStateDict};
 };
 Elm.Lib = Elm.Lib || {};
 Elm.Lib.MouseExtra = Elm.Lib.MouseExtra || {};
