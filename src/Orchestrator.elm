@@ -62,6 +62,11 @@ updateNode uiModel statePool graph node =
     case node of
       Oscillator func constantBaseProps dynamicBaseProps oscProps ->
         let
+
+          -- I reckon this can be automated (particularly in JS)
+          -- You just need a list of props names, and the rest can be done
+          -- Automatically. This doesn't even need to be defined in JS.
+
           inputs = constantBaseProps.inputs
           inputValues = updateInputValues uiModel statePool nodeState graph inputs
           frequency = (MutableArray.unsafeNativeGet 0 inputValues)
