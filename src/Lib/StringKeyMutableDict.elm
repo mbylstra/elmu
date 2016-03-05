@@ -8,6 +8,7 @@ module Lib.StringKeyMutableDict
     , fromList
     , toList
     , values
+    , keys
     ) where
 
 import Native.StringKeyMutableDict
@@ -56,6 +57,10 @@ insert key value dict =
 values : StringKeyMutableDict valueTupe -> List valueType
 values dict =
   Native.StringKeyMutableDict.values dict
+
+keys : StringKeyMutableDict valueTupe -> List valueType
+keys dict =
+  Native.StringKeyMutableDict.keys dict
 
 -- empty : StringKeyMutableDict keyType valueType
 -- empty =

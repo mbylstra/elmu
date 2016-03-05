@@ -1,6 +1,6 @@
 var PROFILING = 1;
 // var PROFILING = 0;
-// var DEBUG = 0;
+// var DEBUG = 1;
 var DEBUG = 0;
 // var ITERATIONS = 100000;
 // var ITERATIONS = 1000;
@@ -64,7 +64,7 @@ var bufferState = BufferHandler.initialState;
 // console.log(bufferState);
 bufferState.graph = audioGraph;
 bufferState.statePool = StatePool.initialiseStatePool(audioGraph);
-console.log('statePool', bufferState.statePool);
+// console.log('statePool', bufferState.statePool);
 
 // console.log('bufferState', bufferState);
 // console.log('audioGraph', audioGraph);

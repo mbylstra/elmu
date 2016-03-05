@@ -3,7 +3,8 @@ module Audio.Atoms.Sine where
 import Array exposing (Array)
 import Basics
 import ElmTest exposing (..)
-import Dict exposing(Dict)
+-- import Dict exposing(Dict)
+import Lib.StringKeyMutableDict as StringKeyMutableDict exposing(StringKeyMutableDict)
 
 import Audio.MainTypes exposing (..)
 import Audio.AudioNodeFunctions exposing (getPeriodSeconds, sampleDuration, fmod)
@@ -81,7 +82,7 @@ sine args =
     sinWave
     { userId = args.id
     , autoId = Nothing
-    , inputs = Dict.fromList
+    , inputs = StringKeyMutableDict.fromList
       [ ("frequency", args.frequency)
       , ("frequencyOffset", args.frequencyOffset)
       , ("phaseOffset", args.phaseOffset)

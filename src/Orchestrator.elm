@@ -42,7 +42,7 @@ import Native.Orchestrator
 --------------------------------------------------------------------------------
 
 -- updateGraph : () -> GenericMutableDict
-updateGraph : ui -> StatePool -> DictGraph ui  -> (Float, DictGraph ui)
+updateGraph : ui -> StatePool -> DictGraph ui  -> Float
 updateGraph uiModel statePool graph =
   Native.Orchestrator.updateGraph uiModel statePool graph
 

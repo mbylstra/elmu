@@ -1,12 +1,13 @@
 module Audio.FlattenGraph (flattenGraph, convertUserIdInputs, flattenNodeList) where
 
-import Audio.MainTypes exposing (..)
-import Dict exposing (Dict)
-import Lib.Misc exposing (unsafeDictGet)
+import Audio.MainTypes exposing (AudioNodes, DictGraph, updateConstantBasePropsCollectExtra, AudioNode(Destination), ConstantBaseProps, Input(AutoID, Node, ID), getNodeAutoId, getConstantBaseProps, updateConstantBaseProps)
+-- import StringKeyMutableDict exposing (StringKeyMutableDict)
+-- import Lib.Misc exposing (unsafeDictGet)
+-- import StringKeyMutableDict as StringKeyMutableDict
 
 import Lib.ListExtra as ListExtra
 
-import PrettyDebug
+-- import PrettyDebug
 
 import Lib.StringKeyMutableDict as StringKeyMutableDict exposing (StringKeyMutableDict)
 
@@ -17,13 +18,15 @@ import Lib.StringKeyMutableDict as StringKeyMutableDict exposing (StringKeyMutab
   This could probably be cleaned up now that we've moved to "tuple inheritance"
 -}
 
+type alias InputsDict ui = StringKeyMutableDict (Input ui)
+
 flattenGraph : AudioNodes ui -> DictGraph ui
 flattenGraph graph =
   graph
   |> flattenNodeList
   |> convertUserIdInputs
   |> updateDestinationNode
-  |> flatNodeListToDict
+  |> flatNodeListToStringKeyMutableDict
 
 
 flattenNodeList : AudioNodes ui -> AudioNodes ui
@@ -58,14 +61,14 @@ flattenNode node oldLastId oldAccNodes =
       let
         -- _ = Debug.log "AAA" oldProps
         _ = "AAA"
-        debugOldInputs = Dict.toList oldProps.inputs
+        -- debugOldInputs = StringKeyMutableDict.toList oldProps.inputs
         -- _ = Debug.log "debugOldInputs" debugOldInputs
-        inputNames = Dict.keys oldProps.inputs
+        inputNames = StringKeyMutableDict.keys oldProps.inputs
         {props, lastId, accNodes} =
           doInputs
             inputNames
             {props = oldProps, lastId = oldLastId, accNodes = oldAccNodes, node=node}
-        debugNewInputs = Dict.keys props.inputs
+        -- debugNewInputs = StringKeyMutableDict.keys props.inputs
         -- _ = Debug.log "debugNewInputs" debugNewInputs
         id = lastId + 1
       in
@@ -131,7 +134,7 @@ flattenInputUpperMiddle { inputName, props, lastId, accNodes } =
       flattenInputMiddle
         { accNodes = accNodes
         , lastId = lastId
-        , input = unsafeDictGet inputName props.inputs  -- this assumes the inputName as already been validated
+        , input = StringKeyMutableDict.unsafeNativeGet inputName props.inputs  -- this assumes the inputName as already been validated
         , inputName = inputName
         , inputs = props.inputs
         }
@@ -155,7 +158,7 @@ flattenInputMiddle { accNodes, lastId, input, inputName, inputs } =
         let
           -- _ = PrettyDebug.log "flattenInputMiddle newInputs" newInputs
           -- _ = Debug.log "flattenInputMiddle iputName" inputName
-          newInputs = Dict.insert inputName (AutoID <| toString lastId) inputs  -- the input now points to an id, rather than an inline node
+          newInputs = StringKeyMutableDict.insert inputName (AutoID <| toString lastId) inputs  -- the input now points to an id, rather than an inline node
         in
           { lastId = lastId
           , accNodes = nodes
@@ -176,8 +179,8 @@ flattenInputLower {accNodes, lastId, input} =
       Nothing
 
 
-flatNodeListToDict : AudioNodes ui -> StringKeyMutableDict (AudioNode ui)
-flatNodeListToDict nodes =
+flatNodeListToStringKeyMutableDict : AudioNodes ui -> StringKeyMutableDict (AudioNode ui)
+flatNodeListToStringKeyMutableDict nodes =
   nodes
   |> List.map (\node -> (getNodeAutoId node, node))
   |> StringKeyMutableDict.fromList
@@ -215,9 +218,9 @@ convertUserIdInputs nodes =
       { baseProps |
         inputs =
           baseProps.inputs
-          |> Dict.toList
+          |> StringKeyMutableDict.toList
           |> List.map convertInput
-          |> Dict.fromList
+          |> StringKeyMutableDict.fromList
       }
 
     convertNodeUserIdInputs node =

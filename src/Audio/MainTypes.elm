@@ -1,6 +1,6 @@
 module Audio.MainTypes where
 
-import Dict exposing(Dict)
+-- import Dict exposing(Dict)
 -- import Lib.MutableDict exposing (MutableDict)
 import Lib.StringKeyMutableDict exposing (StringKeyMutableDict)
 import Lib.GenericMutableDict as GenericMutableDict exposing (GenericMutableDict)
@@ -42,7 +42,7 @@ type Input ui
 type alias ConstantBaseProps ui =
   { userId : Maybe String
   , autoId : Maybe String
-  , inputs : Dict String (Input ui)
+  , inputs : StringKeyMutableDict (Input ui)
   }
 
 type alias DynamicBaseProps = GenericMutableDict
@@ -103,7 +103,7 @@ initialiseOscillatorProps () = GenericMutableDict.fromList [("phase", 0.0)]
 -- js you can use an object for named arguments. Also, the actual (for example)
 -- sine function would necessarily need to take in a list of strings,
 
-type alias InputsDict ui = Dict String (Input ui)
+type alias InputsDict ui = StringKeyMutableDict (Input ui)
   -- These need to be converted to NodeBase's.
   -- | Gain
   --     { id : Maybe idType

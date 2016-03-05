@@ -2,7 +2,8 @@ module Audio.Atoms.Adder where
 
 import Audio.MainTypes exposing (AudioNode(Adder), AdderF, Input, initialiseDynamicBaseProps, InputsDict)
 import Lib.MutableArray as MutableArray
-import Dict
+-- import Dict
+import Lib.StringKeyMutableDict as StringKeyMutableDict exposing(StringKeyMutableDict)
 
 add : AdderF
 add floats = MutableArray.sum floats   -- perhaps you could make a different function that averaged or tailed off logarithmically or something
@@ -34,7 +35,7 @@ namedAdder name inputs =
     inputsDict =
       inputs
       |> List.indexedMap (\indexInt value -> (toString(indexInt), value))
-      |> Dict.fromList
+      |> StringKeyMutableDict.fromList
   in
     Adder
       add

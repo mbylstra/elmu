@@ -1,6 +1,6 @@
 module Audio.Atoms.Destination (destination) where
 
-import Dict exposing(Dict)
+import Lib.StringKeyMutableDict as StringKeyMutableDict exposing(StringKeyMutableDict)
 import Audio.MainTypes exposing (..)
 
 destination : String -> (AudioNode uiModel)
@@ -9,7 +9,7 @@ destination userId =
     identity
     { userId = Nothing
     , autoId = Just "Nothing"
-    , inputs = Dict.fromList
+    , inputs = StringKeyMutableDict.fromList
       [ ("A", ID userId)
       ]
     }

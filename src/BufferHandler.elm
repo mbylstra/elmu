@@ -92,25 +92,24 @@ foldn func initial count =
 
 
 updateForSample : ui -> BufferState ui -> BufferState ui
-updateForSample uiModel {time, graph, buffer, bufferIndex, statePool} =
+updateForSample uiModel bufferState =
   let
       -- _ = Debug.crash "updateForSample"
-      newTime  = time + sampleDuration
-      newBufferIndex = bufferIndex + 1
+      newTime  = bufferState.time + sampleDuration
+      newBufferIndex = bufferState.bufferIndex + 1
       -- _ = Debug.log "uiModel" uiModel
       -- _ = Debug.log "time" time
   in
     let
       -- _ = Debug.log "!!!value" value
-      (value, newGraph) = updateGraph uiModel statePool graph
+      value = updateGraph uiModel bufferState.statePool bufferState.graph
       -- (value, newGraph) = (0.0, graph)
       -- _ = Debug.crash "updateForSample"
+      _ = MutableArray.set newBufferIndex value bufferState.buffer
     in
-      { time  = newTime
-      , graph = newGraph
-      , buffer = MutableArray.set newBufferIndex value buffer
+      { bufferState |
+        time  = newTime
       , bufferIndex = newBufferIndex
-      , statePool = statePool
       }
 
 
