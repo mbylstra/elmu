@@ -15547,7 +15547,7 @@ Elm.Audio.MainTypes.make = function (_elm) {
       {case "Dummy": return func(_p0._0);
          case "Oscillator": return func(_p0._1);
          case "Adder": return func(_p0._1);
-         default: return func(_p0._0);}
+         default: return func(_p0._1);}
    });
    var getConstantBaseProps = function (node) {
       return A2(applyToConstantBaseProps,$Basics.identity,node);
@@ -15579,8 +15579,8 @@ Elm.Audio.MainTypes.make = function (_elm) {
    var Adder = F3(function (a,b,c) {
       return {ctor: "Adder",_0: a,_1: b,_2: c};
    });
-   var Destination = F2(function (a,b) {
-      return {ctor: "Destination",_0: a,_1: b};
+   var Destination = F3(function (a,b,c) {
+      return {ctor: "Destination",_0: a,_1: b,_2: c};
    });
    var Oscillator = F4(function (a,b,c,d) {
       return {ctor: "Oscillator",_0: a,_1: b,_2: c,_3: d};
@@ -15607,11 +15607,11 @@ Elm.Audio.MainTypes.make = function (_elm) {
            return {ctor: "_Tuple2"
                   ,_0: A3(Adder,_p3._0,newConstantBaseProps,_p3._2)
                   ,_1: extra};
-         default: var _p7 = updateFunc(_p3._0);
+         default: var _p7 = updateFunc(_p3._1);
            var newConstantBaseProps = _p7._0;
            var extra = _p7._1;
            return {ctor: "_Tuple2"
-                  ,_0: A2(Destination,newConstantBaseProps,_p3._1)
+                  ,_0: A3(Destination,_p3._0,newConstantBaseProps,_p3._2)
                   ,_1: extra};}
    });
    var updateConstantBaseProps = F2(function (updateFunc,
@@ -15625,7 +15625,10 @@ Elm.Audio.MainTypes.make = function (_elm) {
            _p8._2,
            _p8._3);
          case "Adder": return A3(Adder,_p8._0,updateFunc(_p8._1),_p8._2);
-         default: return A2(Destination,updateFunc(_p8._0),_p8._1);}
+         default: return A3(Destination,
+           _p8._0,
+           updateFunc(_p8._1),
+           _p8._2);}
    });
    var DummyProps = function (a) {    return {func: a};};
    var initialiseDynamicBaseProps = function (_p9) {
@@ -15733,7 +15736,8 @@ Elm.Audio.Atoms.Destination.make = function (_elm) {
    $Signal = Elm.Signal.make(_elm);
    var _op = {};
    var destination = function (userId) {
-      return A2($Audio$MainTypes.Destination,
+      return A3($Audio$MainTypes.Destination,
+      $Basics.identity,
       {userId: $Maybe.Nothing
       ,autoId: $Maybe.Just("Nothing")
       ,inputs: $Dict.fromList(_U.list([{ctor: "_Tuple2"
@@ -16346,11 +16350,12 @@ Elm.Audio.FlattenGraph.make = function (_elm) {
                   var _p3 = _p0._0;
                   var _p2 = _p3;
                   if (_p2.ctor === "Destination") {
-                        var newConstantBaseProps = _U.update(_p2._0,
+                        var newConstantBaseProps = _U.update(_p2._1,
                         {autoId: $Maybe.Just("Destination")});
-                        var newNode = A2($Audio$MainTypes.Destination,
+                        var newNode = A3($Audio$MainTypes.Destination,
+                        _p2._0,
                         newConstantBaseProps,
-                        _p2._1);
+                        _p2._2);
                         return A2($Basics._op["++"],
                         prevNodes,
                         A2($Basics._op["++"],_U.list([newNode]),_p4));
@@ -17818,6 +17823,306 @@ Elm.Gui.make = function (_elm) {
                             ,main: main
                             ,bufferSize: bufferSize};
 };
+Elm.Native.Orchestrator = {};
+Elm.Native.Orchestrator.make = function(localRuntime) {
+
+	localRuntime.Native = localRuntime.Native || {};
+	localRuntime.Native.Orchestrator = localRuntime.Native.Orchestrator || {};
+	if (localRuntime.Native.Orchestrator.values)
+	{
+		return localRuntime.Native.Orchestrator.values;
+	}
+	if ('values' in Elm.Native.Orchestrator)
+	{
+		return localRuntime.Native.Orchestrator.values = Elm.Native.Orchestrator.values;
+	}
+
+	var List = Elm.Native.List.make(localRuntime);
+	var Maybe = Elm.Maybe.make(localRuntime);
+
+
+  // module Orchestrator where
+  //
+  // --------------------------------------------------------------------------------
+  // -- EXTERNAL DEPENDENCIES
+  // --------------------------------------------------------------------------------
+  //
+  // import Dict exposing (Dict)
+  //
+  // --------------------------------------------------------------------------------
+  // -- INTERNAL DEPENDENCIES
+  // --------------------------------------------------------------------------------
+  //
+  // import Lib.MutableArray as MutableArray exposing (MutableArray)
+  // import Lib.GenericOrchestrator as GenericOrchestrator exposing (GenericOrchestrator)
+  // import Lib.StringKeyOrchestrator as StringKeyOrchestrator
+  // import Audio.StatePool as StatePool exposing (StatePool)
+  // import Audio.MainTypes exposing (AudioNode(Destination, Oscillator, Adder), getNodeAutoId, DictGraph, InputsDict, Input(Value, Default, UI, AutoID, Node, ID))
+  //
+  // --------------------------------------------------------------------------------
+  // -- TYPE DEFINITIONS
+  // --------------------------------------------------------------------------------
+  //
+  // type alias ExternalState ui=
+  //     { time : Float
+  //     , externalInputState : ui
+  //     }
+  //
+  // {- the InputHelper type further groups the Input type into
+  //   two types: NodeInput and ValueInput. This reduces concerns
+  //   for this implemenetation code, without making the end user
+  //   API for Input not annoylingly nested to be used as a DSL
+  // -}
+  // type InputHelper ui
+  //   = ReferencedNodeInput (AudioNode ui)
+  //   | ValueInput Float
+  //
+  //
+  // --------------------------------------------------------------------------------
+  // -- MAIN
+  // --------------------------------------------------------------------------------
+  //
+  // updateGraph : ui -> StatePool -> DictGraph ui  -> (Float, DictGraph ui)
+  // updateGraph uiModel statePool graph  =
+  //   let
+  //     destinationNode = getDestinationNode graph
+  //   in
+  //     (updateNode uiModel statePool graph destinationNode, graph) -- a tuple is OK here beacuse it's only created once
+  //
+
+  var getInputValue = function(uiModel, statePool, graph, input) {
+    switch (input.ctor) {
+      case "Value":
+        return input._0;
+      case "AutoID":
+      // case "UI": ??
+        var node = graph[input._0];
+        return updateNode(uiModel, statePool, graph, node);
+    }
+  }
+  // getInputValue : ui -> StatePool -> DictGraph ui -> Input ui -> Float
+  // getInputValue uiModel statePool graph input =
+  //   case getInputHelper uiModel graph input of
+  //     ValueInput value ->
+  //       value
+  //     ReferencedNodeInput node ->
+  //       updateNode uiModel statePool graph node
+  //
+  //
+  // getInputHelper : ui -> DictGraph ui -> Input ui
+  //           -> InputHelper ui
+  // getInputHelper ui graph input =
+  //   case input of
+  //     Value value ->
+  //       ValueInput value
+  //     Default ->
+  //       ValueInput 0.0
+  //     UI func ->
+  //       ValueInput (func ui)
+  //     AutoID id ->
+  //       case StringKeyOrchestrator.get id graph of
+  //         Just node ->
+  //           ReferencedNodeInput node
+  //         Nothing ->
+  //           Debug.crash "This shouldn't happen. Could not find a node. The graph must not have been validated first"
+  //     Node node ->
+  //       Debug.crash "This shouldn't happen. The graph should have been flattened"
+  //     ID id ->
+  //       Debug.crash "This shouldn't happen. All ID inputs should have been converted to AutoID inputs"
+
+  var updateInputValues = function(uiModel, statePool, nodeState, graph, inputsDict) {
+    var Dict = Elm.Dict.make(localRuntime);
+    var inputValues = nodeState.inputValues;
+    Object.keys(inputsDict).map(function(key, i) {
+      // var input = inputsDict[key]; // shit, have to use elm for this
+      var input = Dict.get(key)(inputsDict)._0;// this sucks for performance! we can't use dicts :/ maybe records are better if possible??
+      var value = getInputValue(uiModel, statePool, graph, input);
+      inputValues[i] = value;
+    });
+    // inputsDict is actually just a JS object
+
+  }
+
+
+  var updateGraph = function(uiModel, statePool, graph) {
+    console.log('native updateGraph');
+    var destinationNode = graph.Destination;
+    return updateNode(uiModel, statePool, graph, destinationNode);
+  }
+
+  var updateNode = function(uiModel, statePool, graph, node) {
+
+    var func = node._0;
+    var constantBaseProps = node._1;
+    var dynamicBaseProps = node._2;
+    var nodeId = constantBaseProps.autoId._0;
+    var nodeState = statePool[nodeId];
+    var inputs =  constantBaseProps.inputs;
+    var inputValues = nodeState.inputValues;
+
+    updateInputValues(uiModel, statePool, nodeState, graph, inputs);
+
+    switch (node.ctor) {
+      case "Oscillator":
+        console.log("osicillator");
+
+        var oscProps = node._3;
+
+        var frequency = inputValues[0];
+        var frequencyOffset = inputValues[1];
+        var phaseOffset = inputValues[2];
+        var prevPhase = oscProps.phase;
+        var result = func(frequency, frequencyOffset, phaseOffset, prevPhase);
+        var newValue = result._0;
+        var newPhase = result._1;
+        dynamicBaseProps.outputValue = newValue;
+        oscProps.outputValue = newValue;
+        return newValue;
+
+      case "Adder":
+        newValue = func(inputValues);
+        return newValue;
+  //       Adder func constantBaseProps dynamicBaseProps ->
+  //         let
+  //           inputs = constantBaseProps.inputs
+  //           inputValues = updateInputValues uiModel statePool nodeState graph inputs
+  //           newValue = -- damn, need to do sometin gabout this friggen tuple
+  //             func inputValues
+  //           _ = StringKeyOrchestrator.insert (getNodeAutoId node) node graph
+  //         in
+  //           newValue
+
+      case "Destination":
+        console.log("Dest");
+        var newValue = inputValues[0];
+        return newValue;
+
+  //       Destination constantBaseProps dynamicBaseProps ->
+  //         let
+  //           inputs = constantBaseProps.inputs
+  //           inputValues = updateInputValues uiModel statePool nodeState graph inputs
+  //           newValue = (MutableArray.unsafeNativeGet 0 inputValues)
+  //
+  //           _ = GenericOrchestrator.insert "outputValue" newValue dynamicBaseProps
+  //
+  //           id = getNodeAutoId node  -- < 1%
+  //           graph3 = StringKeyOrchestrator.insert id node graph   -- the dict insert adds ~ 5-10 %  -- this is so much faster now!!
+  //         in
+  //           newValue
+  //
+  //       _ -> Debug.crash("")
+
+    }
+  }
+
+  // updateNode : ui -> StatePool -> DictGraph ui -> AudioNode ui -> Float
+  // updateNode uiModel statePool graph node =
+  //
+  //   let
+  //     nodeId = getNodeAutoId node
+  //     nodeState = StringKeyOrchestrator.unsafeNativeGet nodeId statePool
+
+  //   in
+  //     case node of
+  //       Oscillator func constantBaseProps dynamicBaseProps oscProps ->
+  //         let
+  //
+  //           -- I reckon this can be automated (particularly in JS)
+  //           -- You just need a list of props names, and the rest can be done
+  //           -- Automatically. This doesn't even need to be defined in JS.
+  //
+  //           inputs = constantBaseProps.inputs
+  //           inputValues = updateInputValues uiModel statePool nodeState graph inputs
+  //           frequency = (MutableArray.unsafeNativeGet 0 inputValues)
+  //           frequencyOffset = (MutableArray.unsafeNativeGet 1 inputValues)
+  //           phaseOffset = (MutableArray.unsafeNativeGet 2 inputValues)
+  //           prevPhase = (GenericOrchestrator.unsafeNativeGet "phase" oscProps)
+  //           (newValue, newPhase) = -- damn, need to do sometin gabout this friggen tuple
+  //             func frequency frequencyOffset phaseOffset prevPhase
+  //           _ = GenericOrchestrator.insert "outputValue" newValue dynamicBaseProps
+  //           _ = GenericOrchestrator.insert "phase" newPhase oscProps
+  //           _ = StringKeyOrchestrator.insert (getNodeAutoId node) node graph
+  //         in
+  //           newValue
+  //
+  //       Adder func constantBaseProps dynamicBaseProps ->
+  //         let
+  //           inputs = constantBaseProps.inputs
+  //           inputValues = updateInputValues uiModel statePool nodeState graph inputs
+  //           newValue = -- damn, need to do sometin gabout this friggen tuple
+  //             func inputValues
+  //           _ = StringKeyOrchestrator.insert (getNodeAutoId node) node graph
+  //         in
+  //           newValue
+  //
+  //       Destination constantBaseProps dynamicBaseProps ->
+  //         let
+  //           inputs = constantBaseProps.inputs
+  //           inputValues = updateInputValues uiModel statePool nodeState graph inputs
+  //           newValue = (MutableArray.unsafeNativeGet 0 inputValues)
+  //
+  //           _ = GenericOrchestrator.insert "outputValue" newValue dynamicBaseProps
+  //
+  //           id = getNodeAutoId node  -- < 1%
+  //           graph3 = StringKeyOrchestrator.insert id node graph   -- the dict insert adds ~ 5-10 %  -- this is so much faster now!!
+  //         in
+  //           newValue
+  //
+  //       _ -> Debug.crash("")
+  //
+  //
+  // updateInputValues : ui -> StatePool -> GenericOrchestrator -> DictGraph ui -> InputsDict ui -> MutableArray Float
+  // updateInputValues uiModel statePool nodeState graph inputsDict =
+  //   let
+  //     inputValues = GenericOrchestrator.unsafeNativeGet "inputValues" nodeState
+  //     update inputName input index =
+  //       let
+  //         value = getInputValue uiModel statePool graph input
+  //         _ = MutableArray.set index value inputValues  -- WTF.. this adds 10-15% for 10 oscillators???
+  //       in
+  //         index + 1
+  //     _ = Dict.foldl update 0 inputsDict   -- wecan continue using dicts for the Input's
+  //   in
+  //     inputValues
+  //
+  //
+  // getInputValue : ui -> StatePool -> DictGraph ui -> Input ui -> Float
+  // getInputValue uiModel statePool graph input =
+  //   case getInputHelper uiModel graph input of
+  //     ValueInput value ->
+  //       value
+  //     ReferencedNodeInput node ->
+  //       updateNode uiModel statePool graph node
+  //
+  //
+  // getInputHelper : ui -> DictGraph ui -> Input ui
+  //           -> InputHelper ui
+  // getInputHelper ui graph input =
+  //   case input of
+  //     Value value ->
+  //       ValueInput value
+  //     Default ->
+  //       ValueInput 0.0
+  //     UI func ->
+  //       ValueInput (func ui)
+  //     AutoID id ->
+  //       case StringKeyOrchestrator.get id graph of
+  //         Just node ->
+  //           ReferencedNodeInput node
+  //         Nothing ->
+  //           Debug.crash "This shouldn't happen. Could not find a node. The graph must not have been validated first"
+  //     Node node ->
+  //       Debug.crash "This shouldn't happen. The graph should have been flattened"
+  //     ID id ->
+  //       Debug.crash "This shouldn't happen. All ID inputs should have been converted to AutoID inputs"
+
+	Elm.Native.Orchestrator.values = {
+		updateGraph: F3(updateGraph),
+	};
+
+	return localRuntime.Native.Orchestrator.values = Elm.Native.Orchestrator.values;
+};
+
 Elm.Orchestrator = Elm.Orchestrator || {};
 Elm.Orchestrator.make = function (_elm) {
    "use strict";
@@ -17828,179 +18133,20 @@ Elm.Orchestrator.make = function (_elm) {
    $Audio$StatePool = Elm.Audio.StatePool.make(_elm),
    $Basics = Elm.Basics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
-   $Dict = Elm.Dict.make(_elm),
-   $Lib$GenericMutableDict = Elm.Lib.GenericMutableDict.make(_elm),
-   $Lib$MutableArray = Elm.Lib.MutableArray.make(_elm),
-   $Lib$StringKeyMutableDict = Elm.Lib.StringKeyMutableDict.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
+   $Native$Orchestrator = Elm.Native.Orchestrator.make(_elm),
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm);
    var _op = {};
-   var getDestinationNode = function (graph) {
-      var _p0 = 0;
-      return A2($Lib$StringKeyMutableDict.unsafeNativeGet,
-      "Destination",
-      graph);
-   };
-   var ValueInput = function (a) {
-      return {ctor: "ValueInput",_0: a};
-   };
-   var ReferencedNodeInput = function (a) {
-      return {ctor: "ReferencedNodeInput",_0: a};
-   };
-   var getInputHelper = F3(function (ui,graph,input) {
-      var _p1 = input;
-      switch (_p1.ctor)
-      {case "Value": return ValueInput(_p1._0);
-         case "Default": return ValueInput(0.0);
-         case "UI": return ValueInput(_p1._0(ui));
-         case "AutoID": var _p2 = A2($Lib$StringKeyMutableDict.get,
-           _p1._0,
-           graph);
-           if (_p2.ctor === "Just") {
-                 return ReferencedNodeInput(_p2._0);
-              } else {
-                 return _U.crashCase("Orchestrator",
-                 {start: {line: 215,column: 7},end: {line: 219,column: 115}},
-                 _p2)("This shouldn\'t happen. Could not find a node. The graph must not have been validated first");
-              }
-         case "Node": return _U.crashCase("Orchestrator",
-           {start: {line: 207,column: 3},end: {line: 223,column: 101}},
-           _p1)("This shouldn\'t happen. The graph should have been flattened");
-         default: return _U.crashCase("Orchestrator",
-           {start: {line: 207,column: 3},end: {line: 223,column: 101}},
-           _p1)("This shouldn\'t happen. All ID inputs should have been converted to AutoID inputs");}
-   });
-   var getInputValue = F4(function (uiModel,
-   statePool,
-   graph,
-   input) {
-      var _p6 = A3(getInputHelper,uiModel,graph,input);
-      if (_p6.ctor === "ValueInput") {
-            return _p6._0;
-         } else {
-            return A4(updateNode,uiModel,statePool,graph,_p6._0);
-         }
-   });
-   var updateNode = F4(function (uiModel,statePool,graph,node) {
-      var nodeId = $Audio$MainTypes.getNodeAutoId(node);
-      var nodeState = A2($Lib$StringKeyMutableDict.unsafeNativeGet,
-      nodeId,
-      statePool);
-      var _p7 = 1;
-      var _p8 = node;
-      switch (_p8.ctor)
-      {case "Oscillator": var _p13 = _p8._3;
-           var _p9 = A3($Lib$StringKeyMutableDict.insert,
-           $Audio$MainTypes.getNodeAutoId(node),
-           node,
-           graph);
-           var prevPhase = A2($Lib$GenericMutableDict.unsafeNativeGet,
-           "phase",
-           _p13);
-           var inputs = _p8._1.inputs;
-           var inputValues = A5(updateInputValues,
-           uiModel,
-           statePool,
-           nodeState,
-           graph,
-           inputs);
-           var frequency = A2($Lib$MutableArray.unsafeNativeGet,
-           0,
-           inputValues);
-           var frequencyOffset = A2($Lib$MutableArray.unsafeNativeGet,
-           1,
-           inputValues);
-           var phaseOffset = A2($Lib$MutableArray.unsafeNativeGet,
-           2,
-           inputValues);
-           var _p10 = A4(_p8._0,
-           frequency,
-           frequencyOffset,
-           phaseOffset,
-           prevPhase);
-           var newValue = _p10._0;
-           var newPhase = _p10._1;
-           var _p11 = A3($Lib$GenericMutableDict.insert,
-           "outputValue",
-           newValue,
-           _p8._2);
-           var _p12 = A3($Lib$GenericMutableDict.insert,
-           "phase",
-           newPhase,
-           _p13);
-           return newValue;
-         case "Adder": var _p14 = A3($Lib$StringKeyMutableDict.insert,
-           $Audio$MainTypes.getNodeAutoId(node),
-           node,
-           graph);
-           var inputs = _p8._1.inputs;
-           var inputValues = A5(updateInputValues,
-           uiModel,
-           statePool,
-           nodeState,
-           graph,
-           inputs);
-           var newValue = _p8._0(inputValues);
-           return newValue;
-         case "Destination":
-         var id = $Audio$MainTypes.getNodeAutoId(node);
-           var graph3 = A3($Lib$StringKeyMutableDict.insert,id,node,graph);
-           var inputs = _p8._0.inputs;
-           var inputValues = A5(updateInputValues,
-           uiModel,
-           statePool,
-           nodeState,
-           graph,
-           inputs);
-           var newValue = A2($Lib$MutableArray.unsafeNativeGet,
-           0,
-           inputValues);
-           var _p15 = A3($Lib$GenericMutableDict.insert,
-           "outputValue",
-           newValue,
-           _p8._1);
-           return newValue;
-         default: return _U.crashCase("Orchestrator",
-           {start: {line: 97,column: 5},end: {line: 174,column: 27}},
-           _p8)("");}
-   });
-   var updateInputValues = F5(function (uiModel,
-   statePool,
-   nodeState,
-   graph,
-   inputsDict) {
-      var inputValues = A2($Lib$GenericMutableDict.unsafeNativeGet,
-      "inputValues",
-      nodeState);
-      var update = F3(function (inputName,input,index) {
-         var value = A4(getInputValue,uiModel,statePool,graph,input);
-         var _p17 = A3($Lib$MutableArray.set,index,value,inputValues);
-         return index + 1;
-      });
-      var _p18 = A3($Dict.foldl,update,0,inputsDict);
-      return inputValues;
-   });
    var updateGraph = F3(function (uiModel,statePool,graph) {
-      var destinationNode = getDestinationNode(graph);
-      return {ctor: "_Tuple2"
-             ,_0: A4(updateNode,uiModel,statePool,graph,destinationNode)
-             ,_1: graph};
-   });
-   var ExternalState = F2(function (a,b) {
-      return {time: a,externalInputState: b};
+      return A3($Native$Orchestrator.updateGraph,
+      uiModel,
+      statePool,
+      graph);
    });
    return _elm.Orchestrator.values = {_op: _op
-                                     ,ExternalState: ExternalState
-                                     ,ReferencedNodeInput: ReferencedNodeInput
-                                     ,ValueInput: ValueInput
-                                     ,updateGraph: updateGraph
-                                     ,getDestinationNode: getDestinationNode
-                                     ,updateNode: updateNode
-                                     ,updateInputValues: updateInputValues
-                                     ,getInputValue: getInputValue
-                                     ,getInputHelper: getInputHelper};
+                                     ,updateGraph: updateGraph};
 };
 Elm.BufferHandler = Elm.BufferHandler || {};
 Elm.BufferHandler.make = function (_elm) {
@@ -18104,25 +18250,7 @@ Elm.ReactiveAudio.make = function (_elm) {
    var basicGraph2 = _U.list([A2($Audio$Atoms$Adder.namedAdder,
                              "output",
                              _U.list([$Audio$MainTypes.Node($Audio$Atoms$Sine.sine(_U.update($Audio$Atoms$Sine.sineDefaults,
-                                     {frequency: $Audio$MainTypes.Value(880.0)})))
-                                     ,$Audio$MainTypes.Node($Audio$Atoms$Sine.sine(_U.update($Audio$Atoms$Sine.sineDefaults,
-                                     {frequency: $Audio$MainTypes.Value(880.0)})))
-                                     ,$Audio$MainTypes.Node($Audio$Atoms$Sine.sine(_U.update($Audio$Atoms$Sine.sineDefaults,
-                                     {frequency: $Audio$MainTypes.Value(880.0)})))
-                                     ,$Audio$MainTypes.Node($Audio$Atoms$Sine.sine(_U.update($Audio$Atoms$Sine.sineDefaults,
-                                     {frequency: $Audio$MainTypes.Value(880.0)})))
-                                     ,$Audio$MainTypes.Node($Audio$Atoms$Sine.sine(_U.update($Audio$Atoms$Sine.sineDefaults,
-                                     {frequency: $Audio$MainTypes.Value(880.0)})))
-                                     ,$Audio$MainTypes.Node($Audio$Atoms$Sine.sine(_U.update($Audio$Atoms$Sine.sineDefaults,
-                                     {frequency: $Audio$MainTypes.Value(880.0)})))
-                                     ,$Audio$MainTypes.Node($Audio$Atoms$Sine.sine(_U.update($Audio$Atoms$Sine.sineDefaults,
-                                     {frequency: $Audio$MainTypes.Value(880.0)})))
-                                     ,$Audio$MainTypes.Node($Audio$Atoms$Sine.sine(_U.update($Audio$Atoms$Sine.sineDefaults,
-                                     {frequency: $Audio$MainTypes.Value(880.0)})))
-                                     ,$Audio$MainTypes.Node($Audio$Atoms$Sine.sine(_U.update($Audio$Atoms$Sine.sineDefaults,
-                                     {frequency: $Audio$MainTypes.Value(880.0)})))
-                                     ,$Audio$MainTypes.Node($Audio$Atoms$Sine.sine(_U.update($Audio$Atoms$Sine.sineDefaults,
-                                     {frequency: $Audio$MainTypes.Value(880.0)})))]))
+                             {frequency: $Audio$MainTypes.Value(880.0)})))]))
                              ,$Audio$Atoms$Destination.destination("output")]);
    var audioGraph = $Audio$FlattenGraph.flattenGraph(basicGraph2);
    var basicGraph = _U.list([$Audio$Atoms$Sine.sine(_U.update($Audio$Atoms$Sine.sineDefaults,

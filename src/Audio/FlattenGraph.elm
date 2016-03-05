@@ -236,10 +236,10 @@ updateDestinationNode nodes =
           Debug.crash "no nodes of type Destination were found"
         node :: remainderRemainderNodes ->
           case node of
-            Destination constantBaseProps dynamicBaseProps ->
+            Destination identity constantBaseProps dynamicBaseProps ->
               let
                 newConstantBaseProps = { constantBaseProps | autoId = Just "Destination" }
-                newNode = Destination newConstantBaseProps dynamicBaseProps
+                newNode = Destination identity newConstantBaseProps dynamicBaseProps
               in
                 prevNodes ++ [newNode] ++ remainderRemainderNodes
             _ ->

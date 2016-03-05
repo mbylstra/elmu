@@ -83,7 +83,7 @@ type alias DummyProps = { func: DummyF }
 
 type AudioNode ui
   = Oscillator OscillatorF (ConstantBaseProps ui) DynamicBaseProps OscillatorProps
-  | Destination (ConstantBaseProps ui) DynamicBaseProps
+  | Destination DestinationF (ConstantBaseProps ui) DynamicBaseProps
   -- | Fold   -- this ones a bit of a bummer (like map), as it takes a list of inputs, not a dict!
   | Adder AdderF (ConstantBaseProps ui) DynamicBaseProps -- we just use the dict as a list (which is pretty wierd)
   | Dummy (ConstantBaseProps ui) DummyProps
@@ -164,6 +164,8 @@ type alias GainF = Float -> Float -> Float
 
 type alias DummyF = Float
 
+type alias DestinationF = Float -> Float
+
 -- aliases for readability
 
 type alias ExternalInputState =
@@ -218,11 +220,11 @@ updateConstantBasePropsCollectExtra updateFunc audioNode =
           (newConstantBaseProps, extra) = updateFunc baseProps
         in
           (Adder f newConstantBaseProps b, extra)
-      Destination baseProps b  ->
+      Destination f baseProps b  ->
         let
           (newConstantBaseProps, extra) = updateFunc baseProps
         in
-          (Destination newConstantBaseProps b, extra)
+          (Destination f newConstantBaseProps b, extra)
 
 updateConstantBaseProps : (ConstantBaseProps ui -> ConstantBaseProps ui) -> AudioNode ui -> AudioNode ui
 updateConstantBaseProps updateFunc audioNode =
@@ -233,8 +235,8 @@ updateConstantBaseProps updateFunc audioNode =
         Oscillator f (updateFunc baseProps) b c
       Adder f baseProps b ->
         Adder f (updateFunc baseProps) b
-      Destination baseProps b ->
-        Destination (updateFunc baseProps) b
+      Destination f baseProps b ->
+        Destination f (updateFunc baseProps) b
 
 applyToConstantBaseProps : (ConstantBaseProps ui -> a) -> AudioNode ui -> a
 applyToConstantBaseProps func node =
@@ -242,7 +244,7 @@ applyToConstantBaseProps func node =
     Dummy baseProps _ -> func baseProps
     Oscillator _ baseProps _ _ -> func baseProps
     Adder _ baseProps _ -> func baseProps
-    Destination baseProps _ -> func baseProps
+    Destination f baseProps _ -> func baseProps
 
 
 getConstantBaseProps : AudioNode ui -> ConstantBaseProps ui

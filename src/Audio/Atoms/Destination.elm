@@ -6,6 +6,7 @@ import Audio.MainTypes exposing (..)
 destination : String -> (AudioNode uiModel)
 destination userId =
   Destination
+    identity
     { userId = Nothing
     , autoId = Just "Nothing"
     , inputs = Dict.fromList
