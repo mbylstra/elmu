@@ -1,4 +1,4 @@
-var PROFILING = 1;
+var PROFILING = 0;
 // var PROFILING = 0;
 // var DEBUG = 1;
 var DEBUG = 0;

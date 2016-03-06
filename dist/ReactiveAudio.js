@@ -15908,27 +15908,12 @@ Elm.Audio.Atoms.Sine.make = function (_elm) {
              ,frequencyOffset: c
              ,phaseOffset: d};
    });
-   var sinWave = F4(function (frequency,
+   var sinWave2 = F4(function (frequency,
    frequencyOffset,
    phaseOffset,
    prevPhase) {
       return {ctor: "_Tuple2",_0: 0.0,_1: 0.0};
    });
-   var sine = function (args) {
-      return A4($Audio$MainTypes.Oscillator,
-      sinWave,
-      {userId: args.id
-      ,autoId: $Maybe.Nothing
-      ,inputs: $Lib$StringKeyMutableDict.fromList(_U.list([{ctor: "_Tuple2"
-                                                           ,_0: "frequency"
-                                                           ,_1: args.frequency}
-                                                          ,{ctor: "_Tuple2"
-                                                           ,_0: "frequencyOffset"
-                                                           ,_1: args.frequencyOffset}
-                                                          ,{ctor: "_Tuple2",_0: "phaseOffset",_1: args.phaseOffset}]))},
-      $Audio$MainTypes.initialiseDynamicBaseProps({ctor: "_Tuple0"}),
-      $Audio$MainTypes.initialiseOscillatorProps({ctor: "_Tuple0"}));
-   };
    var sinLookupFrequency = 20.0;
    var sinLookupDuration = 1.0 / sinLookupFrequency;
    var sinLookupArrayLength = $Basics.floor(sinLookupDuration / $Audio$AudioNodeFunctions.sampleDuration);
@@ -15939,7 +15924,7 @@ Elm.Audio.Atoms.Sine.make = function (_elm) {
       };
       return A2($Array.initialize,sinLookupArrayLength,getSample);
    }();
-   var sinWave2 = F4(function (frequency,
+   var sinWave = F4(function (frequency,
    frequencyOffset,
    phaseOffset,
    prevPhase) {
@@ -15964,13 +15949,28 @@ Elm.Audio.Atoms.Sine.make = function (_elm) {
       }();
       return {ctor: "_Tuple2",_0: amplitude,_1: currPhase};
    });
+   var sine = function (args) {
+      return A4($Audio$MainTypes.Oscillator,
+      sinWave,
+      {userId: args.id
+      ,autoId: $Maybe.Nothing
+      ,inputs: $Lib$StringKeyMutableDict.fromList(_U.list([{ctor: "_Tuple2"
+                                                           ,_0: "frequency"
+                                                           ,_1: args.frequency}
+                                                          ,{ctor: "_Tuple2"
+                                                           ,_0: "frequencyOffset"
+                                                           ,_1: args.frequencyOffset}
+                                                          ,{ctor: "_Tuple2",_0: "phaseOffset",_1: args.phaseOffset}]))},
+      $Audio$MainTypes.initialiseDynamicBaseProps({ctor: "_Tuple0"}),
+      $Audio$MainTypes.initialiseOscillatorProps({ctor: "_Tuple0"}));
+   };
    return _elm.Audio.Atoms.Sine.values = {_op: _op
                                          ,sinLookupFrequency: sinLookupFrequency
                                          ,sinLookupDuration: sinLookupDuration
                                          ,sinLookupArrayLength: sinLookupArrayLength
                                          ,sinLookup: sinLookup
-                                         ,sinWave: sinWave
                                          ,sinWave2: sinWave2
+                                         ,sinWave: sinWave
                                          ,Args: Args
                                          ,sine: sine
                                          ,sineDefaults: sineDefaults};
@@ -17545,40 +17545,13 @@ Elm.Native.Orchestrator.make = function(localRuntime) {
 		return localRuntime.Native.Orchestrator.values = Elm.Native.Orchestrator.values;
 	}
 
-	var List = Elm.Native.List.make(localRuntime);
-	var Maybe = Elm.Maybe.make(localRuntime);
-
-
-  var getInputValue = function(uiModel, statePool, graph, input) {
-    switch (input.ctor) {
-      case "Value":
-        return input._0;
-      case "AutoID":
-      // case "UI": ??
-        var node = graph[input._0];
-        return updateNode(uiModel, statePool, graph, node);
-    }
-  }
-
-  var updateInputValues = function(uiModel, statePool, nodeState, graph, inputsDict) {
-    var inputValues = nodeState.inputValues;
-    Object.keys(inputsDict).map(function(key, i) { // hmm, elm dicts are a major pain! (and slow as F). Make it a
-      // var input = inputsDict[key]; // shit, have to use elm for this
-      var input = inputsDict[key];// this sucks for performance! we can't use dicts :/ maybe records are better if possible??
-      var value = getInputValue(uiModel, statePool, graph, input);
-      inputValues[i] = value;
-    });
-    // inputsDict is actually just a JS object
-  }
-
   var updateGraph = function(uiModel, statePool, graph) {
-    // console.log('native updateGraph');
     var destinationNode = graph.Destination;
     return updateNode(uiModel, statePool, graph, destinationNode);
+    // return 0.0;
   }
 
   var updateNode = function(uiModel, statePool, graph, node) {
-
     var func = node._0;
     var constantBaseProps = node._1;
     var dynamicBaseProps = node._2;
@@ -17587,31 +17560,43 @@ Elm.Native.Orchestrator.make = function(localRuntime) {
     var inputs =  constantBaseProps.inputs;
     var inputValues = nodeState.inputValues;
 
-    updateInputValues(uiModel, statePool, nodeState, graph, inputs);
+    var i = 0;
+    for (var key in inputs) {
+      var input = inputs[key];// this sucks for performance! we can't use dicts :/ maybe records are better if possible??
+      var value;
+      switch (input.ctor) {
+        case "Value":
+          value = input._0;
+          break;
+        case "AutoID":
+          var node = graph[input._0];
+          value = updateNode(uiModel, statePool, graph, node);
+          return 0.0
+          break;
+      }
+      inputValues[i] = value;
+      i++;
+    }
 
     switch (node.ctor) {
       case "Oscillator":
         // console.log("osicillator");
+        // return 0.0
 
         var oscProps = node._3;
+
 
         var frequency = inputValues[0];
         var frequencyOffset = inputValues[1];
         var phaseOffset = inputValues[2];
         var prevPhase = oscProps.phase;
-        // var result = func(frequency)(frequencyOffset)(phaseOffset)(prevPhase); // yowza.. this currying shit is going to hurt performance!
-        var result = 0;
-// func(frequency)(frequencyOffset)(phaseOffset)(prevPhase); // yowza.. this currying shit is going to hurt performance!
-        // var newValue = result._0;
-        // var newPhase = result._1;
-        var newValue = 0.0;
-        var newPhase = 0.0;
+        var result = func(frequency)(frequencyOffset)(phaseOffset)(prevPhase); // yowza.. this currying shit is going to hurt performance!
+        // console.log(result);
+        var newValue = result._0;
+        var newPhase = result._1;
         dynamicBaseProps.outputValue = newValue;
         oscProps.phase = newPhase;
         oscProps.outputValue = newValue;
-
-        // what Happened to updating the phase???
-
         return newValue;
 
       case "Adder":
@@ -17625,6 +17610,12 @@ Elm.Native.Orchestrator.make = function(localRuntime) {
 
     }
   }
+
+  // var updateInputValues = function(uiModel, statePool, nodeState, graph, inputsDict) {
+  // }
+
+  // var getInputValue = function(uiModel, statePool, graph, input) {
+  // }
 
 
 	Elm.Native.Orchestrator.values = {
@@ -17742,7 +17733,6 @@ Elm.ReactiveAudio.make = function (_elm) {
    _elm.ReactiveAudio = _elm.ReactiveAudio || {};
    if (_elm.ReactiveAudio.values) return _elm.ReactiveAudio.values;
    var _U = Elm.Native.Utils.make(_elm),
-   $Audio$Atoms$Adder = Elm.Audio.Atoms.Adder.make(_elm),
    $Audio$Atoms$Destination = Elm.Audio.Atoms.Destination.make(_elm),
    $Audio$Atoms$Sine = Elm.Audio.Atoms.Sine.make(_elm),
    $Audio$FlattenGraph = Elm.Audio.FlattenGraph.make(_elm),
@@ -17755,48 +17745,9 @@ Elm.ReactiveAudio.make = function (_elm) {
    $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm);
    var _op = {};
-   var basicGraph2 = _U.list([A2($Audio$Atoms$Adder.namedAdder,
-                             "output",
-                             _U.list([$Audio$MainTypes.Node($Audio$Atoms$Sine.sine(_U.update($Audio$Atoms$Sine.sineDefaults,
-                                     {frequency: $Audio$MainTypes.Value(880.0)})))
-                                     ,$Audio$MainTypes.Node($Audio$Atoms$Sine.sine(_U.update($Audio$Atoms$Sine.sineDefaults,
-                                     {frequency: $Audio$MainTypes.Value(880.0)})))
-                                     ,$Audio$MainTypes.Node($Audio$Atoms$Sine.sine(_U.update($Audio$Atoms$Sine.sineDefaults,
-                                     {frequency: $Audio$MainTypes.Value(880.0)})))
-                                     ,$Audio$MainTypes.Node($Audio$Atoms$Sine.sine(_U.update($Audio$Atoms$Sine.sineDefaults,
-                                     {frequency: $Audio$MainTypes.Value(880.0)})))
-                                     ,$Audio$MainTypes.Node($Audio$Atoms$Sine.sine(_U.update($Audio$Atoms$Sine.sineDefaults,
-                                     {frequency: $Audio$MainTypes.Value(880.0)})))
-                                     ,$Audio$MainTypes.Node($Audio$Atoms$Sine.sine(_U.update($Audio$Atoms$Sine.sineDefaults,
-                                     {frequency: $Audio$MainTypes.Value(880.0)})))
-                                     ,$Audio$MainTypes.Node($Audio$Atoms$Sine.sine(_U.update($Audio$Atoms$Sine.sineDefaults,
-                                     {frequency: $Audio$MainTypes.Value(880.0)})))
-                                     ,$Audio$MainTypes.Node($Audio$Atoms$Sine.sine(_U.update($Audio$Atoms$Sine.sineDefaults,
-                                     {frequency: $Audio$MainTypes.Value(880.0)})))
-                                     ,$Audio$MainTypes.Node($Audio$Atoms$Sine.sine(_U.update($Audio$Atoms$Sine.sineDefaults,
-                                     {frequency: $Audio$MainTypes.Value(880.0)})))
-                                     ,$Audio$MainTypes.Node($Audio$Atoms$Sine.sine(_U.update($Audio$Atoms$Sine.sineDefaults,
-                                     {frequency: $Audio$MainTypes.Value(880.0)})))
-                                     ,$Audio$MainTypes.Node($Audio$Atoms$Sine.sine(_U.update($Audio$Atoms$Sine.sineDefaults,
-                                     {frequency: $Audio$MainTypes.Value(880.0)})))
-                                     ,$Audio$MainTypes.Node($Audio$Atoms$Sine.sine(_U.update($Audio$Atoms$Sine.sineDefaults,
-                                     {frequency: $Audio$MainTypes.Value(880.0)})))
-                                     ,$Audio$MainTypes.Node($Audio$Atoms$Sine.sine(_U.update($Audio$Atoms$Sine.sineDefaults,
-                                     {frequency: $Audio$MainTypes.Value(880.0)})))
-                                     ,$Audio$MainTypes.Node($Audio$Atoms$Sine.sine(_U.update($Audio$Atoms$Sine.sineDefaults,
-                                     {frequency: $Audio$MainTypes.Value(880.0)})))
-                                     ,$Audio$MainTypes.Node($Audio$Atoms$Sine.sine(_U.update($Audio$Atoms$Sine.sineDefaults,
-                                     {frequency: $Audio$MainTypes.Value(880.0)})))
-                                     ,$Audio$MainTypes.Node($Audio$Atoms$Sine.sine(_U.update($Audio$Atoms$Sine.sineDefaults,
-                                     {frequency: $Audio$MainTypes.Value(880.0)})))
-                                     ,$Audio$MainTypes.Node($Audio$Atoms$Sine.sine(_U.update($Audio$Atoms$Sine.sineDefaults,
-                                     {frequency: $Audio$MainTypes.Value(880.0)})))
-                                     ,$Audio$MainTypes.Node($Audio$Atoms$Sine.sine(_U.update($Audio$Atoms$Sine.sineDefaults,
-                                     {frequency: $Audio$MainTypes.Value(880.0)})))
-                                     ,$Audio$MainTypes.Node($Audio$Atoms$Sine.sine(_U.update($Audio$Atoms$Sine.sineDefaults,
-                                     {frequency: $Audio$MainTypes.Value(880.0)})))
-                                     ,$Audio$MainTypes.Node($Audio$Atoms$Sine.sine(_U.update($Audio$Atoms$Sine.sineDefaults,
-                                     {frequency: $Audio$MainTypes.Value(880.0)})))]))
+   var basicGraph2 = _U.list([$Audio$Atoms$Sine.sine(_U.update($Audio$Atoms$Sine.sineDefaults,
+                             {id: $Maybe.Just("output")
+                             ,frequency: $Audio$MainTypes.Value(880.0)}))
                              ,$Audio$Atoms$Destination.destination("output")]);
    var audioGraph = $Audio$FlattenGraph.flattenGraph(basicGraph2);
    var basicGraph = _U.list([$Audio$Atoms$Sine.sine(_U.update($Audio$Atoms$Sine.sineDefaults,

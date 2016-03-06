@@ -30,12 +30,12 @@ sinLookup =
     in
         Array.initialize sinLookupArrayLength getSample
 
-sinWave : Float -> Float -> Float -> Float -> (Float, Float)
-sinWave frequency frequencyOffset phaseOffset prevPhase =
-  (0.0, 0.0)  -- I actually think returning a tuple is problematic for performance! You want to stick to as basic as possible data types.
-
 sinWave2 : Float -> Float -> Float -> Float -> (Float, Float)
 sinWave2 frequency frequencyOffset phaseOffset prevPhase =
+  (0.0, 0.0)  -- I actually think returning a tuple is problematic for performance! You want to stick to as basic as possible data types.
+
+sinWave : Float -> Float -> Float -> Float -> (Float, Float)
+sinWave frequency frequencyOffset phaseOffset prevPhase =
     let
         -- _ = Debug.log "prevPhase" prevPhase
         -- _ = Debug.log "phaseOffset" phaseOffset
@@ -65,6 +65,7 @@ sinWave2 frequency frequencyOffset phaseOffset prevPhase =
             case Array.get lookupArrayIndex sinLookup of
                 Just amplitude' -> amplitude'
                 Nothing -> Debug.crash("arraylookup out of index")
+        -- _ = Debug.log "asdfasdf" 0
     in
         (amplitude, currPhase)  -- I actually think returning a tuple is problematic for performance! You want to stick to as basic as possible data types.
 
