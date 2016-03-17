@@ -4,6 +4,7 @@ module Gui.GridInput.Cell
   , view
   , Model
   , Action
+  , UpdateParams
   )
   where
 
@@ -22,15 +23,23 @@ init model = model
 
 -- UPDATE
 
+{- "Params" for the update function. A pattern I'm trialing -}
+type alias UpdateParams =
+  { mouseDown : Bool }
+
 type Action = MouseDown | MouseEnter | MouseLeave
 
-update : Action -> Model -> Model
-update action model =
+update : Action -> UpdateParams -> Model -> Model
+update action params model =
   case action of
     MouseDown ->
-      not model
+      model
     MouseEnter ->
-      not model
+      if params.mouseDown
+      then
+        True
+      else
+        model
     MouseLeave ->
       model
 
