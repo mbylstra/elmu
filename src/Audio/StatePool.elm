@@ -58,7 +58,7 @@ nodeToStateDict node =
               dict
       in
         dict
-    Destination _ _ ->
+    Destination _ _ _ ->
       let
         dict = GenericMutableDict.empty ()
         _ = GenericMutableDict.insert "value" 0.0 dict
