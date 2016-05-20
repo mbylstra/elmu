@@ -317,6 +317,7 @@ main = app.html
 bufferSize : Int
 -- bufferSize = 512
 bufferSize = 1024
+-- bufferSize = 3
 -- port bufferSizePort : Int
 -- port bufferSizePort = bufferSize
 

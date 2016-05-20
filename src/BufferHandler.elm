@@ -101,7 +101,6 @@ updateForSample uiModel bufferState =
       -- _ = Debug.log "time" time
   in
     let
-      -- _ = Debug.log "!!!value" value
       value = updateGraph uiModel bufferState.statePool bufferState.graph
       -- (value, newGraph) = (0.0, graph)
       -- _ = Debug.crash "updateForSample"

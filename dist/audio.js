@@ -4,7 +4,8 @@ var PROFILING = 0;
 var DEBUG = 0;
 // var ITERATIONS = 100000;
 // var ITERATIONS = 1000;
-var ITERATIONS = 100;
+// var ITERATIONS = 100;
+var ITERATIONS = 2;
 
 
 // var ITERATIONS = 1;

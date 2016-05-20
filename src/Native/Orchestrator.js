@@ -1,3 +1,5 @@
+// @flow
+
 Elm.Native.Orchestrator = {};
 Elm.Native.Orchestrator.make = function(localRuntime) {
 
@@ -36,9 +38,8 @@ Elm.Native.Orchestrator.make = function(localRuntime) {
           value = input._0;
           break;
         case "AutoID":
-          var node = graph[input._0];
-          value = updateNode(uiModel, statePool, graph, node);
-          return 0.0
+          var inputNode = graph[input._0];
+          value = updateNode(uiModel, statePool, graph, inputNode);
           break;
       }
       inputValues[i] = value;
