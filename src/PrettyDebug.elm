@@ -1,1 +1,1 @@
-/home/michael/code/current/elm-pretty-debug-log/PrettyDebug.elm
+../../elm-pretty-debug-log/PrettyDebug.elm
