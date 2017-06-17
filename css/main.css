@@ -1,0 +1,168 @@
+/* apply a natural box layout model to all elements, but allowing components to change */
+@import url(https://fonts.googleapis.com/css?family=Rubik:500,400,300,700);
+.no-select {
+  -webkit-touch-callout: none;
+  /* iOS Safari */
+  -webkit-user-select: none;
+  /* Chrome/Safari/Opera */
+  -khtml-user-select: none;
+  /* Konqueror */
+  -moz-user-select: none;
+  /* Firefox */
+  -ms-user-select: none;
+  /* IE/Edge */
+  user-select: none;
+  /* non-prefixed version, currently
+                                  not supported by any browser */ }
+
+body {
+  background-color: white;
+  color: black;
+  font-family: sans-serif;
+  padding: 0px;
+  margin: 0px; }
+
+h1 {
+  font-family: 'Rubik', Helvetica, Arial, sans-serif;
+  font-weight: 500;
+  font-size: 40px; }
+
+.elm-audio {
+  height: 100%; }
+
+.synth {
+  position: relative;
+  padding: 20px; }
+
+.knobs {
+  display: flex; }
+
+.control-panel {
+  border: 6px solid black;
+  border-bottom: 0px; }
+
+.highlighted {
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 15px;
+  cursor: ns-resize; }
+
+.power-toggle {
+  margin: 10px;
+  position: absolute;
+  right: 26px; }
+
+.color-scheme-chooser {
+  position: absolute;
+  right: 0px;
+  bottom: 0px;
+  display: flex;
+  flex-direction: column-reverse;
+  background-color: white;
+  margin: 10px; }
+
+.color-scheme-colors {
+  padding: 2px;
+  cursor: pointer;
+  display: flex; }
+  .color-scheme-colors div {
+    width: 20px;
+    height: 20px;
+    margin-right: 2px; }
+
+.random-color-button {
+  border-top: 1px solid black;
+  font-size: 18px;
+  text-align: center;
+  cursor: pointer;
+  line-height: 30px;
+  height: 30px; }
+
+.color-scheme-popup {
+  border: 1px solid black;
+  border-bottom: none; }
+
+.current-color-scheme .color-scheme-colors {
+  border: 1px solid black; }
+
+@keyframes fadein {
+  from {
+    opacity: 0; }
+  to {
+    opacity: 1; } }
+
+.cmn-toggle {
+  position: absolute;
+  margin-left: -9999px;
+  visibility: hidden; }
+
+.cmn-toggle + label {
+  display: block;
+  position: relative;
+  cursor: pointer;
+  outline: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none; }
+
+/* ============================================================
+  SWITCH 2 - ROUND FLAT
+============================================================ */
+input.cmn-toggle-round-flat + label {
+  padding: 2px;
+  width: 60px;
+  height: 28px;
+  background-color: #dddddd;
+  -webkit-border-radius: 60px;
+  -moz-border-radius: 60px;
+  -ms-border-radius: 60px;
+  -o-border-radius: 60px;
+  border-radius: 60px;
+  -webkit-transition: background 0.4s;
+  -moz-transition: background 0.4s;
+  -o-transition: background 0.4s;
+  transition: background 0.4s; }
+
+input.cmn-toggle-round-flat + label:before, input.cmn-toggle-round-flat + label:after {
+  display: block;
+  position: absolute;
+  content: ""; }
+
+input.cmn-toggle-round-flat + label:before {
+  top: 2px;
+  left: 2px;
+  bottom: 2px;
+  right: 2px;
+  background-color: #fff;
+  -webkit-border-radius: 60px;
+  -moz-border-radius: 60px;
+  -ms-border-radius: 60px;
+  -o-border-radius: 60px;
+  border-radius: 60px;
+  -webkit-transition: background 0.4s;
+  -moz-transition: background 0.4s;
+  -o-transition: background 0.4s;
+  transition: background 0.4s; }
+
+input.cmn-toggle-round-flat + label:after {
+  top: 4px;
+  left: 4px;
+  bottom: 4px;
+  width: 25px;
+  background-color: #dddddd;
+  -webkit-border-radius: 52px;
+  -moz-border-radius: 52px;
+  -ms-border-radius: 52px;
+  -o-border-radius: 52px;
+  border-radius: 52px;
+  -webkit-transition: margin 0.4s, background 0.4s;
+  -moz-transition: margin 0.4s, background 0.4s;
+  -o-transition: margin 0.4s, background 0.4s;
+  transition: margin 0.4s, background 0.4s; }
+
+input.cmn-toggle-round-flat:checked + label {
+  background-color: #8ce196; }
+
+input.cmn-toggle-round-flat:checked + label:after {
+  margin-left: 30px;
+  background-color: #8ce196; }
