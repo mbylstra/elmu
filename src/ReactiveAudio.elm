@@ -31,7 +31,6 @@ fmSynth1 = fmSynth "fm"
   , modulatorNodes =
     [ { id = "fm.1"
       , multiple = 1.0
-      -- , detune = Default
       , detune = Default
       , modulator = ID "fm.2.gain" -- we must put .gain in until we can chain nodes into one
       , level = GUI "knobs.attack"

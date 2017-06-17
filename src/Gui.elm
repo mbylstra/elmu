@@ -110,7 +110,7 @@ encode model =
       , frequency = model.frequency
       , knobs = knobs
       }
-    _ = Debug.log "encoded:" encoded
+    -- _ = Debug.log "encoded:" encoded
   in
     encoded
 
@@ -232,10 +232,10 @@ view address model =  -- hwere is address??
             [ audioOnCheckbox address model.audioOn
             -- , slider (Signal.forwardTo guiMailbox.address Slider1)
             , div [class "knobs"]
-              [ knobView "attack"
-              , knobView "decay"
+              -- [ knobView "attack"
+              [ knobView "decay"
               , knobView "sustain"
-              , knobView "release"
+              -- , knobView "release"
               ]
             ]
           , piano

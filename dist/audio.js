@@ -51,7 +51,7 @@ var _Utils = exposeElmModule(Elm.Native.Utils);
 var _List = exposeElmModule(Elm.Native.List);
 
 var initialAudioGraph = _List.toArray(ReactiveAudio.audioGraph);
-console.log(initialAudioGraph);
+// console.log(initialAudioGraph);
 
 // TODO: get this from elm! So it's properly type checked. Should map fine.
 // THIS IS GETTING REALLY UNSUSTAINABLE!
@@ -238,7 +238,7 @@ if (PROFILING) {
     console.log('CPU percent:', (secondsElapsed / MAX_ALLOWED_DURATION) * 100.0);
 } else {
     elmGui.ports.outgoingUiModel.subscribe(function(userInput) {
-      console.log('userInput', userInput);
+      // console.log('userInput', userInput);
       userInput.knobs = tupleArrayToObject(userInput.knobs);
       externalState.externalInputState = userInput;
       // console.log('userInput', userInput);
@@ -247,7 +247,7 @@ if (PROFILING) {
 
     var audioCtx = new AudioContext();
     source = audioCtx.createBufferSource();
-    console.log('BUFFER_SIZE', BUFFER_SIZE);
+    // console.log('BUFFER_SIZE', BUFFER_SIZE);
     var scriptNode = audioCtx.createScriptProcessor(BUFFER_SIZE, 1, 1);
     scriptNode.onaudioprocess = function(audioProcessingEvent) {
         var outputBuffer = audioProcessingEvent.outputBuffer;
